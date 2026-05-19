@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Kanban View -->
+    <record id="view_kanban_vente_projet" model="ir.ui.view">
+        <field name="name">vente.projet.kanban</field>
+        <field name="model">vente.projet</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="reference"/>
+                <field name="type"/>
+                <field name="state"/>
+                <field name="wilaya_id"/>
+                <field name="bloc_count"/>
+                <field name="appartement_count"/>
+                <field name="avancement"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div><field name="code"/> - <field name="reference"/></div>
+                                <div>
+                                    <field name="type"/> -
+                                    <field name="wilaya_id"/>
+                                </div>
+                                <div>
+                                    <span><field name="bloc_count"/> Blocs</span> |
+                                    <span><field name="appartement_count"/> Appts</span>
+                                </div>
+                                <div>
+                                    <field name="avancement" widget="progressbar"/>
+                                </div>
+                                <div>
+                                    <field name="state" widget="label_selection"
+                                           options="{'classes': {'draft': 'default', 'in_progress': 'warning', 'done': 'success'}}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_tree_vente_projet" model="ir.ui.view">
+        <field name="name">vente.projet.tree</field>
+        <field name="model">vente.projet</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'" decoration-warning="state == 'in_progress'"
+                  decoration-success="state == 'done'">
+                <field name="reference"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="type"/>
+                <field name="wilaya_id"/>
+                <field name="bloc_count"/>
+                <field name="appartement_count"/>
+                <field name="avancement" widget="progressbar"/>
+                <field name="date_start"/>
+                <field name="date_achevement"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_form_vente_projet" model="ir.ui.view">
+        <field name="name">vente.projet.form</field>
+        <field name="model">vente.projet</field>
+        <field name="arch" type="xml">
+            <form string="Projet Immobilier">
+                <header>
+                    <button name="action_start" type="object" string="Démarrer"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_done" type="object" string="Terminer"
+                            class="oe_highlight" invisible="state != 'in_progress'"/>
+                    <button name="action_draft" type="object" string="Remettre en Brouillon"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_blocs" type="object"
+                                class="oe_stat_button" icon="fa-building">
+                            <field name="bloc_count" widget="statinfo" string="Blocs"/>
+                        </button>
+                        <button name="action_view_appartements" type="object"
+                                class="oe_stat_button" icon="fa-home">
+                            <field name="appartement_count" widget="statinfo" string="Appartements"/>
+                        </button>
+                        <button name="action_view_reservations" type="object"
+                                class="oe_stat_button" icon="fa-bookmark">
+                            <field name="reservation_count" widget="statinfo" string="Réservations"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Intitulé administratif"/></h1>
+                        <field name="reference"/>
+                    </div>
+
+                    <notebook>
+                        <!-- ═══ 1. Informations Générales ═══ -->
+                        <page string="Informations Générales">
+                            <group>
+                                <group>
+                                    <field name="project_id"/>
+                                    <field name="code"/>
+                                    <field name="type"/>
+                                    <field name="avancement" widget="progressbar"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </group>
+                                <group string="Durée de Réalisation">
+                                    <field name="date_start"/>
+                                    <field name="duree"/>
+                                    <field name="date_achevement"/>
+                                </group>
+                            </group>
+                            <separator string="Description"/>
+                            <field name="description"/>
+                        </page>
+
+                        <!-- ═══ 2. Localisation ═══ -->
+                        <page string="Localisation">
+                            <group>
+                                <group>
+                                    <field name="country_id"/>
+                                    <field name="wilaya_id"/>
+                                    <field name="lieu_dit"/>
+                                </group>
+                                <group>
+                                    <field name="repere"/>
+                                    <field name="address"/>
+                                    <field name="superficie_terrain"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ═══ 3. Identification ═══ -->
+                        <page string="Identification">
+                            <!-- 3-1 Identification Juridique et Technique -->
+                            <group string="3-1. Identification Juridique et Technique">
+                                <group>
+                                    <field name="conservation_fonciere"/>
+                                    <field name="livret_foncier"/>
+                                </group>
+                                <group>
+                                    <field name="delivre_le"/>
+                                    <field name="delivre_par"/>
+                                </group>
+                            </group>
+
+                            <!-- 3-1-1 Acte Notarié -->
+                            <group string="3-1-1. Acte Notarié">
+                                <group>
+                                    <field name="acte_num_enregistrement"/>
+                                    <field name="acte_date_publication"/>
+                                </group>
+                                <group>
+                                    <field name="acte_volume"/>
+                                    <field name="acte_folio"/>
+                                </group>
+                            </group>
+
+                            <!-- 3-1-2 État Descriptif de Division -->
+                            <group string="3-1-2. État Descriptif de Division">
+                                <group>
+                                    <field name="edd_num_enregistrement"/>
+                                    <field name="edd_date_publication"/>
+                                    <field name="reference_cadastrale"/>
+                                </group>
+                                <group>
+                                    <field name="edd_volume"/>
+                                    <field name="edd_folio"/>
+                                </group>
+                            </group>
+
+                            <!-- 3-2 Permis et Certificats -->
+                            <group string="3-2. Permis et Certificats">
+                                <group>
+                                    <separator string="Permis de Lotir"/>
+                                    <field name="permis_lotir_num"/>
+                                    <field name="permis_lotir_date"/>
+                                    <field name="permis_lotir_par"/>
+                                </group>
+                                <group>
+                                    <separator string="Certificat Aménagement"/>
+                                    <field name="certificat_amenagement_num"/>
+                                    <field name="certificat_amenagement_date"/>
+                                    <field name="certificat_amenagement_par"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <separator string="Permis de Construire"/>
+                                    <field name="permis_construire_num"/>
+                                    <field name="permis_construire_date"/>
+                                    <field name="permis_construire_par"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ═══ 4. Blocs ═══ -->
+                        <page string="Blocs">
+                            <field name="bloc_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="nbre_etage"/>
+                                    <field name="mezzanine"/>
+                                    <field name="nbre_entre_sols"/>
+                                    <field name="nbre_sous_sols"/>
+                                    <field name="appartement_count"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_search_vente_projet" model="ir.ui.view">
+        <field name="name">vente.projet.search</field>
+        <field name="model">vente.projet</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="reference"/>
+                <field name="wilaya_id"/>
+                <filter string="Vente" name="filter_vente" domain="[('type', '=', 'vente')]"/>
+                <filter string="Location" name="filter_location" domain="[('type', '=', 'location')]"/>
+                <separator/>
+                <filter string="Brouillon" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="En Cours" name="filter_in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Terminé" name="filter_done" domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Type" name="group_type" context="{'group_by': 'type'}"/>
+                    <filter string="Wilaya" name="group_wilaya" context="{'group_by': 'wilaya_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_vente_projet" model="ir.actions.act_window">
+        <field name="name">Projets Immobiliers</field>
+        <field name="res_model">vente.projet</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_search_vente_projet"/>
+    </record>
+</odoo>

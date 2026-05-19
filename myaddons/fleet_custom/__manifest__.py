@@ -1,0 +1,20 @@
+{
+    'name': 'Fleet Custom',
+    'version': '17.0.1.0.0',
+    'summary': 'Personnalisation du parc automobile - Conducteur / Chauffeur',
+    'category': 'Fleet',
+    'depends': ['fleet', 'hr', 'mail'],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/societe_appartenance_views.xml',
+        'views/fleet_views.xml',
+        'views/hr_employee_views.xml',
+        'views/infraction.xml',
+        'wizard/fleet_gazoil_wizard.xml',
+        'report/report_consommation_gazoil.xml',
+        'views/fleet_gazoil.xml',
+    ],
+    'installable': True,
+    'application': False,
+    'license': 'LGPL-3',
+}

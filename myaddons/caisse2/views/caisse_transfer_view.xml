@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+        <record id="cashbox_transfer_view_form" model="ir.ui.view">
+            <field name="name">cashbox.transfer.view.form</field>
+            <field name="model">cashbox.transfer</field>
+            <field name="arch" type="xml">
+                <form>
+
+                    <header>
+                        <button name="action_confirm" type="object" string="Confirmer"
+                                class="oe_highlight" invisible="state != 'draft'"
+                                groups="caisse2.group_comptable"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                    </header>
+
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_preview_report" type="object"
+                                    class="oe_stat_button" icon="fa-eye">
+                                <span class="o_stat_text">Aperçu</span>
+                            </button>
+                        </div>
+                        <widget name="web_ribbon" title="Transféré"
+                                bg_color="text-bg-danger"
+                                invisible="state != 'confirmed'"/>
+                        <field name="company_currency_id" invisible="1"/>
+                        <div class="oe_title">
+                            <field name="name"/>
+                        </div>
+
+                        <div class="row">
+                            <!-- First Block: Source and Destination Cashboxes with Amounts on the Left -->
+                            <div class="col-md-6">
+                                <group string="Info de transfert">
+                                    <group>
+                                        <div class="o_row">
+                                            <label for="source_cashbox_id" string="De"/>
+                                            <field name="source_cashbox_id"
+                                                   string="Caisse Source"
+                                                   readonly="state != 'draft'"
+                                                   options="{'no_create':True,'no_create_edit':True, 'no_open':True}"
+                                                   domain="[('id', '!=', destination_cashbox_id)]"
+                                                   style="min-width: 150px; margin-left: 10px;"/>
+                                            <field name="total_amount_source_cashbox" string="Montant" readonly="1"
+                                                   class="o_right"
+                                                   style="color: grey; margin-left: auto;"/>
+                                        </div>
+                                    </group>
+
+                                    <group>
+                                        <div class="o_row">
+                                            <label for="destination_cashbox_id" string="À"/>
+                                            <field name="destination_cashbox_id"
+                                                   string="Caisse de Destination"
+                                                   required="True"
+                                                   readonly="state != 'draft'"
+                                                   options="{'no_create':True,'no_create_edit':True, 'no_open':True}"
+                                                   domain="[('id', '!=', source_cashbox_id)]"
+                                                   style="min-width: 150px; margin-left: 10px;"/>
+                                            <field name="total_amount_destination_cashbox" string="Montant" readonly="1"
+                                                   class="o_right"
+                                                   style="color: grey; margin-left: auto;"/>
+                                        </div>
+                                    </group>
+
+                                    <group string="Montant du transfert">
+                                        <field name="amount"
+                                               widget="monetary"
+                                               readonly="state != 'draft'"/>
+                                    </group>
+                                </group>
+                            </div>
+
+                            <!-- Second Block: Information Section on the Right -->
+                            <div class="col-md-6">
+                                <group string="details">
+
+                                    <field name="date" readonly="state != 'draft'"/>
+                                    <field name="description" readonly="state != 'draft'"/>
+                                </group>
+                            </div>
+                        </div>
+
+                        <notebook>
+                            <page string="Autres Informations">
+                                <group>
+                                    <field name="user_id"
+                                           options="{'no_create':True,'no_create_edit':True, 'no_open':True}"/>
+                                    <field name="company_id"
+                                           options="{'no_create':True,'no_create_edit':True, 'no_open':True}"
+                                           readonly="1"/>
+                                </group>
+                            </page>
+                            <page string="Notes">
+                                <group>
+                                    <field name="notes"
+                                           placeholder="Notes internes"
+                                           readonly="state != 'draft'"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="cashbox_transfer_view_tree" model="ir.ui.view">
+            <field name="name">cashbox.transfer.view.tree</field>
+            <field name="model">cashbox.transfer</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="source_cashbox_id" string="Caisse Source" optional="hide"/>
+                    <field name="destination_cashbox_id" string="Caisse de Destination" optional="hide"/>
+                    <field name="date"/>
+                    <field name="description"/>
+                    <field name="amount" sum="Total amount" widget="monetary"/>
+                    <field name="company_currency_id" optional="hide"/>
+                    <field name="state"
+                           widget="badge"
+                           decoration-info="state == 'draft'"
+                           decoration-danger="state == 'cancel'"
+                           decoration-success="state == 'confirmed' "/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="cashbox_transfer_view_search" model="ir.ui.view">
+            <field name="name">cashbox.transfer.view.search</field>
+            <field name="model">cashbox.transfer</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <field name="source_cashbox_id"/>
+                    <field name="destination_cashbox_id"/>
+                    <field name="date"/>
+                    <field name="user_id"/>
+                    <field name="company_id"/>
+
+                    <separator/>
+                    <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                    <filter string="Confirmé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+
+                    <group expand="0" string="Grouper par">
+                        <filter string="Caisse Source" name="group_source"
+                                context="{'group_by':'source_cashbox_id'}"/>
+                        <filter string="Caisse de Destination" name="group_destination"
+                                context="{'group_by':'destination_cashbox_id'}"/>
+                        <filter string="Utilisateur" name="group_user" context="{'group_by':'user_id'}"/>
+                        <filter string="Date" name="group_date" context="{'group_by':'date'}"/>
+                        <filter string="État" name="group_state" context="{'group_by':'state'}"/>
+                        <filter string="Société" name="group_company" context="{'group_by':'company_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="cashbox_transfer_act_window" model="ir.actions.act_window">
+            <field name="name">Transferts de Caisse</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">cashbox.transfer</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+</odoo>

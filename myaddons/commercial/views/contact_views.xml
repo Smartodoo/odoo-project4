@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Ajouter le champ contact_category dans la vue formulaire standard -->
+    <record id="view_partner_form_inherit_commercial" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.commercial</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <field name="company_type" position="after">
+                <field name="contact_category" widget="radio" invisible="True"/>
+                <field name="is_blocked" invisible="1"/>
+                <span invisible="not is_blocked" class="text-danger ms-2" style="font-size: 1.5em;">
+                    <i class="fa fa-ban"/>
+                    Bloqué
+                </span>
+            </field>
+        </field>
+    </record>
+
+    <!-- Masquer smart buttons et pages pour Contact externe via contexte -->
+    <record id="view_partner_form_hide_for_externe" model="ir.ui.view">
+        <field name="name">res.partner.form.hide.for.externe</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+
+            <!-- ====== CARTES LOTS : avant le notebook, visible uniquement en Contact externe ====== -->
+            <xpath expr="//notebook" position="before">
+                <field name="lot_cards_html" nolabel="1" widget="html" readonly="1"
+                       invisible="contact_category != 'interne'"
+                       groups="commercial.group_commercial_user"
+                       class="o_field_html" style="width:100%;"/>
+            </xpath>
+            <!-- Masquer : Taux de livraison dans les temps (purchase_stock) -->
+            <xpath expr="//button[.//field[@name='on_time_rate']]" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- ====== Boutons header pour contact externe ====== -->
+            <xpath expr="//sheet" position="before">
+                <header invisible="contact_category != 'interne'" groups="commercial.group_commercial_user">
+                    <field name="is_type_client_locked" invisible="1"/>
+                    <field name="type_client_commercial" invisible="1"/>
+                    <button name="action_set_client" type="object"
+                            string="Classer comme client"
+                            class="btn btn-secondary" icon="fa-user-check"
+                            confirm="Voulez-vous vraiment passer ce contact en Client ? Cette action est irréversible."
+                            invisible="type_client_commercial == 'client' or is_type_client_locked"/>
+                    <button string="Client"
+                            class="btn btn-success" disabled="1" icon="fa-check"
+                            invisible="type_client_commercial != 'client'"/>
+                    <button name="action_set_blocked" type="object"
+                            class="btn btn-secondary"
+                            confirm="Voulez-vous vraiment bloquer ce contact ?"
+                            invisible="is_blocked or type_client_commercial == 'client'"
+                            style="color:#dc3545;">
+                        <i class="fa fa-ban"/>
+                        Bloquer
+                    </button>
+                    <button string="Bloqué"
+                            class="btn btn-danger" disabled="1" icon="fa-ban"
+                            invisible="not is_blocked"/>
+                    <button name="action_set_unblocked" type="object"
+                            string="Débloquer"
+                            class="btn btn-outline-success" icon="fa-unlock"
+                            confirm="Voulez-vous vraiment débloquer ce contact ?"
+                            invisible="not is_blocked"/>
+                    <button name="action_view_communications" type="object"
+                            class="btn btn-secondary" icon="fa-comments"
+                            string="Communications"/>
+                    <button name="action_view_reservation_parking" type="object"
+                            class="btn btn-secondary" icon="fa-car"
+                            string="Fiche Parking"
+                            invisible="type_client_commercial != 'client'"/>
+                    <button name="action_open_print_client_wizard" type="object"
+                            class="btn btn-secondary" icon="fa-print"
+                            string="Imprimer"
+                            invisible="type_client_commercial != 'client'"/>
+                    <button name="action_open_print_situation_wizard" type="object"
+                            class="btn btn-secondary" icon="fa-print"
+                            string="Autre"
+                            invisible="type_client_commercial != 'client'"/>
+                    <button name="action_open_remise_wizard" type="object"
+                            class="btn btn-secondary" icon="fa-percent"
+                            string="Remise"
+                            invisible="type_client_commercial != 'client'"
+                            groups="commercial.group_commercial_admin"/>
+                </header>
+            </xpath>
+
+            <!-- ====== NOM : masquer h1 pour contact externe ====== -->
+            <xpath expr="//div[hasclass('oe_title')]//h1" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <field name="contact_card_html" nolabel="1" widget="html" readonly="1"
+                       invisible="contact_category != 'interne'"
+                       groups="commercial.group_commercial_user"
+                       style="margin-left:auto;margin-right:8px;margin-top:8px;pointer-events:none;"/>
+            </xpath>
+
+            <!-- ====== COMMERCIAL : sous l'image, visible contact externe ====== -->
+            <xpath expr="//field[@name='image_1920']" position="before">
+                <div invisible="contact_category == 'externe'" groups="commercial.group_commercial_user" style="margin-bottom: 8px; display: flex; align-items: center;">
+                    <field name="has_confirmed_payment" invisible="1"/>
+                    <span style="font-weight: bold; margin-right: 16px;">Commercial</span>
+                    <field name="commercial_user_id" string="Commercial"
+                           readonly="has_confirmed_payment"
+                           domain="[('groups_id', 'in', %(commercial.group_commercial_user)d)]"
+                           options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                </div>
+            </xpath>
+
+            <!-- ====== TVA / VAT : masquer pour Contact externe ====== -->
+            <xpath expr="//field[@name='vat']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//label[@for='vat']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//div[@name='vat_vies_container']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- ====== SMART BUTTONS : masquer tout sauf Réunions et Opportunités ====== -->
+
+            <!-- Masquer : Ventes (sale) -->
+            <xpath expr="//button[@name='action_view_sale_order']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+
+            <!-- Masquer : Achats (purchase) -->
+            <xpath expr="//button[.//field[@name='purchase_order_count']]" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Facturé (account) -->
+            <xpath expr="//button[@name='action_view_partner_invoices']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Factures fournisseur (account) -->
+            <xpath expr="//button[.//field[@name='supplier_invoice_count']]" position="attributes">
+                <attribute name="invisible">contact_category == 'interne' or supplier_invoice_count == 0</attribute>
+            </xpath>
+
+            <!-- Masquer : Employés (hr) -->
+            <xpath expr="//button[@name='action_open_employees']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne' or employees_count == 0</attribute>
+            </xpath>
+
+            <!-- Masquer : Engagements (custom_project) -->
+            <xpath expr="//button[@name='action_open_engagments']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne' or is_company != False</attribute>
+            </xpath>
+
+            <!-- ====== PAGES : masquer tout sauf Notes internes ====== -->
+
+            <!-- Masquer : Contacts & Adresses -->
+            <xpath expr="//page[@name='contact_addresses']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Ventes & Achats -->
+            <xpath expr="//page[@name='sales_purchases']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Facturation (company) -->
+            <xpath expr="//page[@name='accounting']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne' or (not is_company and parent_id)</attribute>
+            </xpath>
+
+            <!-- Masquer : Facturation (disabled) -->
+            <xpath expr="//page[@name='accounting_disabled']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne' or is_company or not parent_id</attribute>
+            </xpath>
+
+            <!-- Masquer : Coordonnées fiscales (HR_customization) -->
+            <xpath expr="//page[@name='information_fiscale']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Suivi Sous-traitant (custom_project) -->
+            <xpath expr="//page[@name='suivi_sous_traitant']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Type de contact (HR_customization) -->
+            <xpath expr="//field[@name='contact_type']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+
+            <!-- ====== Page Lots : visible uniquement en Contact externe ====== -->
+            <xpath expr="//page[@name='internal_notes']" position="before">
+                <page name="lots" string="Lots" invisible="contact_category != 'interne'" groups="commercial.group_commercial_user">
+                    <field name="commercial_projet_id" invisible="1"/>
+                    <field name="commercial_bloc_id" invisible="1"/>
+                    <field name="commercial_etage_id" invisible="1"/>
+                    <field name="commercial_lot_state_filter" invisible="1"/>
+                    <field name="commercial_lot_ids" invisible="1"/>
+                    <widget name="contact_lot_search_bar"/>
+                    <field name="partner_lot_line_ids" nolabel="1">
+                        <tree editable="bottom"
+                              decoration-success="state == 'disponible'"
+                              decoration-info="state == 'en_option'"
+                              decoration-warning="state == 'reserve'"
+                              decoration-bf="state == 'loue'"
+                              decoration-danger="state == 'vendu'">
+                            <field name="lot_id" string="N° Lot"
+                                   widget="lot_dialog"
+                                   domain="[('is_location', '=', False), ('projet_id', '=?', parent.commercial_projet_id), ('bloc_id', '=?', parent.commercial_bloc_id), ('etage_id', '=?', parent.commercial_etage_id), ('state', 'in', ('disponible', 'en_option'))]"
+                                   options="{'no_create': True, 'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                            <field name="projet_id" string="Projet" readonly="1" options="{'no_open': True}"/>
+                            <field name="bloc_id" string="Bloc" readonly="1" options="{'no_open': True}"/>
+                            <field name="etage_id" string="Étage" readonly="1" options="{'no_open': True}"/>
+                            <field name="surface_globale" string="Surface" readonly="1" optional="hide"/>
+                            <field name="categorie_id" string="Catégorie" readonly="1" options="{'no_open': True}"/>
+                            <field name="montant_global" string="Montant" readonly="1"/>
+                            <field name="remise" string="Remise" readonly="1"/>
+                            <field name="source" optional="hide"/>
+                            <field name="state" string="État" widget="badge"
+                                   decoration-success="state == 'disponible'"
+                                   decoration-info="state == 'en_option'"
+                                   decoration-warning="state == 'reserve'"
+                                   decoration-bf="state == 'loue'"
+                                   decoration-danger="state == 'vendu'" readonly="1"/>
+                            <field name="type_client_commercial" column_invisible="1"/>
+                            <button name="action_view_versements" type="object"
+                                    string="Versements"
+                                    class="btn btn-link"
+                                    invisible="type_client_commercial != 'client'"/>
+                            <button name="action_view_paiements" type="object"
+                                    string="Paiements" icon="fa-credit-card"
+                                    class="btn btn-link"
+                                    invisible="type_client_commercial != 'client'"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+
+            <!-- ====== Masquer champs du haut pour Contact externe ====== -->
+
+            <!-- Masquer : Particulier / Société -->
+            <xpath expr="//field[@name='company_type']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Adresse (label + div) -->
+            <xpath expr="//span[@name='address_name']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('o_address_format')]" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Téléphone (label + wrapper ajoutés par module sms) -->
+            <xpath expr="//label[@for='phone']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//label[@for='phone']/following-sibling::div[1]" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Mobile (label + wrapper ajoutés par module sms) -->
+            <xpath expr="//label[@for='mobile']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//label[@for='mobile']/following-sibling::div[1]" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Email (label + wrapper ajoutés par module mail) -->
+            <xpath expr="//label[@for='email']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//label[@for='email']/following-sibling::div[1]" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Nom de société, Website, Poste, Titre, Étiquettes -->
+            <xpath expr="//field[@name='parent_id']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='website']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='function']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='title']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- Masquer : Langue -->
+            <xpath expr="//field[@name='lang']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- ====== Page Information : visible uniquement en Contact externe ====== -->
+            <xpath expr="//page[@name='internal_notes']" position="before">
+                <page name="information_externe" string="Fiche client" invisible="contact_category != 'interne'">
+                    <group>
+                        <group string="Identité">
+                            <field name="name" string="Nom" required="type == 'contact'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Coordonnées">
+                            <group>
+                                <field name="genre" required="contact_category == 'interne'"/>
+                                <field name="date_naissance" string="Date Naiss."/>
+                                <field name="acte_naissance" string="N° Acte Naiss."/>
+                                <field name="situation_familiale"/>
+                            </group>
+                            <group>
+                                <field name="lieu_naissance" string="Lieu Naiss."/>
+                                <field name="pays_naissance_id" string="Pays Naiss."
+                                       options="{'no_create': True, 'no_create_edit': True}"/>
+                                <field name="email" widget="email" string="Email"/>
+                            </group>
+                            <group colspan="2">
+                                <field name="phone" widget="phone" string="Téléphone"/>
+                                <field name="mobile" widget="phone" string="Mobile"/>
+                            </group>
+                        </group>
+                        <group string="Adresse">
+                            <field name="street" string="Rue"/>
+                            <field name="street2" string="Rue 2"/>
+                            <field name="city" string="Ville"/>
+                            <field name="state_id" string="Région"/>
+                            <field name="zip" string="Code postal"/>
+                            <field name="country_id" string="Pays"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+
+            <!-- Masquer : N°TVA (vat) dans l'onglet information_fiscale (HR_customization) -->
+            <xpath expr="//page[@name='information_fiscale']//field[@name='vat']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- ====== Masquer Notes internes pour contacts commerciaux ====== -->
+            <xpath expr="//page[@name='internal_notes']" position="attributes">
+                <attribute name="invisible">contact_category == 'interne'</attribute>
+            </xpath>
+
+            <!-- ====== Historique Lots : après Notes internes, visible uniquement pour commerciaux ====== -->
+            <xpath expr="//page[@name='internal_notes']" position="after">
+                <page name="historique_lots" string="Historique Lots"
+                      groups="commercial.group_commercial_user"
+                      invisible="contact_category != 'interne'"
+                      badge="commercial_lot_history_ids">
+                    <field name="commercial_lot_history_ids" nolabel="1" readonly="1">
+                        <tree create="0" delete="0" editable="bottom">
+                            <field name="numero_lot" string="N° Lot"/>
+                            <field name="projet_id" string="Projet" options="{'no_open': True}"/>
+                            <field name="bloc_id" string="Bloc" options="{'no_open': True}"/>
+                            <field name="etage_id" string="Étage" options="{'no_open': True}"/>
+                            <field name="state" string="État" widget="badge"
+                                   decoration-warning="state == 'reserve'"
+                                   decoration-bf="state == 'loue'"
+                                   decoration-danger="state == 'vendu'"/>
+                            <field name="client_id" string="Acheté par" options="{'no_open': True}"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Action : Contact externe (avec flag contexte) -->
+    <record id="action_contact_externe" model="ir.actions.act_window">
+        <field name="name">Pré-réservations</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[('contact_category', '=', 'interne'), ('type_client_commercial', '!=', 'client')]</field>
+        <field name="context">{'default_contact_category': 'interne', 'is_contact_externe': True}</field>
+    </record>
+
+    <!-- Action : Contact interne -->
+    <record id="action_contact_interne" model="ir.actions.act_window">
+        <field name="name">Contact interne</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('contact_category', '=', 'externe')]</field>
+        <field name="context">{'default_contact_category': 'externe'}</field>
+    </record>
+
+    <!-- Vue Kanban héritée : afficher le Lot sur Contact externe -->
+    <record id="view_partner_kanban_inherit_commercial" model="ir.ui.view">
+        <field name="name">res.partner.kanban.inherit.commercial</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.res_partner_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='active']" position="after">
+                <field name="commercial_lot_ids" groups="commercial.group_commercial_user"/>
+            </xpath>
+            <xpath expr="//li[.//field[@name='email']]" position="after">
+                <li t-if="record.commercial_lot_ids.raw_value.length" groups="commercial.group_commercial_user">
+                    <strong>Lots:</strong>
+                    <field name="commercial_lot_ids"/>
+                </li>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Ajouter Group by Type client commercial dans la recherche -->
+    <record id="view_partner_search_inherit_commercial" model="ir.ui.view">
+        <field name="name">res.partner.search.inherit.commercial</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="commercial_lot_ids" string="Lot (actuel ou historique)"
+                       groups="commercial.group_commercial_user"
+                       filter_domain="['|',
+                           ('commercial_lot_ids.numero_lot', 'ilike', self),
+                           ('commercial_lot_history_ids.numero_lot', 'ilike', self)]"/>
+            </xpath>
+            <xpath expr="//group[@name='group_by']" position="before">
+                <separator/>
+                <filter name="filter_blocked" string="Bloqué"
+                        groups="commercial.group_commercial_user"
+                        domain="[('is_blocked', '=', True)]"/>
+                <separator/>
+            </xpath>
+            <xpath expr="//group[@name='group_by']" position="inside">
+                <filter name="group_type_client_commercial" string="Type client commercial"
+                        groups="commercial.group_commercial_user"
+                        context="{'group_by': 'type_client_commercial'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Masquer convention et nombre situations pour contact externe -->
+    <record id="view_partner_tree_hide_for_externe" model="ir.ui.view">
+        <field name="name">res.partner.tree.hide.for.externe</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='display_name']" position="after">
+                <field name="is_blocked" column_invisible="1"/>
+                <field name="blocked_display" string=" " nolabel="1"
+                       column_invisible="not context.get('is_contact_externe')"/>
+            </xpath>
+            <xpath expr="//field[@name='nombre_projets']" position="attributes">
+                <attribute name="column_invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+            <xpath expr="//field[@name='nombre_situations']" position="attributes">
+                <attribute name="column_invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+            <xpath expr="//field[@name='email']" position="after">
+                <field name="commercial_lot_projet_ids" string="Projet" widget="many2many_tags"
+                       column_invisible="not context.get('is_contact_externe')" optional="show"
+                       groups="commercial.group_commercial_user"/>
+                <field name="commercial_lot_bloc_ids" string="Bloc" widget="many2many_tags"
+                       column_invisible="not context.get('is_contact_externe')" optional="show"
+                       groups="commercial.group_commercial_user"/>
+                <field name="commercial_lot_ids" string="Lots" widget="many2many_tags"
+                       column_invisible="not context.get('is_contact_externe')" optional="show"
+                       groups="commercial.group_commercial_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Masquer le menu original Contacts -->
+    <record id="contacts.res_partner_menu_contacts" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Sous-menu : Contact externe (réservé aux commerciaux) -->
+    <menuitem id="menu_contact_externe"
+              name="Contact externe"
+              parent="contacts.menu_contacts"
+              action="action_contact_externe"
+              groups="commercial.group_commercial_user"
+              sequence="1"/>
+
+    <!-- Sous-menu : Contact interne -->
+    <menuitem id="menu_contact_interne"
+              name="Contact interne"
+              parent="contacts.menu_contacts"
+              action="action_contact_interne"
+              sequence="0"/>
+
+</odoo>

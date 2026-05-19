@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="commercial_print_coprop_wizard_form" model="ir.ui.view">
+        <field name="name">commercial.print.coprop.wizard.form</field>
+        <field name="model">commercial.print.coprop.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Imprimer reçu copropriété">
+                <group>
+                    <field name="paiement_id" invisible="1"/>
+                    <field name="echeance_coprop_id"/>
+                </group>
+                <footer>
+                    <button name="action_print" string="Imprimer" type="object" class="btn-primary"/>
+                    <button string="Annuler" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

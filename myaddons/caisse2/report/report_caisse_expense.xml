@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ================= TEMPLATE PDF - PAIEMENTS SITUATIONS ================= -->
+    <template id="report_caisse_expense_situation">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="company" t-value="docs[0].company_id if docs else env.company"/>
+                <div class="page">
+
+                    <!-- ============ EN-TÊTE PERSONNALISÉ ============ -->
+                    <div style="margin-bottom: 20px;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="width: 120px; vertical-align: top;">
+                                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)"
+                                         style="max-height: 80px; max-width: 100px;" alt="Logo"/>
+                                </td>
+                                <td style="vertical-align: middle; text-align: center;">
+                                    <div style="font-size: 22px; font-weight: bold; color: #1a5ba8;">
+                                        <t t-esc="company.name"/>
+                                    </div>
+                                    <div style="font-size: 10px; color: #333; margin-top: 5px;">
+                                        <span t-if="company.street" t-esc="company.street"/>
+                                        <span t-if="company.city">, <t t-esc="company.city"/></span>
+                                        <span t-if="company.phone"> | Tel: <t t-esc="company.phone"/></span>
+                                        <span t-if="company.email"> | <t t-esc="company.email"/></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div style="border-bottom: 2px solid #1a5ba8; margin-top: 10px;"></div>
+                    </div>
+
+                    <!-- En-tête du rapport -->
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #17a2b8; margin-bottom: 5px;">
+                            RAPPORT DES PAIEMENTS SITUATIONS
+                        </h2>
+                    </div>
+
+                    <!-- Informations générales -->
+                    <div style="margin-bottom: 20px;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="width: 50%;">
+                                    <strong>Date d'impression:</strong>
+                                    <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                                </td>
+                                <td style="width: 50%;">
+                                    <strong>Nombre de paiements:</strong>
+                                    <span t-esc="len(docs)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Société:</strong>
+                                    <span t-esc="company.name"/>
+                                </td>
+                                <td>
+                                    <strong>Généré par:</strong>
+                                    <span t-esc="user.name"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Calcul des totaux -->
+                    <t t-set="total_amount" t-value="0"/>
+                    <t t-set="total_paid" t-value="0"/>
+                    <t t-set="total_residual" t-value="0"/>
+                    <t t-foreach="docs" t-as="doc">
+                        <t t-set="total_amount" t-value="total_amount + doc.amount"/>
+                        <t t-set="total_paid" t-value="total_paid + doc.amount_verse"/>
+                        <t t-set="total_residual" t-value="total_residual + doc.amount_residual"/>
+                    </t>
+
+                    <!-- Résumé financier -->
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="background-color: #17a2b8; color: white; padding: 8px; margin-bottom: 0;">RÉSUMÉ FINANCIER</h4>
+                        <table class="table table-bordered" style="margin-bottom: 0;">
+                            <thead style="background-color: #f8f9fa;">
+                                <tr>
+                                    <th style="text-align: center;">Montant Total</th>
+                                    <th style="text-align: center;">Montant Versé</th>
+                                    <th style="text-align: center;">Reste à Payer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center; font-weight: bold;">
+                                        <span t-esc="'%.2f' % total_amount"/>
+                                        <span t-esc="docs[0].company_currency_id.symbol if docs else 'DA'"/>
+                                    </td>
+                                    <td style="text-align: center; font-weight: bold; color: #28a745;">
+                                        <span t-esc="'%.2f' % total_paid"/>
+                                        <span t-esc="docs[0].company_currency_id.symbol if docs else 'DA'"/>
+                                    </td>
+                                    <td style="text-align: center; font-weight: bold; color: #dc3545;">
+                                        <span t-esc="'%.2f' % total_residual"/>
+                                        <span t-esc="docs[0].company_currency_id.symbol if docs else 'DA'"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tableau détaillé -->
+                    <h4 style="background-color: #17a2b8; color: white; padding: 8px; margin-bottom: 0;">DÉTAIL DES PAIEMENTS</h4>
+                    <table class="table table-sm table-bordered">
+                        <thead style="background-color: #f8f9fa;">
+                            <tr>
+                                <th>Référence</th>
+                                <th>Date</th>
+                                <th>Situation</th>
+                                <th>Projet</th>
+                                <th>Caisse</th>
+                                <th>Description</th>
+                                <th style="text-align: right;">Montant</th>
+                                <th style="text-align: right;">Versé</th>
+                                <th style="text-align: right;">Reste</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="doc">
+                                <tr>
+                                    <td><span t-field="doc.name"/></td>
+                                    <td><span t-field="doc.date" t-options='{"format": "dd/MM/yyyy"}'/></td>
+                                    <td><span t-field="doc.situation_id.name"/></td>
+                                    <td><span t-field="doc.project_id.name"/></td>
+                                    <td><span t-field="doc.cashbox_id.name"/></td>
+                                    <td><span t-field="doc.description"/></td>
+                                    <td style="text-align: right;">
+                                        <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.company_currency_id}'/>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span t-field="doc.amount_verse" t-options='{"widget": "monetary", "display_currency": doc.company_currency_id}'/>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span t-field="doc.amount_residual" t-options='{"widget": "monetary", "display_currency": doc.company_currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot style="background-color: #17a2b8; color: white;">
+                            <tr>
+                                <td colspan="6" style="text-align: right;"><strong>TOTAL:</strong></td>
+                                <td style="text-align: right;">
+                                    <strong><span t-esc="'%.2f' % total_amount"/> <span t-esc="docs[0].company_currency_id.symbol if docs else 'DA'"/></strong>
+                                </td>
+                                <td style="text-align: right;">
+                                    <strong><span t-esc="'%.2f' % total_paid"/> <span t-esc="docs[0].company_currency_id.symbol if docs else 'DA'"/></strong>
+                                </td>
+                                <td style="text-align: right;">
+                                    <strong><span t-esc="'%.2f' % total_residual"/> <span t-esc="docs[0].company_currency_id.symbol if docs else 'DA'"/></strong>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================= ACTION REPORT ================= -->
+    <record id="action_report_caisse_expense_situation" model="ir.actions.report">
+        <field name="name">Paiements Situations</field>
+        <field name="model">caisse.expense</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">caisse2.report_caisse_expense_situation</field>
+        <field name="report_file">caisse2.report_caisse_expense_situation</field>
+        <field name="print_report_name">
+            'Paiements_Situations_%s' % (time.strftime('%Y%m%d_%H%M%S'))
+        </field>
+        <field name="binding_model_id" ref="model_caisse_expense"/>
+        <field name="binding_type">report</field>
+    </record>
+
+</odoo>

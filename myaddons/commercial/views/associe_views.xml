@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_associe_view_tree" model="ir.ui.view">
+        <field name="name">commercial.associe.tree</field>
+        <field name="model">commercial.associe</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="telephone"/>
+                <field name="adresse"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_associe_view_form" model="ir.ui.view">
+        <field name="name">commercial.associe.form</field>
+        <field name="model">commercial.associe</field>
+        <field name="arch" type="xml">
+            <form string="Associé">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="telephone" widget="phone"/>
+                            <field name="adresse"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_associe_action" model="ir.actions.act_window">
+        <field name="name">Associés</field>
+        <field name="res_model">commercial.associe</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

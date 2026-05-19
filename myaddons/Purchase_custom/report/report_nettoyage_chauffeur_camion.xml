@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ===== Action Report : Chauffeur ===== -->
+        <record id="action_report_nettoyage_chauffeur" model="ir.actions.report">
+            <field name="name">Rapport Chauffeur</field>
+            <field name="model">nettoyage.situation</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">Purchase_custom.report_nettoyage_chauffeur_camion_document</field>
+            <field name="report_file">Purchase_custom.report_nettoyage_chauffeur_camion_document</field>
+            <field name="binding_model_id" ref="model_nettoyage_situation"/>
+            <field name="binding_type">report</field>
+            <field name="binding_view_types">list</field>
+            <field name="print_report_name">'Rapport_Chauffeur_%s' % (time.strftime('%Y%m%d_%H%M%S'))</field>
+        </record>
+
+        <!-- ===== Action Report : Camion ===== -->
+        <record id="action_report_nettoyage_camion" model="ir.actions.report">
+            <field name="name">Rapport Camion</field>
+            <field name="model">nettoyage.situation</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">Purchase_custom.report_nettoyage_chauffeur_camion_document</field>
+            <field name="report_file">Purchase_custom.report_nettoyage_chauffeur_camion_document</field>
+            <field name="binding_model_id" ref="model_nettoyage_situation"/>
+            <field name="binding_type">report</field>
+            <field name="binding_view_types">list</field>
+            <field name="print_report_name">'Rapport_Camion_%s' % (time.strftime('%Y%m%d_%H%M%S'))</field>
+        </record>
+
+        <!-- ===== Template commun chauffeur / camion ===== -->
+        <template id="report_nettoyage_chauffeur_camion_document">
+            <t t-call="web.html_container">
+                <t t-call="custom_project.etb_tph_layout">
+                    <t t-set="company" t-value="docs[0].project_id.company_id if docs and docs[0].project_id else env.company"/>
+                    <t t-set="dates" t-value="[d.date for d in docs if d.date]"/>
+                    <t t-set="date_min" t-value="min(dates) if dates else False"/>
+                    <t t-set="date_max" t-value="max(dates) if dates else False"/>
+                    <t t-set="total_voyages" t-value="sum(d.nombre_voyages or 0 for d in docs)"/>
+                    <t t-set="total_montant" t-value="sum(d.montant or 0 for d in docs)"/>
+                    <t t-set="ref_situation" t-value="docs[0].name if docs else ''"/>
+
+                    <div class="page" style="font-family: Arial, sans-serif; font-size: 11pt;">
+
+                        <!-- En-tête République -->
+                        <div style="text-align: center; font-weight: 700; font-size: 12pt; margin-bottom: 12pt;">
+                            RÉPUBLIQUE ALGÉRIENNE DÉMOCRATIQUE ET POPULAIRE
+                        </div>
+
+                        <!-- Infos entreprise -->
+                        <div style="margin-bottom: 14pt;">
+                            <div><strong>Entreprise :</strong>
+                                <span t-esc="company.name"/>
+                            </div>
+                            <div><strong>Adresse :</strong>
+                                <span t-esc="company.partner_id.contact_address or company.partner_id.city or ''"/>
+                            </div>
+                            <div t-if="docs[0].project_id"><strong>Projet :</strong>
+                                <span t-esc="docs[0].project_id.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Titre Décompte -->
+                        <div style="text-align: center; border: 1pt solid #000; padding: 6pt; margin-bottom: 4pt; font-weight: 700;">
+                            DECOMPTE SITUATION
+                            <t t-if="ref_situation"> N° <span t-esc="ref_situation"/></t>
+                            <t t-if="date_min and date_max">
+                                DU <span t-esc="date_min.strftime('%d/%m/%Y')"/>
+                                AU <span t-esc="date_max.strftime('%d/%m/%Y')"/>
+                            </t>
+                        </div>
+                        <div style="text-align: center; border: 1pt solid #000; padding: 4pt; margin-bottom: 12pt; font-weight: 700;">
+                            <t t-set="titres_dispo" t-value="[d.titre for d in docs if d.titre]"/>
+                            <t t-if="titres_dispo" t-esc="titres_dispo[0]"/>
+                            <t t-else="">EVACUATION DES TERRES VERS LA CENTRALE A BETON</t>
+                        </div>
+
+                        <!-- Tableau détail -->
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10pt;">
+                            <thead style="background: #f0f0f0;">
+                                <tr>
+                                    <th style="border: 1pt solid #000; padding: 5pt;">DATE</th>
+                                    <th style="border: 1pt solid #000; padding: 5pt;">CAMION / IMMATRICULATION</th>
+                                    <th style="border: 1pt solid #000; padding: 5pt;">Chauffeur</th>
+                                    <th style="border: 1pt solid #000; padding: 5pt; text-align: right;">NOMBRE DE VOYAGE</th>
+                                    <th style="border: 1pt solid #000; padding: 5pt; text-align: right;">PRIX UNITAIRE DU VOYAGE</th>
+                                    <th style="border: 1pt solid #000; padding: 5pt; text-align: right;">MONTANT</th>
+                                    <th style="border: 1pt solid #000; padding: 5pt;">OBSERVATION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="docs" t-as="d">
+                                    <tr>
+                                        <td style="border: 1pt solid #000; padding: 5pt;">
+                                            <t t-if="d.date" t-esc="d.date.strftime('%d/%m/%Y')"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 5pt;">
+                                            <span t-esc="d.camion_id.name or ''"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 5pt;">
+                                            <span t-esc="d.chauffeur_id.name or ''"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
+                                            <t t-esc="'%.2f' % (d.nombre_voyages or 0)"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
+                                            <t t-esc="'%.2f' % (d.prix_unitaire_voyage or 0)"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
+                                            <t t-esc="'%.2f' % (d.montant or 0)"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 5pt;">
+                                            <span t-esc="d.observation or ''"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <!-- Total -->
+                                <tr style="background: #e5e5e5; font-weight: 700;">
+                                    <td colspan="3" style="border: 1pt solid #000; padding: 6pt; text-align: right;">TOTAL</td>
+                                    <td style="border: 1pt solid #000; padding: 6pt; text-align: right;">
+                                        <t t-esc="'%.2f' % total_voyages"/>
+                                    </td>
+                                    <td style="border: 1pt solid #000; padding: 6pt;"></td>
+                                    <td style="border: 1pt solid #000; padding: 6pt; text-align: right;">
+                                        <t t-esc="'%.2f' % total_montant"/>
+                                    </td>
+                                    <td style="border: 1pt solid #000; padding: 6pt;"></td>
+                                </tr>
+                                <!-- MONTANT TOTAL A PAYER -->
+                                <tr style="background: #d0d0d0; font-weight: 700;">
+                                    <td colspan="5" style="border: 1pt solid #000; padding: 6pt; text-align: right;">MONTANT TOTAL A PAYER</td>
+                                    <td colspan="2" style="border: 1pt solid #000; padding: 6pt; text-align: right;">
+                                        <t t-esc="'%.2f' % total_montant"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Montant en lettres -->
+                        <div style="margin-top: 14pt;">
+                            <em>Arrêté le montant du présent décompte à la somme de (en lettres) :</em>
+                            <br/>
+                            <strong>
+                                <t t-set="amount_words" t-value="company.currency_id.amount_to_text(total_montant) if company.currency_id else '%.2f' % total_montant"/>
+                                <span t-esc="amount_words"/>
+                            </strong>
+                        </div>
+
+                        <!-- Pied : ville + date + signatures -->
+                        <div style="margin-top: 24pt; text-align: right;">
+                            Fait à
+                            <span t-esc="company.partner_id.city or '...'"/>
+                            le :
+                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                        </div>
+                        <div style="margin-top: 6pt; text-align: right; font-weight: 700;">ENTREPRISE</div>
+
+                        <div style="margin-top: 50pt; display: table; width: 100%;">
+                            <div style="display: table-row;">
+                                <div style="display: table-cell; width: 33%; text-align: center; padding-top: 30pt; border-top: 1pt solid #000;">
+                                    Caissier(ère)
+                                </div>
+                                <div style="display: table-cell; width: 33%; text-align: center; padding-top: 30pt; border-top: 1pt solid #000;">
+                                    Ingénieur Travaux Publics
+                                </div>
+                                <div style="display: table-cell; width: 33%; text-align: center; padding-top: 30pt; border-top: 1pt solid #000;">
+                                    Directeur Technique
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- views/view_menu.xml -->
+<odoo>
+
+    <menuitem id="caisse_general_menu"
+              name="Caisse"
+              web_icon="caisse2,static/description/icon.png"
+              sequence="20"
+              groups="caisse2.group_caissier"/>
+
+    <menuitem id="caisse_entry_menu_action"
+              name="Encaissements"
+              parent="caisse_general_menu"
+              groups="caisse2.group_comptable,caisse2.group_caissier"
+              action="caisse_entry_act_window"
+              sequence="2"/>
+
+    <menuitem id="menu_caisse_expense"
+              name="Décaissements"
+              parent="caisse_general_menu"
+              groups="caisse2.group_comptable,caisse2.group_caissier"
+              sequence="3"
+    />
+
+    <menuitem id="caisse_transfer_menu_action"
+              name="Transfert"
+              parent="caisse_general_menu"
+              groups="caisse2.group_comptable,caisse2.group_caissier"
+              action="cashbox_transfer_act_window"
+              sequence="4"/>
+
+    <menuitem id="menu_caisses_config"
+              name="Caisses"
+              parent="caisse_general_menu"
+              sequence="1"
+              groups="caisse2.group_comptable,caisse2.group_caissier"
+              action="action_cashbox"/>
+
+    <menuitem id="caisse_expense_supplier_menu_action"
+              name="Paiements Fournisseur"
+              parent="menu_caisse_expense"
+              action="caisse_expense_supplier_act_window"
+              groups="caisse2.group_comptable,caisse2.group_caissier"
+              sequence="1"/>
+
+    <menuitem id="caisse_expense_menu_action"
+              name="Paiements Situations"
+              parent="menu_caisse_expense"
+              action="caisse_expense_act_window"
+              groups="caisse2.group_comptable,caisse2.group_caissier"
+              sequence="2"
+    />
+
+
+</odoo>

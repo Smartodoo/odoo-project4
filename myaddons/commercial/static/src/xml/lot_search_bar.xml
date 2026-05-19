@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="commercial.LotSearchBar">
+        <div t-ref="root" class="d-flex flex-wrap gap-2 align-items-center p-2 mb-2 bg-light rounded border">
+            <i class="fa fa-search text-muted"/>
+            <input type="text" class="form-control form-control-sm" style="max-width: 130px;"
+                   placeholder="N° Lot"
+                   t-att-value="state.numeroLot"
+                   t-on-input="(ev) => this.onInput('numeroLot', ev)"/>
+            <input type="text" class="form-control form-control-sm" style="max-width: 130px;"
+                   placeholder="Bloc"
+                   t-att-value="state.bloc"
+                   t-on-input="(ev) => this.onInput('bloc', ev)"/>
+            <input type="text" class="form-control form-control-sm" style="max-width: 130px;"
+                   placeholder="Étage"
+                   t-att-value="state.etage"
+                   t-on-input="(ev) => this.onInput('etage', ev)"/>
+            <input type="text" class="form-control form-control-sm" style="max-width: 130px;"
+                   placeholder="Catégorie"
+                   t-att-value="state.categorie"
+                   t-on-input="(ev) => this.onInput('categorie', ev)"/>
+            <select class="form-select form-select-sm" style="max-width: 170px;"
+                    t-on-change="onStateChange">
+                <option value="">-- Statut --</option>
+                <option value="disponible" t-att-selected="state.stateFilter === 'disponible'">Disponible</option>
+                <option value="en_option" t-att-selected="state.stateFilter === 'en_option'">Pré-réservé</option>
+                <option value="reserve" t-att-selected="state.stateFilter === 'reserve'">Réservé</option>
+                <option value="vendu" t-att-selected="state.stateFilter === 'vendu'">Vendu</option>
+            </select>
+            <button t-if="hasActiveFilter"
+                    class="btn btn-outline-secondary btn-sm"
+                    t-on-click="onClear">
+                <i class="fa fa-times"/> Effacer
+            </button>
+            <button class="btn btn-outline-primary btn-sm"
+                    t-on-click="onPrint">
+                <i class="fa fa-print"/> Imprimer
+            </button>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--  Views for Caisse Expense Globale -->
+    <record id="caisse_expense_globale_view_tree" model="ir.ui.view">
+        <field name="name">caisse.expense.globale.view.tree</field>
+        <field name="model">caisse.expense.globale</field>
+        <field name="arch" type="xml">
+            <tree create="0">
+                <field name="partner_id"/>
+                <field name="partner_type"/>
+                <field name="project_ids" widget="many2many_tags"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="company_id"/>
+                <field name="company_currency_id" column_invisible="1"/>
+                <field name="total_expense_amount" widget="monetary" options="{'currency_field':'company_currency_id'}"
+                />
+                <field name="total_paid_amount" widget="monetary" options="{'currency_field':'company_currency_id'}"
+                />
+                <field name="total_residual_amount" widget="monetary" options="{'currency_field':'company_currency_id'}"
+                />
+            </tree>
+        </field>
+    </record>
+    <record id="caisse_expense_globale_view_form" model="ir.ui.view">
+        <field name="name">caisse.expense.globale.view.form</field>
+        <field name="model">caisse.expense.globale</field>
+        <field name="arch" type="xml">
+            <form string="Dépense Globale">
+                <header>
+                    <button name="%(caisse2.action_global_expense_print_wizard)d"
+                            type="action"
+                            string="Imprimer les Paiements"
+                            class="btn-primary"
+                            context="{'default_global_expense_id': id}"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_preview_report" type="object"
+                                class="oe_stat_button" icon="fa-eye">
+                            <span class="o_stat_text">Aperçu</span>
+                        </button>
+                    </div>
+                    <group class="col-6">
+                        <field name="partner_id" readonly="1"/>
+                        <field name="partner_type" readonly="1"/>
+                        <field name="project_ids" widget="many2many_tags" readonly="1"/>
+                    </group>
+                    <group class="col-6">
+                        <field name="date_from" readonly="1"/>
+                        <field name="date_to" readonly="1"/>
+                        <field name="company_id" readonly="1"/>
+                        <field name="company_currency_id" invisible="1"/>
+                        <field name="total_expense_amount" readonly="1" widget="monetary"/>
+                        <field name="total_paid_amount" readonly="1" widget="monetary"/>
+                        <field name="total_residual_amount" readonly="1" widget="monetary"/>
+                    </group>
+                    <group string="Dépenses associées" class="col-12">
+                        <field name="expenses_line_ids" invisible="partner_type != 'SUBCONTRACTOR'" readonly="1">
+                            <tree>
+                                <field name="name"/>
+                                <field name="date"/>
+                                <field name="amount" widget="monetary"
+                                       options="{'currency_field':'company_currency_id'}"/>
+                                <field name="amount_verse" string="Versé" widget="monetary"
+                                       options="{'currency_field':'company_currency_id'}"/>
+                                <field name="amount_residual" widget="monetary"
+                                       options="{'currency_field':'company_currency_id'}"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                        <field name="expenses_supplier_line_ids" invisible="partner_type != 'SUPPLIER'" readonly="1">
+                            <tree>
+                                <field name="name"/>
+                                <field name="date"/>
+                                <field name="amount" widget="monetary"
+                                       options="{'currency_field':'company_currency_id'}"/>
+                                <field name="amount_verse" string="Versé" widget="monetary"
+                                       options="{'currency_field':'company_currency_id'}"/>
+                                <field name="amount_residual" widget="monetary"
+                                       options="{'currency_field':'company_currency_id'}"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="caisse_expense_globale_view_search" model="ir.ui.view">
+        <field name="name">caisse.expense.globale.view.search</field>
+        <field name="model">caisse.expense.globale</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="project_ids"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="company_id"/>
+
+                <!-- Filtres par type -->
+                <separator/>
+                <filter string="Fournisseur" name="Fournisseur" domain="[('partner_type','=','SUPPLIER')]"/>
+                <filter string="Sous-traitant" name="Sous_traitant" domain="[('partner_type','=','SUBCONTRACTOR')]"/>
+
+                <group expand="0" string="Grouper par">
+                    <filter string="Partenaire" name="partner_id" context="{'group_by':'partner_id'}"/>
+                    <filter string="Projet" name="project_ids" context="{'group_by':'project_ids'}"/>
+                    <filter string="Type de contact" name="type_de_contact" context="{'group_by':'partner_type'}"/>
+                    <filter string="Société" name="company_id" context="{'group_by':'company_id'}"/>
+                    <filter string="Date" name="date_group" context="{'group_by':'date_from'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Server Action pour aperçu des enregistrements sélectionnés -->
+    <record id="action_preview_expense_globale_multi" model="ir.actions.server">
+        <field name="name">Aperçu PDF</field>
+        <field name="model_id" ref="caisse2.model_caisse_expense_globale"/>
+        <field name="binding_model_id" ref="caisse2.model_caisse_expense_globale"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_preview_report_multi()</field>
+    </record>
+
+    <record id="action_caisse_expense_globale" model="ir.actions.act_window">
+        <field name="name">Dépenses Globales</field>
+        <field name="res_model">caisse.expense.globale</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="caisse_expense_globale_view_tree"/>
+        <field name="search_view_id" ref="caisse_expense_globale_view_search"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Cliquez sur le bouton ci-dessous pour créer une nouvelle dépense globale.
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_caisse_expense_globale"
+              name="Dépenses Globales"
+              parent="caisse2.menu_caisse_expense"
+              action="action_caisse_expense_globale"
+              groups="caisse2.group_comptable,caisse2.group_caissier"
+              sequence="3"/>
+</odoo>

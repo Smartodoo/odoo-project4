@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_contrat_location" model="ir.actions.report">
+        <field name="name">Contrat de Location</field>
+        <field name="model">commercial.location</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.contrat_location_template</field>
+        <field name="report_file">commercial.contrat_location_template</field>
+        <field name="print_report_name">'Contrat - %s' % object.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="contrat_location_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="user" t-value="doc.env.user"/>
+                    <t t-set="user_civilite" t-value="'Mme' if user.genre == 'femme' else 'M.'"/>
+                    <t t-set="client_civilite" t-value="'Mme' if doc.client_location_id.genre == 'femme' else 'M.'"/>
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 20px; padding: 50px 60px;">
+
+                        <!-- Date -->
+                        <p style="text-align: right; margin-bottom: 30px; font-size: 20px;">
+                            Fait Le :
+                            <strong><t t-esc="doc.create_date" t-options='{"widget": "date"}'/></strong>
+                        </p>
+
+                        <!-- Titre -->
+                        <h2 style="text-align: center; margin-bottom: 40px; font-weight: bold; color: #003366; font-size: 30px; text-decoration: underline;">
+                            CONTRAT DE LOCATION
+                        </h2>
+
+                        <!-- Corps texte -->
+                        <p style="text-align: justify; line-height: 2.6; font-size: 20px;">
+                            Entre les soussignés :
+                            Bailleur : <strong><t t-esc="user_civilite"/> <t t-esc="user.name"/></strong>,
+                            Locataire : <strong><t t-esc="client_civilite"/> <t t-esc="doc.client_location_id.nom or '...'"/></strong>.
+                            Objet : Location du lot n°
+                            <strong><t t-esc="doc.lot_id.numero_lot or '...'"/></strong>
+                            situé dans le projet
+                            <strong><t t-esc="doc.projet_id.name or '...'"/></strong>, bloc
+                            <strong><t t-esc="doc.bloc_id.name or '...'"/></strong>.
+                            Durée du contrat :
+                            <t t-if="doc.type_contrat == 'mensuel'">
+                                <strong><t t-esc="doc.delais"/> mois</strong>.
+                            </t>
+                            <t t-else="">
+                                <strong><t t-esc="doc.delais_annees"/> années</strong>.
+                            </t>
+                            Du : <strong><t t-esc="doc.date_debut" t-options='{"widget": "date"}'/></strong>
+                            au : <strong><t t-esc="doc.date_fin" t-options='{"widget": "date"}'/></strong>.
+                            Loyer mensuel :
+                            <strong><t t-esc="'{:,.2f}'.format(doc.montant_mensuel).replace(',', ' ')"/> DA</strong>.
+                            Montant à payer :
+                            <strong><t t-esc="'{:,.2f}'.format(doc.montant_annuel).replace(',', ' ')"/> DA</strong>.
+                        </p>
+
+                        <!-- Échéances -->
+                        <p style="line-height: 2.4; font-size: 20px; margin-bottom: 5px;">
+                            <strong>Échéances de paiement :</strong>
+                        </p>
+                        <p style="line-height: 2.4; font-size: 20px; margin-bottom: 10px;">
+                            Le loyer est payable comme suit :
+                        </p>
+                        <t t-foreach="doc.versement_location_ids" t-as="v">
+                            <p style="line-height: 2.0; font-size: 20px; margin: 0; padding-left: 30px;">
+                                Échéance <t t-esc="v_index + 1"/> :
+                                <strong><t t-esc="'{:,.2f}'.format(v.montant).replace(',', ' ')"/> DA</strong>
+                                le <strong><t t-esc="v.date" t-options='{"widget": "date"}'/></strong>
+                            </p>
+                        </t>
+
+                        <!-- Caution -->
+                        <p style="line-height: 2.4; font-size: 20px; margin-top: 25px; margin-bottom: 25px;">
+                            <strong>Caution de garantie :</strong>
+                            <strong><t t-esc="'{:,.2f}'.format(doc.caution_garantie).replace(',', ' ')"/> DA</strong>
+                            (versée à la signature)
+                        </p>
+
+                        <!-- Obligations -->
+                        <p style="line-height: 2.4; font-size: 20px; margin-bottom: 5px;">
+                            <strong>Obligations :</strong>
+                        </p>
+                        <p style="line-height: 2.4; font-size: 20px; margin-bottom: 5px;">
+                            Le locataire s'engage à payer les montants aux dates prévues et à maintenir le lot en bon état.
+                        </p>
+                        <p style="line-height: 2.4; font-size: 20px; margin-bottom: 25px;">
+                            Le bailleur s'engage à mettre le lot à disposition en bon état.
+                        </p>
+
+                        <!-- Signatures -->
+                        <div style="margin-top: 60px; font-size: 20px;">
+                            <div style="float: left; width: 50%; text-align: center;">
+                                <p style="margin-bottom: 0;"><strong>Le locataire</strong></p>
+                                <p style="margin-top: 5px;"><t t-esc="client_civilite"/> <t t-esc="doc.client_location_id.nom or '...'"/></p>
+                            </div>
+                            <div style="float: right; width: 50%; text-align: center;">
+                                <p style="margin-bottom: 0;"><strong>Le bailleur</strong></p>
+                                <p style="margin-top: 5px;"><t t-esc="user_civilite"/> <t t-esc="user.name"/></p>
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

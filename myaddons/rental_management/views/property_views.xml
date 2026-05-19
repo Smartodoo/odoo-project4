@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_property_apartment" model="ir.actions.act_window">
+        <field name="name">🏠 Appartements</field>
+        <field name="res_model">property.apartment</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'search_default_group_by_state': 1}</field>
+    </record>
+
+    <record id="view_property_apartment_kanban" model="ir.ui.view">
+        <field name="name">property.apartment.kanban</field>
+        <field name="model">property.apartment</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="id"/>
+                <field name="state"/>
+                <field name="image"/>
+                <field name="color"/>
+                <field name="type"/>
+                <field name="block"/>
+                <field name="floor"/>
+                <field name="surface"/>
+                <field name="price_month"/>
+                <field name="is_furnished"/>
+                <field name="has_wifi"/>
+                <field name="has_ac"/>
+                <field name="has_parking"/>
+                <field name="total_rentals"/>
+                <field name="total_revenue"/>
+                <field name="avg_occupancy"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click p-0 mb-3 overflow-hidden"
+                             style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+
+                            <div class="position-relative" style="height: 180px; overflow: hidden;">
+                                <t t-if="record.image.raw_value">
+                                    <img t-att-src="kanban_image('property.apartment', 'image', record.id.raw_value)"
+                                         style="object-fit: cover; width: 100%; height: 100%;"
+                                         alt="Appartement"/>
+                                </t>
+                                <t t-else="">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                                height: 100%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fa fa-building-o" style="font-size: 48px; color: white; opacity: 0.5;"
+                                           title="Image par défaut"/>
+                                    </div>
+                                </t>
+
+                                <div class="position-absolute" style="top: 12px; right: 12px;">
+                                    <span t-attf-class="badge #{record.state.raw_value == 'available' ? 'bg-success' :
+                                                            record.state.raw_value == 'occupied' ? 'bg-danger' :
+                                                            record.state.raw_value == 'soon' ? 'bg-warning' :
+                                                            record.state.raw_value == 'maintenance' ? 'bg-info' : 'bg-secondary'}"
+                                          style="font-size: 0.75rem; padding: 6px 12px; border-radius: 20px;">
+                                        <t t-esc="record.state.value"/>
+                                    </span>
+                                </div>
+
+                                <div class="position-absolute"
+                                     style="bottom: 0; left: 0; right: 0;
+                                            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+                                            padding: 20px 15px 10px;">
+                                    <span class="text-white fw-bold" style="font-size: 1.3rem;">
+                                        <field name="price_month"/>
+                                    </span>
+                                    <span class="text-white-50" style="font-size: 0.8rem;">DA/mois</span>
+                                </div>
+                            </div>
+
+                            <div class="p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="m-0 fw-bold text-truncate" style="color: #2d3748;">
+                                        <field name="name"/>
+                                    </h5>
+                                    <span class="badge bg-light text-dark border">
+                                        <field name="type"/>
+                                    </span>
+                                </div>
+
+                                <div class="text-muted small mb-2">
+                                    <i class="fa fa-map-marker text-danger me-1" title="Emplacement"/>
+                                    <span>Bloc<field name="block"/>, Étage
+                                        <field name="floor"/>
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+                                    <span>
+                                        <i class="fa fa-expand me-1" title="Surface m2"/>
+                                        <field name="surface"/>
+                                        m²
+                                    </span>
+                                    <span t-if="record.is_furnished.raw_value">
+                                        <i class="fa fa-couch me-1" title="Meublé"/>
+                                        Meublé
+                                    </span>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+                                            background: #f8fafc; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+                                    <div class="text-center">
+                                        <div style="font-weight: 700; color: #1e293b; font-size: 14px;">
+                                            <t t-esc="record.total_rentals.raw_value"/>
+                                        </div>
+                                        <div style="font-size: 10px; color: #94a3b8;">LOCS</div>
+                                    </div>
+                                    <div class="text-center"
+                                         style="border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                                        <div style="font-weight: 700; color: #1e293b; font-size: 14px;">
+                                            <t t-esc="record.total_revenue.value"/>
+                                        </div>
+                                        <div style="font-size: 10px; color: #94a3b8;">REVENUS</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div style="font-weight: 700; color: #1e293b; font-size: 14px;">
+                                            <t t-esc="record.avg_occupancy.raw_value"/>
+                                        </div>
+                                        <div style="font-size: 10px; color: #94a3b8;">JOURS</div>
+                                    </div>
+                                </div>
+
+                                <button t-if="record.state.raw_value == 'available'"
+                                        class="btn btn-primary btn-sm w-100 rounded-pill" type="object"
+                                        name="action_rent_now">
+                                    <i class="fa fa-calendar-check-o me-2" title="Réserver maintenant"/>Réserver
+                                </button>
+                                <button t-if="record.state.raw_value == 'occupied'"
+                                        class="btn btn-outline-danger btn-sm w-100 rounded-pill" type="object"
+                                        name="action_view_history">
+                                    <i class="fa fa-eye me-2" title="Voir l'historique"/>Historique
+                                </button>
+                                <button t-if="record.state.raw_value == 'maintenance'"
+                                        class="btn btn-outline-info btn-sm w-100 rounded-pill" type="object"
+                                        name="action_create_maintenance">
+                                    <i class="fa fa-wrench me-2" title="Maintenance"/>Maintenance
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_property_apartment_tree" model="ir.ui.view">
+        <field name="name">property.apartment.tree</field>
+        <field name="model">property.apartment</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'available'" decoration-danger="state == 'occupied'"
+                  decoration-info="state == 'maintenance'">
+                <field name="name"/>
+                <field name="type"/>
+                <field name="block"/>
+                <field name="floor"/>
+                <field name="surface"/>
+                <field name="price_month"/>
+                <field name="state" widget="badge" decoration-success="state == 'available'"
+                       decoration-danger="state == 'occupied'" decoration-info="state == 'maintenance'"/>
+                <field name="total_revenue" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_property_apartment_form" model="ir.ui.view">
+        <field name="name">property.apartment.form</field>
+        <field name="model">property.apartment</field>
+        <field name="arch" type="xml">
+            <form string="Appartement">
+                <header>
+                    <button name="action_set_available" string="✅ Remettre Disponible" type="object"
+                            invisible="state not in ('maintenance', 'cleaning')" class="oe_highlight"/>
+                    <button name="action_set_maintenance" string="🔧 Maintenance" type="object"
+                            invisible="state != 'available'"/>
+                    <button name="action_set_cleaning" string="🧹 Ménage" type="object"
+                            invisible="state != 'available'"/>
+                    <button name="action_create_maintenance" string="🔧 Ticket Maintenance" type="object"
+                            invisible="state == 'available'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="available,occupied,soon,maintenance,cleaning"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_history" type="object" class="oe_stat_button" icon="fa-history">
+                            <field name="total_rentals" widget="statinfo" string="Locations"/>
+                        </button>
+                        <button name="action_view_revenue" type="object" class="oe_stat_button" icon="fa-money">
+                            <field name="total_revenue" widget="statinfo" string="Revenus"/>
+                        </button>
+                    </div>
+                    <field name="image" widget="image" class="oe_avatar" options="{'preview_image': 'image'}"/>
+                    <div class="oe_title">
+                        <label for="name" string="RÉFÉRENCE" class="text-muted small"/>
+                        <h1>
+                            <field name="name" placeholder="ex: APT-05 - Résidence KRIM"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="📍 LOCALISATION">
+                            <field name="type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="address"/>
+                            <field name="block"/>
+                            <field name="floor"/>
+                            <field name="door_number"/>
+                        </group>
+                        <group string="CARACTÉRISTIQUES">
+                            <field name="surface"/>
+                            <field name="capacity"/>
+                        </group>
+                    </group>
+                    <group string="💰 TARIFICATION">
+                        <group>
+                            <field name="price_day" widget="monetary"/>
+                            <field name="price_month" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="price_year" widget="monetary"/>
+                            <field name="avg_daily_rate" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="ÉQUIPEMENTS">
+                        <group>
+                            <field name="is_furnished" widget="boolean_toggle"/>
+                            <field name="has_wifi" widget="boolean_toggle"/>
+                            <field name="has_ac" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="has_parking" widget="boolean_toggle"/>
+                            <field name="has_kitchen" widget="boolean_toggle"/>
+                            <field name="has_tv" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="📸 Photos">
+                            <field name="image_ids" widget="many2many_binary"/>
+                        </page>
+                        <page string="🔧 Maintenances">
+                            <field name="maintenance_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date_reported"/>
+                                    <field name="priority"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_property_apartment_search" model="ir.ui.view">
+        <field name="name">property.apartment.search</field>
+        <field name="model">property.apartment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="type"/>
+                <filter string="Disponibles" name="available" domain="[('state', '=', 'available')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Statut" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <menuitem id="menu_rental_root" name="🏠 IMMOBILIER" sequence="1"/>
+    <menuitem id="menu_apt" name="Appartements" parent="menu_rental_root" action="action_property_apartment"
+              sequence="1"/>
+</odoo>

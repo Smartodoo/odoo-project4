@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vue Tree -->
+    <record id="commercial_statistique_view_tree" model="ir.ui.view">
+        <field name="name">commercial.statistique.tree</field>
+        <field name="model">commercial.statistique</field>
+        <field name="arch" type="xml">
+            <tree string="Statistiques">
+                <field name="projet_id"/>
+                <field name="total_lots"/>
+                <field name="lots_vendus"/>
+                <field name="lots_reserves"/>
+                <field name="pourcentage_vente" widget="progressbar"/>
+                <field name="ca_previsionnel" widget="monetary"/>
+                <field name="ca_actuel" widget="monetary"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue Form (Dashboard) -->
+    <record id="commercial_statistique_view_form" model="ir.ui.view">
+        <field name="name">commercial.statistique.form</field>
+        <field name="model">commercial.statistique</field>
+        <field name="arch" type="xml">
+            <form string="Statistique des ventes">
+                <header>
+                    <button name="action_print" type="object"
+                            string="Imprimer" icon="fa-print"
+                            class="btn-secondary"
+                            invisible="not projet_id"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="projet_id"/>
+                        </group>
+                        <group>
+                            <field name="date_du"/>
+                            <field name="date_au"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group/>
+                        <group>
+                            <div class="d-flex flex-row gap-4 align-items-center">
+                                <div class="d-flex align-items-center gap-1">
+                                    <field name="inclure_habitat" class="oe_inline"/>
+                                    <label for="inclure_habitat" string="Habitat"/>
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <field name="inclure_parking" class="oe_inline"/>
+                                    <label for="inclure_parking" string="Parking"/>
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <field name="inclure_local" class="oe_inline"/>
+                                    <label for="inclure_local" string="Local"/>
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <field name="inclure_service" class="oe_inline"/>
+                                    <label for="inclure_service" string="Service"/>
+                                </div>
+                            </div>
+                        </group>
+                    </group>
+                    <field name="dashboard_html" nolabel="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_statistique_action" model="ir.actions.act_window">
+        <field name="name">Statistique des ventes</field>
+        <field name="res_model">commercial.statistique</field>
+        <field name="view_mode">form</field>
+    </record>
+
+</odoo>

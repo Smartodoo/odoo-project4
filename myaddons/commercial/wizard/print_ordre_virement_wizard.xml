@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="commercial_print_ordre_virement_wizard_form" model="ir.ui.view">
+        <field name="name">commercial.print.ordre.virement.wizard.form</field>
+        <field name="model">commercial.print.ordre.virement.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Ordre de virement">
+                <group>
+                    <field name="paiement_id" invisible="1"/>
+                    <field name="type_virement"/>
+                    <field name="echeance_id"
+                           invisible="type_virement != 'cache_tranche'"
+                           required="type_virement == 'cache_tranche'"/>
+                    <field name="echeance_apport_declare_id"
+                           invisible="type_virement != 'apport_declare'"
+                           required="type_virement == 'apport_declare'"/>
+                    <field name="echeance_apport_non_declare_id"
+                           invisible="type_virement != 'apport_non_declare'"
+                           required="type_virement == 'apport_non_declare'"/>
+                    <field name="echeance_cb_id"
+                           invisible="type_virement != 'cb'"
+                           required="type_virement == 'cb'"/>
+                </group>
+                <footer>
+                    <button name="action_print" string="Imprimer" type="object" class="btn-primary"/>
+                    <button string="Annuler" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

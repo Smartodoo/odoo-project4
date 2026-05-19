@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="commercial.ClientLocationAutreLotSearchBar">
+        <div t-ref="root" class="d-flex flex-wrap gap-2 align-items-center p-2 mb-2 bg-light rounded border">
+            <i class="fa fa-filter text-muted"/>
+            <select class="form-select form-select-sm" style="max-width: 180px;"
+                    t-on-change="onProjetChange">
+                <option value="">-- Projet --</option>
+                <t t-foreach="state.projets" t-as="p" t-key="p.id">
+                    <option t-att-value="p.id" t-att-selected="state.projetId === p.id"><t t-esc="p.name"/></option>
+                </t>
+            </select>
+            <select class="form-select form-select-sm" style="max-width: 150px;"
+                    t-on-change="onBlocChange"
+                    t-att-disabled="!state.projetId">
+                <option value="">-- Bloc --</option>
+                <t t-foreach="state.blocs" t-as="b" t-key="b.id">
+                    <option t-att-value="b.id" t-att-selected="state.blocId === b.id"><t t-esc="b.name"/></option>
+                </t>
+            </select>
+            <select class="form-select form-select-sm" style="max-width: 150px;"
+                    t-on-change="onEtageChange"
+                    t-att-disabled="!state.blocId">
+                <option value="">-- Étage --</option>
+                <t t-foreach="state.etages" t-as="e" t-key="e.id">
+                    <option t-att-value="e.id" t-att-selected="state.etageId === e.id"><t t-esc="e.name"/></option>
+                </t>
+            </select>
+            <button t-if="hasActiveFilter"
+                    class="btn btn-outline-secondary btn-sm"
+                    t-on-click="onClear">
+                <i class="fa fa-times"/> Effacer
+            </button>
+        </div>
+    </t>
+</templates>

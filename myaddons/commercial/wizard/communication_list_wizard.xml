@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="communication_list_wizard_form" model="ir.ui.view">
+        <field name="name">commercial.communication.list.wizard.form</field>
+        <field name="model">commercial.communication.list.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Communications">
+                <field name="partner_id" invisible="1"/>
+                <div class="d-flex justify-content-end mb-3">
+                    <button name="action_print_communications" type="object"
+                            string="Imprimer" class="btn btn-secondary me-2" icon="fa-print"/>
+                    <button name="action_add_communication" type="object"
+                            string="Ajouter une communication" class="btn btn-secondary"/>
+                </div>
+                <field name="communication_ids" nolabel="1" readonly="1">
+                    <tree string="Communications" decoration-info="type_communication == 'entrant'"
+                          decoration-success="type_communication == 'sortant'">
+                        <field name="date_heure"/>
+                        <field name="type_communication" widget="badge"
+                               decoration-info="type_communication == 'entrant'"
+                               decoration-success="type_communication == 'sortant'"/>
+                        <field name="motif"/>
+                        <field name="resultat"/>
+                        <field name="note"/>
+                        <field name="commercial_id"/>
+                    </tree>
+                </field>
+                <footer>
+                    <button string="Fermer" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

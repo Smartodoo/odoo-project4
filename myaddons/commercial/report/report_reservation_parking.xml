@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_reservation_parking" model="ir.actions.report">
+        <field name="name">Fiche Réservation Parking</field>
+        <field name="model">commercial.reservation.parking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.report_reservation_parking_template</field>
+        <field name="report_file">commercial.report_reservation_parking_template</field>
+        <field name="print_report_name">'Fiche Reservation Parking - %s' % object.client_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="report_reservation_parking_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="client" t-value="doc.client_id"/>
+                    <t t-set="parking" t-value="doc.parking_id"/>
+                    <t t-set="projet" t-value="doc.projet_id"/>
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 20px; padding: 50px 60px; position: relative; min-height: 900px;">
+
+                        <!-- Titre -->
+                        <h3 style="text-align: center; font-weight: bold; margin-bottom: 30px; text-decoration: underline; font-size: 28px; color: #003366;">
+                            Fiche de Réservation Parking
+                        </h3>
+
+                        <!-- Informations client -->
+                        <table style="width: 100%; margin-bottom: 20px; font-size: 20px;">
+                            <tr>
+                                <td style="padding: 8px 0;">
+                                    <strong>Nom et prénom :</strong> <t t-esc="client.name or ''"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0;">
+                                    <strong>Bien Acquis :</strong>
+                                    Projet: <t t-esc="projet.name or ''"/>,
+                                    Bloc: <t t-esc="parking.bloc_id.name or ''"/>,
+                                    Lot: <t t-esc="parking.numero_lot or ''"/>,
+                                    Étage: <t t-esc="parking.etage_id.etiquette or ''"/>,
+                                    Type: <t t-esc="parking.categorie_id.categorie or ''"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0;">
+                                    <strong>Date de réservation :</strong>
+                                    <t t-if="doc.date_reservation">
+                                        <t t-esc="doc.date_reservation" t-options="{'widget': 'date'}"/>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Modalité de paiement -->
+                        <div style="margin-bottom: 20px;">
+                            <h5 style="font-weight: bold; text-decoration: underline; font-size: 22px; margin-bottom: 10px; color: #003366;">
+                                Modalité de paiement :
+                            </h5>
+                            <t t-if="doc.modalite_paiement">
+                                <ul style="list-style: none; padding-left: 0; margin: 4px 0; line-height: 2; font-size: 20px;">
+                                    <t t-foreach="doc.modalite_paiement.split('\n')" t-as="line">
+                                        <t t-if="line.strip()">
+                                            <li style="padding: 2px 0;">- <t t-esc="line.strip()"/></li>
+                                        </t>
+                                    </t>
+                                </ul>
+                            </t>
+                        </div>
+
+                        <!-- Conditions -->
+                        <div style="margin-bottom: 20px;">
+                            <h5 style="font-weight: bold; text-decoration: underline; font-size: 22px; margin-bottom: 10px; color: #003366;">
+                                Conditions :
+                            </h5>
+                            <t t-if="doc.conditions">
+                                <ul style="list-style: none; padding-left: 0; margin: 4px 0; line-height: 2; font-size: 20px;">
+                                    <t t-foreach="doc.conditions.split('\n')" t-as="line">
+                                        <t t-if="line.strip()">
+                                            <li style="padding: 2px 0;">- <t t-esc="line.strip()"/></li>
+                                        </t>
+                                    </t>
+                                </ul>
+                            </t>
+                        </div>
+
+                        <!-- Signatures -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0 60px; font-size: 20px;">
+                            <div style="float: left; width: 50%; text-align: center;">
+                                <strong>SIGNATURE CLIENT</strong>
+                            </div>
+                            <div style="float: right; width: 50%; text-align: center;">
+                                <strong>SERVICE COMMERCIAL</strong>
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

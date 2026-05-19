@@ -1,0 +1,119 @@
+// ═══════════════════════════════════════════════════════════════
+// DESIGN SYSTEM — TOKENS FONDAMENTAUX
+// Toute l'identité visuelle du module repose sur ces variables
+// ═══════════════════════════════════════════════════════════════
+
+// ─── PALETTE PRIMAIRE (Indigo Profond — Confiance & Professionnalisme) ───
+$primary-50:  #EEF2FF;
+$primary-100: #E0E7FF;
+$primary-200: #C7D2FE;
+$primary-300: #A5B4FC;
+$primary-400: #818CF8;
+$primary-500: #6366F1;  // Couleur principale
+$primary-600: #4F46E5;  // Hover
+$primary-700: #4338CA;  // Active
+$primary-800: #3730A3;
+$primary-900: #312E81;
+
+// ─── PALETTE SECONDAIRE (Emeraude — Succès & Croissance) ───
+$success-50:  #ECFDF5;
+$success-100: #D1FAE5;
+$success-500: #10B981;
+$success-600: #059669;
+$success-700: #047857;
+$warning-700: #B45309;
+$info-700:    #1D4ED8;
+
+// ─── PALETTE TERTIAIRE (Ambre — Attention & Opportunité) ───
+$warning-50:  #FFFBEB;
+$warning-100: #FEF3C7;
+$warning-500: #F59E0B;
+$warning-600: #D97706;
+
+// ─── PALETTE DANGER (Rose — Urgence & Action Requise) ───
+$danger-50:   #FEF2F2;
+$danger-100:  #FEE2E2;
+$danger-500:  #EF4444;
+$danger-600:  #DC2626;
+$danger-700:  #B91C1C;
+
+// ─── PALETTE INFO (Ciel — Information & Calme) ───
+$info-50:     #EFF6FF;
+$info-500:    #3B82F6;
+$info-600:    #2563EB;
+
+// ─── NEUTRES (Slate — Élégance & Lisibilité) ───
+$slate-50:    #F8FAFC;
+$slate-100:   #F1F5F9;
+$slate-200:   #E2E8F0;
+$slate-300:   #CBD5E1;
+$slate-400:   #94A3B8;
+$slate-500:   #64748B;
+$slate-600:   #475569;
+$slate-700:   #334155;
+$slate-800:   #1E293B;
+$slate-900:   #0F172A;
+
+// ─── TYPOGRAPHIE (Inter — Moderne & Géométrique) ───
+$font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+$text-xs:      0.75rem;   // 12px
+$text-sm:      0.875rem;  // 14px
+$text-base:    1rem;      // 16px
+$text-lg:      1.125rem;  // 18px
+$text-xl:      1.25rem;   // 20px
+$text-2xl:     1.5rem;    // 24px
+$text-3xl:     1.875rem;  // 30px
+$text-4xl:     2.25rem;   // 36px
+
+$font-light:   300;
+$font-normal:  400;
+$font-medium:  500;
+$font-semibold:600;
+$font-bold:    700;
+$font-extrabold:800;
+
+// ─── ESPACEMENT (Système 4px base) ───
+$space-0:  0;
+$space-1:  0.25rem;   // 4px
+$text-sm:  0.875rem;  // 14px
+$space-2:  0.5rem;    // 8px
+$space-3:  0.75rem;   // 12px
+$space-4:  1rem;      // 16px
+$space-5:  1.25rem;   // 20px
+$space-6:  1.5rem;    // 24px
+$space-8:  2rem;      // 32px
+$space-10: 2.5rem;    // 40px
+$space-12: 3rem;      // 48px
+$space-16: 4rem;      // 64px
+
+// ─── RAYONS DE BORDURE ───
+$radius-sm:   0.375rem;  // 6px
+$radius-md:   0.5rem;    // 8px
+$radius-lg:   0.75rem;   // 12px
+$radius-xl:   1rem;      // 16px
+$radius-2xl:  1.5rem;    // 24px
+$radius-full: 9999px;    // Pilule
+
+// ─── OMBRES (Élévation Z-Depth) ───
+$shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+$shadow-2xl:  0 25px 50px -12px rgba(0, 0, 0, 0.25);
+$shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+
+// ─── TRANSITIONS ───
+$transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-base:   200ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow:   300ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+// ─── Z-INDEX SCALE ───
+$z-base:     0;
+$z-dropdown: 10;
+$z-sticky:   20;
+$z-modal:    30;
+$z-tooltip:  40;
+$z-toast:    50;

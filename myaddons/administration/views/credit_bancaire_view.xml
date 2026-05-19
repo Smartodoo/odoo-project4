@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_administration_credit_bancaire_tree" model="ir.ui.view">
+        <field name="name">administration.credit.bancaire.tree</field>
+        <field name="model">administration.credit.bancaire</field>
+        <field name="arch" type="xml">
+            <tree string="Suivi des Crédits Bancaires">
+                <field name="situation_financiere"/>
+                <field name="date_remboursement"/>
+                <field name="montant_global"/>
+
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_administration_credit_bancaire_form" model="ir.ui.view">
+        <field name="name">administration.credit.bancaire.form</field>
+        <field name="model">administration.credit.bancaire</field>
+        <field name="arch" type="xml">
+            <form string="Crédit Bancaire" create="true" edit="true">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="reference"/>
+                            <field name="date_demande"/>
+                            <field name="situation_financiere"/>
+                            <field name="montant_global"/>
+
+                        </group>
+
+                        <group>
+                            <field name="taux_accorde"/>
+                            <field name="taux_interet_annuel"/>
+                            <field name="capital_emprunte"/>
+                            <field name="duree_pret"/>
+                            <field name="journalier"/>
+                            <field name="date_credit"/>
+
+
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="PRESTATION BANCAIRE">
+                            <group>
+                                <field name="montant_interet_annuel"/>
+                                <field name="montant_interet_9_mois"/>
+                                <field name="montant_270jrs"/>
+                                <field name="tva_19"/>
+                                <field name="montant_interet_ttc"/>
+                                <field name="date_remboursement"/>
+
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+</odoo>

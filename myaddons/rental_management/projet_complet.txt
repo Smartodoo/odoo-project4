@@ -1,0 +1,3323 @@
+========== FILE: ./__manifest__.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+{
+    'name': '🏠 Gestion Locative Immobilière',
+    'version': '1.0',
+    'category': 'Real Estate',
+    'summary': 'Gestion complète des appartements et locations',
+    'description': """
+        Module Pro de Gestion Locative :
+        ================================
+        • Appartements : F1, F2, F3, F4, Studio avec localisation
+        • Tarification : Journalier, Hebdomadaire, Mensuel, Annuel
+        • Suivi des locations : Disponible, Loué, Bientôt libre, Maintenance
+        • Tableau de bord : Revenus, Taux d'occupation, Alertes
+        • Formulaire public : Réservation en ligne par les clients
+        • Automatisations : Changement auto des flags, Emails, Cron
+    """,
+    'author': 'Ton Nom - Stage',
+    'depends': ['base', 'mail', 'website'],
+    'data': [
+        'data/ir_sequence_data.xml',
+        'data/cron.xml',
+        'data/mail_template.xml',
+        'security/ir.model.access.csv',
+        'views/property_views.xml',
+        'views/rental_views.xml',
+        'views/dashboard_views.xml',
+        'views/public_templates.xml',
+    ],
+    'assets': {
+        'web.assets_backend': [
+            'rental_management/static/src/scss/main.scss',
+            #'rental_management/static/src/css/custom_style.css',
+            'rental_management/static/src/js/dashboard_chart.js',
+        ],
+        'web.assets_frontend': [
+            'rental_management/static/src/css/custom_style.css',
+        ],
+    },
+    'installable': True,
+    'application': True,
+    'license': 'LGPL-3',
+}---------- END ----------
+
+========== FILE: ./data/ir_sequence_data.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="seq_property_rental" model="ir.sequence">
+        <field name="name">Contrat de Location</field>
+        <field name="code">property.rental</field>
+        <field name="prefix">LOC-</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_property_inspection" model="ir.sequence">
+        <field name="name">Inspection</field>
+        <field name="code">property.inspection</field>
+        <field name="prefix">INS-</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_rental_payment" model="ir.sequence">
+        <field name="name">Paiement</field>
+        <field name="code">rental.payment</field>
+        <field name="prefix">PAY-</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_property_maintenance" model="ir.sequence">
+        <field name="name">Maintenance</field>
+        <field name="code">property.maintenance</field>
+        <field name="prefix">MAINT-</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>---------- END ----------
+
+========== FILE: ./data/demo_data.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Données de démo -->
+</odoo>
+---------- END ----------
+
+========== FILE: ./data/cron.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_update_rental_states" model="ir.cron">
+        <field name="name">🤖 Location: Mise à jour auto des états</field>
+        <field name="model_id" ref="model_property_rental"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_update_rental_states()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+
+    <record id="ir_cron_generate_forecast" model="ir.cron">
+        <field name="name">📊 Prévisions: Génération mensuelle</field>
+        <field name="model_id" ref="model_rental_forecast"/>
+        <field name="state">code</field>
+        <field name="code">model.generate_forecast(months_ahead=6)</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">months</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+</odoo>---------- END ----------
+
+========== FILE: ./data/mail_template.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="email_template_rental_expiry" model="mail.template">
+            <field name="name">Alerte expiration location</field>
+            <field name="model_id" ref="model_property_rental"/>
+            <field name="subject">Votre location {{ object.name }} expire bientôt</field>
+            <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted or 'noreply@domaine.com') }}</field>
+            <field name="email_to">{{ object.client_id.email }}</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p>Bonjour <t t-out="object.client_id.name"/>,</p>
+                    <p>Votre location pour l'unité <strong><t t-out="object.property_id.name"/></strong> arrive à échéance le <strong><t t-out="object.end_date"/></strong>.</p>
+                    <p>Merci de nous contacter pour toute demande de prolongation ou pour organiser l'état des lieux de sortie.</p>
+                    <br/>
+                    <p>Cordialement,</p>
+                    <p><t t-out="object.company_id.name"/></p>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>
+---------- END ----------
+
+========== FILE: ./models/forecast.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api
+from datetime import datetime, timedelta
+
+
+class RentalForecast(models.Model):
+    _name = 'rental.forecast'
+    _description = 'Prévision de Revenus'
+    _order = 'month'
+
+    month = fields.Date("Mois", required=True)
+
+    # Données réelles (après coup)
+    actual_occupancy = fields.Float("Occupation Réelle (%)")
+    actual_revenue = fields.Float("Revenu Réel (DA)")
+
+    # Prévisions
+    predicted_occupancy = fields.Float("Occupation Prédite (%)")
+    predicted_revenue = fields.Float("Revenu Prédit (DA)")
+
+    # Variance
+    variance = fields.Float("Écart (%)", compute="_compute_variance")
+    variance_amount = fields.Float("Écart (DA)", compute="_compute_variance")
+
+    # Analyse
+    trend = fields.Selection([
+        ('up', '📈 Hausse'),
+        ('stable', '➡️ Stable'),
+        ('down', '📉 Baisse'),
+    ], string="Tendance", compute="_compute_trend")
+
+    @api.depends('actual_revenue', 'predicted_revenue')
+    def _compute_variance(self):
+        for rec in self:
+            if rec.predicted_revenue > 0:
+                rec.variance = ((rec.actual_revenue - rec.predicted_revenue) / rec.predicted_revenue) * 100
+                rec.variance_amount = rec.actual_revenue - rec.predicted_revenue
+            else:
+                rec.variance = 0
+                rec.variance_amount = 0
+
+    @api.depends('predicted_revenue')
+    def _compute_trend(self):
+        for rec in self:
+            # Comparer avec le mois précédent
+            previous = self.search([
+                ('month', '<', rec.month),
+            ], order='month desc', limit=1)
+
+            if previous:
+                if rec.predicted_revenue > previous.predicted_revenue * 1.05:
+                    rec.trend = 'up'
+                elif rec.predicted_revenue < previous.predicted_revenue * 0.95:
+                    rec.trend = 'down'
+                else:
+                    rec.trend = 'stable'
+            else:
+                rec.trend = 'stable'
+
+    @api.model
+    def generate_forecast(self, months_ahead=6):
+        """Génère les prévisions pour les mois à venir"""
+        today = fields.Date.today()
+
+        for i in range(months_ahead):
+            month_date = today.replace(day=1) + timedelta(days=32 * i)
+            month_date = month_date.replace(day=1)
+
+            # Analyser l'historique des 3 dernières années pour ce mois
+            historical = self.search([
+                ('month', '>=', month_date.replace(year=month_date.year - 3)),
+                ('month', '<', month_date),
+                ('actual_revenue', '>', 0),
+            ])
+
+            if historical:
+                avg_revenue = sum(historical.mapped('actual_revenue')) / len(historical)
+                avg_occupancy = sum(historical.mapped('actual_occupancy')) / len(historical)
+            else:
+                avg_revenue = 0
+                avg_occupancy = 0
+
+            # Créer ou mettre à jour la prévision
+            forecast = self.search([('month', '=', month_date)], limit=1)
+            vals = {
+                'predicted_revenue': avg_revenue,
+                'predicted_occupancy': avg_occupancy,
+            }
+
+            if forecast:
+                forecast.write(vals)
+            else:
+                vals['month'] = month_date
+                self.create(vals)
+
+        return True---------- END ----------
+
+========== FILE: ./models/property.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api, _
+
+
+class PropertyApartment(models.Model):
+    _name = 'property.apartment'
+    _description = 'Appartement'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'name asc'
+
+    # ============================================
+    # IDENTIFICATION
+    # ============================================
+    name = fields.Char("Référence", required=True, tracking=True)
+    image = fields.Binary("Photo Principale", attachment=True)
+    image_ids = fields.Many2many('ir.attachment', string="Galerie Photos")
+
+    active = fields.Boolean("Actif", default=True)
+
+    # ============================================
+    # TYPE & LOCALISATION
+    # ============================================
+    type = fields.Selection([
+        ('studio', '🏠 Studio'),
+        ('f1', '🏡 F1'),
+        ('f2', '🏡 F2'),
+        ('f3', '🏡 F3'),
+        ('f4', '🏡 F4'),
+    ], string="Type", required=True, default='studio', tracking=True)
+
+    address = fields.Char("Adresse Complète", tracking=True)
+    block = fields.Char("Bloc / Bâtiment")
+    floor = fields.Integer("Étage")
+    door_number = fields.Char("N° Porte / Appartement")
+
+    # Coordonnées GPS (pour carte future)
+    latitude = fields.Float("Latitude")
+    longitude = fields.Float("Longitude")
+
+    # ============================================
+    # CARACTÉRISTIQUES
+    # ============================================
+    surface = fields.Float("Surface (m²)")
+    bedrooms = fields.Integer("Chambres", compute="_compute_rooms", store=True)
+    bathrooms = fields.Integer("Salles de Bain", default=1)
+    capacity = fields.Integer("Capacité (personnes)", default=2)
+
+    # Équipements (avec icônes dans le kanban)
+    is_furnished = fields.Boolean("🛋️ Meublé", default=False)
+    has_wifi = fields.Boolean("📶 Wi-Fi", default=False)
+    has_ac = fields.Boolean("❄️ Climatisation", default=False)
+    has_parking = fields.Boolean("🚗 Parking", default=False)
+    has_elevator = fields.Boolean("🛗 Ascenseur", default=False)
+    has_balcony = fields.Boolean("🌅 Balcon", default=False)
+    has_washing = fields.Boolean("🧺 Machine à Laver", default=False)
+    has_kitchen = fields.Boolean("🍳 Cuisine Équipée", default=False)
+    has_tv = fields.Boolean("📺 TV", default=False)
+
+    # Score de confort (calculé)
+    comfort_score = fields.Integer("Score Confort", compute="_compute_comfort_score", store=True)
+
+    # ============================================
+    # TARIFICATION (4 périodes de base)
+    # ============================================
+    price_day = fields.Float("💰 Tarif Journalier (DA)", default=0.0)
+    price_week = fields.Float("💰 Tarif Hebdomadaire (DA)", default=0.0)
+    price_month = fields.Float("💰 Tarif Mensuel (DA)", default=0.0)
+    price_year = fields.Float("💰 Tarif Annuel (DA)", default=0.0)
+
+    # Tarif moyen calculé (pour comparaison)
+    avg_daily_rate = fields.Float("Tarif Journalier Moyen", compute="_compute_avg_rate")
+
+    # ============================================
+    # TARIFICATION SAISONNIÈRE (NOUVEAU)
+    # ============================================
+    seasonal_rate_ids = fields.One2many('property.seasonal.rate', 'apartment_id',
+                                        string="Tarifs Saisonniers")
+
+    # ============================================
+    # STATUT (Flag automatique intelligent)
+    # ============================================
+    state = fields.Selection([
+        ('available', '🟢 Disponible'),
+        ('occupied', '🔴 Loué'),
+        ('soon', '🟠 Bientôt Libre'),
+        ('maintenance', '🔧 En Maintenance'),
+        ('cleaning', '🧹 En Ménage'),
+        ('reserved', '🔵 Réservé'),
+    ], string="Statut", default='available', tracking=True)
+
+    # ============================================
+    # RELATIONS
+    # ============================================
+    rental_ids = fields.One2many('property.rental', 'property_id',
+                                 string="Historique des Locations")
+    current_rental_id = fields.Many2one('property.rental',
+                                        string="Location en Cours",
+                                        compute="_compute_current_rental")
+
+    # Maintenance
+    maintenance_ids = fields.One2many('property.maintenance', 'apartment_id',
+                                      string="Maintenances")
+
+    # Clés
+    #key_ids = fields.One2many('property.key', 'apartment_id', string="Clés")
+
+    # ============================================
+    # KPI & STATISTIQUES
+    # ============================================
+    total_rentals = fields.Integer("Total Locations", compute="_compute_stats")
+    total_revenue = fields.Float("Revenus Totaux (DA)", compute="_compute_stats")
+    avg_occupancy = fields.Float("Occupation Moyenne (jours)", compute="_compute_stats")
+    last_rental_date = fields.Date("Dernière Location", compute="_compute_stats")
+
+    # ============================================
+    # COULEURS POUR LE KANBAN
+    # ============================================
+    color = fields.Integer("Couleur", compute="_compute_color", store=True)
+
+    # ============================================
+    # COMPUTED METHODS
+    # ============================================
+    @api.depends('type')
+    def _compute_rooms(self):
+        mapping = {'studio': 0, 'f1': 1, 'f2': 2, 'f3': 3, 'f4': 4}
+        for rec in self:
+            rec.bedrooms = mapping.get(rec.type, 0)
+
+    @api.depends('is_furnished', 'has_wifi', 'has_ac', 'has_parking',
+                 'has_elevator', 'has_balcony', 'has_washing', 'has_kitchen', 'has_tv')
+    def _compute_comfort_score(self):
+        for rec in self:
+            score = 0
+            if rec.is_furnished: score += 15
+            if rec.has_wifi: score += 10
+            if rec.has_ac: score += 10
+            if rec.has_parking: score += 10
+            if rec.has_elevator: score += 5
+            if rec.has_balcony: score += 10
+            if rec.has_washing: score += 10
+            if rec.has_kitchen: score += 15
+            if rec.has_tv: score += 5
+            rec.comfort_score = min(score, 100)
+
+    @api.depends('price_day', 'price_week', 'price_month', 'price_year')
+    def _compute_avg_rate(self):
+        for rec in self:
+            rates = [r for r in [rec.price_day, rec.price_week / 7,
+                                 rec.price_month / 30, rec.price_year / 365] if r > 0]
+            rec.avg_daily_rate = sum(rates) / len(rates) if rates else 0
+
+    @api.depends('rental_ids', 'rental_ids.state')
+    def _compute_current_rental(self):
+        for rec in self:
+            current = rec.rental_ids.filtered(
+                lambda r: r.state in ('confirmed', 'ongoing', 'expiring')
+            )
+            rec.current_rental_id = current[0] if current else False
+
+    @api.depends('rental_ids', 'rental_ids.total_price', 'rental_ids.state',
+                 'rental_ids.date_start', 'rental_ids.date_end')
+    def _compute_stats(self):
+        for rec in self:
+            done_rentals = rec.rental_ids.filtered(lambda r: r.state == 'done')
+            rec.total_rentals = len(done_rentals)
+            rec.total_revenue = sum(done_rentals.mapped('total_price'))
+
+            # Occupation moyenne
+            durations = done_rentals.mapped('duration_days')
+            rec.avg_occupancy = sum(durations) / len(durations) if durations else 0
+
+            # Dernière location
+            dates = done_rentals.mapped('date_end')
+            rec.last_rental_date = max(dates) if dates else False
+
+    @api.depends('state')
+    def _compute_color(self):
+        colors = {
+            'available': 10,  # Vert
+            'occupied': 1,  # Rouge
+            'soon': 3,  # Orange
+            'maintenance': 4,  # Bleu
+            'cleaning': 5,  # Violet
+            'reserved': 9,  # Jaune
+        }
+        for rec in self:
+            rec.color = colors.get(rec.state, 0)
+
+    # ============================================
+    # MÉTHODES MÉTIER
+    # ============================================
+    def action_set_available(self):
+        self.write({'state': 'available'})
+        self.message_post(body=_("✅ Appartement remis disponible"))
+
+    def action_set_maintenance(self):
+        self.write({'state': 'maintenance'})
+        self.message_post(body=_("🔧 Appartement mis en maintenance"))
+
+    def action_set_cleaning(self):
+        self.write({'state': 'cleaning'})
+        self.message_post(body=_("🧹 Ménage en cours"))
+
+    def action_rent_now(self):
+        """Ouvre le formulaire de location pré-rempli"""
+        self.ensure_one()
+        return {
+            'name': 'Nouvelle Location',
+            'type': 'ir.actions.act_window',
+            'res_model': 'property.rental',
+            'view_mode': 'form',
+            'context': {
+                'default_property_id': self.id,
+                'default_date_start': fields.Date.context_today(self),
+            },
+            'target': 'current',
+        }
+
+    def action_view_history(self):
+        """Voir l'historique complet"""
+        self.ensure_one()
+        return {
+            'name': '📋 Historique - %s' % self.name,
+            'type': 'ir.actions.act_window',
+            'res_model': 'property.rental',
+            'view_mode': 'tree,form',
+            'domain': [('property_id', '=', self.id)],
+            'target': 'current',
+        }
+
+    def action_create_maintenance(self):
+        """Créer un ticket de maintenance"""
+        self.ensure_one()
+        return {
+            'name': '🔧 Nouvelle Maintenance',
+            'type': 'ir.actions.act_window',
+            'res_model': 'property.maintenance',
+            'view_mode': 'form',
+            'context': {'default_apartment_id': self.id},
+            'target': 'current',
+        }
+
+    def get_seasonal_price(self, date):
+        """Retourne le prix ajusté pour une date donnée (saisonnalité)"""
+        self.ensure_one()
+        seasonal = self.seasonal_rate_ids.filtered(
+            lambda r: r.is_active and r.date_start <= date <= r.date_end
+        )
+        if seasonal:
+            adjustment = seasonal[0].price_adjustment / 100.0
+            return self.price_month * (1 + adjustment)
+        return self.price_month
+
+    def get_best_price(self, date_start, date_end):
+        """Calcule le meilleur prix pour une période donnée"""
+        self.ensure_one()
+        days = (date_end - date_start).days
+        if days <= 0:
+            return 0, 'day'
+
+        # Prix de base
+        prices = {
+            'day': self.price_day,
+            'week': self.price_week,
+            'month': self.price_month,
+            'year': self.price_year,
+        }
+
+        # Appliquer saisonnalité
+        seasonal_adjustment = 0
+        seasonal = self.seasonal_rate_ids.filtered(
+            lambda r: r.is_active and r.date_start <= date_start <= r.date_end
+        )
+        if seasonal:
+            seasonal_adjustment = seasonal[0].price_adjustment / 100.0
+
+        # Calculer le coût pour chaque période
+        costs = {}
+        if prices['day'] > 0:
+            costs['day'] = days * prices['day']
+        if prices['week'] > 0 and days >= 7:
+            costs['week'] = (days / 7.0) * prices['week']
+        if prices['month'] > 0 and days >= 30:
+            costs['month'] = (days / 30.0) * prices['month']
+        if prices['year'] > 0 and days >= 365:
+            costs['year'] = (days / 365.0) * prices['year']
+
+        if not costs:
+            return 0, 'day'
+
+        # Choisir le moins cher
+        best_period = min(costs, key=costs.get)
+        best_price = costs[best_period] * (1 + seasonal_adjustment)
+
+        return best_price, best_period---------- END ----------
+
+========== FILE: ./models/inspection.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api, _
+
+
+class PropertyInspection(models.Model):
+    _name = 'property.inspection'
+    _description = 'État des Lieux'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'date desc'
+
+    name = fields.Char("N° Inspection", readonly=True, default="/", copy=False)
+
+    rental_id = fields.Many2one('property.rental', string="Location", required=True)
+    apartment_id = fields.Many2one('property.apartment', string="Appartement",
+                                   related='rental_id.property_id', store=True)
+
+    inspection_type = fields.Selection([
+        ('entry', '📥 Entrée'),
+        ('exit', '📤 Sortie'),
+        ('routine', '🔍 Routine'),
+        ('damage', '⚠️ Dégâts'),
+    ], string="Type", required=True, default='entry')
+
+    date = fields.Date("Date", default=fields.Date.context_today, required=True)
+    inspector_id = fields.Many2one('res.users', string="Inspecteur",
+                                   default=lambda self: self.env.user)
+
+    # ============================================
+    # CHECKLIST ÉTAT
+    # ============================================
+    # Murs & Plafond
+    walls_condition = fields.Selection([
+        ('excellent', '⭐ Excellent'),
+        ('good', '✅ Bon'),
+        ('fair', '⚠️ Passable'),
+        ('bad', '❌ Mauvais'),
+    ], string="Murs & Plafond", default='good')
+
+    floor_condition = fields.Selection([
+        ('excellent', '⭐ Excellent'),
+        ('good', '✅ Bon'),
+        ('fair', '⚠️ Passable'),
+        ('bad', '❌ Mauvais'),
+    ], string="Sol", default='good')
+
+    # Équipements
+    plumbing_working = fields.Boolean("🚰 Plomberie OK", default=True)
+    electricity_working = fields.Boolean("💡 Électricité OK", default=True)
+    ac_working = fields.Boolean("❄️ Clim OK", default=True)
+    wifi_working = fields.Boolean("📶 WiFi OK", default=True)
+    tv_working = fields.Boolean("📺 TV OK", default=True)
+    kitchen_working = fields.Boolean("🍳 Cuisine OK", default=True)
+
+    # Propreté
+    cleanliness = fields.Selection([
+        ('excellent', '⭐ Excellent'),
+        ('good', '✅ Bon'),
+        ('fair', '⚠️ Passable'),
+        ('bad', '❌ Mauvais'),
+    ], string="Propreté", default='good')
+
+    # ============================================
+    # PHOTOS & DOCUMENTS
+    # ============================================
+    photos_before = fields.Many2many('ir.attachment', 'inspection_photos_before_rel',
+                                     string="Photos Avant")
+    photos_after = fields.Many2many('ir.attachment', 'inspection_photos_after_rel',
+                                    string="Photos Après")
+
+    # ============================================
+    # SIGNATURES
+    # ============================================
+    tenant_signature = fields.Binary("✍️ Signature Locataire")
+    inspector_signature = fields.Binary("✍️ Signature Inspecteur")
+
+    # ============================================
+    # DÉGÂTS & COÛTS
+    # ============================================
+    damage_found = fields.Boolean("Dégâts Constastés", default=False)
+    damage_description = fields.Text("Description des Dégâts")
+    damage_photos = fields.Many2many('ir.attachment', 'inspection_damage_photos_rel',
+                                     string="Photos Dégâts")
+
+    estimated_repair_cost = fields.Float("Coût Réparations Estimé")
+    actual_repair_cost = fields.Float("Coût Réparations Réel")
+
+    # Retenue sur caution
+    deposit_deduction = fields.Float("Retenue Caution")
+
+    # ============================================
+    # NOTES
+    # ============================================
+    notes = fields.Text("Observations Générales")
+
+    state = fields.Selection([
+        ('draft', '📝 Brouillon'),
+        ('done', '✅ Terminé'),
+        ('disputed', '⚠️ Contesté'),
+    ], string="État", default='draft')
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', '/') == '/':
+            vals['name'] = self.env['ir.sequence'].next_by_code('property.inspection') or 'INS/NEW'
+        return super(PropertyInspection, self).create(vals)
+
+    def action_done(self):
+        self.write({'state': 'done'})
+        # Mettre à jour la location si c'est une sortie
+        for rec in self:
+            if rec.inspection_type == 'exit':
+                rec.rental_id.write({'state': 'done'})
+                rec.apartment_id.write({'state': 'available'})
+                rec.message_post(body=_("✅ État des lieux de sortie validé. Appartement libéré."))
+
+    def action_dispute(self):
+        self.write({'state': 'disputed'})
+        # Créer activité pour le gérant
+        self.activity_schedule(
+            'mail.mail_activity_data_todo',
+            summary="État des lieux contesté - %s" % self.name,
+            user_id=self.env.user.id,
+            note=self.damage_description or "Le locataire conteste l'état des lieux."
+        )---------- END ----------
+
+========== FILE: ./models/payment.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api, _
+
+
+class RentalPayment(models.Model):
+    _name = 'rental.payment'
+    _description = 'Paiement Location'
+    _inherit = ['mail.thread']
+    _order = 'date desc'
+
+    name = fields.Char("N° Paiement", readonly=True, default="/", copy=False)
+
+    rental_id = fields.Many2one('property.rental', string="Location", required=True)
+    apartment_id = fields.Many2one('property.apartment', string="Appartement",
+                                   related='rental_id.property_id', store=True)
+    client_id = fields.Many2one('res.partner', string="Client",
+                                related='rental_id.client_id', store=True)
+
+    # ============================================
+    # DÉTAILS PAIEMENT
+    # ============================================
+    date = fields.Date("Date Paiement", default=fields.Date.context_today, required=True)
+    amount = fields.Float("Montant", required=True)
+
+    payment_method = fields.Selection([
+        ('cash', '💵 Espèces'),
+        ('bank_transfer', '🏦 Virement Bancaire'),
+        ('check', '📄 Chèque'),
+        ('card', '💳 Carte Bancaire'),
+        ('mobile', '📱 Paiement Mobile'),
+        ('online', '🌐 En Ligne'),
+    ], string="Méthode", default='cash', required=True)
+
+    reference = fields.Char("Référence / N° Transaction")
+
+    # ============================================
+    # TYPE DE PAIEMENT
+    # ============================================
+    payment_type = fields.Selection([
+        ('deposit', '🔒 Caution'),
+        ('rent', '💰 Loyer'),
+        ('service', '🛎️ Service'),
+        ('penalty', '⚠️ Pénalité'),
+        ('refund', '↩️ Remboursement'),
+    ], string="Type", default='rent', required=True)
+
+    # ============================================
+    # STATUT
+    # ============================================
+    state = fields.Selection([
+        ('draft', '📝 Brouillon'),
+        ('confirmed', '✅ Confirmé'),
+        ('cancelled', '❌ Annulé'),
+    ], string="État", default='draft')
+
+    # ============================================
+    # NOTES
+    # ============================================
+    notes = fields.Text("Notes")
+
+    # ============================================
+    # RELANCE
+    # ============================================
+    is_reminder_sent = fields.Boolean("Relance Envoyée", default=False)
+    reminder_date = fields.Date("Date Relance")
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', '/') == '/':
+            vals['name'] = self.env['ir.sequence'].next_by_code('rental.payment') or 'PAY/NEW'
+        return super(RentalPayment, self).create(vals)
+
+    def action_confirm(self):
+        self.write({'state': 'confirmed'})
+        # Mettre à jour le montant payé sur la location
+        for rec in self:
+            if rec.payment_type == 'rent':
+                rec.rental_id.amount_paid += rec.amount
+                rec.rental_id.message_post(
+                    body=_("💰 Paiement reçu: %s DA (%s)") % (rec.amount, rec.payment_method)
+                )
+
+    def action_cancel(self):
+        self.write({'state': 'cancelled'})
+        # Rembourser le montant
+        for rec in self:
+            if rec.payment_type == 'rent':
+                rec.rental_id.amount_paid -= rec.amount
+
+    def action_send_reminder(self):
+        """Envoyer relance de paiement"""
+        template = self.env.ref('rental_management.email_payment_reminder')
+        for rec in self:
+            template.send_mail(rec.id, force_send=True)
+            rec.write({
+                'is_reminder_sent': True,
+                'reminder_date': fields.Date.today(),
+            })---------- END ----------
+
+========== FILE: ./models/dashboard.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api
+from datetime import datetime, timedelta
+
+
+class RentalDashboard(models.Model):
+    _name = 'rental.dashboard'
+    _description = 'Tableau de Bord Location'
+
+    # ============================================
+    # KPIs APPARTEMENTS
+    # ============================================
+    total_apartments = fields.Integer("Total", compute="_compute_kpi")
+    available_count = fields.Integer("Disponibles", compute="_compute_kpi")
+    occupied_count = fields.Integer("Occupés", compute="_compute_kpi")
+    soon_count = fields.Integer("Bientôt Libre", compute="_compute_kpi")
+    maintenance_count = fields.Integer("Maintenance", compute="_compute_kpi")
+    cleaning_count = fields.Integer("Ménage", compute="_compute_kpi")
+
+    # ============================================
+    # TAUX & REVENUS
+    # ============================================
+    occupancy_rate = fields.Float("Taux Occupation (%)", compute="_compute_kpi")
+
+    daily_revenue = fields.Float("Aujourd'hui", compute="_compute_revenue")
+    weekly_revenue = fields.Float("Cette Semaine", compute="_compute_revenue")
+    monthly_revenue = fields.Float("Ce Mois", compute="_compute_revenue")
+    yearly_revenue = fields.Float("Cette Année", compute="_compute_revenue")
+
+    # ============================================
+    # ALERTES
+    # ============================================
+    expiring_rentals = fields.One2many('property.rental', compute="_compute_alerts", string="Expirantes")
+    unpaid_rentals = fields.One2many('property.rental', compute="_compute_alerts", string="Impayées")
+    active_maintenances = fields.One2many('property.maintenance', compute="_compute_alerts", string="Maintenances")
+
+    @api.depends()
+    def _compute_kpi(self):
+        for rec in self:
+            apartments = self.env['property.apartment'].search([])
+            rec.total_apartments = len(apartments)
+            rec.available_count = len(apartments.filtered(lambda a: a.state == 'available'))
+            rec.occupied_count = len(apartments.filtered(lambda a: a.state == 'occupied'))
+            rec.soon_count = len(apartments.filtered(lambda a: a.state == 'soon'))
+            rec.maintenance_count = len(apartments.filtered(lambda a: a.state == 'maintenance'))
+            rec.cleaning_count = len(apartments.filtered(lambda a: a.state == 'cleaning'))
+
+            total = rec.total_apartments or 1
+            rec.occupancy_rate = round((rec.occupied_count / total) * 100, 2)
+
+    @api.depends()
+    def _compute_revenue(self):
+        today = fields.Date.today()
+        week_start = today - timedelta(days=today.weekday())
+        month_start = today.replace(day=1)
+        year_start = today.replace(month=1, day=1)
+
+        for rec in self:
+            rentals = self.env['property.rental'].search([('state', '=', 'done')])
+
+            rec.daily_revenue = sum(rentals.filtered(lambda r: r.date_end == today).mapped('total_price'))
+            rec.weekly_revenue = sum(rentals.filtered(lambda r: r.date_end >= week_start).mapped('total_price'))
+            rec.monthly_revenue = sum(rentals.filtered(lambda r: r.date_end >= month_start).mapped('total_price'))
+            rec.yearly_revenue = sum(rentals.filtered(lambda r: r.date_end >= year_start).mapped('total_price'))
+
+    @api.depends()
+    def _compute_alerts(self):
+        today = fields.Date.today()
+        for rec in self:
+            rec.expiring_rentals = self.env['property.rental'].search([
+                ('state', 'in', ('ongoing', 'expiring')),
+                ('date_end', '<=', today + timedelta(days=7)),
+            ])
+
+            rec.unpaid_rentals = self.env['property.rental'].search([
+                ('state', 'in', ('confirmed', 'ongoing', 'expiring')),
+                ('payment_status', 'in', ('unpaid', 'partial')),
+            ])
+
+            rec.active_maintenances = self.env['property.maintenance'].search([
+                ('state', 'in', ('new', 'confirmed', 'in_progress', 'waiting_parts')),
+            ])
+
+    def action_refresh(self):
+        return {'type': 'ir.actions.client', 'tag': 'reload'}---------- END ----------
+
+========== FILE: ./models/rental.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError, UserError
+from datetime import datetime, timedelta
+
+
+class PropertyRental(models.Model):
+    _name = 'property.rental'
+    _description = 'Contrat de Location'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'date_start desc'
+
+    # ============================================
+    # IDENTIFICATION
+    # ============================================
+    name = fields.Char("N° Contrat", readonly=True, default="/", copy=False)
+
+    # ============================================
+    # RELATIONS
+    # ============================================
+    property_id = fields.Many2one(
+        'property.apartment',
+        string="Appartement",
+        required=True,
+        tracking=True,
+        domain="[('state', 'in', ['available', 'soon'])]"
+    )
+
+    client_id = fields.Many2one(
+        'res.partner',
+        string="Locataire",
+        required=True,
+        tracking=True
+    )
+
+    # ============================================
+    # DATES
+    # ============================================
+    date_start = fields.Date("Date d'Arrivée", default=fields.Date.context_today, required=True)
+    date_end = fields.Date("Date de Départ", required=True)
+
+    # ============================================
+    # CALCULS AUTO (TEMPS RÉEL + STOCKÉ)
+    # ============================================
+    duration_days = fields.Integer(
+        string="Durée (Jours)",
+        compute="_compute_pricing",
+        store=True,
+        readonly=True
+    )
+
+    period_type = fields.Selection([
+        ('day', '📅 Journalier'),
+        ('week', '📅 Hebdomadaire'),
+        ('month', '📅 Mensuel'),
+        ('year', '📅 Annuel'),
+    ], string="Type de Période", compute="_compute_pricing", store=True, readonly=True)
+
+    unit_price = fields.Float(
+        string="Prix Unitaire (DA)",
+        compute="_compute_pricing",
+        store=True,
+        readonly=True
+    )
+
+    total_price = fields.Float(
+        string="Total à Payer (DA)",
+        compute="_compute_pricing",
+        store=True,
+        readonly=True
+    )
+
+    # ============================================
+    # CAUTION (NOUVEAU)
+    # ============================================
+    deposit_amount = fields.Float("Caution (DA)", compute="_compute_deposit", store=True)
+    deposit_returned = fields.Boolean("Caution Restituée", default=False)
+    deposit_return_date = fields.Date("Date Restitution")
+    deposit_deduction = fields.Float("Retenue sur Caution")
+    deposit_notes = fields.Text("Notes Caution")
+
+    # ============================================
+    # FINANCIER
+    # ============================================
+    currency_id = fields.Many2one(
+        'res.currency',
+        string="Devise",
+        default=lambda self: self.env.company.currency_id,
+        readonly=True
+    )
+
+    amount_paid = fields.Float("Montant Payé", default=0.0)
+
+    amount_due = fields.Float(
+        "Reste à Payer",
+        compute="_compute_amount_due",
+        store=True,
+        readonly=True
+    )
+
+    payment_status = fields.Selection([
+        ('unpaid', '❌ Non Payé'),
+        ('partial', '⚠️ Partiel'),
+        ('paid', '✅ Payé'),
+    ], string="État Paiement", compute="_compute_payment_status", store=True)
+
+    # ============================================
+    # STATUT
+    # ============================================
+    state = fields.Selection([
+        ('draft', '📝 Brouillon'),
+        ('confirmed', '✅ Confirmé'),
+        ('ongoing', '🟢 En Cours'),
+        ('expiring', '🟠 Bientôt Terminé'),
+        ('done', '🔒 Terminé'),
+        ('cancelled', '❌ Annulé'),
+    ], string="État", default='draft', tracking=True)
+
+    # ============================================
+    # ALERTES
+    # ============================================
+    days_remaining = fields.Integer("Jours Restants", compute="_compute_days_remaining")
+    is_expiring_soon = fields.Boolean("Expire Bientôt", compute="_compute_days_remaining")
+
+    # ============================================
+    # RELATIONS NOUVELLES
+    # ============================================
+    inspection_ids = fields.One2many('property.inspection', 'rental_id',
+                                     string="États des Lieux")
+    payment_ids = fields.One2many('rental.payment', 'rental_id',
+                                  string="Paiements")
+    service_ids = fields.One2many('rental.service', 'rental_id',
+                                  string="Prestations")
+
+    # ============================================
+    # NOTES
+    # ============================================
+    notes = fields.Text("Notes / Commentaires")
+
+    # ============================================
+    # ONCHANGE : CALCUL EN TEMPS RÉEL
+    # ============================================
+    @api.onchange('property_id', 'date_start', 'date_end')
+    def _onchange_pricing(self):
+        """Calcule les prix EN TEMPS RÉEL"""
+        for rec in self:
+            if rec.date_start and rec.date_end and rec.property_id:
+                delta = (rec.date_end - rec.date_start).days
+                nb_days = max(delta, 0)
+
+                rec.duration_days = nb_days
+
+                if nb_days <= 0:
+                    rec.period_type = 'day'
+                    rec.unit_price = 0
+                    rec.total_price = 0
+                    return
+
+                apt = rec.property_id
+
+                # Utiliser la méthode intelligente de l'appartement
+                best_price, best_period = apt.get_best_price(rec.date_start, rec.date_end)
+
+                rec.period_type = best_period
+                rec.total_price = best_price
+
+                # Prix unitaire selon période
+                period_prices = {
+                    'day': apt.price_day,
+                    'week': apt.price_week,
+                    'month': apt.price_month,
+                    'year': apt.price_year,
+                }
+                rec.unit_price = period_prices.get(best_period, apt.price_day)
+
+            else:
+                rec.duration_days = 0
+                rec.period_type = 'day'
+                rec.unit_price = 0
+                rec.total_price = 0.0
+
+    # ============================================
+    # COMPUTE (stockage base de données)
+    # ============================================
+    @api.depends('date_start', 'date_end', 'property_id')
+    def _compute_pricing(self):
+        for rec in self:
+            if rec.date_start and rec.date_end and rec.property_id:
+                delta = (rec.date_end - rec.date_start).days
+                nb_days = max(delta, 0)
+
+                rec.duration_days = nb_days
+
+                if nb_days <= 0:
+                    rec.period_type = 'day'
+                    rec.unit_price = 0
+                    rec.total_price = 0
+                    continue
+
+                apt = rec.property_id
+                best_price, best_period = apt.get_best_price(rec.date_start, rec.date_end)
+
+                rec.period_type = best_period
+                rec.total_price = best_price
+
+                period_prices = {
+                    'day': apt.price_day,
+                    'week': apt.price_week,
+                    'month': apt.price_month,
+                    'year': apt.price_year,
+                }
+                rec.unit_price = period_prices.get(best_period, apt.price_day)
+            else:
+                rec.duration_days = 0
+                rec.period_type = 'day'
+                rec.unit_price = 0
+                rec.total_price = 0.0
+
+    @api.depends('property_id', 'duration_days', 'client_id', 'total_price')
+    def _compute_deposit(self):
+        for rec in self:
+            if not rec.property_id:
+                rec.deposit_amount = 0
+                continue
+
+            # Base : 2 mois de loyer ou 5 jours
+            if rec.duration_days < 7:
+                base = rec.property_id.price_day * 5
+            else:
+                base = rec.property_id.price_month * 2
+
+            # Réduction fidélité
+            if rec.client_id and rec.client_id.rental_count > 3:
+                base *= 0.5  # 50% de réduction
+
+            # Plafond
+            rec.deposit_amount = min(base, rec.total_price * 0.5)
+
+    @api.depends('total_price', 'amount_paid')
+    def _compute_amount_due(self):
+        for rec in self:
+            rec.amount_due = max(rec.total_price - rec.amount_paid, 0)
+
+    @api.depends('amount_due', 'total_price', 'amount_paid')
+    def _compute_payment_status(self):
+        for rec in self:
+            if rec.total_price <= 0:
+                rec.payment_status = 'unpaid'
+            elif rec.amount_paid >= rec.total_price:
+                rec.payment_status = 'paid'
+            elif rec.amount_paid > 0:
+                rec.payment_status = 'partial'
+            else:
+                rec.payment_status = 'unpaid'
+
+    @api.depends('date_end', 'state')
+    def _compute_days_remaining(self):
+        today = fields.Date.today()
+        for rec in self:
+            if rec.date_end and rec.state in ('confirmed', 'ongoing', 'expiring'):
+                rec.days_remaining = (rec.date_end - today).days
+                rec.is_expiring_soon = 0 <= rec.days_remaining <= 7
+            else:
+                rec.days_remaining = 0
+                rec.is_expiring_soon = False
+
+    # ============================================
+    # CONTRAINTES
+    # ============================================
+    @api.constrains('date_start', 'date_end')
+    def _check_dates(self):
+        for rec in self:
+            if rec.date_end and rec.date_start and rec.date_end <= rec.date_start:
+                raise ValidationError(_("La date de départ doit être APRÈS la date d'arrivée !"))
+
+    @api.constrains('property_id', 'date_start', 'date_end', 'state')
+    def _check_availability(self):
+        for rec in self:
+            if rec.state in ('draft', 'cancelled', 'done'):
+                continue
+
+            domain = [
+                ('property_id', '=', rec.property_id.id),
+                ('id', '!=', rec.id),
+                ('state', 'in', ('confirmed', 'ongoing', 'expiring')),
+                ('date_start', '<', rec.date_end),
+                ('date_end', '>', rec.date_start),
+            ]
+            if self.search_count(domain) > 0:
+                raise ValidationError(_("Cet appartement est déjà réservé pour cette période !"))
+
+    # ============================================
+    # ACTIONS
+    # ============================================
+    def action_confirm(self):
+        for rec in self:
+            if not rec.property_id:
+                raise UserError(_("Veuillez sélectionner un appartement."))
+
+            if rec.property_id.state not in ('available', 'soon'):
+                raise ValidationError(_("Cet appartement n'est pas disponible."))
+
+            rec.property_id.write({'state': 'occupied'})
+            rec.write({'state': 'confirmed'})
+
+            # Créer inspection d'entrée
+            self.env['property.inspection'].create({
+                'rental_id': rec.id,
+                'inspection_type': 'entry',
+                'date': rec.date_start,
+            })
+
+            # Message détaillé
+            period_labels = {
+                'day': 'Journalier',
+                'week': 'Hebdomadaire',
+                'month': 'Mensuel',
+                'year': 'Annuel',
+            }
+
+            rec.message_post(
+                body=_("""✅ LOCATION CONFIRMÉE
+
+🏠 Appartement: %s
+👤 Client: %s
+📅 Période: %s → %s
+⏱️ Durée: %s jours
+📊 Type: %s
+💰 Total: %s DA
+🔒 Caution: %s DA
+
+État: Confirmé - En attente de démarrage""") % (
+                    rec.property_id.name,
+                    rec.client_id.name,
+                    rec.date_start,
+                    rec.date_end,
+                    rec.duration_days,
+                    period_labels.get(rec.period_type, 'Journalier'),
+                    rec.total_price,
+                    rec.deposit_amount,
+                )
+            )
+        return True
+
+    def action_start(self):
+        for rec in self:
+            rec.write({'state': 'ongoing'})
+            rec.message_post(body=_("🟢 Location démarrée"))
+
+    def action_set_expiring(self):
+        for rec in self:
+            rec.write({'state': 'expiring'})
+            rec.property_id.write({'state': 'soon'})
+
+            # Envoyer rappel au locataire
+            template = self.env.ref('rental_management.email_expiring_reminder')
+            if template:
+                template.send_mail(rec.id, force_send=True)
+
+            rec.message_post(body=_("🟠 Location bientôt terminée (%s jours restants)") % rec.days_remaining)
+
+    def action_done(self):
+        for rec in self:
+            # Créer inspection de sortie
+            self.env['property.inspection'].create({
+                'rental_id': rec.id,
+                'inspection_type': 'exit',
+                'date': fields.Date.today(),
+            })
+
+            rec.write({'state': 'done'})
+            rec.property_id.write({'state': 'available'})
+
+            # Calculer revenu total
+            total_services = sum(rec.service_ids.filtered(lambda s: s.state == 'done').mapped('total'))
+            total_revenue = rec.total_price + total_services
+
+            rec.message_post(
+                body=_("""🔒 LOCATION TERMINÉE
+
+💰 Revenu Location: %s DA
+🛎️ Services: %s DA
+📊 TOTAL: %s DA
+
+Caution à restituer: %s DA""") % (
+                    rec.total_price,
+                    total_services,
+                    total_revenue,
+                    rec.deposit_amount - rec.deposit_deduction,
+                )
+            )
+
+    def action_cancel(self):
+        for rec in self:
+            rec.write({'state': 'cancelled'})
+            if rec.property_id.state == 'occupied':
+                rec.property_id.write({'state': 'available'})
+            rec.message_post(body=_("❌ Location annulée"))
+
+    def action_set_to_draft(self):
+        for rec in self:
+            rec.write({'state': 'draft'})
+            if rec.property_id.state == 'occupied':
+                rec.property_id.write({'state': 'available'})
+
+    def action_create_service(self):
+        """Ajouter une prestation"""
+        self.ensure_one()
+        return {
+            'name': '🛎️ Nouvelle Prestation',
+            'type': 'ir.actions.act_window',
+            'res_model': 'rental.service',
+            'view_mode': 'form',
+            'context': {'default_rental_id': self.id},
+            'target': 'current',
+        }
+
+    def action_register_payment(self):
+        """Enregistrer un paiement"""
+        self.ensure_one()
+        return {
+            'name': '💳 Enregistrer Paiement',
+            'type': 'ir.actions.act_window',
+            'res_model': 'rental.payment',
+            'view_mode': 'form',
+            'context': {
+                'default_rental_id': self.id,
+                'default_amount': self.amount_due,
+            },
+            'target': 'current',
+        }
+
+    def action_generate_contract(self):
+        """Générer le contrat PDF"""
+        return self.env.ref('rental_management.report_rental_contract').report_action(self)
+
+    def action_generate_quittance(self):
+        """Générer quittance de loyer"""
+        return self.env.ref('rental_management.report_quittance').report_action(self)
+
+    # ============================================
+    # CRON
+    # ============================================
+    @api.model
+    def _cron_update_rental_states(self):
+        today = fields.Date.today()
+
+        # 1. Démarrer les locations
+        starting = self.search([
+            ('state', '=', 'confirmed'),
+            ('date_start', '<=', today),
+        ])
+        starting.action_start()
+
+        # 2. Expirantes dans 7 jours
+        expiring_soon = self.search([
+            ('state', '=', 'ongoing'),
+            ('date_end', '<=', today + timedelta(days=7)),
+            ('date_end', '>', today),
+        ])
+        expiring_soon.action_set_expiring()
+
+        # 3. Terminées
+        ended = self.search([
+            ('state', 'in', ('ongoing', 'expiring')),
+            ('date_end', '<', today),
+        ])
+        ended.action_done()
+
+        # 4. Relances impayés (> 5 jours)
+        unpaid = self.search([
+            ('state', 'in', ('confirmed', 'ongoing')),
+            ('payment_status', 'in', ('unpaid', 'partial')),
+            ('date_start', '<=', today - timedelta(days=5)),
+        ])
+        for rental in unpaid:
+            template = rental.env.ref('rental_management.email_payment_reminder')
+            if template:
+                template.send_mail(rental.id, force_send=True)
+
+        return True
+
+    # ============================================
+    # CREATE / WRITE
+    # ============================================
+    @api.model
+    def create(self, vals):
+        if vals.get('name', '/') == '/':
+            vals['name'] = self.env['ir.sequence'].next_by_code('property.rental') or 'LOC/NEW'
+        return super(PropertyRental, self).create(vals)---------- END ----------
+
+========== FILE: ./models/seasonal_rate.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api
+
+
+class PropertySeasonalRate(models.Model):
+    _name = 'property.seasonal.rate'
+    _description = 'Tarif Saisonnier'
+    _order = 'date_start'
+
+    apartment_id = fields.Many2one('property.apartment', string="Appartement", required=True)
+
+    season_name = fields.Char("Nom de la Saison", required=True)
+    date_start = fields.Date("Date Début", required=True)
+    date_end = fields.Date("Date Fin", required=True)
+
+    # Ajustement de prix en pourcentage
+    price_adjustment = fields.Float("Ajustement (%)", default=0.0,
+                                    help="Ex: +30 pour +30%, -10 pour -10%")
+
+    # Prix minimum garanti
+    min_price_day = fields.Float("Prix Journalier Minimum")
+    min_price_month = fields.Float("Prix Mensuel Minimum")
+
+    is_active = fields.Boolean("Active", default=True)
+    color = fields.Integer("Couleur", default=0)
+
+    # Description pour le client
+    description = fields.Text("Description (visible client)")
+
+    @api.constrains('date_start', 'date_end')
+    def _check_dates(self):
+        for rec in self:
+            if rec.date_end <= rec.date_start:
+                raise models.ValidationError("La date fin doit être après la date début !")
+
+    @api.constrains('date_start', 'date_end', 'apartment_id')
+    def _check_overlap(self):
+        for rec in self:
+            overlapping = self.search([
+                ('id', '!=', rec.id),
+                ('apartment_id', '=', rec.apartment_id.id),
+                ('is_active', '=', True),
+                ('date_start', '<=', rec.date_end),
+                ('date_end', '>=', rec.date_start),
+            ])
+            if overlapping:
+                raise models.ValidationError("Cette période chevauche une autre saison active !")---------- END ----------
+
+========== FILE: ./models/client.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api
+
+
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    # ============================================
+    # PROFIL LOCATAIRE
+    # ============================================
+    is_tenant = fields.Boolean("Est Locataire", default=False)
+    tenant_since = fields.Date("Client Depuis", default=fields.Date.today)
+
+    # Documents
+    id_card_number = fields.Char("N° CIN / Passeport")
+    id_card_expiry = fields.Date("Expiration CIN")
+    id_card_file = fields.Binary("Scan CIN")
+
+    # Contact d'urgence
+    emergency_contact = fields.Char("Contact Urgence")
+    emergency_phone = fields.Char("Téléphone Urgence")
+
+    # ============================================
+    # STATISTIQUES LOCATION
+    # ============================================
+    rental_ids = fields.One2many('property.rental', 'client_id', string="Locations")
+    rental_count = fields.Integer("Nombre de Locations", compute="_compute_rental_stats")
+    active_rentals = fields.Integer("Locations Actives", compute="_compute_rental_stats")
+    total_spent = fields.Float("Total Dépensé (DA)", compute="_compute_rental_stats")
+    avg_rental_duration = fields.Float("Durée Moyenne (jours)", compute="_compute_rental_stats")
+
+    # Fidélité
+    loyalty_points = fields.Integer("Points Fidélité", default=0)
+    loyalty_level = fields.Selection([
+        ('bronze', '🥉 Bronze'),
+        ('silver', '🥈 Argent'),
+        ('gold', '🥇 Or'),
+        ('platinum', '💎 Platine'),
+    ], string="Niveau Fidélité", compute="_compute_loyalty", store=True)
+
+    # Préférences
+    preferred_type = fields.Selection([
+        ('studio', 'Studio'),
+        ('f1', 'F1'),
+        ('f2', 'F2'),
+        ('f3', 'F3'),
+        ('f4', 'F4'),
+    ], string="Type Préféré")
+    preferred_block = fields.Char("Bloc Préféré")
+    has_pets = fields.Boolean("A des Animaux")
+    smoker = fields.Boolean("Fumeur")
+
+    # ============================================
+    # RISQUE & NOTATION
+    # ============================================
+    risk_score = fields.Integer("Score de Risque", compute="_compute_risk", store=True)
+    risk_level = fields.Selection([
+        ('low', '🟢 Faible'),
+        ('medium', '🟡 Moyen'),
+        ('high', '🔴 Élevé'),
+    ], string="Niveau de Risque", compute="_compute_risk", store=True)
+
+    # Notes internes
+    internal_notes = fields.Text("Notes Internes (confidentiel)")
+
+    @api.depends('rental_ids', 'rental_ids.state')
+    def _compute_rental_stats(self):
+        for rec in self:
+            rec.rental_count = len(rec.rental_ids)
+            rec.active_rentals = len(rec.rental_ids.filtered(
+                lambda r: r.state in ('confirmed', 'ongoing', 'expiring')
+            ))
+            rec.total_spent = sum(rec.rental_ids.filtered(
+                lambda r: r.state == 'done'
+            ).mapped('total_price'))
+
+            durations = rec.rental_ids.mapped('duration_days')
+            rec.avg_rental_duration = sum(durations) / len(durations) if durations else 0
+
+    @api.depends('rental_count', 'total_spent')
+    def _compute_loyalty(self):
+        for rec in self:
+            points = rec.rental_count * 10 + int(rec.total_spent / 1000)
+            rec.loyalty_points = points
+
+            if points >= 500:
+                rec.loyalty_level = 'platinum'
+            elif points >= 200:
+                rec.loyalty_level = 'gold'
+            elif points >= 50:
+                rec.loyalty_level = 'silver'
+            else:
+                rec.loyalty_level = 'bronze'
+
+    @api.depends('rental_ids', 'rental_ids.payment_status')
+    def _compute_risk(self):
+        for rec in self:
+            if not rec.rental_ids:
+                rec.risk_score = 0
+                rec.risk_level = 'low'
+                continue
+
+            # Calculer le score de risque
+            score = 0
+            total = len(rec.rental_ids)
+
+            # Retards de paiement
+            late_payments = len(rec.rental_ids.filtered(lambda r: r.payment_status == 'unpaid'))
+            score += (late_payments / total) * 50 if total else 0
+
+            # Locations annulées
+            cancelled = len(rec.rental_ids.filtered(lambda r: r.state == 'cancelled'))
+            score += (cancelled / total) * 30 if total else 0
+
+            # Dégâts
+            damages = len(rec.rental_ids.filtered(lambda r: r.inspection_ids.filtered(lambda i: i.damage_found)))
+            score += (damages / total) * 20 if total else 0
+
+            rec.risk_score = min(int(score), 100)
+
+            if score < 20:
+                rec.risk_level = 'low'
+            elif score < 50:
+                rec.risk_level = 'medium'
+            else:
+                rec.risk_level = 'high'---------- END ----------
+
+========== FILE: ./models/__init__.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from . import property
+from . import rental
+from . import client
+from . import dashboard
+from . import seasonal_rate
+from . import inspection
+from . import payment
+from . import service
+from . import maintenance
+from . import forecast---------- END ----------
+
+========== FILE: ./models/maintenance.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api, _
+
+
+class PropertyMaintenance(models.Model):
+    _name = 'property.maintenance'
+    _description = 'Ticket de Maintenance'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'priority desc, date_reported desc'
+
+    name = fields.Char("N° Ticket", readonly=True, default="/", copy=False)
+
+    apartment_id = fields.Many2one('property.apartment', string="Appartement", required=True)
+
+    # ============================================
+    # SIGNALEMENT
+    # ============================================
+    reported_by = fields.Many2one('res.partner', string="Signalé par")
+    reported_by_type = fields.Selection([
+        ('tenant', 'Locataire'),
+        ('staff', 'Personnel'),
+        ('system', 'Système'),
+    ], string="Source", default='tenant')
+
+    date_reported = fields.Date("Date Signalement", default=fields.Date.context_today)
+    date_scheduled = fields.Date("Date Prévue Intervention")
+    date_completed = fields.Date("Date Terminé")
+
+    # ============================================
+    # CATÉGORIE & PRIORITÉ
+    # ============================================
+    category = fields.Selection([
+        ('plumbing', '🚰 Plomberie'),
+        ('electricity', '💡 Électricité'),
+        ('ac', '❄️ Climatisation'),
+        ('wifi', '📶 Internet'),
+        ('furniture', '🛋️ Mobilier'),
+        ('appliance', '🔌 Électroménager'),
+        ('security', '🔒 Sécurité'),
+        ('cleaning', '🧹 Propreté'),
+        ('other', '📦 Autre'),
+    ], string="Catégorie", required=True)
+
+    priority = fields.Selection([
+        ('0', '🟢 Faible'),
+        ('1', '🟡 Normale'),
+        ('2', '🟠 Haute'),
+        ('3', '🔴 Urgente'),
+    ], string="Priorité", default='1')
+
+    # ============================================
+    # DESCRIPTION
+    # ============================================
+    description = fields.Text("Description du Problème", required=True)
+    photos = fields.Many2many('ir.attachment', string="Photos")
+
+    # ============================================
+    # INTERVENTION
+    # ============================================
+    assigned_to = fields.Many2one('res.users', string="Assigné à")
+    provider_id = fields.Many2one('res.partner', string="Prestataire Externe")
+
+    estimated_cost = fields.Float("Coût Estimé")
+    actual_cost = fields.Float("Coût Réel")
+
+    # ============================================
+    # RÉSOLUTION
+    # ============================================
+    resolution = fields.Text("Description Résolution")
+    parts_used = fields.Text("Pièces Remplacées")
+
+    # ============================================
+    # STATUT
+    # ============================================
+    state = fields.Selection([
+        ('new', '🆕 Nouveau'),
+        ('confirmed', '✅ Confirmé'),
+        ('in_progress', '🔧 En Cours'),
+        ('waiting_parts', '⏳ Attente Pièces'),
+        ('done', '✅ Terminé'),
+        ('cancelled', '❌ Annulé'),
+    ], string="État", default='new', tracking=True)
+
+    # Satisfaction
+    tenant_satisfaction = fields.Selection([
+        ('5', '⭐⭐⭐⭐⭐ Excellent'),
+        ('4', '⭐⭐⭐⭐ Bon'),
+        ('3', '⭐⭐⭐ Moyen'),
+        ('2', '⭐⭐ Mauvais'),
+        ('1', '⭐ Très Mauvais'),
+    ], string="Satisfaction Locataire")
+
+    @api.model
+    def create(self, vals):
+        if vals.get('name', '/') == '/':
+            vals['name'] = self.env['ir.sequence'].next_by_code('property.maintenance') or 'MAINT/NEW'
+        return super(PropertyMaintenance, self).create(vals)
+
+    def action_confirm(self):
+        self.write({'state': 'confirmed'})
+        # Créer activité pour le technicien
+        if self.assigned_to:
+            self.activity_schedule(
+                'mail.mail_activity_data_todo',
+                summary="Nouvelle maintenance: %s" % self.name,
+                user_id=self.assigned_to.id,
+                note=self.description
+            )
+
+    def action_start(self):
+        self.write({'state': 'in_progress'})
+
+    def action_wait_parts(self):
+        self.write({'state': 'waiting_parts'})
+
+    def action_done(self):
+        self.write({
+            'state': 'done',
+            'date_completed': fields.Date.today(),
+        })
+        # Notifier le locataire
+        if self.reported_by and self.reported_by_type == 'tenant':
+            template = self.env.ref('rental_management.email_maintenance_done')
+            template.send_mail(self.id, force_send=True)
+
+    def action_cancel(self):
+        self.write({'state': 'cancelled'})---------- END ----------
+
+========== FILE: ./models/service.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import models, fields, api, _
+
+
+class RentalService(models.Model):
+    _name = 'rental.service'
+    _description = 'Prestation Additionnelle'
+    _order = 'rental_id, sequence'
+
+    rental_id = fields.Many2one('property.rental', string="Location", required=True)
+
+    sequence = fields.Integer("Séquence", default=10)
+
+    service_type = fields.Selection([
+        ('cleaning', '🧹 Ménage'),
+        ('linen', '🛏️ Linge de Maison'),
+        ('breakfast', '🍳 Petit-déjeuner'),
+        ('airport', '✈️ Navette Aéroport'),
+        ('grocery', '🛒 Courses'),
+        ('babysitting', '👶 Garde d\'Enfants'),
+        ('tour', '🗺️ Visite Guidée'),
+        ('other', '📦 Autre'),
+    ], string="Type de Service", required=True)
+
+    description = fields.Char("Description")
+
+    # ============================================
+    # PLANIFICATION
+    # ============================================
+    date = fields.Date("Date", default=fields.Date.context_today)
+    frequency = fields.Selection([
+        ('once', 'Une fois'),
+        ('daily', 'Quotidien'),
+        ('weekly', 'Hebdomadaire'),
+        ('monthly', 'Mensuel'),
+    ], string="Fréquence", default='once')
+
+    # ============================================
+    # TARIFICATION
+    # ============================================
+    unit_price = fields.Float("Prix Unitaire")
+    quantity = fields.Float("Quantité", default=1.0)
+    total = fields.Float("Total", compute="_compute_total", store=True)
+
+    # ============================================
+    # STATUT
+    # ============================================
+    state = fields.Selection([
+        ('draft', '📝 Brouillon'),
+        ('confirmed', '✅ Confirmé'),
+        ('done', '🔒 Réalisé'),
+        ('cancelled', '❌ Annulé'),
+    ], string="État", default='draft')
+
+    # Fournisseur / Prestataire
+    provider_id = fields.Many2one('res.partner', string="Prestataire")
+
+    notes = fields.Text("Notes")
+
+    @api.depends('unit_price', 'quantity')
+    def _compute_total(self):
+        for rec in self:
+            rec.total = rec.unit_price * rec.quantity
+
+    def action_confirm(self):
+        self.write({'state': 'confirmed'})
+
+    def action_done(self):
+        self.write({'state': 'done'})
+
+    def action_cancel(self):
+        self.write({'state': 'cancelled'})---------- END ----------
+
+========== FILE: ./projet_complet.txt ==========
+---------- START ----------
+---------- END ----------
+
+========== FILE: ./static/src/js/dashboard_chart.js ==========
+---------- START ----------
+/** @odoo-module **/
+
+import { registry } from "@web/core/registry";
+import { Component, onWillStart, useState } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+
+export class RentalDashboard extends Component {
+    setup() {
+        this.rpc = useService("rpc");
+        this.state = useState({
+            kpi: {
+                ongoing_count: 0,
+                monthly_revenue: 0,
+                available_count: 0,
+                expiring_count: 0
+            }
+        });
+
+        onWillStart(async () => {
+            await this.loadDashboardData();
+        });
+    }
+
+    async loadDashboardData() {
+        const data = await this.rpc("/web/dataset/call_kw/rental.dashboard/get_revenue_data", {
+            model: 'rental.dashboard',
+            method: 'get_revenue_data',
+            args: ['month'],
+            kwargs: {},
+        });
+        if (data && data.kpi) {
+            this.state.kpi = data.kpi;
+        }
+    }
+}
+
+RentalDashboard.template = "rental_management.RentalDashboardTemplate";
+
+// On enregistre l'action pour qu'elle soit utilisable dans le XML
+registry.category("actions").add("rental_dashboard_action", RentalDashboard);---------- END ----------
+
+========== FILE: ./static/src/js/map_widget.js ==========
+---------- START ----------
+odoo.define('rental_management.map_widget', function(require) {
+    "use strict";
+
+    var AbstractField = require('web.AbstractField');
+    var fieldRegistry = require('web.field_registry');
+
+    var MapWidget = AbstractField.extend({
+        template: 'MapWidget',
+        events: {
+            'click .refresh-map': '_refreshMap',
+        },
+        init: function(parent, name, record, options) {
+            this._super(parent, name, record, options);
+            this.map = null;
+        },
+        _render: function() {
+            this._loadMap();
+        },
+        _loadMap: function() {
+            if (this.map) this.map.remove();
+            // Coordonnées fictives (Casablanca)
+            this.map = L.map(this.$el.find('.map-container')[0]).setView([33.5731, -7.5898], 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> & CartoDB'
+            }).addTo(this.map);
+            // Récupérer les appartements avec coordonnées
+            this._rpc({
+                model: 'property.apartment',
+                method: 'get_map_data',
+            }).then(function(data) {
+                for (var i = 0; i < data.length; i++) {
+                    var apt = data[i];
+                    var marker = L.marker([apt.lat, apt.lng]).addTo(this.map);
+                    marker.bindPopup("<b>" + apt.name + "</b><br>" + apt.address_full + "<br>Prix mensuel: " + apt.price_monthly + " DH");
+                }
+            }.bind(this));
+        },
+        _refreshMap: function() {
+            this._loadMap();
+        }
+    });
+    fieldRegistry.add('map_widget', MapWidget);
+});---------- END ----------
+
+========== FILE: ./static/src/css/custom_style.css ==========
+---------- START ----------
+/* Fond général */
+.o_web_client {
+    background: #F7F9FC;
+}
+
+/* Cartes dashboard */
+.rental-card {
+    background: white;
+    border-radius: 24px;
+    padding: 20px;
+    margin: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(94,106,210,0.1);
+}
+
+.rental-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(94,106,210,0.15);
+}
+
+/* Bouton principal */
+.btn-primary {
+    background: linear-gradient(135deg, #5E6AD2 0%, #7B84E0 100%);
+    border: none;
+    border-radius: 40px;
+    padding: 10px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4A56C2 0%, #6A74D0 100%);
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(94,106,210,0.3);
+}
+
+/* Badge statut */
+.badge-available {
+    background: #2DC071;
+    color: white;
+    border-radius: 40px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-occupied {
+    background: #FF5A5F;
+    color: white;
+    border-radius: 40px;
+}
+
+.badge-soon {
+    background: #FF8C42;
+    color: white;
+    border-radius: 40px;
+}
+
+/* Animation de chargement */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.rental-card {
+    animation: fadeInUp 0.4s ease-out;
+}
+/* Palette unique */
+:root {
+    --primary: #5E6AD2;
+    --primary-dark: #4A56C2;
+    --success: #2DC071;
+    --danger: #FF5A5F;
+    --warning: #FF8C42;
+    --dark: #1A2C3E;
+    --light: #F7F9FC;
+    --gray: #6B7A8A;
+}
+
+/* Cartes dashboard */
+.o_kanban_record {
+    border-radius: 24px !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05) !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid rgba(94,106,210,0.1) !important;
+}
+
+.o_kanban_record:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 28px rgba(94,106,210,0.15) !important;
+}
+
+/* Boutons */
+.btn-primary {
+    background: linear-gradient(135deg, #5E6AD2, #7B84E0) !important;
+    border-radius: 40px !important;
+    border: none !important;
+}
+/* ========== PALETTE DE COULEURS UNIQUE ========== */
+:root {
+    --primary: #5E6AD2;
+    --primary-dark: #4A56C2;
+    --primary-light: #7B84E0;
+    --success: #2DC071;
+    --danger: #FF5A5F;
+    --warning: #FF8C42;
+    --info: #36A2EB;
+    --dark: #1A2C3E;
+    --light: #F7F9FC;
+    --gray: #6B7A8A;
+    --white: #FFFFFF;
+    --black: #000000;
+}
+
+/* ========== MODE CLAIR (par défaut) ========== */
+body {
+    background: var(--light);
+    color: var(--dark);
+    transition: all 0.3s ease;
+}
+
+/* Cartes dashboard */
+.o_kanban_record,
+.rental-card {
+    background: var(--white);
+    border-radius: 28px !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05) !important;
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1) !important;
+    border: 1px solid rgba(94,106,210,0.1) !important;
+    overflow: hidden;
+}
+
+.o_kanban_record:hover,
+.rental-card:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 20px 30px rgba(94,106,210,0.2) !important;
+}
+
+/* Boutons gradient */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light)) !important;
+    border: none !important;
+    border-radius: 40px !important;
+    padding: 10px 24px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary)) !important;
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(94,106,210,0.4);
+}
+
+/* Badges statut */
+.badge-available {
+    background: var(--success) !important;
+    color: white !important;
+    border-radius: 40px !important;
+    padding: 4px 12px !important;
+}
+.badge-occupied {
+    background: var(--danger) !important;
+}
+.badge-soon {
+    background: var(--warning) !important;
+}
+
+/* KPI Cards */
+.kpi-card {
+    background: linear-gradient(135deg, var(--white), #f8f9ff);
+    border-radius: 24px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--primary);
+}
+.kpi-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary);
+}
+.kpi-label {
+    font-size: 13px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ========== MODE SOMBRE AUTOMATIQUE ========== */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #121212 !important;
+        color: #E0E0E0 !important;
+    }
+    .o_kanban_record,
+    .rental-card,
+    .kpi-card {
+        background: #1E1E1E !important;
+        border-color: #333 !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
+    }
+    .kpi-value {
+        color: var(--primary-light);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #3a45a0, #5E6AD2) !important;
+    }
+    table, .table {
+        background: #1E1E1E;
+        color: #E0E0E0;
+    }
+    input, select, textarea {
+        background: #2C2C2C !important;
+        color: #E0E0E0 !important;
+        border-color: #444 !important;
+    }
+}---------- END ----------
+
+========== FILE: ./controllers/__init__.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from . import public_form---------- END ----------
+
+========== FILE: ./controllers/public_form.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from odoo import http
+from odoo.http import request
+
+
+class RentalPublicForm(http.Controller):
+
+    @http.route('/rental/form', type='http', auth='public', website=True)
+    def rental_form(self, **kwargs):
+        properties = request.env['property.apartment'].sudo().search([
+            ('state', '=', 'available')
+        ])
+        return request.render('rental_management.public_rental_form', {
+            'properties': properties,
+        })
+
+    @http.route('/rental/submit', type='http', auth='public', website=True, methods=['POST'])
+    def rental_submit(self, **post):
+        error = None
+        success = None
+
+        try:
+            # Créer le client s'il n'existe pas
+            partner = request.env['res.partner'].sudo().create({
+                'name': post.get('name'),
+                'email': post.get('email'),
+                'phone': post.get('phone'),
+                'is_tenant': True,
+            })
+
+            # Créer la demande de location (en brouillon)
+            rental = request.env['property.rental'].sudo().create({
+                'property_id': int(post.get('property_id')),
+                'client_id': partner.id,
+                'date_start': post.get('start_date'),
+                'date_end': post.get('end_date'),
+                'notes': post.get('message', ''),
+            })
+
+            success = "Votre demande a été enregistrée ! N° de contrat: %s" % rental.name
+
+        except Exception as e:
+            error = str(e)
+
+        properties = request.env['property.apartment'].sudo().search([
+            ('state', '=', 'available')
+        ])
+
+        return request.render('rental_management.public_rental_form', {
+            'properties': properties,
+            'success': success,
+            'error': error,
+        })---------- END ----------
+
+========== FILE: ./__init__.py ==========
+---------- START ----------
+# -*- coding: utf-8 -*-
+from . import models
+from . import controllers---------- END ----------
+
+========== FILE: ./views/property_views.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================================== -->
+    <!-- ACTION APPARTEMENTS                        -->
+    <!-- ========================================== -->
+    <record id="action_property_apartment" model="ir.actions.act_window">
+        <field name="name">🏠 Appartements</field>
+        <field name="res_model">property.apartment</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'search_default_group_by_state': 1}</field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- KANBAN ULTRA PRO                           -->
+    <!-- ========================================== -->
+    <record id="view_property_apartment_kanban" model="ir.ui.view">
+        <field name="name">property.apartment.kanban</field>
+        <field name="model">property.apartment</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="id"/>
+                <field name="state"/>
+                <field name="image"/>
+                <field name="color"/>
+                <field name="is_furnished"/>
+                <field name="has_wifi"/>
+                <field name="has_ac"/>
+                <field name="has_parking"/>
+                <field name="has_elevator"/>
+                <field name="has_balcony"/>
+                <field name="has_washing"/>
+                <field name="has_kitchen"/>
+                <field name="has_tv"/>
+                <field name="type"/>
+                <field name="name"/>
+                <field name="block"/>
+                <field name="floor"/>
+                <field name="surface"/>
+                <field name="price_month"/>
+                <field name="price_day"/>
+                <field name="bedrooms"/>
+                <field name="comfort_score"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click p-0 mb-3 overflow-hidden"
+                             style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+
+                            <!-- IMAGE + BADGE STATUT -->
+                            <div class="position-relative" style="height: 180px; overflow: hidden;">
+                                <t t-if="record.image.raw_value">
+                                    <img t-att-src="kanban_image('property.apartment', 'image', record.id.raw_value)"
+                                         style="object-fit: cover; width: 100%; height: 100%;"
+                                         alt="Appartement"/>
+                                </t>
+                                <t t-else="">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                                height: 100%; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fa fa-building-o" style="font-size: 48px; color: white; opacity: 0.5;" title="Appartement"/>
+                                    </div>
+                                </t>
+
+                                <!-- BADGE STATUT -->
+                                <div class="position-absolute" style="top: 12px; right: 12px;">
+                                    <span t-attf-class="badge #{record.state.raw_value == 'available' ? 'bg-success' :
+                                                            record.state.raw_value == 'occupied' ? 'bg-danger' :
+                                                            record.state.raw_value == 'soon' ? 'bg-warning' :
+                                                            record.state.raw_value == 'maintenance' ? 'bg-info' : 'bg-secondary'}"
+                                          style="font-size: 0.75rem; padding: 6px 12px; border-radius: 20px;">
+                                        <t t-esc="record.state.value"/>
+                                    </span>
+                                </div>
+
+                                <!-- SCORE CONFORT -->
+                                <div class="position-absolute" style="top: 12px; left: 12px;">
+                                    <span class="badge bg-dark" style="font-size: 0.7rem;">
+                                        ⭐ <t t-esc="record.comfort_score.raw_value"/>/100
+                                    </span>
+                                </div>
+
+                                <!-- PRIX -->
+                                <div class="position-absolute"
+                                     style="bottom: 0; left: 0; right: 0;
+                                            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+                                            padding: 20px 15px 10px;">
+                                    <span class="text-white fw-bold" style="font-size: 1.3rem;">
+                                        <field name="price_month"/>
+                                    </span>
+                                    <span class="text-white-50" style="font-size: 0.8rem;"> DA/mois</span>
+                                </div>
+                            </div>
+
+                            <!-- CONTENU -->
+                            <div class="p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="m-0 fw-bold text-truncate" style="color: #2d3748;">
+                                        <field name="name"/>
+                                    </h5>
+                                    <span class="badge bg-light text-dark border">
+                                        <field name="type"/>
+                                    </span>
+                                </div>
+
+                                <div class="text-muted small mb-2">
+                                    <i class="fa fa-map-marker text-danger me-1" title="Localisation"/>
+                                    <span>Bloc <field name="block"/>, Étage <field name="floor"/></span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+                                    <span>
+                                        <i class="fa fa-expand me-1" title="Surface"/>
+                                        <field name="surface"/> m²
+                                    </span>
+                                    <span>
+                                        <i class="fa fa-bed me-1" title="Chambres"/>
+                                        <field name="bedrooms"/>
+                                    </span>
+                                    <span t-if="record.is_furnished.raw_value">
+                                        <i class="fa fa-couch me-1" title="Meublé"/>
+                                    </span>
+                                </div>
+
+                                <!-- ÉQUIPEMENTS -->
+                                <div class="d-flex gap-1 mb-3 flex-wrap">
+                                    <span t-if="record.has_wifi.raw_value"
+                                          class="badge bg-info bg-opacity-10 text-info" style="font-size: 0.65rem;">
+                                        📶 WiFi
+                                    </span>
+                                    <span t-if="record.has_ac.raw_value"
+                                          class="badge bg-primary bg-opacity-10 text-primary" style="font-size: 0.65rem;">
+                                        ❄️ Clim
+                                    </span>
+                                    <span t-if="record.has_parking.raw_value"
+                                          class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.65rem;">
+                                        🚗 Parking
+                                    </span>
+                                    <span t-if="record.has_elevator.raw_value"
+                                          class="badge bg-warning bg-opacity-10 text-warning" style="font-size: 0.65rem;">
+                                        🛗
+                                    </span>
+                                    <span t-if="record.has_balcony.raw_value"
+                                          class="badge bg-danger bg-opacity-10 text-danger" style="font-size: 0.65rem;">
+                                        🌅 Balcon
+                                    </span>
+                                    <span t-if="record.has_washing.raw_value"
+                                          class="badge bg-secondary bg-opacity-10 text-secondary" style="font-size: 0.65rem;">
+                                        🧺
+                                    </span>
+                                    <span t-if="record.has_kitchen.raw_value"
+                                          class="badge bg-dark bg-opacity-10 text-dark" style="font-size: 0.65rem;">
+                                        🍳
+                                    </span>
+                                    <span t-if="record.has_tv.raw_value"
+                                          class="badge bg-info bg-opacity-10 text-info" style="font-size: 0.65rem;">
+                                        📺
+                                    </span>
+                                </div>
+
+                                <!-- BOUTONS ACTION -->
+                                <button t-if="record.state.raw_value == 'available'"
+                                        class="btn btn-primary btn-sm w-100 rounded-pill"
+                                        type="object" name="action_rent_now">
+                                    <i class="fa fa-calendar-check-o me-2"/>
+                                    Réserver Maintenant
+                                </button>
+
+                                <button t-if="record.state.raw_value == 'occupied'"
+                                        class="btn btn-outline-danger btn-sm w-100 rounded-pill"
+                                        type="object" name="action_view_history">
+                                    <i class="fa fa-eye me-2"/>
+                                    Voir Historique
+                                </button>
+
+                                <button t-if="record.state.raw_value == 'soon'"
+                                        class="btn btn-outline-warning btn-sm w-100 rounded-pill"
+                                        disabled="disabled">
+                                    <i class="fa fa-clock-o me-2"/>
+                                    Bientôt Disponible
+                                </button>
+
+                                <button t-if="record.state.raw_value == 'maintenance'"
+                                        class="btn btn-outline-info btn-sm w-100 rounded-pill"
+                                        type="object" name="action_create_maintenance">
+                                    <i class="fa fa-wrench me-2"/>
+                                    Maintenance
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- TREE VIEW                                  -->
+    <!-- ========================================== -->
+    <record id="view_property_apartment_tree" model="ir.ui.view">
+        <field name="name">property.apartment.tree</field>
+        <field name="model">property.apartment</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'available'"
+                  decoration-danger="state == 'occupied'"
+                  decoration-warning="state == 'soon'"
+                  decoration-info="state == 'maintenance'">
+                <field name="name"/>
+                <field name="type"/>
+                <field name="address"/>
+                <field name="block"/>
+                <field name="floor"/>
+                <field name="surface"/>
+                <field name="comfort_score"/>
+                <field name="price_month"/>
+                <field name="price_day"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'available'"
+                       decoration-danger="state == 'occupied'"
+                       decoration-warning="state == 'soon'"
+                       decoration-info="state == 'maintenance'"/>
+                <field name="total_rentals"/>
+                <field name="total_revenue" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- FORM VIEW                                  -->
+    <!-- ========================================== -->
+    <record id="view_property_apartment_form" model="ir.ui.view">
+        <field name="name">property.apartment.form</field>
+        <field name="model">property.apartment</field>
+        <field name="arch" type="xml">
+            <form string="Appartement">
+                <header>
+                    <button name="action_set_available" string="✅ Remettre Disponible"
+                            type="object" invisible="state not in ('maintenance', 'cleaning')"
+                            class="oe_highlight"/>
+                    <button name="action_set_maintenance" string="🔧 Maintenance"
+                            type="object" invisible="state != 'available'"/>
+                    <button name="action_set_cleaning" string="🧹 Ménage"
+                            type="object" invisible="state != 'available'"/>
+                    <button name="action_create_maintenance" string="🔧 Ticket Maintenance"
+                            type="object" invisible="state == 'available'"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="available,occupied,soon,maintenance,cleaning"/>
+                </header>
+
+                <sheet>
+                    <!-- STAT BUTTONS -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_history" type="object"
+                                class="oe_stat_button" icon="fa-history">
+                            <field name="total_rentals" widget="statinfo" string="Locations"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-money" disabled="1">
+                            <field name="total_revenue" widget="statinfo" string="Revenus"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-star" disabled="1">
+                            <field name="comfort_score" widget="statinfo" string="Confort"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-bed" disabled="1">
+                            <field name="avg_occupancy" widget="statinfo" string="Jours Moy."/>
+                        </button>
+                    </div>
+
+                    <field name="image" widget="image" class="oe_avatar"
+                           options='{"preview_image": "image"}'/>
+
+                    <div class="oe_title">
+                        <label for="name" string="RÉFÉRENCE" class="text-muted small"/>
+                        <h1>
+                            <field name="name" placeholder="ex: APT-05 - Résidence KRIM"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="📍 LOCALISATION">
+                            <field name="type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="address" placeholder="Adresse complète..."/>
+                            <field name="block" placeholder="Bloc A, B, C..."/>
+                            <field name="floor"/>
+                            <field name="door_number" placeholder="N° 12, 15B..."/>
+                            <field name="latitude" placeholder="36.7538"/>
+                            <field name="longitude" placeholder="3.0588"/>
+                        </group>
+                        <group string="📐 CARACTÉRISTIQUES">
+                            <field name="surface"/>
+                            <field name="capacity"/>
+                            <field name="bedrooms" readonly="1"/>
+                            <field name="bathrooms"/>
+                            <field name="comfort_score" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- TARIFICATION -->
+                    <group string="💰 TARIFICATION DE BASE">
+                        <group>
+                            <field name="price_day" widget="monetary"/>
+                            <field name="price_week" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="price_month" widget="monetary"/>
+                            <field name="price_year" widget="monetary"/>
+                            <field name="avg_daily_rate" readonly="1" widget="monetary"/>
+                        </group>
+                    </group>
+
+                    <!-- ÉQUIPEMENTS -->
+                    <group string="🛋️ ÉQUIPEMENTS">
+                        <group>
+                            <field name="is_furnished" widget="boolean_toggle"/>
+                            <field name="has_wifi" widget="boolean_toggle"/>
+                            <field name="has_ac" widget="boolean_toggle"/>
+                            <field name="has_parking" widget="boolean_toggle"/>
+                            <field name="has_elevator" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="has_balcony" widget="boolean_toggle"/>
+                            <field name="has_washing" widget="boolean_toggle"/>
+                            <field name="has_kitchen" widget="boolean_toggle"/>
+                            <field name="has_tv" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+
+                    <!-- NOTEBOOK -->
+                    <notebook>
+                        <page string="📸 Photos">
+                            <field name="image_ids" widget="many2many_binary"/>
+                        </page>
+                        <page string="🌡️ Tarifs Saisonniers">
+                            <field name="seasonal_rate_ids">
+                                <tree editable="bottom">
+                                    <field name="season_name"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                    <field name="price_adjustment"/>
+                                    <field name="min_price_day"/>
+                                    <field name="min_price_month"/>
+                                    <field name="is_active"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="🔧 Maintenances">
+                            <field name="maintenance_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date_reported"/>
+                                    <field name="category"/>
+                                    <field name="priority"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <!--<page string="🔑 Clés">
+                            <field name="key_ids">
+                                <tree editable="bottom">
+                                    <field name="key_code"/>
+                                    <field name="key_type"/>
+                                    <field name="current_holder"/>
+                                    <field name="status"/>
+                                </tree>
+                            </field>
+                        </page>-->
+                        <page string="📋 Historique Locations">
+                            <field name="rental_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="client_id"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                    <field name="total_price"/>
+                                    <field name="payment_status" widget="badge"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- SEARCH VIEW                                -->
+    <!-- ========================================== -->
+    <record id="view_property_apartment_search" model="ir.ui.view">
+        <field name="name">property.apartment.search</field>
+        <field name="model">property.apartment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="address"/>
+                <field name="type"/>
+                <field name="block"/>
+
+                <filter string="Disponibles" name="available" domain="[('state', '=', 'available')]"/>
+                <filter string="Loués" name="occupied" domain="[('state', '=', 'occupied')]"/>
+                <filter string="Bientôt Libre" name="soon" domain="[('state', '=', 'soon')]"/>
+                <filter string="En Maintenance" name="maintenance" domain="[('state', '=', 'maintenance')]"/>
+                <filter string="Meublés" name="furnished" domain="[('is_furnished', '=', True)]"/>
+                <filter string="WiFi" name="wifi" domain="[('has_wifi', '=', True)]"/>
+                <filter string="Parking" name="parking" domain="[('has_parking', '=', True)]"/>
+
+                <group expand="0" string="Regrouper par">
+                    <filter string="Statut" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Type" name="group_by_type" context="{'group_by': 'type'}"/>
+                    <filter string="Bloc" name="group_by_block" context="{'group_by': 'block'}"/>
+                    <filter string="Étage" name="group_by_floor" context="{'group_by': 'floor'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- MENUS                                      -->
+    <!-- ========================================== -->
+    <menuitem id="menu_rental_root" name="🏠 IMMOBILIER PRO" sequence="1"/>
+    <menuitem id="menu_apt" name="Appartements" parent="menu_rental_root"
+              action="action_property_apartment" sequence="1"/>
+</odoo>---------- END ----------
+
+========== FILE: ./views/seasonal_views.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_seasonal_rate" model="ir.actions.act_window">
+        <field name="name">🌡️ Tarifs Saisonniers</field>
+        <field name="res_model">property.seasonal.rate</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_seasonal_rate_tree" model="ir.ui.view">
+        <field name="name">property.seasonal.rate.tree</field>
+        <field name="model">property.seasonal.rate</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="is_active == True"
+                  decoration-muted="is_active == False">
+                <field name="apartment_id"/>
+                <field name="season_name"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="price_adjustment"/>
+                <field name="is_active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_seasonal_rate_form" model="ir.ui.view">
+        <field name="name">property.seasonal.rate.form</field>
+        <field name="model">property.seasonal.rate</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="apartment_id"/>
+                            <field name="season_name"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group>
+                            <field name="price_adjustment"/>
+                            <field name="min_price_day"/>
+                            <field name="min_price_month"/>
+                            <field name="is_active"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Description visible par les clients..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_seasonal" name="🌡️ Tarifs Saisonniers"
+              parent="menu_rental_root" action="action_seasonal_rate"
+              sequence="30"/>
+</odoo>---------- END ----------
+
+========== FILE: ./views/inspection_views.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_inspection" model="ir.actions.act_window">
+        <field name="name">📋 États des Lieux</field>
+        <field name="res_model">property.inspection</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_inspection_tree" model="ir.ui.view">
+        <field name="name">property.inspection.tree</field>
+        <field name="model">property.inspection</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="inspection_type == 'entry'"
+                  decoration-danger="inspection_type == 'exit'"
+                  decoration-warning="damage_found == True">
+                <field name="name"/>
+                <field name="rental_id"/>
+                <field name="inspection_type" widget="badge"/>
+                <field name="date"/>
+                <field name="inspector_id"/>
+                <field name="damage_found"/>
+                <field name="estimated_repair_cost"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_inspection_form" model="ir.ui.view">
+        <field name="name">property.inspection.form</field>
+        <field name="model">property.inspection</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_done" string="✅ Valider"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_dispute" string="⚠️ Contester"
+                            type="object"
+                            invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="rental_id"/>
+                            <field name="inspection_type"/>
+                            <field name="date"/>
+                            <field name="inspector_id"/>
+                        </group>
+                        <group>
+                            <field name="apartment_id" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- CHECKLIST -->
+                    <group string="✅ Checklist État">
+                        <group>
+                            <field name="walls_condition"/>
+                            <field name="floor_condition"/>
+                            <field name="cleanliness"/>
+                        </group>
+                        <group>
+                            <field name="plumbing_working" widget="boolean_toggle"/>
+                            <field name="electricity_working" widget="boolean_toggle"/>
+                            <field name="ac_working" widget="boolean_toggle"/>
+                            <field name="wifi_working" widget="boolean_toggle"/>
+                            <field name="tv_working" widget="boolean_toggle"/>
+                            <field name="kitchen_working" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+
+                    <!-- PHOTOS -->
+                    <group string="📸 Photos">
+                        <field name="photos_before" widget="many2many_binary"/>
+                        <field name="photos_after" widget="many2many_binary"/>
+                    </group>
+
+                    <!-- SIGNATURES -->
+                    <group string="✍️ Signatures">
+                        <group>
+                            <field name="tenant_signature" widget="signature"/>
+                        </group>
+                        <group>
+                            <field name="inspector_signature" widget="signature"/>
+                        </group>
+                    </group>
+
+                    <!-- DÉGÂTS -->
+                    <group string="⚠️ Dégâts" invisible="not damage_found">
+                        <field name="damage_found" widget="boolean_toggle"/>
+                        <field name="damage_description"/>
+                        <field name="damage_photos" widget="many2many_binary"/>
+                        <field name="estimated_repair_cost"/>
+                        <field name="actual_repair_cost"/>
+                        <field name="deposit_deduction"/>
+                    </group>
+
+                    <field name="notes" placeholder="Observations générales..."/>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_inspection" name="📋 États des Lieux"
+              parent="menu_rental_root" action="action_inspection"
+              sequence="40"/>
+</odoo>---------- END ----------
+
+========== FILE: ./views/rental_views.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================================== -->
+    <!-- ACTION LOCATIONS                           -->
+    <!-- ========================================== -->
+    <record id="action_property_rental_all" model="ir.actions.act_window">
+        <field name="name">📋 Réservations</field>
+        <field name="res_model">property.rental</field>
+        <field name="view_mode">tree,form,calendar,pivot,graph</field>
+        <field name="context">{'search_default_confirmed': 1}</field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- CALENDAR VIEW                              -->
+    <!-- ========================================== -->
+    <record id="view_property_rental_calendar" model="ir.ui.view">
+        <field name="name">property.rental.calendar</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <calendar string="Calendrier des Locations"
+                      date_start="date_start"
+                      date_stop="date_end"
+                      color="state">
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="client_id"/>
+                <field name="total_price"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- PIVOT VIEW (ANALYSE)                       -->
+    <!-- ========================================== -->
+    <record id="view_property_rental_pivot" model="ir.ui.view">
+        <field name="name">property.rental.pivot</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Locations">
+                <field name="property_id" type="row"/>
+                <field name="period_type" type="col"/>
+                <field name="total_price" type="measure"/>
+                <field name="duration_days" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- GRAPH VIEW                                 -->
+    <!-- ========================================== -->
+    <record id="view_property_rental_graph" model="ir.ui.view">
+        <field name="name">property.rental.graph</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <graph string="Revenus par Période" type="bar">
+                <field name="date_start" interval="month"/>
+                <field name="total_price" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- FORM VIEW                                  -->
+    <!-- ========================================== -->
+    <record id="view_property_rental_form" model="ir.ui.view">
+        <field name="name">property.rental.form</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="✅ Confirmer"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_start" string="🟢 Démarrer"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_set_expiring" string="🟠 Bientôt Terminé"
+                            type="object"
+                            invisible="state != 'ongoing'"/>
+                    <button name="action_done" string="🔒 Terminer"
+                            type="object" class="oe_highlight"
+                            invisible="state not in ('ongoing', 'expiring')"/>
+                    <button name="action_cancel" string="❌ Annuler"
+                            type="object"
+                            invisible="state in ('done', 'cancelled')"/>
+                    <button name="action_set_to_draft" string="📝 Remettre Brouillon"
+                            type="object"
+                            invisible="state != 'confirmed'"/>
+
+                    <button name="action_generate_contract" string="📄 Contrat PDF"
+                            type="object" invisible="state == 'draft'"/>
+                    <button name="action_generate_quittance" string="📄 Quittance"
+                            type="object" invisible="state in ('draft', 'cancelled')"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,ongoing,expiring,done"/>
+                </header>
+
+                <sheet>
+                    <field name="is_expiring_soon" invisible="1"/>
+                    <!-- STAT BUTTONS -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_register_payment" type="object"
+                                class="oe_stat_button" icon="fa-credit-card"
+                                invisible="state in ('draft', 'cancelled', 'done')">
+                            <span class="o_stat_text">Paiement</span>
+                        </button>
+                        <button name="action_create_service" type="object"
+                                class="oe_stat_button" icon="fa-concierge-bell"
+                                invisible="state in ('draft', 'cancelled', 'done')">
+                            <span class="o_stat_text">Service</span>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-file-text" disabled="1">
+                            <field name="payment_ids" widget="statinfo" string="Paiements"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <!-- INFOS PRINCIPALES -->
+                    <group>
+                        <group string="👤 LOCATAIRE">
+                            <field name="client_id" widget="res_partner_many2one"
+                                   context="{'default_is_tenant': True}"/>
+                        </group>
+                        <group string="🏠 APPARTEMENT">
+                            <field name="property_id" options="{'no_create': True}"
+                                   domain="[('state', 'in', ['available', 'soon'])]"/>
+                        </group>
+                    </group>
+
+                    <!-- DATES & TARIFICATION -->
+                    <group string="📅 DATES &amp; TARIFICATION">
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group>
+                            <field name="duration_days" readonly="1"/>
+                            <field name="period_type" readonly="1"
+                                   widget="badge"
+                                   decoration-info="period_type == 'day'"
+                                   decoration-success="period_type == 'week'"
+                                   decoration-warning="period_type == 'month'"
+                                   decoration-danger="period_type == 'year'"/>
+                        </group>
+                    </group>
+
+                    <!-- FINANCIER -->
+                    <group string="💰 FINANCIER">
+                        <group>
+                            <field name="unit_price" readonly="1" widget="monetary"/>
+                            <field name="total_price" readonly="1" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="amount_paid" widget="monetary"/>
+                            <field name="amount_due" readonly="1" widget="monetary"/>
+                            <field name="payment_status" widget="badge"
+                                   decoration-danger="payment_status == 'unpaid'"
+                                   decoration-warning="payment_status == 'partial'"
+                                   decoration-success="payment_status == 'paid'"/>
+                        </group>
+                    </group>
+
+                    <!-- CAUTION -->
+                    <group string="🔒 CAUTION">
+                        <group>
+                            <field name="deposit_amount" readonly="1" widget="monetary"/>
+                            <field name="deposit_deduction" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="deposit_returned"/>
+                            <field name="deposit_return_date" invisible="not deposit_returned"/>
+                            <field name="deposit_notes"/>
+                        </group>
+                    </group>
+
+                    <!-- ALERTES -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not is_expiring_soon or state not in ('ongoing', 'expiring')">
+                        <i class="fa fa-exclamation-triangle"/>
+                        ⚠️ Cette location expire dans <field name="days_remaining"/> jours !
+                    </div>
+
+                    <field name="notes" placeholder="Notes additionnelles..."/>
+
+                    <!-- NOTEBOOK -->
+                    <notebook>
+                        <page string="💳 Paiements">
+                            <field name="payment_ids" readonly="0">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount"/>
+                                    <field name="payment_method"/>
+                                    <field name="payment_type"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="🛎️ Prestations">
+                            <field name="service_ids" readonly="0">
+                                <tree editable="bottom">
+                                    <field name="service_type"/>
+                                    <field name="description"/>
+                                    <field name="date"/>
+                                    <field name="unit_price"/>
+                                    <field name="quantity"/>
+                                    <field name="total"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="📋 États des Lieux">
+                            <field name="inspection_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="inspection_type"/>
+                                    <field name="date"/>
+                                    <field name="inspector_id"/>
+                                    <field name="damage_found"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- TREE VIEW                                  -->
+    <!-- ========================================== -->
+    <record id="view_property_rental_tree" model="ir.ui.view">
+        <field name="name">property.rental.tree</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="state == 'done'"
+                  decoration-info="state == 'draft'"
+                  decoration-success="state == 'confirmed'"
+                  decoration-warning="state == 'expiring'">
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="client_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="duration_days"/>
+                <field name="period_type" widget="badge"
+                       decoration-info="period_type == 'day'"
+                       decoration-success="period_type == 'week'"
+                       decoration-warning="period_type == 'month'"
+                       decoration-danger="period_type == 'year'"/>
+                <field name="unit_price" optional="hide"/>
+                <field name="total_price" sum="Total"/>
+                <field name="amount_paid" sum="Payé"/>
+                <field name="amount_due" sum="Reste"/>
+                <field name="payment_status" widget="badge"
+                       decoration-danger="payment_status == 'unpaid'"
+                       decoration-warning="payment_status == 'partial'"
+                       decoration-success="payment_status == 'paid'"/>
+                <field name="state" widget="badge"/>
+                <field name="days_remaining" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- SEARCH VIEW                                -->
+    <!-- ========================================== -->
+    <record id="view_property_rental_search" model="ir.ui.view">
+        <field name="name">property.rental.search</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="property_id"/>
+
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="En Cours" name="ongoing" domain="[('state', '=', 'ongoing')]"/>
+                <filter string="Bientôt Terminé" name="expiring" domain="[('state', '=', 'expiring')]"/>
+                <filter string="Terminé" name="done" domain="[('state', '=', 'done')]"/>
+
+                <filter string="Impayé" name="unpaid" domain="[('payment_status', '=', 'unpaid')]"/>
+                <filter string="Partiel" name="partial" domain="[('payment_status', '=', 'partial')]"/>
+                <filter string="Payé" name="paid" domain="[('payment_status', '=', 'paid')]"/>
+
+                <!-- Filtres par période -->
+                <filter string="Journalier" name="period_day" domain="[('period_type', '=', 'day')]"/>
+                <filter string="Hebdo" name="period_week" domain="[('period_type', '=', 'week')]"/>
+                <filter string="Mensuel" name="period_month" domain="[('period_type', '=', 'month')]"/>
+                <filter string="Annuel" name="period_year" domain="[('period_type', '=', 'year')]"/>
+
+                <!-- Filtres temporels -->
+                <filter string="Ce mois" name="this_month"
+                        domain="[('date_start', '&gt;=', context_today().strftime('%%Y-%%m-01'))]"/>
+                <filter string="Expire cette semaine" name="expiring_this_week"
+                        domain="[('date_end', '&lt;=', (context_today() + relativedelta(days=7)).strftime('%%Y-%%m-%%d')),
+                                  ('state', 'in', ('ongoing', 'expiring'))]"/>
+
+                <group expand="0" string="Regrouper par">
+                    <filter string="Appartement" name="group_by_apt" context="{'group_by': 'property_id'}"/>
+                    <filter string="Client" name="group_by_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="État" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Type Période" name="group_by_period" context="{'group_by': 'period_type'}"/>
+                    <filter string="Mois" name="group_by_month" context="{'group_by': 'date_start:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ========================================== -->
+    <!-- MENU                                       -->
+    <!-- ========================================== -->
+    <menuitem id="menu_rent" name="📋 Réservations" parent="menu_rental_root"
+              action="action_property_rental_all" sequence="20"/>
+</odoo>---------- END ----------
+
+========== FILE: ./views/portal_templates.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Portail client -->
+</odoo>
+---------- END ----------
+
+========== FILE: ./views/dashboard_views.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_rental_dashboard" model="ir.actions.act_window">
+        <field name="name">📊 Tableau de Bord Pro</field>
+        <field name="res_model">rental.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="res_id">1</field>
+        <field name="target">inline</field>
+    </record>
+
+    <record id="view_rental_dashboard_form" model="ir.ui.view">
+        <field name="name">rental.dashboard.form</field>
+        <field name="model">rental.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Tableau de Bord Pro" create="0" delete="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>📊 Tableau de Bord - Gestion Locative Pro</h1>
+                        <p class="text-muted">Vue d'ensemble en temps réel de votre activité</p>
+                    </div>
+
+                    <!-- KPI PRINCIPAUX -->
+                    <div class="row mt-4">
+                        <div class="col-md-2">
+                            <div class="card bg-light" style="border-left: 4px solid #6B7A8A;">
+                                <div class="card-body text-center">
+                                    <h2 class="text-primary"><field name="total_apartments"/></h2>
+                                    <small class="text-muted">TOTAL APPARTEMENTS</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light" style="border-left: 4px solid #2DC071;">
+                                <div class="card-body text-center">
+                                    <h2 class="text-success"><field name="available_count"/></h2>
+                                    <small class="text-muted">DISPONIBLES</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light" style="border-left: 4px solid #FF5A5F;">
+                                <div class="card-body text-center">
+                                    <h2 class="text-danger"><field name="occupied_count"/></h2>
+                                    <small class="text-muted">OCCUPÉS</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light" style="border-left: 4px solid #FF8C42;">
+                                <div class="card-body text-center">
+                                    <h2 class="text-warning"><field name="soon_count"/></h2>
+                                    <small class="text-muted">BIENTÔT LIBRE</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light" style="border-left: 4px solid #36A2EB;">
+                                <div class="card-body text-center">
+                                    <h2 class="text-info"><field name="maintenance_count"/></h2>
+                                    <small class="text-muted">MAINTENANCE</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="card bg-light" style="border-left: 4px solid #5E6AD2;">
+                                <div class="card-body text-center">
+                                    <h2 class="text-primary"><field name="occupancy_rate"/>%</h2>
+                                    <small class="text-muted">TAUX OCCUPATION</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- REVENUS -->
+                    <h3 class="mt-4 mb-3">💰 Revenus</h3>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h4 class="text-primary"><field name="daily_revenue" widget="monetary"/></h4>
+                                    <small class="text-muted">AUJOURD'HUI</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h4 class="text-primary"><field name="weekly_revenue" widget="monetary"/></h4>
+                                    <small class="text-muted">CETTE SEMAINE</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h4 class="text-primary"><field name="monthly_revenue" widget="monetary"/></h4>
+                                    <small class="text-muted">CE MOIS</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h4 class="text-primary"><field name="yearly_revenue" widget="monetary"/></h4>
+                                    <small class="text-muted">CETTE ANNÉE</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ALERTES -->
+                    <h3 class="mt-4 mb-3">⚠️ Alertes &amp; Actions Requises</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-white">
+                                    <i class="fa fa-clock-o"/> Locations Expirantes (≤7 jours)
+                                </div>
+                                <div class="card-body">
+                                    <field name="expiring_rentals" widget="many2many"
+                                           options="{'no_create': True, 'no_edit': True}">
+                                        <tree>
+                                            <field name="name"/>
+                                            <field name="property_id"/>
+                                            <field name="client_id"/>
+                                            <field name="date_end"/>
+                                            <field name="days_remaining"/>
+                                            <field name="payment_status" widget="badge"/>
+                                        </tree>
+                                    </field>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-danger">
+                                <div class="card-header bg-danger text-white">
+                                    <i class="fa fa-exclamation-triangle"/> Locations Impayées
+                                </div>
+                                <div class="card-body">
+                                    <field name="unpaid_rentals" widget="many2many"
+                                           options="{'no_create': True, 'no_edit': True}">
+                                        <tree>
+                                            <field name="name"/>
+                                            <field name="property_id"/>
+                                            <field name="client_id"/>
+                                            <field name="total_price"/>
+                                            <field name="amount_paid"/>
+                                            <field name="amount_due"/>
+                                            <field name="payment_status" widget="badge"/>
+                                        </tree>
+                                    </field>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MAINTENANCES -->
+                    <h3 class="mt-4 mb-3">🔧 Maintenances en Cours</h3>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <field name="active_maintenances" widget="many2many"
+                                           options="{'no_create': True, 'no_edit': True}">
+                                        <tree>
+                                            <field name="name"/>
+                                            <field name="apartment_id"/>
+                                            <field name="category"/>
+                                            <field name="priority"/>
+                                            <field name="assigned_to"/>
+                                            <field name="state" widget="badge"/>
+                                        </tree>
+                                    </field>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_rental_dashboard" name="📊 Tableau de Bord"
+              parent="menu_rental_root" action="action_rental_dashboard"
+              sequence="1"/>
+</odoo>---------- END ----------
+
+========== FILE: ./views/public_templates.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vues publiques du portail -->
+</odoo>
+---------- END ----------
+
+========== FILE: ./views/service_views.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_service" model="ir.actions.act_window">
+        <field name="name">🛎️ Prestations</field>
+        <field name="res_model">rental.service</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_service_tree" model="ir.ui.view">
+        <field name="name">rental.service.tree</field>
+        <field name="model">rental.service</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'done'"
+                  decoration-info="state == 'draft'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="rental_id"/>
+                <field name="service_type" widget="badge"/>
+                <field name="description"/>
+                <field name="date"/>
+                <field name="unit_price"/>
+                <field name="quantity"/>
+                <field name="total" sum="Total"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <menuitem id="menu_service" name="🛎️ Prestations"
+              parent="menu_rental_root" action="action_service"
+              sequence="60"/>
+</odoo>---------- END ----------
+
+========== FILE: ./views/report_templates.xml ==========
+---------- START ----------
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Placeholder pour les rapports -->
+</odoo>
+---------- END ----------
+

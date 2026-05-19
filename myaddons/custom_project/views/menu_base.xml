@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Root Menu - loaded first so other files can reference it -->
+    <menuitem id="custom_project_root_menu" name="Projets S-T"
+              web_icon="custom_project,static/description/closure.png"/>
+    <menuitem id="custom_project_main_menu" name="Projets" parent="custom_project_root_menu" sequence="1"/>
+    <menuitem id="sous_traitons" name="Sous-traitants" parent="custom_project_root_menu" sequence="2"/>
+    <menuitem id="configuration_versement_subcontractor" name="Configuration" parent="custom_project_root_menu" sequence="3"/>
+    <menuitem id="menu_suivi_bet_root" name="Suivi BET" parent="custom_project_root_menu" sequence="50"/>
+    <menuitem id="menu_decompte_bet_root" name="Dcomptes BET" parent="menu_suivi_bet_root" sequence="10"/>
+    <menuitem id="menu_suivi_coulage_root" name="Suivi Coulage" parent="menu_suivi_bet_root" sequence="20"/>
+</odoo>

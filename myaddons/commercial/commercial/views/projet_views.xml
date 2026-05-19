@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_projet_view_tree" model="ir.ui.view">
+        <field name="name">commercial.projet.tree</field>
+        <field name="model">commercial.projet</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="type_projet_ids" widget="many2many_tags"/>
+                <field name="wilaya"/>
+                <field name="avancement" widget="percentpie"/>
+                <field name="bloc_count" string="Blocs"/>
+                <field name="lot_count" string="Lots"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_projet_view_form" model="ir.ui.view">
+        <field name="name">commercial.projet.form</field>
+        <field name="model">commercial.projet</field>
+        <field name="arch" type="xml">
+            <form string="Projet">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_blocs" type="object"
+                                class="oe_stat_button" icon="fa-building">
+                            <field name="bloc_count" widget="statinfo" string="Blocs"/>
+                        </button>
+                        <button name="action_view_lots" type="object"
+                                class="oe_stat_button" icon="fa-th-list">
+                            <field name="lot_count" widget="statinfo" string="Lots"/>
+                        </button>
+                    </div>
+                    <field name="name"/>
+                    <!-- Notebook -->
+                    <notebook>
+                        <!-- Page Informations générales -->
+                        <page string="Informations générales" name="informations_generales">
+                            <group>
+                                <group>
+
+                                    <field name="intitule_administratif"/>
+                                    <field name="code"/>
+                                    <field name="type_projet_ids" widget="many2many_tags"/>
+                                </group>
+                                <group>
+                                    <field name="avancement" widget="progressbar" options="{'editable': True}"/>
+                                    <field name="date_debut"/>
+                                    <field name="duree_realisation"/>
+                                    <field name="date_achevement"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="description"/>
+                            </group>
+                        </page>
+
+                        <!-- Page Localisation -->
+                        <page string="Localisation" name="localisation">
+                            <group>
+                                <group>
+                                    <field name="pays_id"/>
+                                    <field name="wilaya"/>
+                                    <field name="lieu_dit"/>
+                                </group>
+                                <group>
+                                    <field name="repere"/>
+                                    <field name="adresse"/>
+                                    <field name="superficie_terrain"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Page Identification -->
+                        <page string="Identification" name="identification">
+                            <!-- Identification juridique et technique -->
+                            <separator string=" Identification juridique et technique"/>
+                            <group>
+                                <group>
+                                    <field name="conservation_fonciere"/>
+                                    <field name="livret_foncier"/>
+                                </group>
+                                <group>
+                                    <field name="delivre_le"/>
+                                    <field name="delivre_par"/>
+                                </group>
+                            </group>
+
+                            <!--  Acte notarié -->
+                            <separator string=" Acte notarié"/>
+                            <group>
+                                <group>
+                                    <field name="acte_numero_enregistrement"/>
+                                    <field name="acte_date_publication"/>
+                                </group>
+                                <group>
+                                    <field name="acte_volume"/>
+                                    <field name="acte_folio"/>
+                                </group>
+                            </group>
+
+                            <!--  État descriptif de division -->
+                            <separator string=" État descriptif de division"/>
+                            <group>
+                                <group>
+                                    <field name="edd_numero_enregistrement"/>
+                                    <field name="edd_date_publication"/>
+                                    <field name="reference_cadastrale"/>
+                                </group>
+                                <group>
+                                    <field name="edd_volume"/>
+                                    <field name="edd_folio"/>
+                                </group>
+                            </group>
+
+                            <!-- 3-2 Permis et Certificat -->
+                            <separator string=" Permis et Certificat"/>
+                            <group col="3">
+
+                                <!-- Groupe 1 -->
+                                <group string="Permis de lotir">
+                                    <field name="permis_lotir_numero"/>
+                                    <field name="permis_lotir_date"/>
+                                    <field name="permis_lotir_par"/>
+                                </group>
+
+                                <!-- Groupe 2 -->
+                                <group string="Certificat d'aménagement">
+                                    <field name="certificat_amenagement_numero"/>
+                                    <field name="certificat_amenagement_date"/>
+                                    <field name="certificat_amenagement_par"/>
+                                </group>
+
+                                <!-- Groupe 3 -->
+                                <group string="Permis de construire">
+                                    <field name="permis_construire_numero"/>
+                                    <field name="permis_construire_date"/>
+                                    <field name="permis_construire_par"/>
+                                </group>
+
+                            </group>
+                        </page>
+
+                    </notebook>
+
+                    <field name="company_id" invisible="1"/>
+                    <field name="user_id" invisible="1"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="commercial_projet_view_search" model="ir.ui.view">
+        <field name="name">commercial.projet.search</field>
+        <field name="model">commercial.projet</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="intitule_administratif"/>
+                <field name="code"/>
+                <field name="wilaya"/>
+                <field name="type_projet_ids"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_wilaya" string="Wilaya" context="{'group_by': 'wilaya'}"/>
+                    <filter name="group_type" string="Type" context="{'group_by': 'type_projet_ids'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_projet_action" model="ir.actions.act_window">
+        <field name="name">Projets</field>
+        <field name="res_model">commercial.projet</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="commercial_projet_view_search"/>
+    </record>
+
+</odoo>

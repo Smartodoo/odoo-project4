@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_fiche_projet" model="ir.actions.report">
+        <field name="name">Fiche Projet</field>
+        <field name="model">commercial.projet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.fiche_projet_template</field>
+        <field name="report_file">commercial.fiche_projet_template</field>
+        <field name="binding_model_id" ref="model_commercial_projet"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Fiche Projet - %s' % object.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="fiche_projet_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 16px; padding: 40px 50px;">
+
+                        <!-- Titre -->
+                        <h2 style="text-align: center; border-bottom: 3px solid #003366; padding-bottom: 8px; margin-bottom: 20px; color: #003366;">
+                            Fiche Projet : <t t-esc="doc.name"/>
+                        </h2>
+
+                        <!-- CODE et TYPE -->
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                            <div>
+                                <strong>CODE :</strong> <t t-esc="doc.code or ''"/>
+                            </div>
+                            <div>
+                                <strong>TYPE :</strong>
+                                <t t-esc="', '.join(doc.type_projet_ids.mapped('name'))" />
+                            </div>
+                        </div>
+
+                        <!-- LOCALISATION / REALISATION -->
+                        <table class="table table-bordered" style="margin-bottom: 15px;">
+                            <thead>
+                                <tr style="background-color: #003366; color: #fff;">
+                                    <th style="width: 50%; text-align: center; padding: 10px;">LOCALISATION</th>
+                                    <th style="width: 50%; text-align: center; padding: 10px;">REALISATION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px;">
+                                        <strong>Lieu-dit, Quartier ou Cité :</strong>
+                                        <t t-esc="doc.lieu_dit or ''"/><br/><br/>
+                                        <strong>Wilaya :</strong>
+                                        <t t-esc="doc.wilaya_id.name or ''"/>
+                                    </td>
+                                    <td style="padding: 10px;">
+                                        <strong>Date début des travaux :</strong>
+                                        <t t-if="doc.date_debut">
+                                            <t t-esc="doc.date_debut" t-options='{"widget": "date"}'/>
+                                        </t><br/><br/>
+                                        <strong>Délai de réalisation :</strong>
+                                        <t t-if="doc.duree_realisation">
+                                            <t t-esc="doc.duree_realisation"/> mois
+                                        </t><br/><br/>
+                                        <strong>Date d'achèvement :</strong>
+                                        <t t-if="doc.date_achevement">
+                                            <t t-esc="doc.date_achevement" t-options='{"widget": "date"}'/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- TERRAIN ET RESIDENCE -->
+                        <h4 style="background-color: #003366; color: #fff; padding: 10px 14px; margin-top: 20px; border-radius: 3px;">
+                            TERRAIN ET RESIDENCE
+                        </h4>
+                        <table class="table table-bordered" style="margin-bottom: 5px;">
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px; width: 50%;">
+                                        <strong>Conservation foncière :</strong> <t t-esc="doc.conservation_fonciere or ''"/>
+                                    </td>
+                                    <td style="padding: 10px; width: 50%;">
+                                        <strong>Livret foncier :</strong> <t t-esc="doc.livret_foncier or ''"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;">
+                                        <strong>Délivré le :</strong>
+                                        <t t-if="doc.delivre_le">
+                                            <t t-esc="doc.delivre_le" t-options='{"widget": "date"}'/>
+                                        </t>
+                                    </td>
+                                    <td style="padding: 10px;">
+                                        <strong>Délivré par :</strong> <t t-esc="doc.delivre_par or ''"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;">
+                                        <strong>Référence cadastrale :</strong> <t t-esc="doc.reference_cadastrale or ''"/>
+                                    </td>
+                                    <td style="padding: 10px;"> </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Acte notarié -->
+                        <p style="margin: 8px 0 4px 0;"><strong><u>Acte notarié</u></strong></p>
+                        <table class="table table-bordered" style="margin-bottom: 5px;">
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px; width: 50%;">
+                                        <strong>N° d'enregistrement :</strong> <t t-esc="doc.acte_numero_enregistrement or ''"/>
+                                    </td>
+                                    <td style="padding: 10px; width: 50%;">
+                                        <strong>Date de publication :</strong>
+                                        <t t-if="doc.acte_date_publication">
+                                            <t t-esc="doc.acte_date_publication" t-options='{"widget": "date"}'/>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;">
+                                        <strong>Volume :</strong> <t t-esc="doc.acte_volume or ''"/>
+                                    </td>
+                                    <td style="padding: 10px;">
+                                        <strong>Folio :</strong> <t t-esc="doc.acte_folio or ''"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- État descriptif de division -->
+                        <p style="margin: 8px 0 4px 0;"><strong><u>État descriptif de division</u></strong></p>
+                        <table class="table table-bordered" style="margin-bottom: 5px;">
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px; width: 50%;">
+                                        <strong>N° d'enregistrement :</strong> <t t-esc="doc.edd_numero_enregistrement or ''"/>
+                                    </td>
+                                    <td style="padding: 10px; width: 50%;">
+                                        <strong>Date de publication :</strong>
+                                        <t t-if="doc.edd_date_publication">
+                                            <t t-esc="doc.edd_date_publication" t-options='{"widget": "date"}'/>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;">
+                                        <strong>Volume :</strong> <t t-esc="doc.edd_volume or ''"/>
+                                    </td>
+                                    <td style="padding: 10px;">
+                                        <strong>Folio :</strong> <t t-esc="doc.edd_folio or ''"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Permis et Certificat -->
+                        <p style="margin: 8px 0 4px 0;"><strong><u>Permis et Certificat</u></strong></p>
+                        <table class="table table-bordered" style="margin-bottom: 15px;">
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px;">
+                                        <strong>Permis de lotir :</strong> <t t-esc="doc.permis_lotir_numero or ''"/>
+                                        <t t-if="doc.permis_lotir_date">
+                                             du <t t-esc="doc.permis_lotir_date" t-options='{"widget": "date"}'/>
+                                        </t>
+                                        <t t-if="doc.permis_lotir_par">
+                                             Par : <t t-esc="doc.permis_lotir_par"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;">
+                                        <strong>Certificat d'aménagement :</strong> <t t-esc="doc.certificat_amenagement_numero or ''"/>
+                                        <t t-if="doc.certificat_amenagement_date">
+                                             du <t t-esc="doc.certificat_amenagement_date" t-options='{"widget": "date"}'/>
+                                        </t>
+                                        <t t-if="doc.certificat_amenagement_par">
+                                             Par : <t t-esc="doc.certificat_amenagement_par"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;">
+                                        <strong>Permis de construire :</strong> <t t-esc="doc.permis_construire_numero or ''"/>
+                                        <t t-if="doc.permis_construire_date">
+                                             du <t t-esc="doc.permis_construire_date" t-options='{"widget": "date"}'/>
+                                        </t>
+                                        <t t-if="doc.permis_construire_par">
+                                             Par : <t t-esc="doc.permis_construire_par"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- BLOC ET ETAGES -->
+                        <h4 style="background-color: #003366; color: #fff; padding: 10px 14px; margin-top: 20px; border-radius: 3px;">
+                            BLOC ET ETAGES
+                        </h4>
+
+                        <t t-if="doc.bloc_ids">
+                            <!-- Table des blocs -->
+                            <table class="table table-bordered" style="margin-bottom: 10px;">
+                                <thead>
+                                    <tr style="background-color: #e8edf2;">
+                                        <th style="padding: 10px; text-align: center;">BLOC</th>
+                                        <th style="padding: 10px; text-align: center;">Nbre de Sous-sols</th>
+                                        <th style="padding: 10px; text-align: center;">Nbre Entre-sols</th>
+                                        <th style="padding: 10px; text-align: center;">Nbre de Mezzanines</th>
+                                        <th style="padding: 10px; text-align: center;">Nbre d'Étages</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.bloc_ids" t-as="bloc">
+                                        <td style="padding: 10px; text-align: center;">
+                                            <t t-esc="bloc.code"/>
+                                        </td>
+                                        <td style="padding: 10px; text-align: center;">
+                                            <t t-esc="bloc.nbre_soussols"/>
+                                        </td>
+                                        <td style="padding: 10px; text-align: center;">
+                                            <t t-esc="bloc.nbre_entresols"/>
+                                        </td>
+                                        <td style="padding: 10px; text-align: center;">
+                                            <t t-esc="bloc.mezzanine"/>
+                                        </td>
+                                        <td style="padding: 10px; text-align: center;">
+                                            <t t-esc="bloc.nbre_etages"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </t>
+                        <t t-else="">
+                            <p style="color: #888; font-style: italic;">Aucun bloc défini pour ce projet.</p>
+                        </t>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

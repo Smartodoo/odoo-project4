@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ===== Action Report : liste brise roche (multi-sélection) ===== -->
+        <record id="action_report_brise_roche_list" model="ir.actions.report">
+            <field name="name">Décompte Situation Brise Roche</field>
+            <field name="model">situation.brise.roche</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">Purchase_custom.report_brise_roche_list_document</field>
+            <field name="report_file">Purchase_custom.report_brise_roche_list_document</field>
+            <field name="binding_model_id" ref="model_situation_brise_roche"/>
+            <field name="binding_type">report</field>
+            <field name="binding_view_types">list</field>
+            <field name="print_report_name">'Decompte_Brise_Roche_%s' % (time.strftime('%Y%m%d_%H%M%S'))</field>
+        </record>
+
+        <!-- ===== Template ===== -->
+        <template id="report_brise_roche_list_document">
+            <t t-call="web.html_container">
+                <t t-call="custom_project.etb_tph_layout">
+                    <t t-set="company" t-value="docs[0].project_id.company_id if docs and docs[0].project_id else env.company"/>
+                    <t t-set="dates" t-value="[d.date for d in docs if d.date]"/>
+                    <t t-set="date_min" t-value="min(dates) if dates else False"/>
+                    <t t-set="date_max" t-value="max(dates) if dates else False"/>
+                    <t t-set="total_heures" t-value="sum(d.nombre_heures or 0 for d in docs)"/>
+                    <t t-set="total_journ" t-value="sum(d.total_journalite or 0 for d in docs)"/>
+                    <t t-set="total_montant" t-value="sum(d.montant or 0 for d in docs)"/>
+                    <t t-set="ref_situation" t-value="docs[0].name if docs else ''"/>
+                    <t t-set="sous_traitant" t-value="docs[0].sous_traitant_id if docs else False"/>
+
+                    <div class="page" style="font-family: Arial, sans-serif; font-size: 10pt; padding-top: 10pt;">
+
+                        <!-- En-tête République -->
+                        <div style="text-align: center; font-weight: 700; font-size: 11pt; margin-bottom: 14pt; margin-top: 8pt;">
+                            RÉPUBLIQUE ALGÉRIENNE DÉMOCRATIQUE ET POPULAIRE
+                        </div>
+
+                        <!-- Infos entreprise -->
+                        <div style="margin-bottom: 12pt; font-size: 10pt;">
+                            <div><strong>Entreprise :</strong>
+                                <span t-esc="company.name"/>
+                            </div>
+                            <div><strong>Adresse :</strong>
+                                <span t-esc="company.partner_id.contact_address or company.partner_id.city or ''"/>
+                            </div>
+                            <div t-if="docs[0].project_id"><strong>Projet :</strong>
+                                <span t-esc="docs[0].project_id.name"/>
+                            </div>
+                            <div t-if="sous_traitant"><strong>Sous-traitant :</strong>
+                                <span t-esc="sous_traitant.name"/>
+                            </div>
+                        </div>
+
+                        <!-- Titre Décompte -->
+                        <div style="text-align: center; border: 1pt solid #000; padding: 6pt; margin-bottom: 10pt; font-weight: 700; font-size: 11pt;">
+                            DECOMPTE SITUATION
+                            <t t-if="ref_situation"> N° <span t-esc="ref_situation"/></t>
+                            <t t-if="date_min and date_max">
+                                DU <span t-esc="date_min.strftime('%d/%m/%Y')"/>
+                                AU <span t-esc="date_max.strftime('%d/%m/%Y')"/>
+                            </t>
+                        </div>
+
+                        <!-- Tableau détail -->
+                        <table style="width: 100%; border-collapse: collapse; font-size: 8pt; table-layout: fixed; word-wrap: break-word;">
+                            <colgroup>
+                                <col style="width: 7%;"/>   <!-- DATE -->
+                                <col style="width: 9%;"/>   <!-- TYPE ENGIN -->
+                                <col style="width: 7%;"/>   <!-- N° BON -->
+                                <col style="width: 9%;"/>   <!-- ENGIN -->
+                                <col style="width: 14%;"/>  <!-- DESIGNATION -->
+                                <col style="width: 8%;"/>   <!-- TOTAL HEURES -->
+                                <col style="width: 8%;"/>   <!-- TOTAL JOURNALITE -->
+                                <col style="width: 11%;"/>  <!-- PRIX UNITAIRE -->
+                                <col style="width: 11%;"/>  <!-- MONTANT -->
+                                <col style="width: 16%;"/>  <!-- OBSERVATION -->
+                            </colgroup>
+                            <thead style="background: #f0f0f0;">
+                                <tr>
+                                    <th style="border: 1pt solid #000; padding: 4pt; vertical-align: middle;">DATE</th>
+                                    <th style="border: 1pt solid #000; padding: 4pt; vertical-align: middle;">TYPE D'ENGIN</th>
+                                    <th style="border: 1pt solid #000; padding: 4pt; vertical-align: middle;">N° BON</th>
+                                    <th style="border: 1pt solid #000; padding: 4pt; vertical-align: middle;">ENGIN</th>
+                                    <th style="border: 1pt solid #000; padding: 4pt; vertical-align: middle;">DÉSIGNATION</th>
+                                    <th style="border: 1pt solid #000; padding: 4pt; text-align: right; vertical-align: middle;">TOTAL HEURES</th>
+                                    <th style="border: 1pt solid #000; padding: 4pt; text-align: right; vertical-align: middle;">TOTAL JOURNALITÉ</th>
+                                    <th style="border: 1pt solid #000; padding: 4pt; text-align: right; vertical-align: middle;">PRIX UNITAIRE / JOUR</th>
+                                    <th style="border: 1pt solid #000; padding: 4pt; text-align: right; vertical-align: middle;">MONTANT</th>
+                                    <th style="border: 1pt solid #000; padding: 4pt; vertical-align: middle;">OBSERVATION</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="docs" t-as="d">
+                                    <tr>
+                                        <td style="border: 1pt solid #000; padding: 4pt;">
+                                            <t t-if="d.date" t-esc="d.date.strftime('%d/%m/%Y')"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 4pt;">
+                                            <span t-esc="d.type_engin or ''"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 4pt;">
+                                            <span t-esc="d.n_bon or ''"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 4pt;">
+                                            <span t-esc="d.engin or ''"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 4pt;">
+                                            <span t-esc="d.designation or ''"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 4pt; text-align: right;">
+                                            <t t-esc="'%.2f' % (d.nombre_heures or 0)"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 4pt; text-align: right;">
+                                            <t t-esc="'%.2f' % (d.total_journalite or 0)"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 4pt; text-align: right;">
+                                            <t t-esc="'%.2f' % (d.prix_unitaire_jour or 0)"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 4pt; text-align: right;">
+                                            <t t-esc="'%.2f' % (d.montant or 0)"/>
+                                        </td>
+                                        <td style="border: 1pt solid #000; padding: 4pt;">
+                                            <span t-esc="d.observation or ''"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <!-- Total -->
+                                <tr style="background: #e5e5e5; font-weight: 700;">
+                                    <td colspan="5" style="border: 1pt solid #000; padding: 5pt; text-align: right;">TOTAL</td>
+                                    <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
+                                        <t t-esc="'%.2f' % total_heures"/>
+                                    </td>
+                                    <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
+                                        <t t-esc="'%.2f' % total_journ"/>
+                                    </td>
+                                    <td style="border: 1pt solid #000; padding: 5pt;"></td>
+                                    <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
+                                        <t t-esc="'%.2f' % total_montant"/>
+                                    </td>
+                                    <td style="border: 1pt solid #000; padding: 5pt;"></td>
+                                </tr>
+                                <!-- MONTANT TOTAL A PAYER -->
+                                <tr style="background: #d0d0d0; font-weight: 700;">
+                                    <td colspan="8" style="border: 1pt solid #000; padding: 6pt; text-align: right;">MONTANT TOTAL A PAYER</td>
+                                    <td colspan="2" style="border: 1pt solid #000; padding: 6pt; text-align: right;">
+                                        <t t-esc="'%.2f' % total_montant"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Montant en lettres -->
+                        <div style="margin-top: 14pt;">
+                            <em>Arrêté le montant du présent décompte à la somme de (en lettres) :</em>
+                            <br/>
+                            <strong>
+                                <t t-set="amount_words" t-value="company.currency_id.amount_to_text(total_montant) if company.currency_id else '%.2f' % total_montant"/>
+                                <span t-esc="amount_words"/>
+                            </strong>
+                        </div>
+
+                        <!-- Pied : ville + date -->
+                        <div style="margin-top: 24pt; text-align: right;">
+                            Fait à
+                            <span t-esc="company.partner_id.city or '...'"/>
+                            le :
+                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                        </div>
+                        <div style="margin-top: 6pt; text-align: right; font-weight: 700;">ENTREPRISE</div>
+
+                        <!-- Signatures -->
+                        <div style="margin-top: 50pt; display: table; width: 100%;">
+                            <div style="display: table-row;">
+                                <div style="display: table-cell; width: 33%; text-align: center; padding-top: 30pt; border-top: 1pt solid #000;">
+                                    Caissier(ère)
+                                </div>
+                                <div style="display: table-cell; width: 33%; text-align: center; padding-top: 30pt; border-top: 1pt solid #000;">
+                                    Ingénieur Travaux Publics
+                                </div>
+                                <div style="display: table-cell; width: 33%; text-align: center; padding-top: 30pt; border-top: 1pt solid #000;">
+                                    Directeur Technique
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <!-- Paperformat paysage pour le tableau large -->
+        <record id="paperformat_brise_roche_landscape" model="report.paperformat">
+            <field name="name">Brise Roche Paysage</field>
+            <field name="default" eval="False"/>
+            <field name="format">A4</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Landscape</field>
+            <field name="margin_top">40</field>
+            <field name="margin_bottom">20</field>
+            <field name="margin_left">7</field>
+            <field name="margin_right">7</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">25</field>
+            <field name="dpi">90</field>
+        </record>
+
+        <record id="action_report_brise_roche_list" model="ir.actions.report">
+            <field name="paperformat_id" ref="paperformat_brise_roche_landscape"/>
+        </record>
+    </data>
+</odoo>

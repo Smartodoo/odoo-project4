@@ -1,0 +1,226 @@
+<odoo>
+    <template id="constat_report_template">
+        <t t-call="web.external_layout">
+            <main>
+                <t t-foreach="docs" t-as="o">
+                    <div class="page">
+                        <h2 class="text-center" style="border-bottom: 3px solid #000; padding-bottom: 10px;">
+                            CONSTAT AMIABLE D'ACCIDENT AUTOMOBILE
+                        </h2>
+
+                        <!-- Date and general info -->
+                        <div class="row mt-3 mb-3">
+                            <div class="col-6">
+                                <p><strong>Date de l'accident :</strong>
+                                    <span t-field="o.date_accident"/>
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p><strong>N° PV :</strong>
+                                    <span t-field="o.numero_pv"/>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Two columns: Vehicle A and Vehicle B -->
+                        <div class="row">
+                            <!-- VEHICLE A (Our vehicle) -->
+                            <div class="col-6" style="border-right: 2px solid #000; padding-right: 15px;">
+                                <h4 class="text-center" style="background-color: #e8e8e8; padding: 5px;">
+                                    VÉHICULE A (Assuré)
+                                </h4>
+
+                                <h5 style="border-bottom: 1px solid #ccc;">Véhicule</h5>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Véhicule :</strong></td>
+                                        <td><span t-field="o.vehicle_id"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Immatriculation :</strong></td>
+                                        <td><span t-field="o.license_plate"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>N° de série :</strong></td>
+                                        <td><span t-field="o.numero_serie"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Conducteur :</strong></td>
+                                        <td><span t-field="o.driver_id"/></td>
+                                    </tr>
+                                </table>
+
+                                <h5 style="border-bottom: 1px solid #ccc;">Assurance</h5>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Compagnie :</strong></td>
+                                        <td><span t-field="o.assurence2"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Agence :</strong></td>
+                                        <td><span t-field="o.agence_assurance1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>N° Police :</strong></td>
+                                        <td><span t-field="o.numero_police"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Date d'effet :</strong></td>
+                                        <td><span t-field="o.date_effet"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Date d'expiration :</strong></td>
+                                        <td><span t-field="o.date_expertation"/></td>
+                                    </tr>
+                                </table>
+
+                                <h5 style="border-bottom: 1px solid #ccc;">Dégâts constatés</h5>
+                                <div style="min-height: 80px; border: 1px solid #ccc; padding: 5px;">
+                                    <span t-field="o.degat_sur_vehicule_html"/>
+                                </div>
+                            </div>
+
+                            <!-- VEHICLE B (Third party) -->
+                            <div class="col-6" style="padding-left: 15px;">
+                                <h4 class="text-center" style="background-color: #e8e8e8; padding: 5px;">
+                                    VÉHICULE B (Tiers)
+                                </h4>
+
+                                <t t-if="o.accident_type == 'tiers'">
+                                    <h5 style="border-bottom: 1px solid #ccc;">Tiers</h5>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td><strong>Nom complet :</strong></td>
+                                            <td><span t-field="o.nom_tiers"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Adresse :</strong></td>
+                                            <td><span t-field="o.prenom_tiers"/></td>
+                                        </tr>
+                                    </table>
+
+                                    <h5 style="border-bottom: 1px solid #ccc;">Assurance</h5>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td><strong>Compagnie :</strong></td>
+                                            <td><span t-field="o.assurence"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Agence :</strong></td>
+                                            <td><span t-field="o.agence_assurance2"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>N° Police :</strong></td>
+                                            <td><span t-field="o.numero_police2"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Date d'effet :</strong></td>
+                                            <td><span t-field="o.date_effet_1"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Date d'expiration :</strong></td>
+                                            <td><span t-field="o.date_expertation_1"/></td>
+                                        </tr>
+                                    </table>
+
+                                    <h5 style="border-bottom: 1px solid #ccc;">Dégâts constatés</h5>
+                                    <div style="min-height: 80px; border: 1px solid #ccc; padding: 5px;">
+                                        <span t-field="o.degat_sur_vehicule2"/>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <p class="text-center text-muted mt-4">
+                                        <em>Accident sans adversaire</em>
+                                    </p>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Circumstances -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 style="border-bottom: 1px solid #ccc;">Circonstances de l'accident</h5>
+                                <div style="min-height: 60px; border: 1px solid #ccc; padding: 8px;">
+                                    <span t-field="o.circonstances"/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fault -->
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <p><strong>Fautif :</strong>
+                                    <span t-if="o.fautif == 'notre_vehicule'">Notre véhicule</span>
+                                    <span t-if="o.fautif == 'tiers'">Le tiers</span>
+                                    <span t-if="o.fautif == 'partage'">Responsabilité partagée</span>
+                                    <span t-if="o.fautif == 'non_determine'">Non déterminé</span>
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p><strong>Type d'accident :</strong>
+                                    <span t-if="o.accident_type == 'tiers'">Avec adversaire</span>
+                                    <span t-if="o.accident_type == 'sans'">Sans adversaire</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Repair and cost info -->
+                        <div class="row mt-3" style="border-top: 1px solid #ccc; padding-top: 10px;">
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Coût de réparation :</strong></td>
+                                        <td><span t-field="o.cout_reparation"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Durée d'immobilisation :</strong></td>
+                                        <td>
+                                            <span t-field="o.Duree_immobilisation"/>
+                                            <span t-if="o.time_type == 'day'"> jour(s)</span>
+                                            <span t-if="o.time_type == 'month'"> mois</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>N° Sinistre :</strong></td>
+                                        <td><span t-field="o.numero_sinistre"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Montant règlement :</strong></td>
+                                        <td><span t-field="o.montant_reparation" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Signatures -->
+                        <div class="row mt-5">
+                            <div class="col-6 text-center">
+                                <p style="border-top: 1px solid #000; width: 200px; margin: 0 auto; padding-top: 5px;">
+                                    Signature conducteur A
+                                </p>
+                            </div>
+                            <div class="col-6 text-center" t-if="o.accident_type == 'tiers'">
+                                <p style="border-top: 1px solid #000; width: 200px; margin: 0 auto; padding-top: 5px;">
+                                    Signature conducteur B
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </main>
+        </t>
+    </template>
+
+    <record id="action_report_constat" model="ir.actions.report">
+        <field name="name">Constat Amiable</field>
+        <field name="model">sinistre</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sinistre.constat_report_template</field>
+        <field name="report_file">sinistre.constat_report_template</field>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

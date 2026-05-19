@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Ajouter le champ contact_category dans la vue formulaire standard -->
+    <record id="view_partner_form_inherit_commercial" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.commercial</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <field name="company_type" position="after">
+                <field name="contact_category" widget="radio" invisible="True"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Masquer smart buttons et pages pour Contact externe via contexte -->
+    <record id="view_partner_form_hide_for_externe" model="ir.ui.view">
+        <field name="name">res.partner.form.hide.for.externe</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+
+            <!-- ====== SMART BUTTONS : masquer tout sauf Réunions et Opportunités ====== -->
+
+            <!-- Masquer : Ventes (sale) -->
+            <xpath expr="//button[@name='action_view_sale_order']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+
+
+            <!-- Masquer : Achats (purchase) -->
+            <xpath expr="//button[.//field[@name='purchase_order_count']]" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+
+            <!-- Masquer : Facturé (account) -->
+            <xpath expr="//button[@name='action_view_partner_invoices']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+
+            <!-- Masquer : Factures fournisseur (account) -->
+            <xpath expr="//button[.//field[@name='supplier_invoice_count']]" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe') or supplier_invoice_count == 0</attribute>
+            </xpath>
+
+            <!-- Masquer : Employés (hr) -->
+            <xpath expr="//button[@name='action_open_employees']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe') or employees_count == 0</attribute>
+            </xpath>
+
+            <!-- Masquer : Taux de livraison dans les temps (purchase_stock) -->
+            <xpath expr="//button[.//field[@name='on_time_rate']]" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+
+            <!-- Masquer : Engagements (custom_project) -->
+            <xpath expr="//button[@name='action_open_engagments']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe') or is_company != False</attribute>
+            </xpath>
+
+            <!-- ====== PAGES : masquer tout sauf Notes internes ====== -->
+
+            <!-- Masquer : Contacts & Adresses -->
+            <xpath expr="//page[@name='contact_addresses']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+
+            <!-- Masquer : Ventes & Achats -->
+            <xpath expr="//page[@name='sales_purchases']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+
+            <!-- Masquer : Facturation (company) -->
+            <xpath expr="//page[@name='accounting']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe') or (not is_company and parent_id)</attribute>
+            </xpath>
+
+            <!-- Masquer : Facturation (disabled) -->
+            <xpath expr="//page[@name='accounting_disabled']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe') or is_company or not parent_id</attribute>
+            </xpath>
+
+            <!-- Masquer : Coordonnées fiscales (HR_customization) -->
+            <xpath expr="//page[@name='information_fiscale']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+
+            <!-- Masquer : Suivi Sous-traitant (custom_project) -->
+            <xpath expr="//page[@name='suivi_sous_traitant']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+
+            <!-- Masquer : Type de contact (HR_customization) -->
+            <xpath expr="//field[@name='contact_type']" position="attributes">
+                <attribute name="invisible">context.get('is_contact_externe')</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- Action : Contact externe (avec flag contexte) -->
+    <record id="action_contact_externe" model="ir.actions.act_window">
+        <field name="name">Contact externe</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="domain">[('contact_category', '=', 'interne')]</field>
+        <field name="context">{'default_contact_category': 'interne', 'is_contact_externe': True}</field>
+    </record>
+
+    <!-- Action : Contact interne -->
+    <record id="action_contact_interne" model="ir.actions.act_window">
+        <field name="name">Contact interne</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="domain">[('contact_category', '=', 'externe')]</field>
+        <field name="context">{'default_contact_category': 'externe'}</field>
+    </record>
+
+    <!-- Masquer le menu original Contacts -->
+    <record id="contacts.res_partner_menu_contacts" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Sous-menu : Contact externe -->
+    <menuitem id="menu_contact_externe"
+              name="Contact externe"
+              parent="contacts.menu_contacts"
+              action="action_contact_externe"
+              sequence="1"/>
+
+    <!-- Sous-menu : Contact interne -->
+    <menuitem id="menu_contact_interne"
+              name="Contact interne"
+              parent="contacts.menu_contacts"
+              action="action_contact_interne"
+              sequence="0"/>
+
+</odoo>

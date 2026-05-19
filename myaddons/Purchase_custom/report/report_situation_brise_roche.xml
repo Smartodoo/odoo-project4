@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ===== Action Report ===== -->
+        <record id="action_report_situation_brise_roche" model="ir.actions.report">
+            <field name="name">Situation Brise Roche</field>
+            <field name="model">situation.brise.roche</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">Purchase_custom.report_situation_brise_roche_document</field>
+            <field name="report_file">Purchase_custom.report_situation_brise_roche_document</field>
+            <field name="binding_model_id" ref="model_situation_brise_roche"/>
+            <field name="binding_type">report</field>
+            <field name="print_report_name">'Situation_Brise_Roche_%s' % (object.name or '').replace('/', '_')</field>
+        </record>
+
+        <!-- ===== Template ===== -->
+        <template id="report_situation_brise_roche_document">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="custom_project.etb_tph_layout">
+                        <div class="page sbr-doc">
+                            <style>
+                                .sbr-doc { font-size: 13pt !important; line-height: 1.5; }
+                                .sbr-doc * { font-size: inherit; }
+                                .sbr-title { color: #1F4E79; text-align: center; letter-spacing: 2px;
+                                             border-bottom: 3px solid #1F4E79; padding-bottom: 10pt;
+                                             margin-bottom: 18pt; font-weight: 700; font-size: 22pt !important; }
+                                .sbr-section-title { background: #1F4E79; color: #fff; padding: 8pt 12pt;
+                                                     margin-top: 14pt; margin-bottom: 10pt;
+                                                     border-radius: 3px; font-size: 15pt !important; font-weight: 700;
+                                                     letter-spacing: 1pt; text-transform: uppercase; }
+                                .sbr-info-card { border: 1px solid #d0dde9; border-left: 5px solid #1F4E79;
+                                                 padding: 8pt 12pt; margin-bottom: 7pt;
+                                                 background: #f7fafc; border-radius: 3px; }
+                                .sbr-info-card .label { color: #5a6c7d; font-size: 11pt !important;
+                                                        text-transform: uppercase; letter-spacing: 0.3pt;
+                                                        font-weight: 700; display: block; margin-bottom: 3pt; }
+                                .sbr-info-card .value { color: #1a202c; font-size: 14pt !important;
+                                                        font-weight: 600; word-break: break-word; }
+                                .sbr-table { width: 100%; border-collapse: collapse; margin-top: 8pt;
+                                             font-size: 13pt !important; }
+                                .sbr-table thead { background: #1F4E79; color: #fff; }
+                                .sbr-table th { padding: 9pt; font-size: 13pt !important; font-weight: 700;
+                                                text-align: left; }
+                                .sbr-table td { padding: 8pt 10pt; font-size: 13pt !important;
+                                                border-bottom: 1px solid #dee2e6; }
+                                .sbr-totaux { background: #1F4E79; color: #fff; padding: 10pt 14pt;
+                                              border-radius: 3px; margin-top: 14pt;
+                                              font-size: 16pt !important; font-weight: 700; text-align: right; }
+                                .sbr-observation { border: 1px solid #d0dde9; border-radius: 3px;
+                                                   padding: 10pt 14pt; background: #fffdf5;
+                                                   min-height: 40pt; font-size: 13pt !important; }
+                                .sbr-sign-box { border-top: 1.5px solid #333; margin-top: 50pt;
+                                                padding-top: 8pt; text-align: center; font-weight: 700;
+                                                font-size: 13pt !important; }
+                            </style>
+
+                            <h2 class="sbr-title">SITUATION BRISE ROCHE</h2>
+
+                            <!-- ===== Bloc Référence ===== -->
+                            <div class="sbr-section-title">Identification</div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="sbr-info-card">
+                                        <span class="label">Référence</span>
+                                        <span class="value" t-esc="o.name or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="sbr-info-card">
+                                        <span class="label">Date</span>
+                                        <span class="value">
+                                            <t t-esc="o.date.strftime('%d/%m/%Y') if o.date else '—'"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="sbr-info-card">
+                                        <span class="label">N° Bon</span>
+                                        <span class="value" t-esc="o.n_bon or '—'"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ===== Bloc Engin & Projet ===== -->
+                            <div class="sbr-section-title">Engin &amp; Projet</div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="sbr-info-card">
+                                        <span class="label">Type d'engin</span>
+                                        <span class="value" t-esc="o.type_engin or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="sbr-info-card">
+                                        <span class="label">Engin</span>
+                                        <span class="value" t-esc="o.engin or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="sbr-info-card">
+                                        <span class="label">Projet</span>
+                                        <span class="value" t-esc="o.project_id.name or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="sbr-info-card">
+                                        <span class="label">Sous-traitant</span>
+                                        <span class="value" t-esc="o.sous_traitant_id.name or '—'"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ===== Bloc Calcul ===== -->
+                            <div class="sbr-section-title">Détails du calcul</div>
+                            <table class="sbr-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:40%;">Désignation</th>
+                                        <th style="width:20%; text-align:right;">Nombre d'heures</th>
+                                        <th style="width:20%; text-align:right;">Total Journalité</th>
+                                        <th style="width:20%; text-align:right;">Prix unitaire / jour</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <strong t-esc="o.engin or 'Brise Roche'"/>
+                                            <t t-if="o.type_engin"> — <span t-esc="o.type_engin"/></t>
+                                        </td>
+                                        <td style="text-align:right;">
+                                            <t t-esc="'%.2f' % (o.nombre_heures or 0.0)"/> h
+                                        </td>
+                                        <td style="text-align:right;">
+                                            <t t-esc="'%.2f' % (o.total_journalite or 0.0)"/>
+                                        </td>
+                                        <td style="text-align:right;">
+                                            <t t-esc="'%.2f' % (o.prix_unitaire_jour or 0.0)"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- ===== Total ===== -->
+                            <div class="sbr-totaux">
+                                MONTANT TOTAL :
+                                <t t-esc="'%.2f' % (o.montant or 0.0)"/> DA
+                            </div>
+
+                            <!-- ===== Observation ===== -->
+                            <t t-if="o.observation">
+                                <div class="sbr-section-title">Observation</div>
+                                <div class="sbr-observation">
+                                    <span t-esc="o.observation"/>
+                                </div>
+                            </t>
+
+                            <!-- ===== Signatures ===== -->
+                            <div class="row mt-5">
+                                <div class="col-4">
+                                    <div class="sbr-sign-box">Signature Sous-traitant</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="sbr-sign-box">Signature Responsable</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="sbr-sign-box">Signature Directeur</div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_tree_vente_bloc" model="ir.ui.view">
+        <field name="name">vente.bloc.tree</field>
+        <field name="model">vente.bloc</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="projet_id"/>
+                <field name="nbre_etage"/>
+                <field name="mezzanine"/>
+                <field name="nbre_entre_sols"/>
+                <field name="nbre_sous_sols"/>
+                <field name="appartement_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_form_vente_bloc" model="ir.ui.view">
+        <field name="name">vente.bloc.form</field>
+        <field name="model">vente.bloc</field>
+        <field name="arch" type="xml">
+            <form string="Bloc">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="projet_id"/>
+                            <field name="nbre_etage"/>
+                            <field name="mezzanine"/>
+                        </group>
+                        <group>
+                            <field name="nbre_entre_sols"/>
+                            <field name="nbre_sous_sols"/>
+                            <field name="appartement_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Étages">
+                            <field name="etage_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="appartement_count"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_vente_bloc" model="ir.actions.act_window">
+        <field name="name">Blocs</field>
+        <field name="res_model">vente.bloc</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

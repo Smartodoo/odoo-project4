@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <!-- Security Category for Achats -->
+        <record id="group_achat_category" model="ir.module.category">
+            <field name="name">Achats Personnalisés</field>
+            <field name="description">Gestion des achats et versements fournisseurs</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- Lecture Seule Achats Group -->
+        <record id="group_achat_lecture_seule" model="res.groups">
+            <field name="name">Achats - Lecture Seule</field>
+            <field name="category_id" ref="Purchase_custom.group_achat_category"/>
+            <field name="comment">Accès en lecture seule sur les bons de commande.</field>
+        </record>
+
+        <!-- Lecture Seule Versements Fournisseurs Group -->
+        <record id="group_versement_lecture_seule" model="res.groups">
+            <field name="name">Versements Fournisseurs - Lecture Seule</field>
+            <field name="category_id" ref="Purchase_custom.group_achat_category"/>
+            <field name="comment">Accès en lecture seule sur les versements fournisseurs.</field>
+        </record>
+    </data>
+</odoo>

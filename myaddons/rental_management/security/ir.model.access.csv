@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_property_apartment_user,property.apartment.user,model_property_apartment,base.group_user,1,1,1,1
+access_property_rental_user,property.rental.user,model_property_rental,base.group_user,1,1,1,1
+access_property_seasonal_rate_user,property.seasonal.rate.user,model_property_seasonal_rate,base.group_user,1,1,1,1
+access_property_inspection_user,property.inspection.user,model_property_inspection,base.group_user,1,1,1,1
+access_rental_payment_user,rental.payment.user,model_rental_payment,base.group_user,1,1,1,1
+access_rental_service_user,rental.service.user,model_rental_service,base.group_user,1,1,1,1
+access_property_maintenance_user,property.maintenance.user,model_property_maintenance,base.group_user,1,1,1,1
+access_rental_dashboard_user,rental.dashboard.user,model_rental_dashboard,base.group_user,1,1,1,0
+access_property_apartment_portal,property.apartment.portal,model_property_apartment,base.group_portal,1,0,0,0
+access_property_rental_portal,property.rental.portal,model_property_rental,base.group_portal,1,0,0,0
+access_rental_payment_portal,rental.payment.portal,model_rental_payment,base.group_portal,1,0,0,0

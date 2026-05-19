@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Séquence VER/0001 -->
+    <record id="seq_commercial_versement" model="ir.sequence">
+        <field name="name">Versement Commercial</field>
+        <field name="code">commercial.versement</field>
+        <field name="prefix">VER/</field>
+        <field name="padding">4</field>
+    </record>
+
+    <!-- Vue formulaire -->
+    <record id="commercial_versement_form" model="ir.ui.view">
+        <field name="name">commercial.versement.form</field>
+        <field name="model">commercial.versement</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirmer" string="Confirmer" type="object"
+                            class="btn-primary" invisible="state != 'brouillon'"
+                            groups="commercial.group_commercial_admin"/>
+                    <button name="action_rembourser" string="Rembourser" type="object"
+                            class="btn-warning" invisible="state not in ('confirme', 'partiellement_rembourse')"
+                            groups="commercial.group_commercial_admin"/>
+                    <button name="action_print_versement" string="Imprimer versement"
+                            type="object" class="btn-secondary"
+                            invisible="state == 'brouillon'"/>
+                    <button name="action_print_remboursement" string="Imprimer remboursement"
+                            type="object" class="btn-secondary"
+                            invisible="state == 'brouillon' or not remboursement_ids"/>
+                    <field name="state" widget="statusbar" statusbar_visible="brouillon,confirme"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="lot_id" readonly="1" force_save="1"
+                                   options="{'no_create': True, 'no_create_edit': True, 'no_open': True}"/>
+                            <field name="client_id" readonly="1" force_save="1"
+                                   options="{'no_open': True}"/>
+                            <field name="projet_id" readonly="1" force_save="1"
+                                   options="{'no_open': True}"/>
+                            <field name="bloc_id" readonly="1" force_save="1"
+                                   options="{'no_open': True}"/>
+                        </group>
+                        <group>
+                            <field name="montant" readonly="state != 'brouillon'"/>
+                            <field name="mode_paiement" readonly="state != 'brouillon'"/>
+                            <field name="date" readonly="state != 'brouillon'"/>
+                            <field name="date_encaissement" readonly="1" invisible="not date_encaissement"/>
+                            <field name="caisse_entry_id" readonly="1" invisible="not caisse_entry_id"/>
+                            <field name="montant_total_rembourse" invisible="state in ('brouillon', 'confirme')"/>
+                            <field name="montant_restant" invisible="state in ('brouillon', 'confirme')"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" readonly="state != 'brouillon'" placeholder="Notes..."/>
+                    </group>
+                    <notebook invisible="not remboursement_ids">
+                        <page string="Remboursements">
+                            <field name="remboursement_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="montant_rembourse"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'brouillon'"
+                                           decoration-success="state == 'confirme'"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue liste -->
+    <record id="commercial_versement_tree" model="ir.ui.view">
+        <field name="name">commercial.versement.tree</field>
+        <field name="model">commercial.versement</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="is_commercial_admin" column_invisible="1"/>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="projet_id"/>
+                <field name="bloc_id" optional="hide"/>
+                <field name="lot_id"/>
+                <field name="date"/>
+                <field name="date_encaissement" optional="show"/>
+                <field name="montant"/>
+                <field name="mode_paiement"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'brouillon'"
+                       decoration-success="state == 'confirme'"
+                       decoration-warning="state == 'partiellement_rembourse'"
+                       decoration-danger="state == 'totalement_rembourse'"/>
+                <button name="action_notifier" string="Notifier" type="object"
+                        class="btn-primary btn-sm"
+                        invisible="state != 'brouillon' or is_commercial_admin or notified"/>
+                <button name="action_notifier" string="Notifié" type="object"
+                        class="btn-light btn-sm" disabled="1"
+                        invisible="state != 'brouillon' or is_commercial_admin or not notified"/>
+                <field name="notified" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue recherche -->
+    <record id="commercial_versement_search" model="ir.ui.view">
+        <field name="name">commercial.versement.search</field>
+        <field name="model">commercial.versement</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="projet_id"/>
+                <field name="lot_id"/>
+                <filter name="filter_brouillon" string="Brouillon" domain="[('state', '=', 'brouillon')]"/>
+                <filter name="filter_confirme" string="Confirmé" domain="[('state', '=', 'confirme')]"/>
+                <filter name="filter_partiellement" string="Partiellement remboursé" domain="[('state', '=', 'partiellement_rembourse')]"/>
+                <filter name="filter_totalement" string="Totalement remboursé" domain="[('state', '=', 'totalement_rembourse')]"/>
+                <separator/>
+                <filter name="filter_archive" string="Archivé" domain="[('active', '=', False)]"/>
+                <separator/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_client" string="Client" context="{'group_by': 'client_id'}"/>
+                    <filter name="group_projet" string="Projet" context="{'group_by': 'projet_id'}"/>
+                    <filter name="group_lot" string="Lot" context="{'group_by': 'lot_id'}"/>
+                    <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_versement_action" model="ir.actions.act_window">
+        <field name="name">Versements</field>
+        <field name="res_model">commercial.versement</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

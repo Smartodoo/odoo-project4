@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_seasonal_rate" model="ir.actions.act_window">
+        <field name="name">🌡️ Tarifs Saisonniers</field>
+        <field name="res_model">property.seasonal.rate</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_seasonal_rate_tree" model="ir.ui.view">
+        <field name="name">property.seasonal.rate.tree</field>
+        <field name="model">property.seasonal.rate</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="is_active == True"
+                  decoration-muted="is_active == False">
+                <field name="apartment_id"/>
+                <field name="season_name"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="price_adjustment"/>
+                <field name="is_active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_seasonal_rate_form" model="ir.ui.view">
+        <field name="name">property.seasonal.rate.form</field>
+        <field name="model">property.seasonal.rate</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="apartment_id"/>
+                            <field name="season_name"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group>
+                            <field name="price_adjustment"/>
+                            <field name="min_price_day"/>
+                            <field name="min_price_month"/>
+                            <field name="is_active"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Description visible par les clients..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_seasonal" name="🌡️ Tarifs Saisonniers"
+              parent="menu_rental_root" action="action_seasonal_rate"
+              sequence="30"/>
+</odoo>

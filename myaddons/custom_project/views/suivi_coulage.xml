@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============== SUIVI COULAGE (Parent) ============== -->
+
+    <!-- Tree View -->
+    <record id="view_suivi_coulage_tree" model="ir.ui.view">
+        <field name="name">suivi.coulage.tree</field>
+        <field name="model">suivi.coulage</field>
+        <field name="arch" type="xml">
+            <tree string="Suivi des Coulages">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="maitre_ouvrage"/>
+                <field name="entreprise_realisation"/>
+                <field name="bet_suivi"/>
+                <field name="line_count"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'in_progress'" decoration-success="state == 'done'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_suivi_coulage_form" model="ir.ui.view">
+        <field name="name">suivi.coulage.form</field>
+        <field name="model">suivi.coulage</field>
+        <field name="arch" type="xml">
+            <form string="Suivi des Coulages">
+                <header>
+                    <button name="action_in_progress" type="object" string="Démarrer" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_done" type="object" string="Terminer" class="btn-primary" invisible="state != 'in_progress'"/>
+                    <button name="action_draft" type="object" string="Remettre en Brouillon" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Informations Projet">
+                            <field name="project_id"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group string="Intervenants">
+                            <field name="maitre_ouvrage" placeholder="Ex: SARL INNOVATION"/>
+                            <field name="entreprise_realisation" placeholder="Ex: ETBTPH CHELIL MOKRANE"/>
+                            <field name="bet_suivi" placeholder="Ex: NABIL KHOMERI"/>
+                            <field name="responsable_suivi"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lignes de Coulage" name="lines">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" string="N°" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="bloc"/>
+                                    <field name="quantite"/>
+                                    <field name="centrale_beton"/>
+                                    <field name="date_coulage"/>
+                                    <field name="date_7_jours"/>
+                                    <field name="resultat_7_jours"/>
+                                    <field name="is_conforme_7" widget="boolean_toggle" readonly="1"/>
+                                    <field name="date_28_jours"/>
+                                    <field name="resultat_28_jours"/>
+                                    <field name="is_conforme_28" widget="boolean_toggle" readonly="1"/>
+                                    <field name="observation"/>
+                                    <field name="laboratoire"/>
+                                    <field name="temperature" optional="hide"/>
+                                    <field name="heure" optional="hide"/>
+                                    <field name="nb_eprouvettes" optional="hide"/>
+                                    <field name="state" widget="badge" decoration-info="state == 'pending'" decoration-warning="state == 'test_7'" decoration-success="state == 'done'"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Notes additionnelles..."/>
+                        </page>
+                    </notebook>
+                    <field name="company_id" invisible="1"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_suivi_coulage_search" model="ir.ui.view">
+        <field name="name">suivi.coulage.search</field>
+        <field name="model">suivi.coulage</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Suivi Coulages">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="maitre_ouvrage"/>
+                <field name="entreprise_realisation"/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="En Cours" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Terminé" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Projet" name="group_project" context="{'group_by': 'project_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Maître d'Ouvrage" name="group_maitre" context="{'group_by': 'maitre_ouvrage'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============== SUIVI COULAGE LINE ============== -->
+
+    <!-- Tree View for Lines (standalone) -->
+    <record id="view_suivi_coulage_line_tree" model="ir.ui.view">
+        <field name="name">suivi.coulage.line.tree</field>
+        <field name="model">suivi.coulage.line</field>
+        <field name="arch" type="xml">
+            <tree string="Lignes de Coulage" default_order="sequence">
+                <field name="sequence" string="N°"/>
+                <field name="coulage_id"/>
+                <field name="project_id"/>
+                <field name="name"/>
+                <field name="bloc"/>
+                <field name="quantite"/>
+                <field name="centrale_beton"/>
+                <field name="date_coulage"/>
+                <field name="date_7_jours"/>
+                <field name="resultat_7_jours"/>
+                <field name="is_conforme_7" widget="boolean_toggle"/>
+                <field name="date_28_jours"/>
+                <field name="resultat_28_jours"/>
+                <field name="is_conforme_28" widget="boolean_toggle"/>
+                <field name="laboratoire"/>
+                <field name="state" widget="badge" decoration-info="state == 'pending'" decoration-warning="state == 'test_7'" decoration-success="state == 'done'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View for Lines -->
+    <record id="view_suivi_coulage_line_form" model="ir.ui.view">
+        <field name="name">suivi.coulage.line.form</field>
+        <field name="model">suivi.coulage.line</field>
+        <field name="arch" type="xml">
+            <form string="Ligne de Coulage">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,test_7,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Informations Générales">
+                            <field name="sequence" string="N°"/>
+                            <field name="name"/>
+                            <field name="coulage_id"/>
+                            <field name="project_id"/>
+                            <field name="bloc"/>
+                        </group>
+                        <group string="Coulage">
+                            <field name="centrale_beton"/>
+                            <field name="quantite"/>
+                            <field name="date_coulage"/>
+                            <field name="temperature"/>
+                            <field name="heure"/>
+                            <field name="nb_eprouvettes"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Test à 7 Jours">
+                            <field name="date_7_jours"/>
+                            <field name="resultat_7_jours"/>
+                            <field name="is_conforme_7" widget="boolean_toggle"/>
+                        </group>
+                        <group string="Test à 28 Jours">
+                            <field name="date_28_jours"/>
+                            <field name="resultat_28_jours"/>
+                            <field name="is_conforme_28" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <group string="Informations Complémentaires">
+                        <field name="laboratoire"/>
+                        <field name="observation"/>
+                    </group>
+                    <field name="company_id" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View for Lines -->
+    <record id="view_suivi_coulage_line_search" model="ir.ui.view">
+        <field name="name">suivi.coulage.line.search</field>
+        <field name="model">suivi.coulage.line</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Lignes">
+                <field name="name"/>
+                <field name="coulage_id"/>
+                <field name="project_id"/>
+                <field name="centrale_beton"/>
+                <field name="laboratoire"/>
+                <filter string="En attente" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Test 7j effectué" name="test_7" domain="[('state', '=', 'test_7')]"/>
+                <filter string="Terminé" name="done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter string="Conforme 7j" name="conforme_7" domain="[('is_conforme_7', '=', True)]"/>
+                <filter string="Non Conforme 7j" name="non_conforme_7" domain="[('is_conforme_7', '=', False), ('resultat_7_jours', '>', 0)]"/>
+                <filter string="Conforme 28j" name="conforme_28" domain="[('is_conforme_28', '=', True)]"/>
+                <filter string="Non Conforme 28j" name="non_conforme_28" domain="[('is_conforme_28', '=', False), ('resultat_28_jours', '>', 0)]"/>
+                <separator/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Suivi Coulage" name="group_coulage" context="{'group_by': 'coulage_id'}"/>
+                    <filter string="Projet" name="group_project" context="{'group_by': 'project_id'}"/>
+                    <filter string="Bloc" name="group_bloc" context="{'group_by': 'bloc'}"/>
+                    <filter string="Centrale à Béton" name="group_centrale" context="{'group_by': 'centrale_beton'}"/>
+                    <filter string="Laboratoire" name="group_labo" context="{'group_by': 'laboratoire'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============== ACTIONS ============== -->
+
+    <!-- Action for Suivi Coulage -->
+    <record id="action_suivi_coulage" model="ir.actions.act_window">
+        <field name="name">Suivi des Coulages</field>
+        <field name="res_model">suivi.coulage</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer un nouveau suivi de coulage
+            </p>
+            <p>
+                Gérez le suivi des coulages de béton pour vos projets BTP.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for Lines (all lines view) -->
+    <record id="action_suivi_coulage_line" model="ir.actions.act_window">
+        <field name="name">Toutes les Lignes de Coulage</field>
+        <field name="res_model">suivi.coulage.line</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune ligne de coulage
+            </p>
+        </field>
+    </record>
+
+    <!-- ============== MENUS ============== -->
+
+    
+
+    <!-- ============== INHERIT PROJECT FORM ============== -->
+
+    <record id="view_custom_project_form_inherit_coulage" model="ir.ui.view">
+        <field name="name">custom.project.form.inherit.coulage</field>
+        <field name="model">custom.project</field>
+        <field name="inherit_id" ref="custom_project.view_custom_project_form"/>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <!-- Add stat button for coulages -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_coulages" type="object" class="oe_stat_button" icon="fa-flask">
+                    <div class="o_stat_info">
+                        <field name="coulage_count" widget="statinfo" string="Coulages"/>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

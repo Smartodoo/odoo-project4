@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_client_location_view_tree" model="ir.ui.view">
+        <field name="name">commercial.client.location.tree</field>
+        <field name="model">commercial.client.location</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="nom"/>
+                <field name="genre"/>
+                <field name="telephone" widget="phone"/>
+                <field name="adresse" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_client_location_view_form" model="ir.ui.view">
+        <field name="name">commercial.client.location.form</field>
+        <field name="model">commercial.client.location</field>
+        <field name="arch" type="xml">
+            <form string="Client Location">
+                <header>
+                    <button name="action_print_reglement_interieur" type="object"
+                            string="Imprimer Règlement Intérieur"
+                            class="btn btn-secondary" icon="fa-print"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_1920'}"/>
+                    <field name="client_card_html" nolabel="1" widget="html" readonly="1"
+                           style="margin-left:auto;margin-right:8px;margin-top:8px;pointer-events:none;"/>
+
+                    <field name="lot_cards_html" nolabel="1" colspan="2"
+                           readonly="1" class="oe_span"/>
+
+                    <notebook>
+                        <page string="Lots Location" name="lots_location">
+                            <field name="commercial_projet_id" invisible="1"/>
+                            <field name="commercial_bloc_id" invisible="1"/>
+                            <field name="commercial_etage_id" invisible="1"/>
+                            <field name="commercial_lot_state_filter" invisible="1"/>
+                            <widget name="client_location_lot_search_bar"/>
+                            <field name="lot_ids" nolabel="1"
+                                   context="{'client_location_name': nom, 'client_location_id': id}"
+                                   domain="[('is_location', '=', True), ('projet_id', '=?', commercial_projet_id), ('bloc_id', '=?', commercial_bloc_id), ('etage_id', '=?', commercial_etage_id), ('state', 'not in', ['reserve', 'vendu'])]">
+                                <tree editable="bottom"
+                                      decoration-success="state == 'disponible'"
+                                      decoration-info="state == 'en_option'"
+                                      decoration-warning="state == 'reserve'"
+                                      decoration-bf="state == 'loue'"
+                                      decoration-danger="state == 'vendu'">
+                                    <field name="numero_lot" readonly="1"/>
+                                    <field name="projet_id" readonly="1" options="{'no_open': True}"/>
+                                    <field name="bloc_id" readonly="1" options="{'no_open': True}"/>
+                                    <field name="etage_id" readonly="1" options="{'no_open': True}"/>
+                                    <field name="surface_globale" readonly="1"/>
+                                    <field name="montant_global" readonly="1"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'disponible'"
+                                           decoration-info="state == 'en_option'"
+                                           decoration-warning="state == 'reserve'"
+                                           decoration-bf="state == 'loue'"
+                                           decoration-danger="state == 'vendu'"/>
+                                    <button name="action_view_location" type="object"
+                                            string="Location"
+                                            class="btn btn-link"
+                                            icon="fa-home"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Lots Projets" name="lots_autres">
+                            <field name="commercial_autre_projet_id" invisible="1"/>
+                            <field name="commercial_autre_bloc_id" invisible="1"/>
+                            <field name="commercial_autre_etage_id" invisible="1"/>
+                            <widget name="client_location_autre_lot_search_bar"/>
+                            <field name="lot_autre_ids" nolabel="1"
+                                   context="{'client_location_name': nom, 'client_location_id': id}"
+                                   domain="[('is_location', '=', False), ('projet_id', '=?', commercial_autre_projet_id), ('bloc_id', '=?', commercial_autre_bloc_id), ('etage_id', '=?', commercial_autre_etage_id), ('state', 'not in', ['reserve', 'vendu'])]">
+                                <tree editable="bottom"
+                                      decoration-success="state == 'disponible'"
+                                      decoration-info="state == 'en_option'"
+                                      decoration-warning="state == 'reserve'"
+                                      decoration-danger="state == 'vendu'">
+                                    <field name="numero_lot" readonly="1"/>
+                                    <field name="projet_id" readonly="1" options="{'no_open': True}"/>
+                                    <field name="bloc_id" readonly="1" options="{'no_open': True}"/>
+                                    <field name="etage_id" readonly="1" options="{'no_open': True}"/>
+                                    <field name="surface_globale" readonly="1"/>
+                                    <field name="montant_global" readonly="1"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'disponible'"
+                                           decoration-info="state == 'en_option'"
+                                           decoration-warning="state == 'reserve'"
+                                           decoration-danger="state == 'vendu'"/>
+                                    <button name="action_view_location" type="object"
+                                            string="Location"
+                                            class="btn btn-link"
+                                            icon="fa-home"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Historique" name="historique">
+                            <field name="location_ids" nolabel="1"
+                                   domain="[('state', '=', 'termine')]"
+                                   readonly="1">
+                                <tree create="false" edit="false" delete="false">
+                                    <field name="name"/>
+                                    <field name="lot_id"/>
+                                    <field name="projet_id"/>
+                                    <field name="bloc_id"/>
+                                    <field name="type_contrat"/>
+                                    <field name="date_debut"/>
+                                    <field name="date_fin"/>
+                                    <field name="montant_mensuel"/>
+                                    <field name="total_versements"/>
+                                    <field name="state" widget="badge"
+                                           decoration-muted="state == 'termine'"/>
+                                    <button name="action_open_location_form" type="object"
+                                            string="Location"
+                                            class="btn btn-link"
+                                            icon="fa-home"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Fiche client" name="fiche_client">
+                            <group>
+                                <group string="Identité">
+                                    <field name="nom" required="1"/>
+                                    <field name="genre" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="telephone" widget="phone"/>
+                                </group>
+                                <group string="Naissance">
+                                    <field name="date_naissance"/>
+                                    <field name="lieu_naissance"/>
+                                    <field name="pays_naissance" options="{'no_create': True, 'no_create_edit': True}"/>
+                                    <field name="numero_acte_naissance"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Adresse" colspan="2">
+                                    <field name="adresse" placeholder="Adresse complète du client..." nolabel="1" colspan="2"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+
+                    <field name="company_id" invisible="1"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="commercial_client_location_view_search" model="ir.ui.view">
+        <field name="name">commercial.client.location.search</field>
+        <field name="model">commercial.client.location</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="nom"/>
+                <field name="telephone"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_client_location_action" model="ir.actions.act_window">
+        <field name="name">Réservations</field>
+        <field name="res_model">commercial.client.location</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="commercial_client_location_view_search"/>
+    </record>
+
+</odoo>

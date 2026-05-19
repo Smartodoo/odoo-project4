@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Recap Tree View -->
+    <record id="commercial_location_recap_view_tree" model="ir.ui.view">
+        <field name="name">commercial.location.recap.tree</field>
+        <field name="model">commercial.location</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="annee"/>
+                <field name="lot_id"/>
+                <field name="client_location_id"/>
+                <field name="type_contrat"/>
+                <field name="montant_mensuel"/>
+                <field name="montant_annuel" sum="Total annuel"/>
+                <field name="nombre_versements"/>
+                <field name="total_versements" sum="Total versements"/>
+                <field name="reste_a_payer" sum="Total reste"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'brouillon'"
+                       decoration-success="state == 'en_cours'"
+                       decoration-muted="state == 'termine'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Recap Search View -->
+    <record id="commercial_location_recap_view_search" model="ir.ui.view">
+        <field name="name">commercial.location.recap.search</field>
+        <field name="model">commercial.location</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="lot_id"/>
+                <field name="client_location_id"/>
+                <field name="annee"/>
+                <filter name="en_cours" string="En cours"
+                        domain="[('state', '=', 'en_cours')]"/>
+                <filter name="termine" string="Terminé"
+                        domain="[('state', '=', 'termine')]"/>
+                <separator/>
+                <group expand="1" string="Regrouper par">
+                    <filter name="group_annee" string="Année"
+                            context="{'group_by': 'annee'}"/>
+                    <filter name="group_lot" string="Lot"
+                            context="{'group_by': 'lot_id'}"/>
+                    <filter name="group_client" string="Client"
+                            context="{'group_by': 'client_location_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Recap Action -->
+    <record id="commercial_recap_location_action" model="ir.actions.act_window">
+        <field name="name">Récap Location</field>
+        <field name="res_model">commercial.location</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="commercial_location_recap_view_search"/>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Server Action pour aperçu PDF des enregistrements sélectionnés -->
+    <record id="action_preview_recap_location_multi" model="ir.actions.server">
+        <field name="name">Aperçu PDF</field>
+        <field name="model_id" ref="commercial.model_commercial_location"/>
+        <field name="binding_model_id" ref="commercial.model_commercial_location"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_preview_report_multi()</field>
+    </record>
+
+</odoo>

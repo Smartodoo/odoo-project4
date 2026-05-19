@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vue Form -->
+    <record id="view_reservation_parking_form" model="ir.ui.view">
+        <field name="name">commercial.reservation.parking.form</field>
+        <field name="model">commercial.reservation.parking</field>
+        <field name="arch" type="xml">
+            <form string="Réservation Parking">
+                <header>
+                    <button name="action_print_fiche_parking" type="object"
+                            string="Imprimer Fiche Parking"
+                            class="btn btn-secondary" icon="fa-print"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="client_id" options="{'no_open': True}" readonly="context.get('default_client_id')"/>
+                            <field name="allowed_parking_ids" invisible="1"/>
+                            <field name="parking_id" options="{'no_open': True}"/>
+                            <field name="date_reservation"/>
+                        </group>
+                        <group>
+                            <field name="projet_id" readonly="1" options="{'no_open': True}"/>
+                            <field name="bloc_id" readonly="1" options="{'no_open': True}"/>
+                            <field name="etage_id" readonly="1" options="{'no_open': True}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="modalite_paiement"/>
+                        <field name="conditions"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_reservation_parking" model="ir.actions.act_window">
+        <field name="name">Réservations Parking</field>
+        <field name="res_model">commercial.reservation.parking</field>
+        <field name="view_mode">form</field>
+    </record>
+
+</odoo>

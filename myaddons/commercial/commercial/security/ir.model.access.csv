@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_commercial_projet,commercial.projet,model_commercial_projet,base.group_user,1,1,1,1
+access_commercial_bloc,commercial.bloc,model_commercial_bloc,base.group_user,1,1,1,1
+access_commercial_lot,commercial.lot,model_commercial_lot,base.group_user,1,1,1,1
+access_commercial_etage,commercial.etage,model_commercial_etage,base.group_user,1,1,1,1
+access_commercial_type_projet,commercial.type.projet,model_commercial_type_projet,base.group_user,1,1,1,1
+access_commercial_categorie,commercial.categorie,model_commercial_categorie,base.group_user,1,1,1,1
+access_commercial_type_lot,commercial.type.lot,model_commercial_type_lot,base.group_user,1,1,1,1
+access_commercial_nature_categorie,commercial.nature.categorie,model_commercial_nature_categorie,base.group_user,1,1,1,1

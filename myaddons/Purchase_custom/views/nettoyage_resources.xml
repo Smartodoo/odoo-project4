@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ===================== CAMION ===================== -->
+        <record id="nettoyage_camion_view_tree" model="ir.ui.view">
+            <field name="name">nettoyage.camion.tree</field>
+            <field name="model">nettoyage.camion</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="active" optional="hide"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="nettoyage_camion_view_form" model="ir.ui.view">
+            <field name="name">nettoyage.camion.form</field>
+            <field name="model">nettoyage.camion</field>
+            <field name="arch" type="xml">
+                <form string="Camion">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="Ex: 12345-AB-16"/></h1>
+                        </div>
+                        <group>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="nettoyage_camion_view_search" model="ir.ui.view">
+            <field name="name">nettoyage.camion.search</field>
+            <field name="model">nettoyage.camion</field>
+            <field name="arch" type="xml">
+                <search string="Recherche Camion">
+                    <field name="name"/>
+                    <filter name="filter_inactive" string="Archivés" domain="[('active','=',False)]"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="nettoyage_camion_action" model="ir.actions.act_window">
+            <field name="name">Camions</field>
+            <field name="res_model">nettoyage.camion</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="nettoyage_camion_view_search"/>
+        </record>
+
+        <!-- ===================== CHAUFFEUR ===================== -->
+        <record id="nettoyage_chauffeur_view_tree" model="ir.ui.view">
+            <field name="name">nettoyage.chauffeur.tree</field>
+            <field name="model">nettoyage.chauffeur</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="active" optional="hide"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="nettoyage_chauffeur_view_form" model="ir.ui.view">
+            <field name="name">nettoyage.chauffeur.form</field>
+            <field name="model">nettoyage.chauffeur</field>
+            <field name="arch" type="xml">
+                <form string="Chauffeur">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="Nom du chauffeur"/></h1>
+                        </div>
+                        <group>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="nettoyage_chauffeur_view_search" model="ir.ui.view">
+            <field name="name">nettoyage.chauffeur.search</field>
+            <field name="model">nettoyage.chauffeur</field>
+            <field name="arch" type="xml">
+                <search string="Recherche Chauffeur">
+                    <field name="name"/>
+                    <filter name="filter_inactive" string="Archivés" domain="[('active','=',False)]"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="nettoyage_chauffeur_action" model="ir.actions.act_window">
+            <field name="name">Chauffeurs</field>
+            <field name="res_model">nettoyage.chauffeur</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="nettoyage_chauffeur_view_search"/>
+        </record>
+
+        <!-- ===================== MENUS ===================== -->
+        <menuitem id="nettoyage_camion_menu"
+                  name="Camions"
+                  parent="menu_situation_parent_project"
+                  action="nettoyage_camion_action"
+                  sequence="10"/>
+
+        <menuitem id="nettoyage_chauffeur_menu"
+                  name="Chauffeurs"
+                  parent="menu_situation_parent_project"
+                  action="nettoyage_chauffeur_action"
+                  sequence="11"/>
+    </data>
+</odoo>

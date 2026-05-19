@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Paper Format : Portrait A4 pour rapports commerciaux -->
+    <record id="paperformat_commercial_portrait" model="report.paperformat">
+        <field name="name">A4 Portrait - Commercial</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">55</field>
+        <field name="margin_bottom">25</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">45</field>
+    </record>
+
+    <!-- Layout personnalisé pour les rapports du module Commercial -->
+    <template id="external_layout_commercial">
+        <t t-set="o_company" t-value="docs.env.company"/>
+        <div class="header">
+            <div style="overflow: hidden; padding-bottom: 10px; border-bottom: 2px solid #003366;">
+                <img t-att-src="'/web/image/res.company/%s/logo' % o_company.id"
+                     style="height: 180px; float: left;"
+                     alt="Logo"/>
+                <div style="float: right; text-align: right; padding-top: 15px;">
+                    <div style="font-size: 22px; font-weight: bold; color: #003366;">SARL IMMOBILIERE INNOVATION</div>
+                    <div style="font-size: 15px; color: #333; margin-top: 6px;">Cité 05 Juillet Ex Gare Routière Bt « G »</div>
+                    <div style="font-size: 15px; color: #333;">Tizi Ouzou 15000</div>
+                    <div style="font-size: 15px; color: #333;">Algérie</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="article o_report_layout_standard">
+            <t t-out="0"/>
+        </div>
+
+        <div class="footer" style="border-top: 2px solid #003366; padding-top: 8px; text-align: center; font-size: 18px; color: #333;">
+            <p style="margin: 2px 0;">
+                Tél / Fax : 026 19 60 72 / Mobile : 0660 99 71 46 / 0660 98 35 54
+            </p>
+            <p style="margin: 2px 0;">
+                E-mail : contact@groupeinnovation-dz.com
+            </p>
+        </div>
+    </template>
+
+</odoo>

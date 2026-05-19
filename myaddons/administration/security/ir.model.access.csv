@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_administration_juridique_user,access.administration.juridique.user,model_administration_juridique,base.group_user,1,1,1,1
+access_administration_credit_bancaire_user,access.administration.credit.bancaire.user,model_administration_credit_bancaire,base.group_user,1,1,1,1
+access_administration_juridique_audience_historique,access.administration.juridique.audience.historique,model_administration_juridique_audience_historique,base.group_user,1,1,1,1
+access_administration_suivi_g50_user,access.administration.suivi.g50.user,model_administration_suivi_g50,base.group_user,1,1,1,1

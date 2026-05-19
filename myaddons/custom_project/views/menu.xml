@@ -1,0 +1,96 @@
+<odoo>
+    <!-- Root menus are defined in menu_base.xml -->
+
+    <record id="action_custom_project_internal" model="ir.actions.act_window">
+        <field name="name">Projets Internes</field>
+        <field name="res_model">custom.project</field>
+        <field name="domain">[('is_internal', '=', True),('company_id', '=', allowed_company_ids[0])]</field>
+        <field name="context">{'default_is_internal': True}</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer votre premier projet interne
+            </p>
+            <p>
+                Gérez vos projets internes avec suivi de progression et paiements.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_custom_project_external" model="ir.actions.act_window">
+        <field name="name">Projets Externes</field>
+        <field name="res_model">custom.project</field>
+        <field name="domain">[('is_internal', '=', False),('company_id', '=', allowed_company_ids[0])]</field>
+        <field name="context">{'default_is_internal': False}</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer votre premier projet externe
+            </p>
+            <p>
+                Gérez vos projets externes avec suivi de progression et paiements.
+            </p>
+        </field>
+    </record>
+    <menuitem id="custom_project_menuitem_interne" name="Projets Internes" parent="custom_project_main_menu"
+              action="action_custom_project_internal"/>
+    <menuitem id="custom_project_menuitem_externe" name="Projets Externes" parent="custom_project_main_menu"
+              action="action_custom_project_external"/>
+
+    <record id="action_open_subcontractors_individuels" model="ir.actions.act_window">
+        <field name="name">Sous-traitants</field>
+        <field name="res_model">res.partner</field>
+        <field name="domain">[('contact_type', '=', 'SUBCONTRACTOR'),('is_company','=',False),('company_id', '=',
+            allowed_company_ids[0])]
+        </field>
+        <field name="context">{'default_contact_type': 'SUBCONTRACTOR','default_is_company': False}</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="action_open_subcontractors_entreprises" model="ir.actions.act_window">
+        <field name="name">Sous-traitants</field>
+        <field name="res_model">res.partner</field>
+        <field name="domain">[('contact_type', '=', 'SUBCONTRACTOR'),('is_company','=',True), ('company_id', '=',
+            allowed_company_ids[0])]
+        </field>
+        <field name="context">{'default_contact_type': 'SUBCONTRACTOR','default_is_company': True}</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!-- Sous-traitants sub-menus (parent defined in menu_base.xml) -->
+    <menuitem id="s_traitons_individuels" name="Sous-traitants Individuels" parent="sous_traitons" sequence="1"
+              action="action_open_subcontractors_individuels"/>
+    <menuitem id="s_traitons_entreprises" name="Sous-traitants Entreprises" parent="sous_traitons" sequence="2"
+              action="action_open_subcontractors_entreprises"/>
+
+    <!-- ================= Décomptes BET ===================== -->
+    <!-- Root menus defined in menu_base.xml -->
+
+    <menuitem id="menu_decompte_bet"
+              name="Décomptes"
+              parent="menu_decompte_bet_root"
+              action="action_decompte_bet"
+              sequence="10"/>
+
+    <menuitem id="menu_decompte_bet_lines"
+              name="Toutes les lignes"
+              parent="menu_decompte_bet_root"
+              action="action_decompte_bet_line"
+              sequence="20"/>
+
+    <!-- ================= Suivi Coulage ===================== -->
+
+    <menuitem id="menu_suivi_coulages"
+              name="Coulages"
+              parent="menu_suivi_coulage_root"
+              action="action_suivi_coulage"
+              sequence="10"/>
+
+    <menuitem id="menu_suivi_coulage_lines"
+              name="Toutes les lignes"
+              parent="menu_suivi_coulage_root"
+              action="action_suivi_coulage_line"
+              sequence="20"/>
+
+
+
+     
+</odoo>

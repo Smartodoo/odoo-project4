@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_suivi_g50_tree" model="ir.ui.view">
+        <field name="name">administration.suivi.g50.tree</field>
+        <field name="model">administration.suivi.g50</field>
+        <field name="arch" type="xml">
+            <tree string="Suivi G50"
+                  decoration-success="state == 'paye'"
+                  decoration-danger="state == 'non_paye'">
+                <field name="date_depot"/>
+                <field name="mois"/>
+                <field name="annee"/>
+                <field name="montant" sum="Total"/>
+                <field name="state"/>
+                <field name="date_paiement"/>
+                <field name="methode_paiement"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_suivi_g50_form" model="ir.ui.view">
+        <field name="name">administration.suivi.g50.form</field>
+        <field name="model">administration.suivi.g50</field>
+        <field name="arch" type="xml">
+            <form string="Suivi G50">
+                <sheet>
+                    <group>
+                        <group string="Informations G50">
+                            <field name="date_depot"/>
+                            <label for="mois" string="Mois et année G50"/>
+                            <div class="d-flex gap-2">
+                                <field name="mois" nolabel="1" class="w-50"/>
+                                <field name="annee" nolabel="1" class="w-50"/>
+                            </div>
+                            <field name="montant"/>
+                        </group>
+                        <group string="Paiement">
+                            <field name="state"/>
+                            <field name="date_paiement"/>
+                            <field name="methode_paiement"/>
+                            <field name="numero_cheque" invisible="methode_paiement != 'cheque'"/>
+                        </group>
+                    </group>
+                    <separator string="Documents"/>
+                    <field name="piece_jointe_ids" widget="many2many_binary" string="Scanner le document"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_suivi_g50_search" model="ir.ui.view">
+        <field name="name">administration.suivi.g50.search</field>
+        <field name="model">administration.suivi.g50</field>
+        <field name="arch" type="xml">
+            <search string="Suivi G50">
+                <field name="mois"/>
+                <field name="annee"/>
+                <filter name="paye" string="Payé" domain="[('state', '=', 'paye')]"/>
+                <filter name="non_paye" string="Non payé" domain="[('state', '=', 'non_paye')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_annee" string="Année" context="{'group_by': 'annee'}"/>
+                    <filter name="group_mois" string="Mois" context="{'group_by': 'mois'}"/>
+                    <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
+                    <filter name="group_methode" string="Méthode de paiement" context="{'group_by': 'methode_paiement'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_suivi_g50" model="ir.actions.act_window">
+        <field name="name">Suivi G50</field>
+        <field name="res_model">administration.suivi.g50</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

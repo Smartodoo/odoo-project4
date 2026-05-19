@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_recuperation_view_tree" model="ir.ui.view">
+        <field name="name">commercial.recuperation.tree</field>
+        <field name="model">commercial.recuperation</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="location_id"/>
+                <field name="responsable_id"/>
+                <field name="pourcentage"/>
+                <field name="montant" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_recuperation_view_form" model="ir.ui.view">
+        <field name="name">commercial.recuperation.form</field>
+        <field name="model">commercial.recuperation</field>
+        <field name="arch" type="xml">
+            <form string="Récupération">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="location_id"/>
+                            <field name="responsable_id"/>
+                        </group>
+                        <group>
+                            <field name="pourcentage"/>
+                            <field name="montant"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="commercial_recuperation_view_search" model="ir.ui.view">
+        <field name="name">commercial.recuperation.search</field>
+        <field name="model">commercial.recuperation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="responsable_id"/>
+                <field name="location_id"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_responsable" string="Responsable" context="{'group_by': 'responsable_id'}"/>
+                    <filter name="group_location" string="Contrat" context="{'group_by': 'location_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_recuperation_action" model="ir.actions.act_window">
+        <field name="name">Récupérations</field>
+        <field name="res_model">commercial.recuperation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="commercial_recuperation_view_search"/>
+    </record>
+
+</odoo>

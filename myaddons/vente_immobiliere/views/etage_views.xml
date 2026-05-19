@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_tree_vente_etage" model="ir.ui.view">
+        <field name="name">vente.etage.tree</field>
+        <field name="model">vente.etage</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="bloc_id"/>
+                <field name="projet_id"/>
+                <field name="appartement_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_form_vente_etage" model="ir.ui.view">
+        <field name="name">vente.etage.form</field>
+        <field name="model">vente.etage</field>
+        <field name="arch" type="xml">
+            <form string="Étage">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="bloc_id"/>
+                            <field name="projet_id"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="appartement_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Appartements">
+                            <field name="appartement_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="type"/>
+                                    <field name="surface"/>
+                                    <field name="nb_pieces"/>
+                                    <field name="price"/>
+                                    <field name="state"
+                                           decoration-success="state == 'disponible'"
+                                           decoration-warning="state == 'reserve'"
+                                           decoration-danger="state == 'vendu'"
+                                           widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_vente_etage" model="ir.actions.act_window">
+        <field name="name">Étages</field>
+        <field name="res_model">vente.etage</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

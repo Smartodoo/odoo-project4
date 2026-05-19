@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Proposition Terrain - Tree View -->
+    <record id="commercial_proposition_terrain_view_tree" model="ir.ui.view">
+        <field name="name">commercial.proposition.terrain.tree</field>
+        <field name="model">commercial.proposition.terrain</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="numero"/>
+                <field name="date"/>
+                <field name="nom_prenom_proprietaire"/>
+                <field name="adresse"/>
+                <field name="telephone"/>
+                <field name="surface_utile"/>
+                <field name="facades"/>
+                <field name="source"/>
+                <field name="prix_m2_estimation"/>
+                <field name="reunion_tenue_le"/>
+                <field name="compte_rendu"/>
+                <field name="wilaya"/>
+                <field name="region"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Proposition Terrain - Form View -->
+    <record id="commercial_proposition_terrain_view_form" model="ir.ui.view">
+        <field name="name">commercial.proposition.terrain.form</field>
+        <field name="model">commercial.proposition.terrain</field>
+        <field name="arch" type="xml">
+            <form string="Proposition terrain">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="numero"/>
+                            <field name="date"/>
+                            <field name="nom_prenom_proprietaire"/>
+                            <field name="adresse"/>
+                            <field name="telephone" widget="phone"/>
+                            <field name="email" widget="email"/>
+                        </group>
+                        <group>
+                            <field name="wilaya"/>
+                            <field name="region"/>
+                            <field name="agent"/>
+                            <field name="surface_utile"/>
+                            <field name="facades"/>
+                            <field name="gabarit"/>
+                        </group>
+                    </group>
+                    <separator string="Prix et réunion"/>
+                    <group>
+                        <group>
+                            <field name="source"/>
+                            <field name="papier_notaire"/>
+                            <field name="prix_m2_estimation"/>
+                        </group>
+                        <group>
+                            <field name="reunion_tenue_le"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Compte rendu / Observation">
+                            <group>
+                                <field name="compte_rendu"/>
+                                <field name="observation"/>
+                            </group>
+                        </page>
+                        <page string="Documents">
+                            <field name="document_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Proposition Terrain - Search View -->
+    <record id="commercial_proposition_terrain_view_search" model="ir.ui.view">
+        <field name="name">commercial.proposition.terrain.search</field>
+        <field name="model">commercial.proposition.terrain</field>
+        <field name="arch" type="xml">
+            <search string="Proposition terrain">
+                <field name="nom_prenom_proprietaire"/>
+                <field name="adresse"/>
+                <field name="telephone"/>
+                <field name="agent"/>
+                <field name="wilaya"/>
+                <field name="region"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_wilaya" string="Wilaya" context="{'group_by': 'wilaya'}"/>
+                    <filter name="group_region" string="Région" context="{'group_by': 'region'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
+                    <filter name="group_agent" string="Agent" context="{'group_by': 'agent'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Proposition Terrain - Action -->
+    <record id="commercial_proposition_terrain_action" model="ir.actions.act_window">
+        <field name="name">Proposition terrain</field>
+        <field name="res_model">commercial.proposition.terrain</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="commercial_proposition_terrain_view_search"/>
+        <field name="context">{}</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- ===== Sale Order : web ribbons ===== -->
+    <record id="view_sale_order_form_inherit_payment_state" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.payment.state</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <field name="invoice_payment_state" invisible="1"/>
+            </xpath>
+            <xpath expr="//sheet/div[1]" position="before">
+                <widget name="web_ribbon" title="Payé"
+                        bg_color="text-bg-success"
+                        invisible="invoice_payment_state != 'paid' or state != 'sale'"/>
+                <widget name="web_ribbon" title="Paiement Partiel"
+                        bg_color="text-bg-warning"
+                        invisible="invoice_payment_state != 'partial' or state != 'sale'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Sale Order : tree avec badge état -->
+    <record id="view_sale_order_tree_inherit_payment_state" model="ir.ui.view">
+        <field name="name">sale.order.tree.inherit.payment.state</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="invoice_payment_state" widget="badge" optional="show"
+                       string="État paiement"
+                       decoration-success="invoice_payment_state == 'paid'"
+                       decoration-warning="invoice_payment_state == 'partial'"
+                       decoration-danger="invoice_payment_state == 'not_paid'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ===== Purchase Order : web ribbons ===== -->
+    <record id="view_purchase_order_form_inherit_payment_state" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.payment.state</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <field name="invoice_payment_state" invisible="1"/>
+            </xpath>
+            <xpath expr="//sheet/div[1]" position="before">
+                <widget name="web_ribbon" title="Payé"
+                        bg_color="text-bg-success"
+                        invisible="invoice_payment_state != 'paid' or state != 'purchase'"/>
+                <widget name="web_ribbon" title="Paiement Partiel"
+                        bg_color="text-bg-warning"
+                        invisible="invoice_payment_state != 'partial' or state != 'purchase'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Purchase Order : tree avec badge état -->
+    <record id="view_purchase_order_tree_inherit_payment_state" model="ir.ui.view">
+        <field name="name">purchase.order.tree.inherit.payment.state</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="invoice_payment_state" widget="badge" optional="show"
+                       string="État paiement"
+                       decoration-success="invoice_payment_state == 'paid'"
+                       decoration-warning="invoice_payment_state == 'partial'"
+                       decoration-danger="invoice_payment_state == 'not_paid'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

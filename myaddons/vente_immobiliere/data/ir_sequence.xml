@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_vente_projet" model="ir.sequence">
+            <field name="name">Projet Immobilier</field>
+            <field name="code">vente.projet</field>
+            <field name="prefix">PROJ/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_vente_reservation" model="ir.sequence">
+            <field name="name">Réservation Immobilière</field>
+            <field name="code">vente.reservation</field>
+            <field name="prefix">RES/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

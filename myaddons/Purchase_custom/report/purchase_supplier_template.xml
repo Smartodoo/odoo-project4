@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Template personnalisé pour le Bon de Commande -->
+    <template id="report_bon_commande_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="Purchase_custom.report_bon_commande_content"/>
+            </t>
+        </t>
+    </template>
+    <template id="report_bon_commande_content">
+        <meta charset="UTF-8"/>
+        <div class="page" style="font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 12px;">
+            <!-- ============ EN-TÊTE ============ -->
+            <div style="position: relative; min-height: 120px; margin-bottom: 10px;">
+                <!-- Logo à gauche (positionné en absolu) -->
+                <div t-if="o.company_id.logo" style="position: absolute; left: 0; top: 5px;">
+                    <img t-att-src="image_data_uri(o.company_id.logo)"
+                         style="max-height: 120px; max-width: 130px;" alt="Logo"/>
+                </div>
+                <!-- Nom et données entreprise (centré sur toute la largeur) -->
+                <div style="text-align: center; padding-top: 8px;">
+                    <t t-set="name_color" t-value="'#943634' if 'CHELIL' in (o.company_id.name or '').upper() else '#083c8a'"/>
+                    <div t-attf-style="font-size: 32px; font-weight: bold; font-family: 'Algerian', serif; color: {{name_color}}; letter-spacing: 3px; margin-bottom: 8px;">
+                        <t t-esc="o.company_id.name"/>
+                    </div>
+                    <div style="font-size: 12px; color: #000; font-weight: bold; line-height: 1.8;">
+                        <div>
+                            Adresse : <t t-esc="o.company_id.street or ''"/>
+                            <t t-if="o.company_id.street2"> <t t-esc="o.company_id.street2"/></t>
+                            <t t-if="o.company_id.city"> <t t-esc="o.company_id.city"/></t>
+                            <t t-if="o.company_id.zip"> <t t-esc="o.company_id.zip"/></t>
+                        </div>
+                        <div>
+                            T&#233;l/Fax : <t t-esc="o.company_id.phone or ''"/>
+                            <t t-if="o.company_id.mobile"> / Mobile : <t t-esc="o.company_id.mobile"/></t>
+                        </div>
+                        <div t-if="o.company_id.email">
+                            Email : <t t-esc="o.company_id.email"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ligne de séparation bleue -->
+            <div style="border-bottom: 3px solid #083c8a; margin: 8px 0 15px 0;"></div>
+
+            <!-- ============ TITRE BON DE COMMANDE (FOND BLEU) ============ -->
+            <div style="text-align: center; margin: 15px 0;">
+                <div style="display: inline-block; background-color: #083c8a; border: 3px solid #083c8a; padding: 12px 50px; border-radius: 3px;">
+                    <span style="font-size: 22px; font-weight: bold; color: #ffffff; letter-spacing: 1px; white-space: nowrap;">
+                        BON DE COMMANDE N&#176; : <t t-esc="o.name.split('P')[1].lstrip('0') + '/' + str(o.date_order.year) if o.name and o.date_order else o.name"/>
+                    </span>
+                </div>
+            </div>
+
+            <!-- ============ DATE ET LIEU ============ -->
+            <div style="text-align: right; margin: 15px 0 10px 0;">
+                <span style="font-size: 14px; font-weight: bold;">
+                    Fait &#224; Tizi Ouzou le : <t t-esc="o.date_order.strftime('%d/%m/%Y') if o.date_order else ''"/>
+                </span>
+            </div>
+
+            <!-- ============ CASES ENTREPRISE / FOURNISSEUR ============ -->
+            <table style="width: 100%; margin: 15px 0; border-collapse: collapse;">
+                <tr>
+                    <!-- Case Entreprise (émetteur) -->
+                    <td style="width: 55%; vertical-align: top; padding: 12px 15px; border: 1px solid #000;">
+                        <div style="margin-bottom: 6px;">
+                            <span style="font-weight: bold; text-decoration: underline;">ENTREPRISE :</span>
+                            <t t-esc="o.company_id.name"/>
+                        </div>
+                        <div style="margin-bottom: 6px;">
+                            <span style="font-weight: bold; text-decoration: underline;">ADRESSE :</span>
+                            <t t-esc="o.company_id.street or ''"/>
+                            <t t-if="o.company_id.street2"> <t t-esc="o.company_id.street2"/></t>
+                            <t t-if="o.company_id.city"> <t t-esc="o.company_id.city"/></t>
+                        </div>
+                        <div>
+                            <span style="font-weight: bold; text-decoration: underline;">Num&#233;ro :</span>
+                            <t t-esc="o.company_id.phone or ''"/>
+                        </div>
+                    </td>
+                    <!-- Case Fournisseur -->
+                    <td style="width: 45%; vertical-align: middle; padding: 12px 15px; border: 1px solid #000; text-align: center;">
+                        <div style="font-size: 14px;">
+                            <span style="font-weight: bold; text-decoration: underline;">ENTREPRISE:</span>
+                            <t t-esc="o.partner_id.name"/>
+                        </div>
+                        <div t-if="o.partner_id.street" style="margin-top: 5px; font-size: 11px;">
+                            <t t-esc="o.partner_id.street"/>
+                        </div>
+                        <div t-if="o.partner_id.phone" style="margin-top: 3px; font-size: 11px;">
+                            Tel: <t t-esc="o.partner_id.phone"/>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- ============ TABLEAU DES ARTICLES ============ -->
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; width: 12%;">
+                            N°
+                        </th>
+                        <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; width: 38%;">
+                            D&#233;signations
+                        </th>
+                        <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; width: 12%;">
+                            QTE
+                        </th>
+                        <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; width: 19%;">
+                            Prix Unitaire
+                        </th>
+                        <th style="border: 1px solid #000; padding: 12px 8px; text-align: center; width: 19%;">
+                            Montant
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-set="line_num" t-value="0"/>
+                    <t t-foreach="o.order_line" t-as="line">
+                        <t t-if="not line.display_type">
+                            <t t-set="line_num" t-value="line_num + 1"/>
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 10px 8px; text-align: center;">
+                                    <t t-esc="'%02d' % line_num"/>
+                                </td>
+                                <td style="border: 1px solid #000; padding: 10px 8px;">
+                                    <t t-esc="line.product_id.name or line.name"/>
+                                </td>
+                                <td style="border: 1px solid #000; padding: 10px 8px; text-align: center;">
+                                    <t t-esc="int(line.product_qty) if line.product_qty == int(line.product_qty) else line.product_qty"/>
+                                </td>
+                                <td style="border: 1px solid #000; padding: 10px 8px; text-align: right;">
+                                    <t t-esc="'%.2f' % line.price_unit"/>
+                                </td>
+                                <td style="border: 1px solid #000; padding: 10px 8px; text-align: right;">
+                                    <t t-esc="'%.2f' % line.price_subtotal"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </t>
+                </tbody>
+            </table>
+
+
+        </div>
+
+        <!-- ============ PIED DE PAGE - SIGNATURES (FIXÉ EN BAS) ============ -->
+        <div style="position: fixed; bottom: 0; left: 0; right: 0; padding: 20px 40px;">
+            <table style="width: 100%;">
+                <tr>
+                    <td style="width: 50%; vertical-align: top;">
+                        <div style="padding: 10px;">
+                            <p style="margin: 0 0 15px 0; font-style: italic;">
+                                <u>Re&#231;u le:</u> _________________________
+                            </p>
+                            <p style="margin: 0; font-style: italic;">
+                                <u>par:</u> _________________________
+                            </p>
+                        </div>
+                    </td>
+                    <td style="width: 50%; text-align: right; vertical-align: top;">
+                        <p style="margin: 0; font-weight: bold; font-size: 13px;">
+                            <t t-esc="o.company_id.name"/>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <!-- Action de rapport pour le Bon de Commande -->
+    <record id="action_report_bon_commande" model="ir.actions.report">
+        <field name="name">Bon de Commande</field>
+        <field name="model">purchase.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">Purchase_custom.report_bon_commande_document</field>
+        <field name="report_file">Purchase_custom.report_bon_commande_document</field>
+        <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="Purchase_custom.paperformat_bon_commande"/>
+    </record>
+
+</odoo>

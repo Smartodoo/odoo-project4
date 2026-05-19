@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Kanban View -->
+    <record id="view_kanban_vente_appartement" model="ir.ui.view">
+        <field name="name">vente.appartement.kanban</field>
+        <field name="model">vente.appartement</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="type"/>
+                <field name="surface"/>
+                <field name="price"/>
+                <field name="state"/>
+                <field name="projet_id"/>
+                <field name="bloc_id"/>
+                <field name="etage_id"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click #{record.state.raw_value == 'disponible' ? 'bg-success-light' : record.state.raw_value == 'reserve' ? 'bg-warning-light' : 'bg-danger-light'}"
+                             style="padding: 8px;">
+                            <div class="o_kanban_record_top">
+                                <strong><field name="name"/></strong>
+                                <field name="state" widget="label_selection"
+                                       options="{'classes': {'disponible': 'success', 'reserve': 'warning', 'vendu': 'danger'}}"/>
+                            </div>
+                            <div>
+                                <field name="type"/> |
+                                <field name="surface"/> m²
+                            </div>
+                            <div>
+                                <field name="projet_id"/> /
+                                <field name="bloc_id"/> /
+                                <field name="etage_id"/>
+                            </div>
+                            <div class="mt-1">
+                                <strong><field name="price" widget="monetary"/></strong>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_tree_vente_appartement" model="ir.ui.view">
+        <field name="name">vente.appartement.tree</field>
+        <field name="model">vente.appartement</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'disponible'"
+                  decoration-warning="state == 'reserve'"
+                  decoration-danger="state == 'vendu'">
+                <field name="name"/>
+                <field name="projet_id"/>
+                <field name="bloc_id"/>
+                <field name="etage_id"/>
+                <field name="type"/>
+                <field name="surface"/>
+                <field name="nb_pieces"/>
+                <field name="niveau_finition"/>
+                <field name="price" widget="monetary"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'disponible'"
+                       decoration-warning="state == 'reserve'"
+                       decoration-danger="state == 'vendu'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_form_vente_appartement" model="ir.ui.view">
+        <field name="name">vente.appartement.form</field>
+        <field name="model">vente.appartement</field>
+        <field name="arch" type="xml">
+            <form string="Appartement">
+                <sheet>
+                    <widget name="web_ribbon" title="Réservé" bg_color="text-bg-warning"
+                            invisible="state != 'reserve'"/>
+                    <widget name="web_ribbon" title="Vendu" bg_color="text-bg-danger"
+                            invisible="state != 'vendu'"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Localisation">
+                            <field name="etage_id"/>
+                            <field name="bloc_id"/>
+                            <field name="projet_id"/>
+                        </group>
+                        <group string="Caractéristiques">
+                            <field name="type"/>
+                            <field name="surface"/>
+                            <field name="nb_pieces"/>
+                            <field name="nb_salles_bain"/>
+                            <field name="orientation"/>
+                            <field name="niveau_finition"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Prix et État">
+                            <field name="price" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="state"/>
+                            <field name="date_livraison"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Options">
+                            <field name="has_balcon"/>
+                            <field name="has_parking"/>
+                            <field name="parking_number" invisible="not has_parking"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                        <page string="Plan">
+                            <field name="plan_image" widget="image"/>
+                        </page>
+                        <page string="Réservations">
+                            <field name="reservation_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="date_reservation"/>
+                                    <field name="price" widget="monetary"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'draft'"
+                                           decoration-warning="state == 'reserve'"
+                                           decoration-success="state in ('confirmed', 'sold')"
+                                           decoration-danger="state == 'cancelled'"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_search_vente_appartement" model="ir.ui.view">
+        <field name="name">vente.appartement.search</field>
+        <field name="model">vente.appartement</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="projet_id"/>
+                <field name="bloc_id"/>
+                <field name="etage_id"/>
+                <filter string="Disponible" name="filter_disponible" domain="[('state', '=', 'disponible')]"/>
+                <filter string="Réservé" name="filter_reserve" domain="[('state', '=', 'reserve')]"/>
+                <filter string="Vendu" name="filter_vendu" domain="[('state', '=', 'vendu')]"/>
+                <separator/>
+                <filter string="Avec Parking" name="filter_parking" domain="[('has_parking', '=', True)]"/>
+                <filter string="Avec Balcon" name="filter_balcon" domain="[('has_balcon', '=', True)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Projet" name="group_projet" context="{'group_by': 'projet_id'}"/>
+                    <filter string="Bloc" name="group_bloc" context="{'group_by': 'bloc_id'}"/>
+                    <filter string="Étage" name="group_etage" context="{'group_by': 'etage_id'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'type'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_vente_appartement" model="ir.actions.act_window">
+        <field name="name">Appartements</field>
+        <field name="res_model">vente.appartement</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_search_vente_appartement"/>
+    </record>
+</odoo>

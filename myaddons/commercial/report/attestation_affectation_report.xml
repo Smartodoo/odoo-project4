@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action : Attestation d'affectation -->
+    <record id="action_report_attestation_affectation" model="ir.actions.report">
+        <field name="name">Attestation d'affectation</field>
+        <field name="model">commercial.print.client.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.attestation_affectation_template</field>
+        <field name="report_file">commercial.attestation_affectation_template</field>
+        <field name="print_report_name">'Attestation Affectation - %s' % object.partner_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- Corps partagé entre attestation d'affectation et réservation CB -->
+    <template id="attestation_body">
+        <t t-set="client" t-value="doc.partner_id"/>
+        <t t-set="lot" t-value="doc.lot_id"/>
+        <t t-set="projet" t-value="lot.projet_id"/>
+        <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 20px; padding: 50px 60px; position: relative; min-height: 900px;">
+
+            <!-- Date -->
+            <div style="text-align: right; margin-bottom: 40px; font-size: 20px;">
+                <t t-esc="projet.wilaya_id.name or ''"/> LE:
+                <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d / %m / %Y')"/>
+            </div>
+
+            <!-- Titre -->
+            <h3 style="text-align: center; font-weight: bold; margin-bottom: 5px; text-decoration: underline; font-size: 28px; color: #003366;">
+                <t t-esc="titre_rapport"/>
+            </h3>
+            <t t-if="sous_titre_rapport">
+                <div style="text-align: center; font-weight: bold; font-size: 22px; margin-bottom: 35px; color: #003366;">
+                    <t t-esc="sous_titre_rapport"/>
+                </div>
+            </t>
+            <t t-if="not sous_titre_rapport">
+                <div style="margin-bottom: 25px;"></div>
+            </t>
+
+            <!-- Corps du texte -->
+            <p style="text-align: justify; line-height: 2.4; font-size: 20px; margin-bottom: 35px;">
+                Nous soussignés entreprise de promotion immobilière
+                (Immobilière Innovation)
+                atteste par la présente que
+                <strong><t t-if="client.genre == 'femme'">Mme </t><t t-else="">M. </t><t t-esc="client.name or ''"/></strong>
+                <t t-if="client.date_naissance">
+                    &#160;&#160;Né(e) le <t t-esc="client.date_naissance" t-options="{'widget': 'date'}"/>
+                </t>
+                est affectataire pour l'acquisition d'un logement promotionnel collectif
+                au projet <strong><t t-esc="projet.name or ''"/></strong>
+                <t t-if="projet.programme">
+                    <t t-esc="projet.programme"/>,
+                </t>
+                <t t-if="projet.section">
+                    section <t t-esc="projet.section"/>
+                </t>
+                <t t-if="projet.lieu_dit">
+                    , <t t-esc="projet.lieu_dit"/>
+                </t>
+                <t t-if="projet.commune_id">
+                    commune de <t t-esc="projet.commune_id.name or ''"/>
+                </t>
+                <t t-if="projet.wilaya_id">
+                    et wilaya de <t t-esc="projet.wilaya_id.name or ''"/>,
+                </t>
+                identifié comme suit :
+            </p>
+
+            <!-- Identification du bien -->
+            <div style="width: 80%; margin: 0 auto 35px auto; font-size: 20px; line-height: 2.6;">
+                <p style="margin: 0;"><strong>Wilaya :</strong> <t t-esc="projet.wilaya_id.name or ''"/></p>
+                <p style="margin: 0;"><strong>Commune :</strong> <t t-esc="projet.commune_id.name or ''"/></p>
+                <p style="margin: 0;"><strong>Programme :</strong> <t t-esc="projet.programme or ''"/></p>
+                <p style="margin: 0;"><strong>LOT N° :</strong> <t t-esc="lot.numero_lot or ''"/></p>
+                <p style="margin: 0;"><strong>Type :</strong> <t t-esc="lot.categorie_id.categorie or ''"/></p>
+                <p style="margin: 0;"><strong>Étage :</strong> <t t-esc="lot.etage_id.etiquette or ''"/></p>
+                <p style="margin: 0;"><strong>Bloc :</strong> <t t-esc="lot.bloc_id.name or ''"/></p>
+                <p style="margin: 0;"><strong>Surface Totale :</strong> <t t-esc="'%.2f m²' % lot.surface_globale"/></p>
+                <p style="margin: 0;"><strong>Prix Du Logement en TTC est fixé à :</strong> <t t-esc="'{:,.2f}'.format(lot.montant_global).replace(',', ' ')"/> DA</p>
+            </div>
+
+            <!-- Signatures -->
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0 60px; font-size: 20px;">
+                <t t-if="not hide_signature_client">
+                    <div style="float: left; width: 50%; text-align: center;">
+                        <strong>SIGNATURE CLIENT</strong>
+                    </div>
+                </t>
+                <div style="text-align: center;" t-att-style="'float: right; width: 50%; text-align: center;' if not hide_signature_client else 'text-align: right;'">
+                    <strong><t t-esc="doc.env.company.name"/></strong>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+
+        </div>
+    </template>
+
+    <!-- QWeb Template : Attestation d'affectation -->
+    <template id="attestation_affectation_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="titre_rapport" t-value="'ATTESTATION D\'AFFECTATION'"/>
+                    <t t-set="sous_titre_rapport" t-value="False"/>
+                    <t t-set="hide_signature_client" t-value="False"/>
+                    <t t-call="commercial.attestation_body"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action : Attestation de réservation par CB -->
+    <record id="action_report_attestation_reservation_cb" model="ir.actions.report">
+        <field name="name">Attestation de réservation par CB</field>
+        <field name="model">commercial.print.client.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.attestation_reservation_cb_template</field>
+        <field name="report_file">commercial.attestation_reservation_cb_template</field>
+        <field name="print_report_name">'Attestation Reservation CB - %s' % object.partner_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Attestation de réservation par CB -->
+    <template id="attestation_reservation_cb_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="titre_rapport" t-value="'ATTESTATION DE RESERVATION'"/>
+                    <t t-set="sous_titre_rapport" t-value="'(Pour crédit bancaire)'"/>
+                    <t t-set="hide_signature_client" t-value="True"/>
+                    <t t-call="commercial.attestation_body"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action : Attestation d'affectation provisoire -->
+    <record id="action_report_attestation_provisoire" model="ir.actions.report">
+        <field name="name">Attestation d'affectation provisoire</field>
+        <field name="model">commercial.print.client.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.attestation_provisoire_template</field>
+        <field name="report_file">commercial.attestation_provisoire_template</field>
+        <field name="print_report_name">'Attestation Provisoire - %s' % object.partner_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Attestation d'affectation provisoire -->
+    <template id="attestation_provisoire_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="client" t-value="doc.partner_id"/>
+                    <t t-set="lot" t-value="doc.lot_id"/>
+                    <t t-set="projet" t-value="lot.projet_id"/>
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 20px; padding: 50px 60px; position: relative; min-height: 900px;">
+
+                        <!-- Titre -->
+                        <h3 style="text-align: center; font-weight: bold; margin-bottom: 35px; font-size: 28px; color: #003366;">
+                            Attestation D'affectation Provisoire
+                        </h3>
+
+                        <!-- Corps du texte -->
+                        <p style="text-align: justify; line-height: 2.4; font-size: 20px; margin-bottom: 35px; text-indent: 35px;">
+                            Nous soussignés Entreprise de Promotion Immobilière
+                            (Immobilière Innovation)
+                            atteste par la présente que
+                            <strong><t t-if="client.genre == 'femme'">Mme </t><t t-else="">M. </t><t t-esc="client.name or ''"/></strong>
+                            <t t-if="client.date_naissance">
+                                Né(e) le <t t-esc="client.date_naissance" t-options="{'widget': 'date'}"/>
+                            </t>
+                            est affectataire pour l'acquisition d'un Logement promotionnel collectif
+                            au Projet <strong><t t-esc="projet.name or ''"/></strong>
+                            <t t-if="projet.programme">
+                                <t t-esc="projet.programme"/>,
+                            </t>
+                            <t t-if="projet.lieu_dit">
+                                à <t t-esc="projet.lieu_dit"/>
+                            </t>
+                            <t t-if="projet.commune_id">
+                                commune de <t t-esc="projet.commune_id.name or ''"/>
+                            </t>
+                            <t t-if="projet.wilaya_id">
+                                et wilaya de <t t-esc="projet.wilaya_id.name or ''"/>,
+                            </t>
+                            <t t-if="projet.description">
+                                <t t-esc="projet.description"/>
+                            </t>
+                        </p>
+
+                        <!-- Ligne récapitulative -->
+                        <div style="font-size: 20px; margin-bottom: 50px;">
+                            <p style="margin-bottom: 10px;"><strong>Étage :</strong> <t t-esc="lot.etage_id.etiquette or ''"/></p>
+                            <p style="margin-bottom: 10px;"><strong>Type :</strong> <t t-esc="lot.categorie_id.categorie or ''"/></p>
+                            <p style="margin-bottom: 10px;"><strong>Surface :</strong> <t t-esc="'%.2f m²' % lot.surface_globale"/></p>
+                            <p style="margin-bottom: 10px;"><strong>Bloc :</strong> <t t-esc="lot.bloc_id.name or ''"/></p>
+                            <p style="margin-bottom: 10px;"><strong>Lot :</strong> <t t-esc="lot.numero_lot or ''"/></p>
+                        </div>
+
+                        <!-- Signature -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0 60px; font-size: 20px;">
+                            <div style="text-align: right;">
+                                <strong>Sarl Immobilière Innovation</strong>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

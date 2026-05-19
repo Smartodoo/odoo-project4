@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_payment" model="ir.actions.act_window">
+        <field name="name">💳 Paiements</field>
+        <field name="res_model">rental.payment</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+    </record>
+
+    <record id="view_payment_tree" model="ir.ui.view">
+        <field name="name">rental.payment.tree</field>
+        <field name="model">rental.payment</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'confirmed'"
+                  decoration-muted="state == 'cancelled'"
+                  decoration-info="payment_type == 'deposit'"
+                  decoration-warning="payment_type == 'penalty'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="rental_id"/>
+                <field name="client_id"/>
+                <field name="payment_type" widget="badge"/>
+                <field name="payment_method" widget="badge"/>
+                <field name="amount" sum="Total"/>
+                <field name="state" widget="badge"/>
+
+                <button name="action_confirm" string="Confirmer" type="object"
+                        icon="fa-check" invisible="state != 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_payment_form" model="ir.ui.view">
+        <field name="name">rental.payment.form</field>
+        <field name="model">rental.payment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="✅ Confirmer" type="object"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+
+                    <button name="action_cancel" string="❌ Annuler" type="object"
+                            invisible="state != 'draft'"/>
+
+                    <button name="action_send_reminder" string="📧 Relancer" type="object"
+                            invisible="state != 'draft'"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="rental_id"/>
+                            <field name="client_id" readonly="1"/>
+                            <field name="apartment_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="amount" widget="monetary"/>
+                            <field name="payment_method"/>
+                            <field name="payment_type"/>
+                            <field name="reference"/>
+                        </group>
+                    </group>
+                    <field name="notes" placeholder="Notes..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_payment" name="💳 Paiements" parent="menu_rental_root"
+              action="action_payment" sequence="50"/>
+</odoo>

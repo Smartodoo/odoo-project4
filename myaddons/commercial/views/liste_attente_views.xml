@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_liste_attente_tree" model="ir.ui.view">
+        <field name="name">commercial.liste.attente.tree</field>
+        <field name="model">commercial.liste.attente</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="telephone"/>
+                <field name="email"/>
+                <field name="projet"/>
+                <field name="bloc" optional="show"/>
+                <field name="etage" optional="show"/>
+                <field name="lot" optional="show"/>
+                <field name="commercial_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_liste_attente_form" model="ir.ui.view">
+        <field name="name">commercial.liste.attente.form</field>
+        <field name="model">commercial.liste.attente</field>
+        <field name="arch" type="xml">
+            <form string="Liste d'attente">
+                <sheet>
+                    <group>
+                        <group string="Fiche client">
+                            <field name="name"/>
+                            <field name="telephone"/>
+                            <field name="email"/>
+                        </group>
+                        <group string="Affectation">
+                            <field name="commercial_id"/>
+                        </group>
+                    </group>
+                    <separator string="Intéressé par"/>
+                    <group>
+                        <group>
+                            <field name="projet"/>
+                            <field name="bloc"/>
+                        </group>
+                        <group>
+                            <field name="etage"/>
+                            <field name="lot"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes">
+                            <field name="remarque" placeholder="Remarques..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="commercial_liste_attente_search" model="ir.ui.view">
+        <field name="name">commercial.liste.attente.search</field>
+        <field name="model">commercial.liste.attente</field>
+        <field name="arch" type="xml">
+            <search string="Liste d'attente">
+                <field name="name"/>
+                <field name="telephone"/>
+                <field name="projet"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Projet" name="group_projet" context="{'group_by': 'projet'}"/>
+                    <filter string="Commercial" name="group_commercial" context="{'group_by': 'commercial_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_liste_attente_action" model="ir.actions.act_window">
+        <field name="name">Liste d'attente</field>
+        <field name="res_model">commercial.liste.attente</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="commercial_liste_attente_search"/>
+    </record>
+
+</odoo>

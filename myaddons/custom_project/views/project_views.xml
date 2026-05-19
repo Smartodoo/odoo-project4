@@ -1,0 +1,767 @@
+<odoo>
+
+    <!-- Views of model custom.stock -->
+    <record id="view_custom_stock_form" model="ir.ui.view">
+        <field name="name">custom.stock.form</field>
+        <field name="model">custom.stock</field>
+        <field name="arch" type="xml">
+            <form string="Stock d'articles">
+                <sheet>
+                    <group class="col-6">
+                        <field name="product_id"/>
+                        <field name="quantity"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+
+
+
+    </record>
+    <record id="view_custom_stock_tree" model="ir.ui.view">
+        <field name="name">custom.stock.tree</field>
+        <field name="model">custom.stock</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="product_id"/>
+                <field name="quantity"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_custom_stock_search" model="ir.ui.view">
+        <field name="name">custom.stock.search</field>
+        <field name="model">custom.stock</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Views of model custom.project -->
+    <record id="view_custom_project_form" model="ir.ui.view">
+        <field name="name">custom.project.form</field>
+        <field name="model">custom.project</field>
+        <field name="arch" type="xml">
+            <form string="Projet">
+
+                <header>
+                    <button name="action_confirm" type="object" string="Confirmer" invisible="state !=  'draft'"/>
+                    <button name="action_done" type="object" string="Terminer" invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" type="object" string="Annuler" invisible="state != 'confirmed'"/>
+                    <button name="action_draft" type="object" string="Remettre en brouillon"
+                            invisible="state in [ 'draft','confirmed']"/>
+                    <field name="state" widget="statusbar"/>
+                    <button name="%(custom_project.action_open_view_situation_final)d"
+                            string="Situation finale"
+                            type="action"
+                            class="oe_stat_button"
+                            context="{'default_project_id': active_id}"
+                    />
+
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+
+
+                        <button name="open_related_purchases" string="Bons d'achats" type="object"
+                                class="oe_stat_button">
+                            <field name="nombre_achat" widget="statinfo"/>
+                        </button>
+                        <button
+                                class="oe_stat_button"
+                                icon="fa-bar-chart"
+                                type="object"
+                                name="action_view_consumptions">
+                            <div class="o_stat_info">
+                                <field name="consumption_count" widget="statinfo"
+                                       string="Consommations"/>
+                            </div>
+                        </button>
+                        <button name="open_custom_stock" string="Articles de stock" type="object"
+                                class="oe_stat_button" icon="fa-cubes">
+                            <field name="nombre_stock_article" widget="statinfo"/>
+                        </button>
+<!--                        <button name="action_view_observations" type="object" string="Observations"-->
+<!--                                class="oe_stat_button" icon="fa-comments">-->
+<!--                            <field name="observation_count" widget="statinfo" string="Observations"/>-->
+<!--                        </button>-->
+                        <button name="action_view_observations" type="object" class="oe_stat_button" icon="fa-comments">
+                            <div class="o_stat_info">
+<!--                                <field name="observation_count" widget="statinfo" string="Observations"/>-->
+                                <field name="open_observation_count" widget="statinfo" string="Prevision"/>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Confirmé" bg_color="text-bg-success"
+                            invisible="state != 'confirmed'"/>
+                    <widget name="web_ribbon" title="Terminé" bg_color="text-bg-success" invisible="state != 'done'"/>
+                    <widget name="web_ribbon" title="Annulé" bg_color="text-bg-danger"
+                            invisible="state != 'cancelled'"/>
+                    <group>
+                        <group class="col-6">
+                            <field name="is_internal" readonly="1"/>
+                            <field name="name" class="col-6" readonly="state in ['confirmed','done','cancelled']"/>
+                        </group>
+                        <group class="col-6">
+                            <group>
+                                <field name="co_contractor"/>
+                            </group>
+
+
+                            <!--                        <field name="stock_articles_ids" invisible="1"/>-->
+                        </group>
+                        <group class="col-6">
+                            <field name="client_id" class="col-6" readonly="state in ['confirmed','done','cancelled']"/>
+                            <field name="tax_ids" widget="many2many_tags" readonly=" is_internal != False"/>
+                            <field name="tax_ids_2" widget="many2many_tags" string="Taxes Logments" readonly="1"
+                                   invisible="is_internal != True"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Import">
+                            <div style="padding: 20px; background: #f8fafc; min-height: 400px;">
+                                <!-- Compact Header -->
+                                <div style="display: flex; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+                                    <i class="fa fa-file-excel-o" style="font-size: 24px; color: #059669; margin-right: 12px;"/>
+                                    <div>
+                                        <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1e293b;">Importation Excel</h3>
+                                        <span style="font-size: 13px; color: #64748b;">Chargez vos fichiers de données</span>
+                                    </div>
+                                </div>
+
+                                <!-- Import Cards Row -->
+                                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+                                    <!-- Services Card -->
+                                    <div style="flex: 1; min-width: 280px; background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                                        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                                            <span style="background: #ede9fe; color: #7c3aed; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                                <i class="fa fa-cogs" style="margin-right: 5px;"/>SERVICES
+                                            </span>
+                                        </div>
+
+                                        <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; margin-bottom: 14px;">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <i class="fa fa-file-o" style="color: #94a3b8; font-size: 18px;"/>
+                                                <div style="flex: 1;">
+                                                    <field name="import_file" filename="import_filename" widget="binary"/>
+                                                    <field name="import_filename" readonly="1" class="text-muted" style="font-size: 11px;"/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button name="import_excel_file" type="object"
+                                                class="btn btn-sm"
+                                                style="background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;">
+                                            <i class="fa fa-upload" style="margin-right: 6px;"/>Importer
+                                        </button>
+                                    </div>
+
+                                    <!-- Logements Card -->
+                                    <div style="flex: 1; min-width: 280px; background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;" invisible="is_internal != True">
+                                        <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                                            <span style="background: #d1fae5; color: #059669; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                                <i class="fa fa-home" style="margin-right: 5px;"/>LOGEMENTS
+                                            </span>
+                                        </div>
+
+                                        <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; margin-bottom: 14px;">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <i class="fa fa-file-o" style="color: #94a3b8; font-size: 18px;"/>
+                                                <div style="flex: 1;">
+                                                    <field name="import_other_file" filename="import_other_filename" widget="binary" invisible="is_internal != True"/>
+                                                    <field name="import_other_filename" readonly="1" invisible="is_internal != True" class="text-muted" style="font-size: 11px;"/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button name="action_import_other_file" type="object"
+                                                class="btn btn-sm" invisible="is_internal != True"
+                                                style="background: #059669; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;">
+                                            <i class="fa fa-upload" style="margin-right: 6px;"/>Importer
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Compact Tips -->
+                                <div style="margin-top: 20px; padding: 12px 16px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fa fa-lightbulb-o" style="color: #d97706; font-size: 16px;"/>
+                                    <span style="font-size: 13px; color: #92400e;">Format requis: Excel (.xlsx) avec les colonnes correspondantes au modèle</span>
+                                </div>
+                            </div>
+                        </page>
+
+                        <!-- Services Tab with Modern Design -->
+                        <page string="Services">
+                            <div style="padding: 20px;">
+                                <!-- Header with Stats -->
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px;">
+                                    <!-- Total HT -->
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Total HT</div>
+                                                <div style="font-size: 24px; font-weight: 700; margin-top: 5px;">
+                                                    <field name="total_price" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
+                                                <i class="fa fa-calculator" style="font-size: 20px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- TVA 19% -->
+                                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 8px 25px rgba(240, 147, 251, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">TVA (19%)</div>
+                                                <div style="font-size: 24px; font-weight: 700; margin-top: 5px;">
+                                                    <field name="tax_totale" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
+                                                <i class="fa fa-percent" style="font-size: 20px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Total TTC -->
+                                    <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 8px 25px rgba(17, 153, 142, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Total TTC</div>
+                                                <div style="font-size: 24px; font-weight: 700; margin-top: 5px;">
+                                                    <field name="total" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
+                                                <i class="fa fa-money" style="font-size: 20px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Table Container -->
+                                <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 10px 12px; margin-right: 12px;">
+                                            <i class="fa fa-list-alt" style="color: white; font-size: 18px;"/>
+                                        </div>
+                                        <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #2d3436;">Détail des Services</h3>
+                                    </div>
+                                    <div class="oe_form_field" style="border-radius: 12px; overflow: hidden;">
+                                        <field name="table_html" widget="html" options="{'sanitize': False}" readonly="1"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <field name="currency_id" invisible="1"/>
+                        </page>
+
+                        <!-- Logments Tab with Modern Design -->
+                        <page string="Logments" invisible="is_internal != True">
+                            <div style="padding: 20px;">
+                                <!-- Header with Stats -->
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px;">
+                                    <!-- Total HT -->
+                                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Total HT</div>
+                                                <div style="font-size: 24px; font-weight: 700; margin-top: 5px;">
+                                                    <field name="total_price_2" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
+                                                <i class="fa fa-home" style="font-size: 20px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- TVA 9% -->
+                                    <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 8px 25px rgba(250, 112, 154, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">TVA (9%)</div>
+                                                <div style="font-size: 24px; font-weight: 700; margin-top: 5px;">
+                                                    <field name="tax_totale_2" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
+                                                <i class="fa fa-percent" style="font-size: 20px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Total TTC -->
+                                    <div style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); padding: 20px; border-radius: 16px; color: white; box-shadow: 0 8px 25px rgba(161, 140, 209, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                <div style="font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Total TTC</div>
+                                                <div style="font-size: 24px; font-weight: 700; margin-top: 5px;">
+                                                    <field name="total_2" readonly="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
+                                                <i class="fa fa-money" style="font-size: 20px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Table Container -->
+                                <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; padding: 10px 12px; margin-right: 12px;">
+                                            <i class="fa fa-building" style="color: white; font-size: 18px;"/>
+                                        </div>
+                                        <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #2d3436;">Détail des Logments</h3>
+                                    </div>
+                                    <div class="oe_form_field" style="border-radius: 12px; overflow: hidden;">
+                                        <field name="other_table_html" widget="html" options="{'sanitize': False}" readonly="1"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <field name="currency_id" invisible="1"/>
+                        </page>
+                        <page string="Dashboard">
+                            <!-- Modern Dashboard with Progression -->
+                            <div style="padding: 20px;">
+                                <!-- Header Stats Cards -->
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
+                                    <!-- Total Project Value -->
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 16px; color: white; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div>
+                                                <div style="font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Montant Total HT</div>
+                                                <div style="font-size: 28px; font-weight: 700; margin-top: 8px;">
+                                                    <field name="total_intern" widget="monetary" options="{'currency_field': 'currency_id'}" style="font-size: 28px;"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px;">
+                                                <i class="fa fa-money" style="font-size: 24px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Paid Amount -->
+                                    <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); padding: 25px; border-radius: 16px; color: white; box-shadow: 0 10px 30px rgba(17, 153, 142, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div>
+                                                <div style="font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Montant Payé</div>
+                                                <div style="font-size: 28px; font-weight: 700; margin-top: 8px;">
+                                                    <field name="total_paid" widget="monetary" options="{'currency_field': 'currency_id'}" style="font-size: 28px;"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px;">
+                                                <i class="fa fa-check-circle" style="font-size: 24px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Remaining Amount -->
+                                    <div style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); padding: 25px; border-radius: 16px; color: white; box-shadow: 0 10px 30px rgba(235, 51, 73, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div>
+                                                <div style="font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Montant Restant</div>
+                                                <div style="font-size: 28px; font-weight: 700; margin-top: 8px;">
+                                                    <field name="total_remaining" widget="monetary" options="{'currency_field': 'currency_id'}" style="font-size: 28px;"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px;">
+                                                <i class="fa fa-hourglass-half" style="font-size: 24px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Situations Count -->
+                                    <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 25px; border-radius: 16px; color: white; box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                            <div>
+                                                <div style="font-size: 12px; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Situations</div>
+                                                <div style="font-size: 28px; font-weight: 700; margin-top: 8px;">
+                                                    <field name="paid_situation_count"/> / <field name="situation_count"/>
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px;">
+                                                <i class="fa fa-file-text-o" style="font-size: 24px;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Progress Section -->
+                                <div style="background: white; border-radius: 20px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                        <div>
+                                            <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #2d3436;">Progression du Projet</h3>
+                                            <p style="margin: 5px 0 0; color: #636e72; font-size: 14px;">Basé sur les paiements effectués</p>
+                                        </div>
+                                        <div style="font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                                            <field name="progress" widget="float" digits="[3,1]"/>%
+                                        </div>
+                                    </div>
+                                    <!-- Progress Bar -->
+                                    <div style="background: #e9ecef; border-radius: 15px; height: 20px; overflow: hidden; position: relative;">
+                                        <field name="progress" widget="progressbar" options="{'editable': false}"/>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px; color: #636e72;">
+                                        <span><i class="fa fa-flag-o" style="margin-right: 5px;"/> Début: 0%</span>
+                                        <span><i class="fa fa-flag-checkered" style="margin-right: 5px;"/> Objectif: 100%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Situation Finale Table -->
+                                <div style="background: white; border-radius: 20px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 25px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                                        <div style="display: flex; align-items: center;">
+                                            <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 14px; padding: 14px; margin-right: 15px; box-shadow: 0 8px 20px rgba(240, 147, 251, 0.3);">
+                                                <i class="fa fa-table" style="color: white; font-size: 22px;"/>
+                                            </div>
+                                            <div>
+                                                <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #2d3436;">Situation Finale</h3>
+                                                <p style="margin: 5px 0 0; color: #636e72; font-size: 14px;">Récapitulatif des quantités et montants</p>
+                                            </div>
+                                        </div>
+                                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 16px; box-shadow: 0 6px 15px rgba(240, 147, 251, 0.3);">
+                                            <i class="fa fa-list-ol" style="margin-right: 8px;"/>
+                                            <field name="situation_final_count"/> lignes
+                                        </div>
+                                    </div>
+                                    <!-- Table Container with Modern Styling -->
+                                    <div style="border-radius: 16px; overflow: hidden; border: 1px solid #e9ecef;">
+                                        <field name="situation_final_ids" nolabel="1" readonly="1">
+                                            <tree decoration-success="difference1 &gt;= 0" decoration-danger="difference1 &lt; 0" style="font-size: 14px;">
+                                                <field name="designation2" string="Désignation"/>
+                                                <field name="quantity_marche" string="Qté Marché" sum="Total"/>
+                                                <field name="quantity_cumulee" string="Qté Cumulée" sum="Total"/>
+                                                <field name="montant_marche" string="Montant Marché" sum="Total" widget="monetary"/>
+                                                <field name="montant_cumulee" string="Montant Cumulé" sum="Total" widget="monetary"/>
+                                                <field name="difference1" string="Diff. Qté" sum="Total"/>
+                                                <field name="difference2" string="Diff. Montant" sum="Total" widget="monetary"/>
+                                                <field name="progress_percentage" string="Avancement" widget="progressbar"/>
+                                            </tree>
+                                        </field>
+                                    </div>
+                                    <!-- Legend -->
+                                    <div style="display: flex; gap: 25px; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e9ecef;">
+                                        <div style="display: flex; align-items: center; font-size: 13px; color: #636e72;">
+                                            <span style="display: inline-block; width: 12px; height: 12px; background: #28a745; border-radius: 3px; margin-right: 8px;"></span>
+                                            Différence positive (favorable)
+                                        </div>
+                                        <div style="display: flex; align-items: center; font-size: 13px; color: #636e72;">
+                                            <span style="display: inline-block; width: 12px; height: 12px; background: #dc3545; border-radius: 3px; margin-right: 8px;"></span>
+                                            Différence négative (défavorable)
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                                    <button name="action_view_situations" type="object" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600;">
+                                        <i class="fa fa-list" style="margin-right: 8px;"/> Voir les Situations
+                                    </button>
+                                    <button name="%(custom_project.action_open_view_situation_final)d" type="action" class="btn btn-secondary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600; color: white;" context="{'default_project_id': active_id}">
+                                        <i class="fa fa-table" style="margin-right: 8px;"/> Gérer Situation Finale
+                                    </button>
+                                </div>
+                            </div>
+                            <field name="dashboard_html" nolabel="1" invisible="1"/>
+                        </page>
+                        <page string="Description">
+                            <field name="description" widget="text" options="{'no_create': True}"/>
+                            <field name="company_id"/>
+                        </page>
+                    </notebook>
+
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_custom_project_tree" model="ir.ui.view">
+        <field name="name">custom.project.tree.intern</field>
+        <field name="model">custom.project</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-muted="state == 'cancelled'" decoration-bf="state == 'done'">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="total_intern" sum="Total"/>
+                <field name="total_paid" sum="Total Payé"/>
+                <field name="total_remaining" sum="Restant"/>
+                <field name="progress" widget="progressbar"/>
+                <field name="situation_count"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-warning="state == 'done'" decoration-danger="state == 'cancelled'"/>
+                <field name="currency_id" invisible="1"/>
+            </tree>
+
+        </field>
+    </record>
+    <record id="view_custom_project_search" model="ir.ui.view">
+        <field name="name">custom.project.search</field>
+        <field name="model">custom.project</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="client_id"/>
+                <filter name="filtre_draft" string="Brouillon" domain="[('state','=','draft')]"/>
+                <filter name="filter_confirmed" string="Confirmé" domain="[('state','=','confirmed')]"/>
+                <filter name="filter_done" string="Terminé" domain="[('state','=','done')]"/>
+                <filter name="filter_cancelled" string="Annulé" domain="[('state','=','cancelled')]"/>
+                <filter name="goup_by_status" string="statut" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Kanban View for Projects -->
+    <record id="view_custom_project_kanban" model="ir.ui.view">
+        <field name="name">custom.project.kanban</field>
+        <field name="model">custom.project</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="state"/>
+                <field name="total_intern"/>
+                <field name="progress"/>
+                <field name="total_paid"/>
+                <field name="total_remaining"/>
+                <field name="situation_count"/>
+                <field name="color"/>
+                <field name="currency_id"/>
+                <field name="is_internal"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click #{kanban_color(record.color.raw_value)}">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                        <span class="o_kanban_record_subtitle text-muted">
+                                            <field name="client_id"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div class="mb-1">
+                                        <span class="text-muted">Montant: </span>
+                                        <field name="total_intern" widget="monetary"/>
+                                    </div>
+                                    <div class="mb-1">
+                                        <span class="text-muted">Payé: </span>
+                                        <field name="total_paid" widget="monetary"/>
+                                    </div>
+                                    <div class="mb-2">
+                                        <field name="progress" widget="progressbar"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <span class="badge rounded-pill">
+                                            <i class="fa fa-file-text-o"/> <field name="situation_count"/> Situations
+                                        </span>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="state" widget="label_selection" options="{'classes': {'draft': 'info', 'confirmed': 'success', 'done': 'secondary', 'cancelled': 'danger'}}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Simplified Form View for Initial Info Only (group_project_initial_info) -->
+    <record id="view_custom_project_form_initial_info" model="ir.ui.view">
+        <field name="name">custom.project.form.initial.info</field>
+        <field name="model">custom.project</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <form string="Projet - Informations Initiales">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du Projet" required="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Informations du Projet">
+                            <field name="is_internal" widget="boolean_toggle" string="Projet Interne"/>
+                            <field name="client_id" string="Contractant" required="1" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                    <field name="state" readonly="1" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Simplified Tree View for Initial Info Only -->
+    <record id="view_custom_project_tree_initial_info" model="ir.ui.view">
+        <field name="name">custom.project.tree.initial.info</field>
+        <field name="model">custom.project</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="is_internal" string="Interne" widget="boolean_toggle"/>
+                <field name="client_id"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action for Initial Info Only -->
+    <record id="action_custom_project_initial_info" model="ir.actions.act_window">
+        <field name="name">Projets - Informations Initiales</field>
+        <field name="res_model">custom.project</field>
+        <field name="domain">[('state', '=', 'draft')]</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_custom_project_tree_initial_info')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_custom_project_form_initial_info')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer un nouveau projet
+            </p>
+            <p>
+                Remplissez le nom du projet et le contractant.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu for Initial Info Only (visible only to group_project_initial_info) -->
+    <menuitem id="menu_project_initial_info"
+              name="Projets"
+              action="action_custom_project_initial_info"
+              web_icon="custom_project,static/description/closure.png"
+              groups="custom_project.group_project_initial_info"
+              sequence="10"/>
+
+    <!-- ==================== READ-ONLY ACCESS (Sabrina) ==================== -->
+
+    <!-- Read-Only Form View -->
+    <record id="view_custom_project_form_readonly" model="ir.ui.view">
+        <field name="name">custom.project.form.readonly</field>
+        <field name="model">custom.project</field>
+        <field name="priority">60</field>
+        <field name="arch" type="xml">
+            <form string="Projet (Lecture Seule)" create="false" edit="false" delete="false">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="open_related_purchases" string="Bons d'achats" type="object"
+                                class="oe_stat_button">
+                            <field name="nombre_achat" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-bar-chart" type="object"
+                                name="action_view_consumptions">
+                            <div class="o_stat_info">
+                                <field name="consumption_count" widget="statinfo" string="Consommations"/>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Confirmé" bg_color="text-bg-success"
+                            invisible="state != 'confirmed'"/>
+                    <widget name="web_ribbon" title="Terminé" bg_color="text-bg-success" invisible="state != 'done'"/>
+                    <widget name="web_ribbon" title="Annulé" bg_color="text-bg-danger"
+                            invisible="state != 'cancelled'"/>
+                    <group>
+                        <group>
+                            <field name="is_internal" readonly="1"/>
+                            <field name="name" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="client_id" readonly="1"/>
+                            <field name="co_contractor" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Services">
+                            <group>
+                                <group>
+                                    <field name="total_price" readonly="1" widget="monetary"/>
+                                </group>
+                                <group>
+                                    <field name="tax_totale" readonly="1" widget="monetary"/>
+                                </group>
+                                <group>
+                                    <field name="total" readonly="1" widget="monetary"/>
+                                </group>
+                            </group>
+                            <field name="table_html" widget="html" options="{'sanitize': False}" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </page>
+                        <page string="Dashboard">
+                            <group>
+                                <group>
+                                    <field name="total_intern" readonly="1" widget="monetary"/>
+                                    <field name="total_paid" readonly="1" widget="monetary"/>
+                                </group>
+                                <group>
+                                    <field name="total_remaining" readonly="1" widget="monetary"/>
+                                    <field name="progress" readonly="1" widget="progressbar"/>
+                                </group>
+                            </group>
+                            <field name="situation_final_ids" readonly="1">
+                                <tree>
+                                    <field name="designation2"/>
+                                    <field name="quantity_marche" sum="Total"/>
+                                    <field name="quantity_cumulee" sum="Total"/>
+                                    <field name="montant_marche" sum="Total" widget="monetary"/>
+                                    <field name="montant_cumulee" sum="Total" widget="monetary"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Description">
+                            <field name="description" readonly="1"/>
+                            <field name="company_id" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Read-Only Tree View -->
+    <record id="view_custom_project_tree_readonly" model="ir.ui.view">
+        <field name="name">custom.project.tree.readonly</field>
+        <field name="model">custom.project</field>
+        <field name="priority">60</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false">
+                <field name="name"/>
+                <field name="is_internal" string="Interne"/>
+                <field name="client_id"/>
+                <field name="total_intern" sum="Total"/>
+                <field name="total_paid" sum="Total Payé"/>
+                <field name="total_remaining" sum="Restant"/>
+                <field name="progress" widget="progressbar"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-warning="state == 'done'" decoration-danger="state == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action for Read-Only Access -->
+    <record id="action_custom_project_readonly" model="ir.actions.act_window">
+        <field name="name">Projets (Consultation)</field>
+        <field name="res_model">custom.project</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_custom_project_tree_readonly')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_custom_project_form_readonly')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun projet disponible
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu for Read-Only Access -->
+    <menuitem id="menu_project_readonly"
+              name="Projets (Consultation)"
+              action="action_custom_project_readonly"
+              web_icon="custom_project,static/description/closure.png"
+              groups="custom_project.group_project_readonly"
+              sequence="10"/>
+
+</odoo>

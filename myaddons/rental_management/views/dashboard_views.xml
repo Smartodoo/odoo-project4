@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_rental_dashboard_pro" model="ir.actions.act_window">
+        <field name="name">📊 Tableau de Bord Pro</field>
+        <field name="res_model">rental.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="res_id">1</field>
+        <field name="target">inline</field>
+    </record>
+
+
+    <!-- 1. METS L'ACTION ET LE GRAPH ICI (EN PREMIER) -->
+    <record id="action_rental_graph" model="ir.actions.act_window">
+        <field name="name">Analyse des Revenus</field>
+        <field name="res_model">property.rental</field>
+        <field name="view_mode">graph</field>
+    </record>
+
+    <record id="view_rental_graph" model="ir.ui.view">
+        <field name="name">property.rental.graph</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <graph string="Revenus par Mois" type="bar">
+                <field name="date_start" interval="month"/>
+                <field name="total_price" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_rental_dashboard_pro" model="ir.ui.view">
+        <field name="name">rental.dashboard.pro</field>
+        <field name="model">rental.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Tableau de Bord Immobilier Pro" create="0" delete="0" edit="0">
+                <sheet style="background: transparent; box-shadow: none; border: none; padding: 0;">
+
+                    <!-- HEADER HERO -->
+                    <div style="background: linear-gradient(135deg, #1e293b 0%, #312e81 50%, #4f46e5 100%);
+                                border-radius: 24px; padding: 40px; margin-bottom: 32px;
+                                position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: -50%; right: -20%; width: 500px; height: 500px;
+                                    background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+                                    pointer-events: none;">&#8203;
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h1 style="color: white; font-weight: 800; font-size: 32px; margin: 0; letter-spacing: -0.02em;">
+                                    Tableau de Bord
+                                </h1>
+                                <p style="color: rgba(255,255,255,0.7); font-size: 16px; margin: 8px 0 0 0;">
+                                    Vue d'ensemble en temps réel de votre activité locative
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div style="display: inline-flex; align-items: center; gap: 8px;
+                                            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+                                            border-radius: 16px; padding: 12px 24px; color: white;">
+                                    <i class="fa fa-calendar" title="Date"/>
+                                    <span style="font-weight: 600;">Aujourd'hui</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI CARDS -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4 col-lg-2">
+                            <div class="kpi-glass-card"
+                                 style="--card-color: #6366f1; --card-color-light: #818cf8; --card-bg: #eef2ff;">
+                                <div class="kpi-icon">
+                                    <i class="fa fa-building" title="Total"/>
+                                </div>
+                                <div class="kpi-value">
+                                    <field name="total_apartments"/>
+                                </div>
+                                <div class="kpi-label">Total Appartements</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-lg-2">
+                            <div class="kpi-glass-card"
+                                 style="--card-color: #10b981; --card-color-light: #34d399; --card-bg: #ecfdf5;">
+                                <div class="kpi-icon">
+                                    <i class="fa fa-check-circle" title="Disponibles"/>
+                                </div>
+                                <div class="kpi-value">
+                                    <field name="available_count"/>
+                                </div>
+                                <div class="kpi-label">Disponibles</div>
+                                <div class="kpi-trend up">
+                                    <i class="fa fa-arrow-up" title="Tendance"/>
+                                    Prêt à louer
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-lg-2">
+                            <div class="kpi-glass-card"
+                                 style="--card-color: #ef4444; --card-color-light: #f87171; --card-bg: #fef2f2;">
+                                <div class="kpi-icon">
+                                    <i class="fa fa-user" title="Occupés"/>
+                                </div>
+                                <div class="kpi-value">
+                                    <field name="occupied_count"/>
+                                </div>
+                                <div class="kpi-label">Occupés</div>
+                                <div class="kpi-trend up">
+                                    <i class="fa fa-fire" title="Actifs"/>
+                                    Actifs
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-lg-2">
+                            <div class="kpi-glass-card"
+                                 style="--card-color: #f59e0b; --card-color-light: #fbbf24; --card-bg: #fffbeb;">
+                                <div class="kpi-icon">
+                                    <i class="fa fa-clock-o" title="Bientôt libre"/>
+                                </div>
+                                <div class="kpi-value">
+                                    <field name="soon_count"/>
+                                </div>
+                                <div class="kpi-label">Bientôt Libre</div>
+                                <div class="kpi-trend down">
+                                    <i class="fa fa-hourglass-half" title="Délai"/>
+                                    ≤ 30 jours
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-lg-2">
+                            <div class="kpi-glass-card"
+                                 style="--card-color: #3b82f6; --card-color-light: #60a5fa; --card-bg: #eff6ff;">
+                                <div class="kpi-icon">
+                                    <i class="fa fa-wrench" title="Maintenance"/>
+                                </div>
+                                <div class="kpi-value">
+                                    <field name="maintenance_count"/>
+                                </div>
+                                <div class="kpi-label">En Maintenance</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-lg-2">
+                            <div class="kpi-glass-card"
+                                 style="--card-color: #8b5cf6; --card-color-light: #a78bfa; --card-bg: #f5f3ff;">
+                                <div class="kpi-icon">
+                                    <i class="fa fa-pie-chart" title="Taux"/>
+                                </div>
+                                <div class="kpi-value">
+                                    <field name="occupancy_rate"/>%
+                                </div>
+                                <div class="kpi-label">Taux Occupation</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- REVENUS -->
+                    <h3 style="font-size: 20px; font-weight: 700; color: #1e293b; margin: 32px 0 20px 0; display: flex; align-items: center; gap: 10px;">
+                        <span style="width: 4px; height: 24px; background: linear-gradient(180deg, #6366f1, #8b5cf6); border-radius: 4px; display: inline-block;">
+                            &#8203;
+                        </span>
+                        💰 Revenus &amp; Performance
+                    </h3>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div style="background: linear-gradient(135deg, #1e293b, #334155); border-radius: 20px; padding: 24px; color: white; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: -20px; right: -20px; font-size: 80px; opacity: 0.05;">
+                                    <i class="fa fa-sun-o" title="Jour"/>
+                                </div>
+                                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; margin-bottom: 8px;">
+                                    Aujourd'hui
+                                </div>
+                                <div style="font-size: 28px; font-weight: 800;">
+                                    <field name="daily_revenue" widget="monetary"/>
+                                </div>
+                                <div style="font-size: 12px; opacity: 0.6; margin-top: 8px;">
+                                    <i class="fa fa-calendar-o" title="Calendrier"/>
+                                    En cours
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div style="background: linear-gradient(135deg, #4f46e5, #6366f1); border-radius: 20px; padding: 24px; color: white; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: -20px; right: -20px; font-size: 80px; opacity: 0.05;">
+                                    <i class="fa fa-calendar" title="Semaine"/>
+                                </div>
+                                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; margin-bottom: 8px;">
+                                    Cette Semaine
+                                </div>
+                                <div style="font-size: 28px; font-weight: 800;">
+                                    <field name="weekly_revenue" widget="monetary"/>
+                                </div>
+                                <div style="font-size: 12px; opacity: 0.6; margin-top: 8px;">
+                                    <i class="fa fa-arrow-up" title="Hausse"/>
+                                    vs semaine dernière
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div style="background: linear-gradient(135deg, #7c3aed, #8b5cf6); border-radius: 20px; padding: 24px; color: white; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: -20px; right: -20px; font-size: 80px; opacity: 0.05;">
+                                    <i class="fa fa-calendar-check-o" title="Mois"/>
+                                </div>
+                                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; margin-bottom: 8px;">
+                                    Ce Mois
+                                </div>
+                                <div style="font-size: 28px; font-weight: 800;">
+                                    <field name="monthly_revenue" widget="monetary"/>
+                                </div>
+                                <div style="font-size: 12px; opacity: 0.6; margin-top: 8px;">
+                                    Performance mensuelle
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div style="background: linear-gradient(135deg, #059669, #10b981); border-radius: 20px; padding: 24px; color: white; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: -20px; right: -20px; font-size: 80px; opacity: 0.05;">
+                                    <i class="fa fa-line-chart" title="Année"/>
+                                </div>
+                                <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; margin-bottom: 8px;">
+                                    Cette Année
+                                </div>
+                                <div style="font-size: 28px; font-weight: 800;">
+                                    <field name="yearly_revenue" widget="monetary"/>
+                                </div>
+                                <div style="font-size: 12px; opacity: 0.6; margin-top: 8px;">
+                                    <i class="fa fa-trophy" title="Performance"/>
+                                    Performance annuelle
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ALERTES -->
+                    <h3 style="font-size: 20px; font-weight: 700; color: #1e293b; margin: 32px 0 20px 0; display: flex; align-items: center; gap: 10px;">
+                        <span style="width: 4px; height: 24px; background: linear-gradient(180deg, #ef4444, #f59e0b); border-radius: 4px; display: inline-block;">
+                            &#8203;
+                        </span>
+                        ⚠️ Alertes &amp; Actions Requises
+                    </h3>
+
+                    <div class="row g-4">
+                        <!-- Expirantes -->
+                        <div class="col-md-6">
+                            <div style="background: white; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #fef3c7;">
+                                <div style="background: linear-gradient(90deg, #f59e0b, #fbbf24); padding: 16px 24px; color: white; display: flex; align-items: center; gap: 12px;">
+                                    <i class="fa fa-clock-o" style="font-size: 20px;" title="Expirantes"/>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 16px;">Locations Expirantes</div>
+                                        <div style="font-size: 12px; opacity: 0.9;">&lt;= 30 jours — Renouvellement ou
+                                            préparation
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <field name="expiring_rentals" widget="many2many"
+                                           options="{'no_create': True, 'no_edit': True}">
+                                        <tree decoration-warning="days_remaining &lt;= 3"
+                                              decoration-danger="days_remaining &lt;= 1">
+                                            <field name="name"/>
+                                            <field name="property_id"/>
+                                            <field name="client_id"/>
+                                            <field name="date_end"/>
+                                            <field name="days_remaining" widget="badge"
+                                                   decoration-danger="days_remaining &lt;= 1"
+                                                   decoration-warning="days_remaining &lt;= 3"/>
+                                            <field name="payment_status" widget="badge"/>
+                                        </tree>
+                                    </field>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Impayées -->
+                        <div class="col-md-6">
+                            <div style="background: white; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #fee2e2;">
+                                <div style="background: linear-gradient(90deg, #ef4444, #f87171); padding: 16px 24px; color: white; display: flex; align-items: center; gap: 12px;">
+                                    <i class="fa fa-exclamation-triangle" style="font-size: 20px;" title="Impayées"/>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 16px;">Locations Impayées</div>
+                                        <div style="font-size: 12px; opacity: 0.9;">Relance commerciale requise</div>
+                                    </div>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <field name="unpaid_rentals" widget="many2many"
+                                           options="{'no_create': True, 'no_edit': True}">
+                                        <tree decoration-danger="amount_due > 0">
+                                            <field name="name"/>
+                                            <field name="property_id"/>
+                                            <field name="client_id"/>
+                                            <field name="total_price" widget="monetary"/>
+                                            <field name="amount_paid" widget="monetary"/>
+                                            <field name="amount_due" widget="monetary" sum="Total dû"/>
+                                            <field name="payment_status" widget="badge"/>
+                                        </tree>
+                                    </field>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maintenances -->
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-12">
+                            <div style="background: white; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #dbeafe;">
+                                <div style="background: linear-gradient(90deg, #3b82f6, #60a5fa); padding: 16px 24px; color: white; display: flex; align-items: center; gap: 12px;">
+                                    <i class="fa fa-wrench" style="font-size: 20px;" title="Maintenances"/>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 16px;">Maintenances en Cours</div>
+                                        <div style="font-size: 12px; opacity: 0.9;">Suivi des interventions</div>
+                                    </div>
+                                </div>
+                                <div style="padding: 20px;">
+                                    <field name="active_maintenances" widget="many2many"
+                                           options="{'no_create': True, 'no_edit': True}">
+                                        <tree decoration-danger="priority == '3'"
+                                              decoration-warning="priority == '2'">
+                                            <field name="name"/>
+                                            <field name="apartment_id"/>
+                                            <field name="category" widget="badge"/>
+                                            <field name="priority" widget="badge"/>
+                                            <field name="assigned_to"/>
+                                            <field name="date_scheduled"/>
+                                            <field name="state" widget="badge"/>
+                                        </tree>
+                                    </field>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER -->
+                    <div style="text-align: center; margin-top: 40px; padding: 24px; color: #94a3b8; font-size: 12px;">
+                        <i class="fa fa-cog fa-spin" style="margin-right: 8px;" title="Mise à jour"/>
+                        Dernière mise à jour automatique
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 text-center" style="margin-top: 20px;">
+                            <!-- Bouton pour ouvrir le vrai graphique sans erreur -->
+                            <button name="%(action_rental_graph)d" type="action"
+                                    class="btn btn-primary" string="📊 Voir l'Analyse Graphique"/>
+                        </div>
+                    </div>
+
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <menuitem id="menu_rental_dashboard_pro" name="📊 Tableau de Bord "
+              parent="menu_rental_root" action="action_rental_dashboard_pro"
+              sequence="1"/>
+</odoo>

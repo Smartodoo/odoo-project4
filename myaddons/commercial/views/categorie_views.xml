@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_categorie_view_tree" model="ir.ui.view">
+        <field name="name">commercial.categorie.tree</field>
+        <field name="model">commercial.categorie</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="type_lot_id"/>
+                <field name="nature_id"/>
+                <field name="categorie"/>
+                <field name="surface_01"/>
+                <field name="prix_surface_01"/>
+                <field name="surface_02"/>
+                <field name="prix_surface_02"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_categorie_view_form" model="ir.ui.view">
+        <field name="name">commercial.categorie.form</field>
+        <field name="model">commercial.categorie</field>
+        <field name="arch" type="xml">
+            <form string="Catégorie">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="type_lot_id"/>
+                            <field name="nature_id"/>
+                            <field name="categorie"/>
+                        </group>
+                        <group>
+                            <field name="etage_id"/>
+                            <field name="surface_01"/>
+                            <field name="prix_surface_01"/>
+                            <field name="surface_02"/>
+                            <field name="prix_surface_02"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="select_parking_wizard_form" model="ir.ui.view">
+        <field name="name">commercial.select.parking.wizard.form</field>
+        <field name="model">commercial.select.parking.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sélectionner un parking">
+                <group>
+                    <field name="client_id" invisible="1"/>
+                    <field name="available_parking_ids" invisible="1"/>
+                    <field name="parking_id" options="{'no_open': True}"/>
+                </group>
+                <footer>
+                    <button name="action_print" string="Imprimer" type="object" class="btn-primary"/>
+                    <button string="Annuler" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

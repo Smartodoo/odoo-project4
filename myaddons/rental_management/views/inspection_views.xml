@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_inspection" model="ir.actions.act_window">
+        <field name="name"> États des Lieux</field>
+        <field name="res_model">property.inspection</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_inspection_tree" model="ir.ui.view">
+        <field name="name">property.inspection.tree</field>
+        <field name="model">property.inspection</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="inspection_type == 'entry'"
+                  decoration-danger="inspection_type == 'exit'"
+                  decoration-warning="damage_found == True">
+                <field name="name"/>
+                <field name="rental_id"/>
+                <field name="inspection_type" widget="badge"/>
+                <field name="date"/>
+                <field name="inspector_id"/>
+                <field name="damage_found"/>
+                <field name="estimated_repair_cost"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_inspection_form" model="ir.ui.view">
+        <field name="name">property.inspection.form</field>
+        <field name="model">property.inspection</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_done" string=" Valider"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_dispute" string="Contester"
+                            type="object"
+                            invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="rental_id"/>
+                            <field name="inspection_type"/>
+                            <field name="date"/>
+                            <field name="inspector_id"/>
+                        </group>
+                        <group>
+                            <field name="apartment_id" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- CHECKLIST -->
+                    <group string=" Checklist État">
+                        <group>
+                            <field name="walls_condition"/>
+                            <field name="floor_condition"/>
+                            <field name="cleanliness"/>
+                        </group>
+                        <group>
+                            <field name="plumbing_working" widget="boolean_toggle"/>
+                            <field name="electricity_working" widget="boolean_toggle"/>
+                            <field name="ac_working" widget="boolean_toggle"/>
+                            <field name="wifi_working" widget="boolean_toggle"/>
+                            <field name="tv_working" widget="boolean_toggle"/>
+                            <field name="kitchen_working" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+
+                    <!-- PHOTOS -->
+                    <group string="📸 Photos">
+                        <field name="photos_before" widget="many2many_binary"/>
+                        <field name="photos_after" widget="many2many_binary"/>
+                    </group>
+
+                    <!-- SIGNATURES -->
+                    <group string="✍️ Signatures">
+                        <group>
+                            <field name="tenant_signature" widget="signature"/>
+                        </group>
+                        <group>
+                            <field name="inspector_signature" widget="signature"/>
+                        </group>
+                    </group>
+
+                    <!-- DÉGÂTS -->
+                    <group string="⚠️ Dégâts" invisible="not damage_found">
+                        <field name="damage_found" widget="boolean_toggle"/>
+                        <field name="damage_description"/>
+                        <field name="damage_photos" widget="many2many_binary"/>
+                        <field name="estimated_repair_cost"/>
+                        <field name="actual_repair_cost"/>
+                        <field name="deposit_deduction"/>
+                    </group>
+
+                    <field name="notes" placeholder="Observations générales..."/>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_inspection" name="📋 États des Lieux"
+              parent="menu_rental_root" action="action_inspection"
+              sequence="40"/>
+</odoo>

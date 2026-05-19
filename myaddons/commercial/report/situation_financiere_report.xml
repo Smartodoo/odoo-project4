@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action : Situation Financière Détaillée -->
+    <record id="action_report_situation_financiere" model="ir.actions.report">
+        <field name="name">Situation Financière Détaillée</field>
+        <field name="model">commercial.print.situation.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.situation_financiere_template</field>
+        <field name="report_file">commercial.situation_financiere_template</field>
+        <field name="print_report_name">'Situation Financière - %s' % object.paiement_id.client_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Situation Financière Détaillée -->
+    <template id="situation_financiere_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="paiement" t-value="doc.paiement_id"/>
+                    <t t-set="lot" t-value="paiement.lot_id"/>
+                    <t t-set="client" t-value="paiement.client_id"/>
+                    <t t-set="projet" t-value="lot.projet_id"/>
+
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 12px;">
+
+                        <!-- Main bordered container -->
+                        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+
+                            <!-- Row 1: Client name | Title | Date -->
+                            <tr>
+                                <td style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 8px 10px; width: 22%; vertical-align: top; color: #0000CC;">
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="(client.name or '').split(' ', 1)[0]"/>
+                                    </strong>
+                                    <br/>
+                                    <t t-if="len((client.name or '').split(' ', 1)) > 1">
+                                        <span t-esc="(client.name or '').split(' ', 1)[1]"/>
+                                    </t>
+                                </td>
+                                <td style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 8px; width: 53%; text-align: center; vertical-align: middle;">
+                                    <span style="font-size: 16px; color: #0000CC;">
+                                        SITUATION FINANCIERE DETAILLEE (DECLARATION)
+                                    </span>
+                                </td>
+                                <td style="border-bottom: 2px solid #000; padding: 8px 10px; width: 25%; text-align: right; vertical-align: top;">
+                                    <t t-esc="time.strftime('%d/%m/%Y')"/>
+                                </td>
+                            </tr>
+
+                            <!-- Row 2: Project/Lot info | Prix de vente | Crédit bancaire -->
+                            <tr>
+                                <!-- Left: Project and lot details -->
+                                <td style="border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top; line-height: 1.6;">
+                                    <strong t-esc="projet.name or ''"/><br/>
+                                    LOT N° <t t-esc="lot.numero_lot or ''"/><br/>
+                                    <t t-esc="lot.categorie_id.categorie or ''"/><br/>
+                                    <t t-esc="'%.2f' % lot.surface_globale"/> m²<br/>
+                                    BLOC <t t-esc="lot.bloc_id.code or ''"/><br/>
+                                    <t t-esc="lot.etage_id.etiquette or ''"/>
+                                </td>
+
+                                <!-- Center: Prix de vente -->
+                                <td style="border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top;">
+                                    <div style="text-align: center; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                                        Prix de vente
+                                    </div>
+                                    <div style="text-align: center; margin: 8px 0;">
+                                        <t t-esc="doc.get_type_lot()"/>
+                                    </div>
+                                    <div style="text-align: center; font-weight: bold; font-size: 14px;">
+                                        <t t-esc="'{:,.0f}'.format(paiement.montant_lot)"/>
+                                    </div>
+                                </td>
+
+                                <!-- Right: Crédit bancaire -->
+                                <td style="border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top;">
+                                    <div style="text-align: center; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                                        Crédit bancaire
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        Montant Crédit: <strong><t t-esc="'{:,.2f}'.format(paiement.montant_accorde)"/></strong>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Row 3: Summary totals -->
+                            <tr>
+                                <!-- Left: Vente totals -->
+                                <td colspan="2" style="border-right: 2px solid #000; padding: 8px 10px; line-height: 1.8;">
+                                    MONTANT TOTAL DE VENTE :
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="'{:,.2f}'.format(paiement.montant_lot)"/>
+                                    </strong>
+                                    <br/>
+                                    <span style="color: #0000CC;">
+                                        MONTANT ENCAISSE:
+                                        <strong style="font-size: 13px;">
+                                            <t t-esc="'{:,.2f}'.format(doc.get_montant_encaisse())"/>
+                                        </strong>
+                                    </span>
+                                    <br/>
+                                    <span style="color: #CC0000;">
+                                        RESTE A ENCAISSER:
+                                        <strong style="font-size: 13px;">
+                                            <t t-esc="'{:,.2f}'.format(doc.get_reste_encaisser())"/>
+                                        </strong>
+                                    </span>
+                                </td>
+
+                                <!-- Right: Crédit bancaire totals -->
+                                <td style="padding: 8px 10px; line-height: 1.8;">
+                                    MONTANT DECLARE:
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="'{:,.2f}'.format(paiement.montant_accorde)"/>
+                                    </strong>
+                                    <br/>
+                                    REGULARISE:
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="'{:,.2f}'.format(paiement.montant_paye_cb)"/>
+                                    </strong>
+                                    <br/>
+                                    <span style="color: #CC0000;">
+                                        RESTE A REGULARISER:
+                                        <strong style="font-size: 13px;">
+                                            <t t-esc="'{:,.2f}'.format(paiement.reste_cb)"/>
+                                        </strong>
+                                    </span>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <!-- ========== Transactions déclarées ========== -->
+                        <div style="margin-top: 15px;">
+                            <div style="border: 2px solid #000; border-bottom: none; padding: 5px 10px; text-decoration: underline; color: #0000CC;">
+                                Transactions déclarées
+                            </div>
+                            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+                                <thead>
+                                    <tr>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 14%;">Compte</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 12%;">Date</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">Montant</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 16%;">Nature</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center;">Observation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.get_echeances_declarees()" t-as="ech">
+                                        <tr>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                <t t-esc="paiement.banque_id.name or ''"/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                <t t-esc="ech.date_encaissement or ech.date" t-options='{"widget": "date"}'/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(ech.montant)"/> DA
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center; background-color: #d9d9d9;">
+                                                Encaissement CB
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px;">
+                                                <t t-esc="doc.get_observation_cb(ech)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="not doc.get_echeances_declarees()">
+                                        <tr>
+                                            <td colspan="5" style="border: 1px solid #000; padding: 15px; text-align: center; color: #999;">
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- ========== Transactions non déclarées ========== -->
+                        <div style="margin-top: 15px;">
+                            <div style="border: 2px solid #000; border-bottom: none; padding: 5px 10px; text-decoration: underline; color: #0000CC;">
+                                Transactions non déclarées
+                            </div>
+                            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+                                <thead>
+                                    <tr>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 14%;">Mode</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 12%;">Date</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">Montant</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 16%;">Nature</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center;">Observation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.get_echeances_non_declarees()" t-as="ech">
+                                        <tr>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                Apport Personnel
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                <t t-esc="ech.date_encaissement or ech.date" t-options='{"widget": "date"}'/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(ech.montant)"/> DA
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center; background-color: #d9d9d9;">
+                                                Encaissement AP
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px;">
+                                                <t t-esc="doc.get_observation_ap(ech)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="not doc.get_echeances_non_declarees()">
+                                        <tr>
+                                            <td colspan="5" style="border: 1px solid #000; padding: 15px; text-align: center; color: #999;">
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Report Action : Situation Financière Détaillée (Déclarées seul.) -->
+    <!-- ================================================================== -->
+    <record id="action_report_situation_declarees" model="ir.actions.report">
+        <field name="name">Situation Financière Détaillée (Déclarées)</field>
+        <field name="model">commercial.print.situation.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.situation_declarees_template</field>
+        <field name="report_file">commercial.situation_declarees_template</field>
+        <field name="print_report_name">'Situation Financière Déclarées - %s' % object.paiement_id.client_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Situation Financière Détaillée (Déclarées) -->
+    <template id="situation_declarees_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="paiement" t-value="doc.paiement_id"/>
+                    <t t-set="lot" t-value="paiement.lot_id"/>
+                    <t t-set="client" t-value="paiement.client_id"/>
+                    <t t-set="projet" t-value="lot.projet_id"/>
+
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 12px;">
+
+                        <!-- Main bordered container -->
+                        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+
+                            <!-- Row 1: Client name | Title | Date -->
+                            <tr>
+                                <td style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 8px 10px; width: 22%; vertical-align: top; color: #0000CC;">
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="(client.name or '').split(' ', 1)[0]"/>
+                                    </strong>
+                                    <br/>
+                                    <t t-if="len((client.name or '').split(' ', 1)) > 1">
+                                        <span t-esc="(client.name or '').split(' ', 1)[1]"/>
+                                    </t>
+                                </td>
+                                <td style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 8px; width: 53%; text-align: center; vertical-align: middle;">
+                                    <span style="font-size: 16px; color: #0000CC;">
+                                        SITUATION FINANCIERE DETAILLEE (DECLARATION)
+                                    </span>
+                                </td>
+                                <td style="border-bottom: 2px solid #000; padding: 8px 10px; width: 25%; text-align: right; vertical-align: top;">
+                                    <t t-esc="time.strftime('%d/%m/%Y')"/>
+                                </td>
+                            </tr>
+
+                            <!-- Row 2: Project/Lot info | Prix de vente | Crédit bancaire -->
+                            <tr>
+                                <!-- Left: Project and lot details -->
+                                <td style="border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top; line-height: 1.6;">
+                                    <strong t-esc="projet.name or ''"/><br/>
+                                    LOT N° <t t-esc="lot.numero_lot or ''"/><br/>
+                                    <t t-esc="lot.categorie_id.categorie or ''"/><br/>
+                                    <t t-esc="'%.2f' % lot.surface_globale"/> m²<br/>
+                                    BLOC <t t-esc="lot.bloc_id.code or ''"/><br/>
+                                    <t t-esc="lot.etage_id.etiquette or ''"/>
+                                </td>
+
+                                <!-- Center: Prix de vente (montant déclaré) -->
+                                <td style="border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top;">
+                                    <div style="text-align: center; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                                        Prix de vente
+                                    </div>
+                                    <div style="text-align: center; margin: 8px 0;">
+                                        <t t-esc="doc.get_type_lot()"/>
+                                    </div>
+                                    <div style="text-align: center; font-weight: bold; font-size: 14px;">
+                                        <t t-esc="'{:,.0f}'.format(lot.montant_declare or 0)"/>
+                                    </div>
+                                </td>
+
+                                <!-- Right: Crédit bancaire -->
+                                <td style="border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top;">
+                                    <div style="text-align: center; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                                        Crédit bancaire
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        Montant Crédit: <strong><t t-esc="'{:,.2f}'.format(paiement.montant_accorde)"/></strong>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Row 3: Summary (CB only) -->
+                            <tr>
+                                <td colspan="3" style="padding: 8px 10px; line-height: 1.8; text-align: right;">
+                                    MONTANT DE VENTE :
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="'{:,.2f}'.format(paiement.montant_accorde)"/>
+                                    </strong>
+                                    <br/>
+                                    COMPTABILISE:
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="'{:,.2f}'.format(paiement.montant_paye_cb)"/>
+                                    </strong>
+                                    <br/>
+                                    RESTE A COMPTABILISER:
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="'{:,.2f}'.format(paiement.reste_cb)"/>
+                                    </strong>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <!-- ========== Transactions déclarées ========== -->
+                        <div style="margin-top: 15px;">
+                            <div style="border: 2px solid #000; border-bottom: none; padding: 5px 10px; text-decoration: underline; color: #0000CC;">
+                                Transactions déclarées
+                            </div>
+                            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+                                <thead>
+                                    <tr>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 14%;">Compte</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 12%;">Date</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">Montant</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 16%;">Nature</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center;">Observation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.get_echeances_declarees()" t-as="ech">
+                                        <tr>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                <t t-esc="paiement.banque_id.name or ''"/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                <t t-esc="ech.date_encaissement or ech.date" t-options='{"widget": "date"}'/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(ech.montant)"/> DA
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center; background-color: #d9d9d9;">
+                                                Encaissement CB
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px;">
+                                                <t t-esc="doc.get_observation_cb(ech)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="not doc.get_echeances_declarees()">
+                                        <tr>
+                                            <td colspan="5" style="border: 1px solid #000; padding: 15px; text-align: center; color: #999;">
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Report Action : Dossier Client avec Transactions                   -->
+    <!-- ================================================================== -->
+    <record id="action_report_dossier_client_avec" model="ir.actions.report">
+        <field name="name">Dossier Client avec Transactions</field>
+        <field name="model">commercial.print.situation.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.dossier_client_avec_template</field>
+        <field name="report_file">commercial.dossier_client_avec_template</field>
+        <field name="print_report_name">'Dossier Client - %s' % object.paiement_id.client_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Dossier Client avec Transactions -->
+    <template id="dossier_client_avec_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="paiement" t-value="doc.paiement_id"/>
+                    <t t-set="lot" t-value="paiement.lot_id"/>
+                    <t t-set="client" t-value="paiement.client_id"/>
+                    <t t-set="projet" t-value="lot.projet_id"/>
+
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 12px;">
+
+                        <!-- Date top right -->
+                        <div style="text-align: right; margin-bottom: 10px;">
+                            <t t-esc="time.strftime('%d/%m/%Y')"/>
+                        </div>
+
+                        <!-- Title -->
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <span style="font-size: 18px; color: #0000CC;">Dossier Client</span>
+                        </div>
+
+                        <!-- Client name -->
+                        <div style="margin-bottom: 5px; font-size: 14px; color: #0000CC;">
+                            <strong>
+                                <t t-esc="(client.name or '').split(' ', 1)[0]"/>
+                                <t t-if="len((client.name or '').split(' ', 1)) > 1">
+                                    / <t t-esc="(client.name or '').split(' ', 1)[1]"/>
+                                </t>
+                            </strong>
+                        </div>
+
+                        <!-- Tel -->
+                        <div style="margin-bottom: 15px;">
+                            <strong>Tel :</strong> <t t-esc="client.phone or client.mobile or ''"/>
+                        </div>
+
+                        <!-- Lot info -->
+                        <div style="margin-bottom: 5px;">
+                            <strong t-esc="projet.name or ''"/>
+                            — LOT N° <t t-esc="lot.numero_lot or ''"/>
+                            — <t t-esc="lot.categorie_id.categorie or ''"/>
+                            — <t t-esc="'%.2f' % lot.surface_globale"/> m²
+                            — BLOC <t t-esc="lot.bloc_id.code or ''"/>
+                            — <t t-esc="lot.etage_id.etiquette or ''"/>
+                        </div>
+
+                        <!-- Financial summary -->
+                        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-top: 15px;">
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Prix de Vente</td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold;">
+                                    <t t-esc="'{:,.2f}'.format(paiement.montant_lot)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 8px; font-weight: bold; color: #0000CC;">Réglé</td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold; color: #0000CC;">
+                                    <t t-esc="'{:,.2f}'.format(paiement.montant_deja_paye)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 8px; font-weight: bold; color: #CC0000;">Reste</td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold; color: #CC0000;">
+                                    <t t-esc="'{:,.2f}'.format(paiement.reste)"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Observations -->
+                        <div style="margin-top: 15px; margin-bottom: 15px;">
+                            <strong>Observations :</strong>
+                        </div>
+
+                        <!-- Détails des transactions -->
+                        <div style="margin-top: 15px;">
+                            <div style="border: 2px solid #000; border-bottom: none; padding: 5px 10px; text-decoration: underline; color: #0000CC;">
+                                Détails des transactions
+                            </div>
+                            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+                                <thead>
+                                    <tr>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 14%;">Mode</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 12%;">Date</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">Montant</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 16%;">Nature</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center;">Observation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.get_all_transactions()" t-as="tr">
+                                        <tr>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                <t t-esc="tr['mode']"/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                <t t-esc="tr['date']" t-options='{"widget": "date"}'/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(tr['montant'])"/> DA
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center; background-color: #d9d9d9;">
+                                                <t t-esc="tr['nature']"/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px;">
+                                                <t t-esc="tr['observation']"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="not doc.get_all_transactions()">
+                                        <tr>
+                                            <td colspan="5" style="border: 1px solid #000; padding: 15px; text-align: center; color: #999;">
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Report Action : Dossier Client sans Transactions                   -->
+    <!-- ================================================================== -->
+    <record id="action_report_dossier_client_sans" model="ir.actions.report">
+        <field name="name">Dossier Client sans Transactions</field>
+        <field name="model">commercial.print.situation.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.dossier_client_sans_template</field>
+        <field name="report_file">commercial.dossier_client_sans_template</field>
+        <field name="print_report_name">'Dossier Client - %s' % object.paiement_id.client_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Dossier Client sans Transactions -->
+    <template id="dossier_client_sans_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="paiement" t-value="doc.paiement_id"/>
+                    <t t-set="lot" t-value="paiement.lot_id"/>
+                    <t t-set="client" t-value="paiement.client_id"/>
+                    <t t-set="projet" t-value="lot.projet_id"/>
+
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 12px;">
+
+                        <!-- Date top right -->
+                        <div style="text-align: right; margin-bottom: 10px;">
+                            <t t-esc="time.strftime('%d/%m/%Y')"/>
+                        </div>
+
+                        <!-- Title -->
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <span style="font-size: 18px; color: #0000CC;">Dossier Client</span>
+                        </div>
+
+                        <!-- Client name -->
+                        <div style="margin-bottom: 5px; font-size: 14px; color: #0000CC;">
+                            <strong>
+                                <t t-esc="(client.name or '').split(' ', 1)[0]"/>
+                                <t t-if="len((client.name or '').split(' ', 1)) > 1">
+                                    / <t t-esc="(client.name or '').split(' ', 1)[1]"/>
+                                </t>
+                            </strong>
+                        </div>
+
+                        <!-- Tel -->
+                        <div style="margin-bottom: 15px;">
+                            <strong>Tel :</strong> <t t-esc="client.phone or client.mobile or ''"/>
+                        </div>
+
+                        <!-- Lot info -->
+                        <div style="margin-bottom: 5px;">
+                            <strong t-esc="projet.name or ''"/>
+                            — LOT N° <t t-esc="lot.numero_lot or ''"/>
+                            — <t t-esc="lot.categorie_id.categorie or ''"/>
+                            — <t t-esc="'%.2f' % lot.surface_globale"/> m²
+                            — BLOC <t t-esc="lot.bloc_id.code or ''"/>
+                            — <t t-esc="lot.etage_id.etiquette or ''"/>
+                        </div>
+
+                        <!-- Financial summary -->
+                        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-top: 15px;">
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Prix de Vente</td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold;">
+                                    <t t-esc="'{:,.2f}'.format(paiement.montant_lot)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 8px; font-weight: bold; color: #0000CC;">Réglé</td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold; color: #0000CC;">
+                                    <t t-esc="'{:,.2f}'.format(paiement.montant_deja_paye)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 8px; font-weight: bold; color: #CC0000;">Reste</td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: right; font-weight: bold; color: #CC0000;">
+                                    <t t-esc="'{:,.2f}'.format(paiement.reste)"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Observations -->
+                        <div style="margin-top: 15px;">
+                            <strong>Observations :</strong>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================================================================== -->
+    <!-- Report Action : Situation de Réservation                           -->
+    <!-- ================================================================== -->
+    <record id="action_report_situation_reservation" model="ir.actions.report">
+        <field name="name">Situation de Réservation</field>
+        <field name="model">commercial.print.situation.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.situation_reservation_template</field>
+        <field name="report_file">commercial.situation_reservation_template</field>
+        <field name="print_report_name">'Situation Réservation - %s' % object.paiement_id.client_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Situation de Réservation -->
+    <template id="situation_reservation_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="paiement" t-value="doc.paiement_id"/>
+                    <t t-set="lot" t-value="paiement.lot_id"/>
+                    <t t-set="client" t-value="paiement.client_id"/>
+                    <t t-set="projet" t-value="lot.projet_id"/>
+
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 12px;">
+
+                        <!-- Main bordered container -->
+                        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+
+                            <!-- Row 1: Client name | Title | Date -->
+                            <tr>
+                                <td style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 8px 10px; width: 20%; vertical-align: top; color: #0000CC;">
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="(client.name or '').split(' ', 1)[0]"/>
+                                    </strong>
+                                    <br/>
+                                    <t t-if="len((client.name or '').split(' ', 1)) > 1">
+                                        <span t-esc="(client.name or '').split(' ', 1)[1]"/>
+                                    </t>
+                                </td>
+                                <td colspan="2" style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 8px; text-align: center; vertical-align: middle;">
+                                    <span style="font-size: 16px; color: #0000CC;">
+                                        SITUATION DE RESERVATION
+                                    </span>
+                                </td>
+                                <td style="border-bottom: 2px solid #000; padding: 8px 10px; width: 15%; text-align: right; vertical-align: top;">
+                                    <t t-esc="time.strftime('%d/%m/%Y')"/>
+                                </td>
+                            </tr>
+
+                            <!-- Row 2: Project/Lot info | Prix de vente | Crédit bancaire | Charges de coprop. -->
+                            <tr>
+                                <!-- Left: Project and lot details -->
+                                <td style="border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top; line-height: 1.6;">
+                                    <strong t-esc="projet.name or ''"/><br/>
+                                    LOT N° <t t-esc="lot.numero_lot or ''"/><br/>
+                                    <t t-esc="lot.categorie_id.categorie or ''"/><br/>
+                                    <t t-esc="'%.2f' % lot.surface_globale"/> m²<br/>
+                                    BLOC <t t-esc="lot.bloc_id.code or ''"/><br/>
+                                    <t t-esc="lot.etage_id.etiquette or ''"/>
+                                </td>
+
+                                <!-- Prix de vente -->
+                                <td style="border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top; width: 20%;">
+                                    <div style="text-align: center; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                                        Prix de vente
+                                    </div>
+                                    <div style="text-align: center; margin: 8px 0;">
+                                        <t t-esc="doc.get_type_lot()"/>
+                                    </div>
+                                    <div style="text-align: center; font-weight: bold; font-size: 14px;">
+                                        <t t-esc="'{:,.0f}'.format(paiement.montant_lot)"/>
+                                    </div>
+                                </td>
+
+                                <!-- Crédit bancaire -->
+                                <td style="border-right: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top; width: 25%;">
+                                    <div style="text-align: center; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                                        Crédit bancaire
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        Montant Crédit: <strong><t t-esc="'{:,.2f}'.format(paiement.montant_accorde)"/></strong>
+                                    </div>
+                                </td>
+
+                                <!-- Charges de coprop. -->
+                                <td style="border-bottom: 2px solid #000; padding: 8px 10px; vertical-align: top; width: 15%;">
+                                    <div style="text-align: center; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                                        Charges de coprop.
+                                    </div>
+                                    <div style="margin-top: 8px;">
+                                        Montant:<br/>
+                                        <strong><t t-esc="'{:,.2f}'.format(paiement.montant_coprop)"/></strong>
+                                    </div>
+                                    <div style="margin-top: 5px;">
+                                        Réglé:<br/>
+                                        <strong><t t-esc="'{:,.2f}'.format(paiement.montant_paye_coprop)"/></strong>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Row 3: Montant total de vente -->
+                            <tr>
+                                <td colspan="4" style="padding: 8px 10px; text-align: center; font-weight: bold;">
+                                    Montant total de vente :
+                                    <span style="font-size: 13px;">
+                                        <t t-esc="'{:,.2f}'.format(paiement.montant_lot)"/>
+                                    </span>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <!-- ========== Détails des transactions ========== -->
+                        <div style="margin-top: 15px;">
+                            <div style="text-align: center; font-weight: bold; margin-bottom: 5px; color: #0000CC;">
+                                Détails des transactions
+                            </div>
+                            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+                                <thead>
+                                    <tr>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 14%;">Mode</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 12%;">Date</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 20%;">Montant</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 16%;">Nature</th>
+                                        <th style="border: 1px solid #000; padding: 8px; text-align: center;">Observation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="doc.get_all_transactions()" t-as="tr">
+                                        <tr>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                <t t-esc="tr['mode']"/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center;">
+                                                <t t-esc="tr['date']" t-options='{"widget": "date"}'/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(tr['montant'])"/> DA
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px; text-align: center; background-color: #d9d9d9;">
+                                                <t t-esc="tr['nature']"/>
+                                            </td>
+                                            <td style="border: 1px solid #000; padding: 6px;">
+                                                <t t-esc="tr['observation']"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="not doc.get_all_transactions()">
+                                        <tr>
+                                            <td colspan="5" style="border: 1px solid #000; padding: 15px; text-align: center; color: #999;">
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Bottom summary -->
+                        <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-top: 10px;">
+                            <tr>
+                                <td style="border-right: 2px solid #000; padding: 8px 10px; width: 55%;">
+                                    TOTAL DES ENCAISSEMENTS:
+                                    <strong style="font-size: 13px;">
+                                        <t t-esc="'{:,.2f}'.format(paiement.montant_deja_paye)"/>
+                                    </strong>
+                                </td>
+                                <td style="padding: 8px 10px; text-align: right;">
+                                    <span style="color: #CC0000;">
+                                        RESTE A ENCAISSER:
+                                        <strong style="font-size: 13px;">
+                                            <t t-esc="'{:,.2f}'.format(paiement.reste)"/>
+                                        </strong>
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

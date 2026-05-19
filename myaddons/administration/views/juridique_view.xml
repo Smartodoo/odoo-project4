@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_administration_juridique_tree" model="ir.ui.view">
+        <field name="name">administration.juridique.tree</field>
+        <field name="model">administration.juridique</field>
+        <field name="arch" type="xml">
+            <tree string="Suivi Juridique">
+                <field name="date"/>
+                <field name="numero_affaire"/>
+                <field name="partie"/>
+                <field name="designation"/>
+                <field name="juridiction"/>
+                <field name="section_chambre"/>
+                <field name="date_audience"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_administration_juridique_form" model="ir.ui.view">
+        <field name="name">administration.juridique.form</field>
+        <field name="model">administration.juridique</field>
+        <field name="arch" type="xml">
+            <form string="Affaire Juridique" create="true" edit="true">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="numero_affaire"/>
+                            <field name="partie"/>
+                            <field name="designation"/>
+                        </group>
+                        <group>
+                            <field name="juridiction"/>
+                            <field name="section_chambre"/>
+                            <field name="date_audience"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Procédure">
+                            <field name="historique_audience_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="ancienne_date" readonly="1"/>
+                                    <field name="note"/>
+                                </tree>
+                            </field>
+
+                        </page>
+                        <page string="Observations">
+                            <field name="observation" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

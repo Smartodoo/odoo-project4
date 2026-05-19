@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Catégorie du module Commercial -->
+    <record id="module_category_commercial" model="ir.module.category">
+        <field name="name">Commercial</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- Groupe : Utilisateur Commercial -->
+    <record id="group_commercial_user" model="res.groups">
+        <field name="name">Utilisateur</field>
+        <field name="category_id" ref="module_category_commercial"/>
+    </record>
+
+    <!-- Groupe : Admin Commercial (hérite du groupe Utilisateur) -->
+    <record id="group_commercial_admin" model="res.groups">
+        <field name="name">Admin</field>
+        <field name="category_id" ref="module_category_commercial"/>
+        <field name="implied_ids" eval="[(4, ref('group_commercial_user'))]"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,225 @@
+/* Fond général */
+.o_web_client {
+    background: #F7F9FC;
+}
+
+/* Cartes dashboard */
+.rental-card {
+    background: white;
+    border-radius: 24px;
+    padding: 20px;
+    margin: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(94,106,210,0.1);
+}
+
+.rental-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(94,106,210,0.15);
+}
+
+/* Bouton principal */
+.btn-primary {
+    background: linear-gradient(135deg, #5E6AD2 0%, #7B84E0 100%);
+    border: none;
+    border-radius: 40px;
+    padding: 10px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4A56C2 0%, #6A74D0 100%);
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(94,106,210,0.3);
+}
+
+/* Badge statut */
+.badge-available {
+    background: #2DC071;
+    color: white;
+    border-radius: 40px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-occupied {
+    background: #FF5A5F;
+    color: white;
+    border-radius: 40px;
+}
+
+.badge-soon {
+    background: #FF8C42;
+    color: white;
+    border-radius: 40px;
+}
+
+/* Animation de chargement */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.rental-card {
+    animation: fadeInUp 0.4s ease-out;
+}
+/* Palette unique */
+:root {
+    --primary: #5E6AD2;
+    --primary-dark: #4A56C2;
+    --success: #2DC071;
+    --danger: #FF5A5F;
+    --warning: #FF8C42;
+    --dark: #1A2C3E;
+    --light: #F7F9FC;
+    --gray: #6B7A8A;
+}
+
+/* Cartes dashboard */
+.o_kanban_record {
+    border-radius: 24px !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05) !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid rgba(94,106,210,0.1) !important;
+}
+
+.o_kanban_record:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 28px rgba(94,106,210,0.15) !important;
+}
+
+/* Boutons */
+.btn-primary {
+    background: linear-gradient(135deg, #5E6AD2, #7B84E0) !important;
+    border-radius: 40px !important;
+    border: none !important;
+}
+/* ========== PALETTE DE COULEURS UNIQUE ========== */
+:root {
+    --primary: #5E6AD2;
+    --primary-dark: #4A56C2;
+    --primary-light: #7B84E0;
+    --success: #2DC071;
+    --danger: #FF5A5F;
+    --warning: #FF8C42;
+    --info: #36A2EB;
+    --dark: #1A2C3E;
+    --light: #F7F9FC;
+    --gray: #6B7A8A;
+    --white: #FFFFFF;
+    --black: #000000;
+}
+
+/* ========== MODE CLAIR (par défaut) ========== */
+body {
+    background: var(--light);
+    color: var(--dark);
+    transition: all 0.3s ease;
+}
+
+/* Cartes dashboard */
+.o_kanban_record,
+.rental-card {
+    background: var(--white);
+    border-radius: 28px !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05) !important;
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1) !important;
+    border: 1px solid rgba(94,106,210,0.1) !important;
+    overflow: hidden;
+}
+
+.o_kanban_record:hover,
+.rental-card:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 20px 30px rgba(94,106,210,0.2) !important;
+}
+
+/* Boutons gradient */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light)) !important;
+    border: none !important;
+    border-radius: 40px !important;
+    padding: 10px 24px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary)) !important;
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(94,106,210,0.4);
+}
+
+/* Badges statut */
+.badge-available {
+    background: var(--success) !important;
+    color: white !important;
+    border-radius: 40px !important;
+    padding: 4px 12px !important;
+}
+.badge-occupied {
+    background: var(--danger) !important;
+}
+.badge-soon {
+    background: var(--warning) !important;
+}
+
+/* KPI Cards */
+.kpi-card {
+    background: linear-gradient(135deg, var(--white), #f8f9ff);
+    border-radius: 24px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-left: 4px solid var(--primary);
+}
+.kpi-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary);
+}
+.kpi-label {
+    font-size: 13px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ========== MODE SOMBRE AUTOMATIQUE ========== */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #121212 !important;
+        color: #E0E0E0 !important;
+    }
+    .o_kanban_record,
+    .rental-card,
+    .kpi-card {
+        background: #1E1E1E !important;
+        border-color: #333 !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important;
+    }
+    .kpi-value {
+        color: var(--primary-light);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #3a45a0, #5E6AD2) !important;
+    }
+    table, .table {
+        background: #1E1E1E;
+        color: #E0E0E0;
+    }
+    input, select, textarea {
+        background: #2C2C2C !important;
+        color: #E0E0E0 !important;
+        border-color: #444 !important;
+    }
+}

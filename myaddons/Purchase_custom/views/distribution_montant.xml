@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="distribution_form" model="ir.ui.view">
+        <field name="name">distribution_form</field>
+        <field name="model">distribution.montant</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <sheet>
+                    <group>
+                        <field name="purchase_id"/>
+                        <field name="total"/>
+                        <field name="montant"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="distribution_tree" model="ir.ui.view">
+        <field name="name">distribution_tree</field>
+        <field name="model">distribution.montant</field>
+        <field name="arch" type="xml">
+            <tree create="false" delete="false" editable="bottom">
+                <field name="purchase_id"/>
+                <field name="total"/>
+                <field name="montant"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="distribution_montant_action" model="ir.actions.act_window">
+        <field name="name">Distribution des montants</field>
+        <field name="res_model">distribution.montant</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+</odoo>

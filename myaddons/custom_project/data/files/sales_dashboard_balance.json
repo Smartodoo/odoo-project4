@@ -1,0 +1,667 @@
+{
+    "version": 13,
+    "sheets": [
+        {
+            "id": "sheet1",
+            "name": "Dashboard",
+            "colNumber": 12,
+            "rowNumber": 90,
+            "rows": {
+                "6": {
+                    "size": 40
+                },
+                "18": {
+                    "size": 40
+                },
+                "19": {
+                    "size": 40
+                },
+                "31": {
+                    "size": 40
+                },
+                "32": {
+                    "size": 40
+                },
+                "44": {
+                    "size": 40
+                },
+                "45": {
+                    "size": 40
+                },
+                "57": {
+                    "size": 40
+                },
+                "58": {
+                    "size": 40
+                },
+                "70": {
+                    "size": 40
+                },
+                "71": {
+                    "size": 40
+                },
+                "83": {
+                    "size": 40
+                },
+                "84": {
+                    "size": 40
+                }
+            },
+            "cols": {
+                "0": {
+                    "size": 100
+                },
+                "1": {
+                    "size": 175
+                },
+                "2": {
+                    "size": 100
+                },
+                "3": {
+                    "size": 100
+                },
+                "4": {
+                    "size": 50
+                },
+                "5": {
+                    "size": 100
+                },
+                "6": {
+                    "size": 175
+                },
+                "7": {
+                    "size": 100
+                },
+                "8": {
+                    "size": 100
+                },
+                "9": {
+                    "size": 100
+                },
+                "10": {
+                    "size": 100
+                },
+                "11": {
+                    "size": 100
+                }
+            },
+            "merges": [],
+            "cells": {
+                // الخلايا الأصلية من الملف الأصلي
+                "A7": {
+                    "style": 1,
+                    "content": "[Monthly Sales](odoo://view/{\"viewType\":\"graph\",\"action\":{\"domain\":[[\"state\",\"not in\",[\"draft\",\"cancel\",\"sent\"]]],\"context\":{\"group_by\":[\"date:month\"],\"graph_measure\":\"price_subtotal\",\"graph_mode\":\"line\",\"graph_groupbys\":[\"date:month\"]},\"modelName\":\"sale.report\",\"views\":[[false,\"graph\"],[false,\"pivot\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Sales Analysis\"})",
+                    "border": 1
+                },
+                // ... جميع الخلايا الأصلية الأخرى
+
+                // إضافة خلايا جديدة للتوازن
+                "J7": {
+                    "style": 1,
+                    "content": "[Purchase Analysis](odoo://view/{\"viewType\":\"pivot\",\"action\":{\"domain\":[[\"state\",\"in\",[\"purchase\",\"done\"]]],\"context\":{\"group_by\":[\"date:month\"],\"pivot_measures\":[\"amount_total\"],\"pivot_column_groupby\":[],\"pivot_row_groupby\":[\"date:month\"]},\"modelName\":\"purchase.order\",\"views\":[[false,\"pivot\"],[false,\"list\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Purchase Analysis\"})",
+                    "border": 1
+                },
+                "J19": {
+                    "style": 1,
+                    "content": "[Sales vs Purchase Balance](odoo://view/{\"viewType\":\"pivot\",\"action\":{\"domain\":[],\"context\":{\"group_by\":[\"date:month\"],\"pivot_measures\":[\"balance_amount\"],\"pivot_column_groupby\":[],\"pivot_row_groupby\":[\"date:month\"]},\"modelName\":\"sale.purchase.balance\",\"views\":[[false,\"pivot\"],[false,\"graph\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Balance Analysis\"})",
+                    "border": 1
+                },
+                "J20": {
+                    "style": 2,
+                    "content": "=_t(\"Month\")",
+                    "border": 2
+                },
+                "J21": {
+                    "style": 3,
+                    "content": "=ODOO.PIVOT.HEADER(13,\"#date:month\",1)"
+                },
+                "J22": {
+                    "style": 4,
+                    "content": "=ODOO.PIVOT.HEADER(13,\"#date:month\",2)"
+                },
+                "J23": {
+                    "style": 3,
+                    "content": "=ODOO.PIVOT.HEADER(13,\"#date:month\",3)"
+                },
+                "J24": {
+                    "style": 4,
+                    "content": "=ODOO.PIVOT.HEADER(13,\"#date:month\",4)"
+                },
+                "J25": {
+                    "style": 3,
+                    "content": "=ODOO.PIVOT.HEADER(13,\"#date:month\",5)"
+                },
+                "J26": {
+                    "style": 4,
+                    "content": "=ODOO.PIVOT.HEADER(13,\"#date:month\",6)"
+                },
+                "K20": {
+                    "style": 10,
+                    "content": "=_t(\"Sales\")",
+                    "border": 2
+                },
+                "K21": {
+                    "style": 9,
+                    "content": "=ODOO.PIVOT(13,\"sales_amount\",\"#date:month\",1)"
+                },
+                "K22": {
+                    "content": "=ODOO.PIVOT(13,\"sales_amount\",\"#date:month\",2)"
+                },
+                "K23": {
+                    "style": 9,
+                    "content": "=ODOO.PIVOT(13,\"sales_amount\",\"#date:month\",3)"
+                },
+                "K24": {
+                    "content": "=ODOO.PIVOT(13,\"sales_amount\",\"#date:month\",4)"
+                },
+                "K25": {
+                    "style": 9,
+                    "content": "=ODOO.PIVOT(13,\"sales_amount\",\"#date:month\",5)"
+                },
+                "K26": {
+                    "content": "=ODOO.PIVOT(13,\"sales_amount\",\"#date:month\",6)"
+                },
+                "L20": {
+                    "style": 10,
+                    "content": "=_t(\"Purchase\")",
+                    "border": 2
+                },
+                "L21": {
+                    "style": 9,
+                    "content": "=ODOO.PIVOT(13,\"purchase_amount\",\"#date:month\",1)"
+                },
+                "L22": {
+                    "content": "=ODOO.PIVOT(13,\"purchase_amount\",\"#date:month\",2)"
+                },
+                "L23": {
+                    "style": 9,
+                    "content": "=ODOO.PIVOT(13,\"purchase_amount\",\"#date:month\",3)"
+                },
+                "L24": {
+                    "content": "=ODOO.PIVOT(13,\"purchase_amount\",\"#date:month\",4)"
+                },
+                "L25": {
+                    "style": 9,
+                    "content": "=ODOO.PIVOT(13,\"purchase_amount\",\"#date:month\",5)"
+                },
+                "L26": {
+                    "content": "=ODOO.PIVOT(13,\"purchase_amount\",\"#date:month\",6)"
+                },
+                "M20": {
+                    "style": 11,
+                    "content": "=_t(\"Balance\")",
+                    "border": 2
+                },
+                "M21": {
+                    "style": 9,
+                    "content": "=K21-L21"
+                },
+                "M22": {
+                    "content": "=K22-L22"
+                },
+                "M23": {
+                    "style": 9,
+                    "content": "=K23-L23"
+                },
+                "M24": {
+                    "content": "=K24-L24"
+                },
+                "M25": {
+                    "style": 9,
+                    "content": "=K25-L25"
+                },
+                "M26": {
+                    "content": "=K26-L26"
+                }
+            },
+            "conditionalFormats": [],
+            "figures": [
+                // الأشكال الأصلية من الملف الأصلي
+                {
+                    "id": "51823220-f22b-4359-8711-579a249c91bb",
+                    "x": 0,
+                    "y": 0,
+                    "width": 200,
+                    "height": 120,
+                    "tag": "chart",
+                    "data": {
+                        "baselineColorDown": "#DC6965",
+                        "baselineColorUp": "#00A04A",
+                        "baselineMode": "percentage",
+                        "title": "Quotations",
+                        "type": "scorecard",
+                        "background": "",
+                        "baseline": "Data!E4",
+                        "baselineDescr": "since last period",
+                        "keyValue": "Data!D4"
+                    }
+                },
+                // ... جميع الأشكال الأصلية الأخرى
+
+                // إضافة شكل جديد للتوازن
+                {
+                    "id": "balance-scorecard",
+                    "x": 840,
+                    "y": 0,
+                    "width": 200,
+                    "height": 120,
+                    "tag": "chart",
+                    "data": {
+                        "baselineColorDown": "#DC6965",
+                        "baselineColorUp": "#00A04A",
+                        "baselineMode": "value",
+                        "title": "Purchase Balance",
+                        "type": "scorecard",
+                        "background": "",
+                        "baseline": "Data!F10",
+                        "baselineDescr": "since last period",
+                        "keyValue": "Data!E10"
+                    }
+                }
+            ],
+            "areGridLinesVisible": true,
+            "isVisible": true
+        },
+        {
+            "id": "eae01f9c-c461-4489-ade4-957ef2459d40",
+            "name": "Data",
+            "colNumber": 30,
+            "rowNumber": 110,
+            "rows": {},
+            "cols": {
+                "0": {
+                    "size": 160.46142578125
+                },
+                "1": {
+                    "size": 89.46142578125
+                },
+                "2": {
+                    "size": 89.46142578125
+                },
+                "3": {
+                    "size": 89.46142578125
+                },
+                "4": {
+                    "size": 89.46142578125
+                },
+                "5": {
+                    "size": 100
+                },
+                "6": {
+                    "size": 100
+                }
+            },
+            "merges": [],
+            "cells": {
+                // الخلايا الأصلية من الملف الأصلي
+                "A1": {
+                    "style": 5,
+                    "content": "=_t(\"KPI\")"
+                },
+                "A2": {
+                    "content": "=_t(\"Draft quotations\")"
+                },
+                // ... جميع الخلايا الأصلية الأخرى
+
+                // إضافة خلايا جديدة للتوازن
+                "A10": {
+                    "content": "=_t(\"Purchase Balance\")"
+                },
+                "B10": {
+                    "content": "=ODOO.PIVOT(14,\"amount_total\") - ODOO.PIVOT(11,\"price_subtotal\")"
+                },
+                "C10": {
+                    "content": "=ODOO.PIVOT(15,\"amount_total\") - ODOO.PIVOT(12,\"price_subtotal\")"
+                },
+                "D10": {
+                    "style": 9,
+                    "content": "=FORMAT.LARGE.NUMBER(B10)"
+                },
+                "E10": {
+                    "style": 9,
+                    "content": "=FORMAT.LARGE.NUMBER(C10)"
+                },
+                "F10": {
+                    "style": 9,
+                    "content": "=B10-C10"
+                }
+            },
+            "conditionalFormats": [],
+            "figures": [],
+            "areGridLinesVisible": true,
+            "isVisible": true
+        }
+    ],
+    "entities": {},
+    "styles": {
+        // الأنماط الأصلية من الملف الأصلي
+        "1": {
+            "textColor": "#01666b",
+            "bold": true,
+            "fontSize": 16
+        },
+        // ... جميع الأنماط الأصلية الأخرى
+    },
+    "formats": {
+        // التنسيقات الأصلية من الملف الأصلي
+        "1": "0",
+        "2": "[$$]#,##0",
+        "3": "#,##0"
+    },
+    "borders": {
+        // الحدود الأصلية من الملف الأصلي
+        "1": {
+            "bottom": [
+                "thin",
+                "#000"
+            ]
+        },
+        "2": {
+            "top": [
+                "thin",
+                "#000"
+            ]
+        }
+    },
+    "revisionId": "START_REVISION",
+    "settings": {
+        "locale": {
+            "name": "English (US)",
+            "code": "en_US",
+            "thousandsSeparator": ",",
+            "decimalSeparator": ".",
+            "dateFormat": "mm/dd/yyyy",
+            "timeFormat": "hh:mm:ss",
+            "formulaArgSeparator": ","
+        }
+    },
+    "chartOdooMenusReferences": {
+        // المراجع الأصلية من الملف الأصلي
+        "a527960b-0812-4291-baba-f6b4b5280a0d": "sale.menu_sale_order",
+        "51823220-f22b-4359-8711-579a249c91bb": "sale.menu_sale_quotations",
+        "9a38934c-b454-4a4b-88aa-17d1b80dbf5f": "sale.menu_sale_order",
+        "67858d0e-b5ba-4a3c-bf9e-c0fceaeedf65": "sale.menu_reporting_sales",
+        "d43375c1-73a6-42a2-8dbd-0f13c285824f": "sale.menu_reporting_sales",
+        // إضافة مرجع جديد للتوازن
+        "balance-scorecard": "purchase.menu_purchase_form"
+    },
+    "odooVersion": 4,
+    "lists": {
+        // القوائم الأصلية من الملف الأصلي
+        "1": {
+            "columns": [
+                "name",
+                "partner_id",
+                "user_id",
+                "amount_untaxed"
+            ],
+            "domain": [
+                "|",
+                [
+                    "state",
+                    "=",
+                    "draft"
+                ],
+                [
+                    "state",
+                    "=",
+                    "sent"
+                ]
+            ],
+            "model": "sale.order",
+            "context": {},
+            "orderBy": [
+                {
+                    "name": "amount_untaxed",
+                    "asc": false
+                }
+            ],
+            "id": "1",
+            "name": "Quotations by Untaxed Amount"
+        },
+        // ... جميع القوائم الأصلية الأخرى
+    },
+    "listNextId": 3,
+    "pivots": {
+        // المحاور الأصلية من الملف الأصلي
+        "3": {
+            "colGroupBys": [],
+            "context": {
+                "params": {
+                    "action": 1275,
+                    "model": "sale.report",
+                    "view_type": "pivot",
+                    "menu_id": 878,
+                    "cids": 1
+                },
+                "group_by_no_leaf": 1,
+                "group_by": []
+            },
+            "domain": [
+                [
+                    "categ_id",
+                    "!=",
+                    false
+                ], [
+                    "state",
+                    "not in",
+                    [
+                        "draft",
+                        "sent",
+                        "cancel"
+                    ]
+                ]
+            ],
+            "id": "3",
+            "measures": [
+                {
+                    "field": "order_reference"
+                },
+                {
+                    "field": "price_subtotal"
+                }
+            ],
+            "model": "sale.report",
+            "rowGroupBys": [
+                "categ_id"
+            ],
+            "name": "Sales Analysis by Product Category",
+            "sortedColumn": {
+                "groupId": [
+                    [],
+                    []
+                ],
+                "measure": "price_subtotal",
+                "order": "desc"
+            }
+        },
+        // ... جميع المحاور الأصلية الأخرى
+
+        // إضافة محاور جديدة للتوازن
+        "13": {
+            "colGroupBys": [],
+            "context": {
+                "group_by_no_leaf": 1,
+                "group_by": []
+            },
+            "domain": [],
+            "id": "13",
+            "measures": [
+                {"field": "sales_amount"},
+                {"field": "purchase_amount"},
+                {"field": "balance_amount"}
+            ],
+            "model": "sale.purchase.balance",
+            "rowGroupBys": [
+                "date:month"
+            ],
+            "name": "Sales vs Purchase Balance",
+            "sortedColumn": {
+                "groupId": [
+                    [],
+                    []
+                ],
+                "measure": "balance_amount",
+                "order": "desc"
+            }
+        },
+        "14": {
+            "colGroupBys": [],
+            "context": {},
+            "domain": [
+                ["state", "in", ["purchase", "done"]]
+            ],
+            "id": "14",
+            "measures": [
+                {"field": "amount_total"}
+            ],
+            "model": "purchase.order",
+            "rowGroupBys": [],
+            "name": "Purchase Total - Current",
+            "sortedColumn": null
+        },
+        "15": {
+            "colGroupBys": [],
+            "context": {},
+            "domain": [
+                ["state", "in", ["purchase", "done"]]
+            ],
+            "id": "15",
+            "measures": [
+                {"field": "amount_total"}
+            ],
+            "model": "purchase.order",
+            "rowGroupBys": [],
+            "name": "Purchase Total - Previous",
+            "sortedColumn": null
+        }
+    },
+    "pivotNextId": 16,
+    "globalFilters": [
+        // الفلاتر الأصلية من الملف الأصلي
+        {
+            "id": "13d30fda-b14d-4a56-b186-25468af3b1e9",
+            "type": "date",
+            "label": "Period",
+            "defaultValue": "last_three_months",
+            "rangeType": "relative",
+            "defaultsToCurrentPeriod": false,
+            "pivotFields": {
+                "3": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "4": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "5": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "6": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "7": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "8": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "9": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "10": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "11": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "12": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": -1
+                },
+                // إضافة حقول جديدة للتوازن
+                "13": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "14": {
+                    "field": "date_order",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "15": {
+                    "field": "date_order",
+                    "type": "datetime",
+                    "offset": -1
+                }
+            },
+            "listFields": {
+                "1": {
+                    "field": "date_order",
+                    "type": "datetime",
+                    "offset": 0
+                },
+                "2": {
+                    "field": "date_order",
+                    "type": "datetime",
+                    "offset": 0
+                }
+            },
+            "graphFields": {
+                "a527960b-0812-4291-baba-f6b4b5280a0d": {
+                    "field": "date",
+                    "type": "datetime",
+                    "offset": 0
+                }
+            }
+        },
+        // ... جميع الفلاتر الأصلية الأخرى
+
+        // إضافة فلتر جديد للتوازن
+        {
+            "id": "purchase-vendor-filter",
+            "type": "relation",
+            "label": "Purchase Vendor",
+            "modelName": "res.partner",
+            "defaultValue": [],
+            "defaultValueDisplayNames": [],
+            "rangeType": "year",
+            "defaultsToCurrentPeriod": false,
+            "pivotFields": {
+                "13": {
+                    "field": "partner_id",
+                    "type": "many2one"
+                },
+                "14": {
+                    "field": "partner_id",
+                    "type": "many2one"
+                },
+                "15": {
+                    "field": "partner_id",
+                    "type": "many2one"
+                }
+            },
+            "listFields": {},
+            "graphFields": {}
+        }
+    ]
+}

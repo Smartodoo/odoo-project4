@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_location_view_tree" model="ir.ui.view">
+        <field name="name">commercial.location.tree</field>
+        <field name="model">commercial.location</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="lot_id"/>
+                <field name="projet_id"/>
+                <field name="bloc_id"/>
+
+                <field name="client_location_id"/>
+                <field name="delais"/>
+                <field name="montant_mensuel"/>
+                <field name="caution_garantie" sum="Total"/>
+                <field name="total_versements" sum="Total"/>
+                <field name="montant_annuel" sum="Total"/>
+                <field name="montant_g50" sum="Total"/>
+                <field name="net_encaisse" sum="Total"/>
+                <field name="recuperation_nom_1"/>
+                <field name="recuperation_montant_1" sum="Total"/>
+                <field name="recuperation_nom_2"/>
+                <field name="recuperation_montant_2" sum="Total"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'brouillon'"
+                       decoration-success="state == 'en_cours'"
+                       decoration-muted="state == 'termine'"
+                       decoration-danger="state == 'annule'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_location_view_form" model="ir.ui.view">
+        <field name="name">commercial.location.form</field>
+        <field name="model">commercial.location</field>
+        <field name="arch" type="xml">
+            <form string="Contrat de Location">
+                <header>
+                    <button name="%(commercial.action_report_contrat_location)d"
+                            type="action" string="Imprimer Contrat" class="btn-primary"
+                            icon="fa-print"/>
+                    <button name="%(commercial.action_report_attestation_caution_garantie)d"
+                            type="action" string="Imprimer Caution" class="btn-primary"
+                            icon="fa-print"/>
+                    <button name="action_open_decharge_wizard" type="object"
+                            string="Imprimer Décharge" class="btn-primary"
+                            icon="fa-print"/>
+                    <button name="action_annuler" type="object"
+                            string="Annuler le contrat" class="btn-danger"
+                            confirm="Voulez-vous vraiment annuler ce contrat ? Le lot sera remis en disponible."
+                            invisible="state != 'en_cours'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="brouillon,en_cours,termine"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" string="Référence"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="lot_id" options="{'no_create': True}" readonly="state in ('en_cours', 'termine', 'annule')"/>
+                            <field name="projet_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="bloc_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="etage_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="client_location_id" options="{'no_create': True}" readonly="state in ('en_cours', 'termine', 'annule')"/>
+
+                        </group>
+                        <group>
+                            <field name="type_contrat" readonly="state in ('en_cours', 'termine', 'annule')"/>
+                            <field name="delais" readonly="state in ('en_cours', 'termine', 'annule')" invisible="type_contrat != 'mensuel'"/>
+                            <field name="delais_annees" readonly="state in ('en_cours', 'termine', 'annule')" invisible="type_contrat != 'annuel'"/>
+                            <field name="date_debut" readonly="state in ('en_cours', 'termine', 'annule')"/>
+                            <field name="date_fin" readonly="state in ('en_cours', 'termine', 'annule')"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="montant_mensuel" readonly="state in ('en_cours', 'termine', 'annule')"/>
+                            <field name="montant_declare" readonly="state in ('en_cours', 'termine', 'annule')"/>
+                            <field name="caution_garantie" readonly="state in ('en_cours', 'termine', 'annule')"/>
+                            <field name="montant_annuel"/>
+                        </group>
+                        <group>
+                            <field name="montant_g50"/>
+                            <field name="net_encaisse"/>
+                            <field name="total_versements"/>
+                            <field name="reste_a_payer"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Versements" name="versements">
+                            <button name="action_generer_versements" type="object"
+                                    string="Générer les versements" class="btn-primary mb-3"
+                                    icon="fa-refresh"
+                                    invisible="state in ('en_cours', 'termine', 'annule')"/>
+                            <field name="versement_location_ids" readonly="state in ('en_cours', 'termine', 'annule')">
+                                <tree editable="bottom">
+                                    <field name="name" readonly="1"/>
+                                    <field name="montant" sum="Total"/>
+                                    <field name="date"/>
+                                    <field name="mode_paiement"/>
+                                    <field name="state" widget="badge"
+                                           decoration-info="state == 'brouillon'"
+                                           decoration-success="state == 'confirme'"/>
+                                    <button name="action_confirmer" type="object"
+                                            string="Confirmer" icon="fa-check"
+                                            confirm="Voulez-vous vraiment confirmer ce versement ?"
+                                            invisible="state != 'brouillon'"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Récupération" name="recuperation">
+                            <field name="recuperation_ids" readonly="state in ('en_cours', 'termine', 'annule')">
+                                <tree editable="bottom">
+                                    <field name="responsable_id"/>
+                                    <field name="pourcentage"/>
+                                    <field name="montant" sum="Total"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+
+                    <field name="active" invisible="1"/>
+                    <field name="company_id" invisible="1"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="commercial_location_view_search" model="ir.ui.view">
+        <field name="name">commercial.location.search</field>
+        <field name="model">commercial.location</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="lot_id"/>
+                <field name="projet_id"/>
+                <field name="client_location_id"/>
+                <field name="annee"/>
+                <field name="date_debut"/>
+                <field name="date_fin"/>
+                <field name="recuperation_nom_1" string="Récup. 1"/>
+                <field name="recuperation_nom_2" string="Récup. 2"/>
+                <separator/>
+                <filter name="brouillon" string="Brouillon"
+                        domain="[('state', '=', 'brouillon')]"/>
+                <filter name="en_cours" string="En cours"
+                        domain="[('state', '=', 'en_cours')]"/>
+                <filter name="termine" string="Terminé"
+                        domain="[('state', '=', 'termine')]"/>
+                <filter name="annule" string="Annulé"
+                        domain="[('state', '=', 'annule')]"/>
+                <filter name="archive" string="Archivé"
+                        domain="[('active', '=', False)]"/>
+                <separator/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_annee" string="Année"
+                            context="{'group_by': 'annee'}"/>
+                    <filter name="group_lot" string="Lot"
+                            context="{'group_by': 'lot_id'}"/>
+                    <filter name="group_client" string="Client"
+                            context="{'group_by': 'client_location_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_location_action" model="ir.actions.act_window">
+        <field name="name">Locations</field>
+        <field name="res_model">commercial.location</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="commercial_location_view_tree"/>
+        <field name="search_view_id" ref="commercial_location_view_search"/>
+    </record>
+
+</odoo>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_tree_vente_reservation" model="ir.ui.view">
+        <field name="name">vente.reservation.tree</field>
+        <field name="model">vente.reservation</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'"
+                  decoration-warning="state == 'reserve'"
+                  decoration-success="state in ('confirmed', 'sold')"
+                  decoration-danger="state == 'cancelled'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="appartement_id"/>
+                <field name="projet_id"/>
+                <field name="type"/>
+                <field name="date_reservation"/>
+                <field name="price" widget="monetary"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="user_id"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'reserve'"
+                       decoration-success="state in ('confirmed', 'sold')"
+                       decoration-danger="state == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_form_vente_reservation" model="ir.ui.view">
+        <field name="name">vente.reservation.form</field>
+        <field name="model">vente.reservation</field>
+        <field name="arch" type="xml">
+            <form string="Réservation">
+                <header>
+                    <button name="action_reserve" type="object" string="Réserver"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_confirm" type="object" string="Confirmer"
+                            class="oe_highlight" invisible="state != 'reserve'"/>
+                    <button name="action_sell" type="object" string="Vendre"
+                            class="oe_highlight" invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" type="object" string="Annuler"
+                            invisible="state in ('sold', 'cancelled')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,reserve,confirmed,sold"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sale_order" type="object"
+                                class="oe_stat_button" icon="fa-shopping-cart"
+                                invisible="not sale_order_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Bon de Commande</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Client">
+                            <field name="partner_id"/>
+                            <field name="user_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Appartement">
+                            <field name="appartement_id"
+                                   domain="[('state', '=', 'disponible')]"
+                                   readonly="state != 'draft'"/>
+                            <field name="projet_id"/>
+                            <field name="type"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Dates">
+                            <field name="date_reservation"/>
+                            <field name="date_confirmation"/>
+                            <field name="date_vente"/>
+                        </group>
+                        <group string="Financier">
+                            <field name="price" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="sale_order_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes">
+                            <field name="note" placeholder="Notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_search_vente_reservation" model="ir.ui.view">
+        <field name="name">vente.reservation.search</field>
+        <field name="model">vente.reservation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="appartement_id"/>
+                <field name="projet_id"/>
+                <filter string="Mes Réservations" name="filter_my"
+                        domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Brouillon" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Réservé" name="filter_reserve" domain="[('state', '=', 'reserve')]"/>
+                <filter string="Confirmé" name="filter_confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Vendu" name="filter_sold" domain="[('state', '=', 'sold')]"/>
+                <filter string="Annulé" name="filter_cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Client" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Projet" name="group_projet" context="{'group_by': 'projet_id'}"/>
+                    <filter string="Commercial" name="group_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action: All Reservations -->
+    <record id="action_vente_reservation" model="ir.actions.act_window">
+        <field name="name">Réservations</field>
+        <field name="res_model">vente.reservation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_search_vente_reservation"/>
+    </record>
+
+    <!-- Action: My Reservations -->
+    <record id="action_vente_reservation_my" model="ir.actions.act_window">
+        <field name="name">Mes Réservations</field>
+        <field name="res_model">vente.reservation</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_search_vente_reservation"/>
+        <field name="context">{'search_default_filter_my': 1}</field>
+    </record>
+</odoo>

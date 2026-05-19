@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="report_versement_subcontractor_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="custom_project.etb_tph_layout">
+                    <div class="page" style="display:flex; flex-direction:column; min-height:100%;">
+                        <style>
+
+                            .company-header { text-align: center; font-family: Arial, Helvetica, sans-serif; }
+                            .company-name { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+                            .company-addr { font-size: 10px; color: #333333; margin-top: 2px; }
+                            .title-row { margin-top: 14px; display:flex; justify-content:space-between;
+                            align-items:flex-start; }
+                            .doc-title { text-align:center; width:70%; margin:0 auto; font-weight:700; text-decoration:
+                            underline; }
+                            .meta-right { text-align:right; font-size:15px; width:30%; }
+                            .section { margin-top:15px; font-size:15px; }
+                            .info-table { width:100%; border-collapse: collapse; font-size:15px; margin-top:8px; }
+                            .info-table td { vertical-align: top; padding:4px 6px; }
+                            .label { font-weight:700; width:160px; }
+                            .amount-big { font-size:20px; font-weight:700; margin-top:8px; text-align:right; }
+                            .amount-words { font-style:italic; margin-top:6px; }
+                            .objet { margin-top:15px; }
+                            .totals { margin-top:10px; font-size:15px; }
+                            .sign-block {
+                            display: flex;
+                            flex-direction: row;
+                            justify-content: space-between;
+                            align-items: flex-start;
+                            margin-top: 40px;
+                            width: 100%;
+                            }
+
+                            .sign-left {
+                            width: 40%;
+                            text-align: left;
+                            font-size: 15px;
+                            }
+
+                            .sign-right {
+                            width: 40%;
+                            text-align: right;
+                            font-size: 15px;
+                            }
+
+                            .stamp { margin-top:8px; font-size:11px; color:#444; }
+                            hr.sep { border: none; border-top: 1px solid #888; margin-top:10px; margin-bottom:10px; }
+                        </style>
+                        <hr class="sep"/>
+
+                        <!-- Titre centré -->
+                        <div style="text-align:center; font-weight:700; text-decoration:underline; margin-top:10px;">
+                            <div style="font-size:14px">BON DE VERSEMENT</div>
+                            <div style="font-size:15px; margin-top:6px;">
+                                <span t-esc="doc.name or '/'"/>
+                            </div>
+                        </div>
+                        <!-- Date à droite -->
+                        <div style="text-align:right; font-size:15px; margin-top:14px;">
+                            <strong>Date :</strong>
+                            <span t-field="doc.date"/>
+                        </div>
+
+                        <!-- Info bénéficiaire / projet -->
+                        <div class="section">
+                            <table class="info-table">
+                                <tr>
+                                    <td class="label">Sous-traitant :</td>
+                                    <td>
+                                        <span t-esc="doc.subcontractor_id.name or ''"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Projet :</td>
+                                    <td>
+                                        <!-- adaptation si ton champ est nested -->
+                                        <t t-if="doc.project_id">
+                                            <span t-esc="(doc.project_id.project_id.name)"/>
+                                        </t>
+                                        <t t-if="not doc.project_id">
+                                            <span>-</span>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Lot :</td>
+                                    <td>
+                                        <t t-foreach="doc.lots_id" t-as="lot" t-if="doc.lots_id">
+                                            <span t-esc="lot.name"/>
+                                        </t>
+                                        <t t-if="not doc.lots_id">-</t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label">Montant (DA) :</td>
+                                    <td>
+                                        <div class="amount-big">
+                                            <span t-field="doc.amount"/>
+                                            <span>DA</span>
+                                        </div>
+                                        <div class="amount-words">
+                                            <strong>En lettres :</strong>
+                                            <span t-esc="doc.amount_en_words or ''"/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <br/>
+                        <!-- Objet de versement -->
+                        <div class="objet">
+                            <strong>Objet de versement :</strong>
+                            <div style="margin-top:6px;">
+                                <t t-raw="doc.objet_versement or ''"/>
+                            </div>
+                        </div>
+                        <br/><br/><br/><br/><br/>
+
+                        <!-- Montant dû -->
+                        <div class="totals" style="margin-top:20px; font-size:15px;">
+                            <strong>Montant dû :</strong>
+                            <span t-field="doc.amount_due"/>
+                            DA
+                        </div>
+                        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+                        <!-- Signatures en bas de page -->
+                        <table style="width:100%; border-collapse:collapse; border:none;">
+                            <tr>
+                                <!-- gauche : Signature Sous-traitant -->
+                                <td style="width:30%; vertical-align:top; text-align:right; font-size:15px; border:1px solid #fff; padding-left:8px;">
+                                    <div>
+                                        <strong>Signature Sous-traitant</strong>
+                                    </div>
+<!--                                    <div style="margin-top:35px;">-->
+<!--                                        <div style="display:inline-block; border-bottom:1px solid #000; width:220px; height:12px;"></div>-->
+<!--                                    </div>-->
+                                </td>
+
+                                <!-- espace central -->
+                                <td style="width:40%; border:1px solid #fff;"></td>
+
+                                <!-- droite : Service finance -->
+                                <td style="width:30%; vertical-align:top; text-align:left; font-size:15px; border:1px solid #fff; padding-right:8px;">
+                                    <div>
+                                        <strong>Service finance</strong>
+                                    </div>
+<!--                                    <div style="margin-top:35px;">-->
+<!--                                        <div style="display:inline-block; border-bottom:1px solid #000; width:220px; height:12px;"></div>-->
+<!--                                    </div>-->
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_versement_subcontractor" model="ir.actions.report">
+        <field name="name">Versement Subcontractor Report</field>
+        <field name="model">versement.subcontractor</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_project.report_versement_subcontractor_document</field>
+        <field name="binding_model_id" ref="model_versement_subcontractor"/>
+    </record>
+</odoo>

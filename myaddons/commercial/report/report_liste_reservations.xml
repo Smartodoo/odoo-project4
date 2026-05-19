@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action : Liste des Réservations -->
+    <record id="action_report_liste_reservations" model="ir.actions.report">
+        <field name="name">Liste des Réservations</field>
+        <field name="model">commercial.client.location</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.liste_reservations_template</field>
+        <field name="report_file">commercial.liste_reservations_template</field>
+        <field name="print_report_name">'Liste des Reservations'</field>
+        <field name="paperformat_id" ref="paperformat_liste_clients"/>
+        <field name="binding_model_id" ref="commercial.model_commercial_client_location"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- QWeb Template : Liste des Réservations -->
+    <template id="liste_reservations_template">
+        <t t-call="web.html_container">
+            <t t-call="commercial.external_layout_commercial">
+                <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 12px;">
+
+                    <!-- Titre -->
+                    <h3 style="text-align: center; font-weight: bold; margin-bottom: 5px; text-decoration: underline; font-size: 20px; color: #003366;">
+                        LISTE DES RÉSERVATIONS
+                    </h3>
+
+                    <!-- Date d'impression -->
+                    <div style="text-align: right; margin-bottom: 15px; font-size: 11px;">
+                        Imprimé le : <t t-esc="time.strftime('%d/%m/%Y')"/>
+                    </div>
+
+                    <!-- Tableau -->
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="background: #003366; color: #fff;">
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center; width: 4%;">N°</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: left;">Nom</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Téléphone</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Lots</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Projet</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Bloc</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Type</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Date début</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Date fin</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: right;">Montant</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: right;">Versement</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: right;">Reste</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="counter" t-value="0"/>
+                            <t t-foreach="docs" t-as="client">
+                                <!-- Récupérer les contrats en cours -->
+                                <t t-set="contrats" t-value="client.location_ids.filtered(lambda c: c.state == 'en_cours')"/>
+                                <t t-if="contrats">
+                                    <t t-foreach="contrats" t-as="contrat">
+                                        <t t-set="counter" t-value="counter + 1"/>
+                                        <tr style="border-bottom: 1px solid #ddd;">
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                                <t t-esc="counter"/>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc;">
+                                                <t t-esc="client.nom or ''"/>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                                <t t-esc="client.telephone or ''"/>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                                <t t-esc="contrat.lot_id.numero_lot or ''"/>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                                <t t-esc="contrat.projet_id.name or ''"/>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                                <t t-esc="contrat.bloc_id.name or ''"/>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                                <t t-if="contrat.type_contrat == 'mensuel'">Mensuel</t>
+                                                <t t-if="contrat.type_contrat == 'annuel'">Annuel</t>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                                <t t-if="contrat.date_debut">
+                                                    <t t-esc="contrat.date_debut" t-options="{'widget': 'date'}"/>
+                                                </t>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                                <t t-if="contrat.date_fin">
+                                                    <t t-esc="contrat.date_fin" t-options="{'widget': 'date'}"/>
+                                                </t>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(contrat.montant_annuel)"/>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(contrat.total_versements)"/>
+                                            </td>
+                                            <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">
+                                                <t t-esc="'{:,.2f}'.format(contrat.reste_a_payer)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                                <!-- Client sans contrat en cours -->
+                                <t t-if="not contrats">
+                                    <t t-set="counter" t-value="counter + 1"/>
+                                    <tr style="border-bottom: 1px solid #ddd;">
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                            <t t-esc="counter"/>
+                                        </td>
+                                        <td style="padding: 6px; border: 1px solid #ccc;">
+                                            <t t-esc="client.nom or ''"/>
+                                        </td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                            <t t-esc="client.telephone or ''"/>
+                                        </td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                            <t t-foreach="client.lot_ids" t-as="lot">
+                                                <t t-esc="lot.numero_lot or ''"/>
+                                                <t t-if="not lot_last">, </t>
+                                            </t>
+                                        </td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                            <t t-foreach="client.lot_ids" t-as="lot">
+                                                <t t-esc="lot.projet_id.name or ''"/>
+                                                <t t-if="not lot_last">, </t>
+                                            </t>
+                                        </td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                            <t t-foreach="client.lot_ids" t-as="lot">
+                                                <t t-esc="lot.bloc_id.name or ''"/>
+                                                <t t-if="not lot_last">, </t>
+                                            </t>
+                                        </td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">-</td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">-</td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">-</td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">-</td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">-</td>
+                                        <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">-</td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Total -->
+                    <div style="margin-top: 20px; text-align: right; font-size: 13px;">
+                        <strong>Nombre total de réservations : <t t-esc="len(docs)"/></strong>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

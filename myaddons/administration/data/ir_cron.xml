@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Cron pour notifier les audiences à venir 3 jours avant -->
+        <record id="ir_cron_check_upcoming_audiences" model="ir.cron">
+            <field name="name">Notification Audience - 3 jours avant</field>
+            <field name="model_id" ref="administration.model_administration_juridique"/>
+            <field name="state">code</field>
+            <field name="code">model.check_upcoming_audiences()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="active">True</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">False</field>
+
+            <!-- Prochaine exécution à 08:00 aujourd'hui (ou demain si l'heure est passée) -->
+            <field name="nextcall" eval="(datetime.now())"/>
+        </record>
+        <record id="ir_cron_remboursement_notifications" model="ir.cron">
+            <field name="name">Notifications Date Remboursement</field>
+            <field name="model_id" ref="model_administration_credit_bancaire"/>
+            <field name="state">code</field>
+            <field name="code">model.check_upcoming_remboursements()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="nextcall" eval="(datetime.now())"/>
+        </record>
+    </data>
+</odoo>

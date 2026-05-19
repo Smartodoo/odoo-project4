@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="paperformat_decompte_bet" model="report.paperformat">
+            <field name="name">Décompte BET A4</field>
+            <field name="default" eval="False"/>
+            <field name="format">A4</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">35</field>
+            <field name="margin_bottom">23</field>
+            <field name="margin_left">7</field>
+            <field name="margin_right">7</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">30</field>
+            <field name="dpi">90</field>
+        </record>
+
+        <record id="action_report_decompte_bet" model="ir.actions.report">
+            <field name="name">Décompte BET</field>
+            <field name="model">decompte.bet</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">custom_project.report_decompte_bet_template</field>
+            <field name="report_file">custom_project.report_decompte_bet_template</field>
+            <field name="paperformat_id" ref="paperformat_decompte_bet"/>
+            <field name="binding_model_id" ref="model_decompte_bet"/>
+            <field name="binding_type">report</field>
+            <field name="print_report_name">'Decompte_BET_%s' % (object.name or '').replace('/', '_')</field>
+        </record>
+
+        <template id="report_decompte_bet_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="web.external_layout">
+                        <div class="page db-doc">
+                            <style>
+                                .db-doc { font-size: 10pt !important; line-height: 1.4; color: #2c3e50; }
+                                .db-doc * { font-size: inherit; }
+                                .db-title { background: #1a237e; color: #fff; padding: 10pt 14pt;
+                                            margin-bottom: 12pt; border-radius: 3px;
+                                            font-size: 16pt !important; font-weight: 700; }
+                                .db-title-num { float: right; font-size: 12pt !important; }
+                                .db-state { display: inline-block; padding: 3pt 10pt; background: rgba(255,255,255,0.25);
+                                            border-radius: 12pt; font-size: 9pt !important;
+                                            font-weight: 600; text-transform: uppercase; margin-left: 6pt; }
+                                .db-info-table { width: 100%; border-collapse: collapse; margin-bottom: 12pt; }
+                                .db-info-cell { width: 33.3%; vertical-align: top; padding: 8pt 10pt;
+                                                border: 1pt solid #cfd8dc; background: #f5f5f5; }
+                                .db-info-title { font-size: 10pt !important; font-weight: 700; color: #1a237e;
+                                                 padding-bottom: 4pt; border-bottom: 1pt solid #cfd8dc;
+                                                 margin-bottom: 5pt; text-transform: uppercase; }
+                                .db-kv { width: 100%; font-size: 9.5pt !important; }
+                                .db-kv td { padding: 2pt 0; }
+                                .db-kv td.k { color: #607d8b; }
+                                .db-kv td.v { text-align: right; font-weight: 500; }
+                                .db-section { background: #283593; color: #fff; padding: 7pt 12pt;
+                                              font-size: 11pt !important; font-weight: 700;
+                                              border-radius: 3pt 3pt 0 0; }
+                                .db-table { width: 100%; border-collapse: collapse; font-size: 9.5pt !important; }
+                                .db-table thead th { background: #3949ab; color: #fff; padding: 6pt 4pt;
+                                                     border: 1pt solid #1a237e; font-weight: 700;
+                                                     text-align: center; font-size: 9pt !important; }
+                                .db-table tbody td { padding: 5pt 4pt; border: 1pt solid #cfd8dc; }
+                                .db-table tbody tr:nth-child(even) td { background: #f8f9fc; }
+                                .db-table tbody tr.subtotal td { background: #fff8e1 !important;
+                                                                  font-weight: 700; color: #e65100; }
+                                .db-table tfoot td { background: #1a237e; color: #fff; padding: 8pt 4pt;
+                                                     border: 1pt solid #1a237e; font-weight: 700;
+                                                     font-size: 10pt !important; }
+                                .db-totals { width: 100%; border-collapse: collapse; margin-top: 12pt; }
+                                .db-totals td { width: 33%; padding: 9pt; text-align: center;
+                                                border: 1pt solid #cfd8dc; background: #f5f5f5; }
+                                .db-totals td.grand { border-color: #2e7d32; background: #e8f5e9; }
+                                .db-tot-label { font-size: 9pt !important; color: #607d8b; font-weight: 700;
+                                                text-transform: uppercase; margin-bottom: 3pt; display: block; }
+                                .db-tot-value { font-size: 13pt !important; font-weight: 700; color: #1a237e; }
+                                .db-totals td.grand .db-tot-value { color: #2e7d32; font-size: 15pt !important; }
+                                .db-totals td.grand .db-tot-label { color: #1b5e20; }
+                                .db-lettres { margin-top: 12pt; padding: 9pt 12pt; background: #fff8e1;
+                                              border: 1pt solid #ffa726; font-size: 10pt !important; }
+                                .db-lettres strong { color: #e65100; }
+                                .db-notes { margin-top: 9pt; padding: 8pt 12pt; background: #f5f5f5;
+                                            border: 1pt solid #cfd8dc; font-size: 9.5pt !important; }
+                                .db-signs { width: 100%; margin-top: 28pt; border-collapse: collapse; }
+                                .db-sign { width: 33%; text-align: center; padding-top: 45pt;
+                                           border-top: 1pt solid #2c3e50; font-size: 10pt !important;
+                                           font-weight: 700; }
+                                .db-spacer { width: 1%; }
+                                .text-end { text-align: right; }
+                                .text-center { text-align: center; }
+                            </style>
+
+                            <!-- Bandeau titre -->
+                            <div class="db-title">
+                                DÉCOMPTE BET
+                                <span class="db-title-num">
+                                    N&#176; <span t-field="doc.name"/>
+                                    <span class="db-state"
+                                          t-esc="{'draft': 'Brouillon', 'validated': 'Validé', 'paid': 'Payé'}.get(doc.state, '-')"/>
+                                </span>
+                            </div>
+
+                            <!-- Infos en 3 colonnes -->
+                            <table class="db-info-table">
+                                <tr>
+                                    <td class="db-info-cell">
+                                        <div class="db-info-title">Projet</div>
+                                        <table class="db-kv">
+                                            <tr><td class="k">Nom :</td><td class="v"><span t-field="doc.project_id.name"/></td></tr>
+                                            <tr><td class="k">Désignation :</td><td class="v"><span t-field="doc.projet_designation"/></td></tr>
+                                            <tr><td class="k">Wilaya :</td><td class="v"><span t-field="doc.projet_wilaya"/></td></tr>
+                                            <tr><td class="k">Société :</td><td class="v"><span t-field="doc.company_id.name"/></td></tr>
+                                        </table>
+                                    </td>
+                                    <td class="db-info-cell">
+                                        <div class="db-info-title">BET</div>
+                                        <table class="db-kv">
+                                            <tr><td class="k">Nom :</td><td class="v"><span t-field="doc.bet_name"/></td></tr>
+                                            <tr><td class="k">Adresse :</td><td class="v"><span t-field="doc.bet_address"/></td></tr>
+                                            <tr><td class="k">Resp. :</td><td class="v"><span t-field="doc.bet_responsable"/></td></tr>
+                                            <tr><td class="k">Entreprise :</td><td class="v"><span t-field="doc.entreprise"/></td></tr>
+                                        </table>
+                                    </td>
+                                    <td class="db-info-cell">
+                                        <div class="db-info-title">Décompte</div>
+                                        <table class="db-kv">
+                                            <tr><td class="k">Référence :</td><td class="v"><span t-field="doc.name"/></td></tr>
+                                            <tr><td class="k">N&#176; :</td><td class="v"><span t-field="doc.numero_decompte"/></td></tr>
+                                            <tr><td class="k">Date :</td><td class="v">
+                                                <span t-if="doc.date_decompte" t-esc="doc.date_decompte.strftime('%d/%m/%Y')"/>
+                                            </td></tr>
+                                            <tr><td class="k">Nb lignes :</td><td class="v"><span t-field="doc.line_count"/></td></tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div class="db-section">DÉTAIL DES PRESTATIONS</div>
+
+                            <table class="db-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:3%;">N&#176;</th>
+                                        <th style="width:30%; text-align:left;">Désignation</th>
+                                        <th style="width:7%;">Qté Préc.</th>
+                                        <th style="width:7%;">Qté Mois</th>
+                                        <th style="width:7%;">Qté Cum.</th>
+                                        <th style="width:8%;">P.U.</th>
+                                        <th style="width:11%;">M. Préc.</th>
+                                        <th style="width:11%;">M. Mois</th>
+                                        <th style="width:16%;">M. Cumulé</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="doc.line_ids" t-as="line"
+                                        t-attf-class="{{ 'subtotal' if line.is_subtotal else '' }}">
+                                        <td class="text-center"><t t-esc="line.sequence"/></td>
+                                        <td><span t-field="line.name"/></td>
+                                        <td class="text-end"><t t-esc="'%.2f' % (line.quantite_precedent or 0)"/></td>
+                                        <td class="text-end"><t t-esc="'%.2f' % (line.quantite_mois or 0)"/></td>
+                                        <td class="text-end"><t t-esc="'%.2f' % (line.quantite_cumule or 0)"/></td>
+                                        <td class="text-end"><t t-esc="'%.2f' % (line.prix_unitaire or 0)"/></td>
+                                        <td class="text-end">
+                                            <span t-field="line.montant_precedent"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="line.montant_mois"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="line.montant_cumule"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="6" class="text-end">TOTAUX</td>
+                                        <td class="text-end">
+                                            <span t-field="doc.montant_total_precedent"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="doc.montant_total_mois"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="doc.montant_total_cumule"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                            <table class="db-totals">
+                                <tr>
+                                    <td>
+                                        <span class="db-tot-label">Total Précédent</span>
+                                        <div class="db-tot-value">
+                                            <span t-field="doc.montant_total_precedent"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="db-tot-label">Total du Mois</span>
+                                        <div class="db-tot-value">
+                                            <span t-field="doc.montant_total_mois"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </div>
+                                    </td>
+                                    <td class="grand">
+                                        <span class="db-tot-label">Total Cumulé</span>
+                                        <div class="db-tot-value">
+                                            <span t-field="doc.montant_total_cumule"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div t-if="doc.montant_en_lettres" class="db-lettres">
+                                <strong>Arrêté à la somme de :</strong>
+                                <span t-field="doc.montant_en_lettres"/>
+                            </div>
+
+                            <div t-if="doc.notes" class="db-notes">
+                                <strong>Notes :</strong>
+                                <p t-field="doc.notes" style="margin: 4pt 0 0 0;"/>
+                            </div>
+
+                            <table class="db-signs">
+                                <tr>
+                                    <td class="db-sign">Le BET</td>
+                                    <td class="db-spacer"></td>
+                                    <td class="db-sign">L'Entreprise</td>
+                                    <td class="db-spacer"></td>
+                                    <td class="db-sign">Le Maître d'Ouvrage</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>

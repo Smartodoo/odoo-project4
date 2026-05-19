@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_attestation_caution_garantie" model="ir.actions.report">
+        <field name="name">Attestation Caution de Garantie</field>
+        <field name="model">commercial.location</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.attestation_caution_garantie_template</field>
+        <field name="report_file">commercial.attestation_caution_garantie_template</field>
+        <field name="print_report_name">'Attestation Caution - %s' % object.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="attestation_caution_garantie_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="user" t-value="doc.env.user"/>
+                    <t t-set="user_civilite" t-value="'Mme' if user.genre == 'femme' else 'M.'"/>
+                    <t t-set="client_civilite" t-value="'Mme' if doc.client_location_id.genre == 'femme' else 'M.'"/>
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 22px; padding: 60px 70px; position: relative; min-height: 900px;">
+
+                        <!-- Date -->
+                        <p style="text-align: right; margin-bottom: 40px; font-size: 22px;">
+                            Fait Le :
+                            <strong><t t-esc="doc.create_date" t-options='{"widget": "date"}'/></strong>
+                        </p>
+
+                        <!-- Titre -->
+                        <h2 style="text-align: center; margin-bottom: 50px; font-weight: bold; color: #003366; font-size: 30px; text-decoration: underline;">
+                            ATTESTATION DE CAUTION DE GARANTIE
+                        </h2>
+
+                        <!-- Corps -->
+                        <p style="text-align: justify; line-height: 2.6; font-size: 22px;">
+                            Je soussigné(e) :
+                            <strong><t t-esc="user_civilite"/> <t t-esc="user.name"/></strong>
+                            avoir reçu de la part de
+                            <strong><t t-esc="client_civilite"/> <t t-esc="doc.client_location_id.nom or '...'"/></strong>
+                        </p>
+
+                        <p style="text-align: justify; line-height: 2.6; font-size: 22px;">
+                            La somme de :
+                            <strong style="font-size: 24px;"><t t-esc="'{:,.2f}'.format(doc.caution_garantie).replace(',', ' ')"/> DA</strong>
+                        </p>
+
+                        <p style="text-align: justify; line-height: 2.6; font-size: 22px;">
+                            (en lettres : <strong><t t-esc="doc.get_montant_en_lettres()"/></strong>)
+                        </p>
+
+                        <p style="text-align: justify; line-height: 2.6; font-size: 22px;">
+                            Comme caution de garantie pour la location du lot
+                            <strong><t t-esc="doc.lot_id.numero_lot or '...'"/></strong>
+                            dans le projet
+                            <strong><t t-esc="doc.projet_id.name or '...'"/></strong>
+                            dans le bloc
+                            <strong><t t-esc="doc.bloc_id.name or '...'"/></strong>.
+                        </p>
+
+                        <p style="text-align: justify; line-height: 2.6; font-size: 22px;">
+                            Cette caution garantit le respect des obligations locatives et sera restituée
+                            après la fin du contrat, sous réserve de l'état des lieux et du paiement des sommes dues.
+                        </p>
+
+                        <!-- Signatures -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0 60px; font-size: 22px;">
+                            <div style="float: left; width: 50%; text-align: center;">
+                                <p style="margin-bottom: 0;"><strong>Le locataire</strong></p>
+                                <p style="margin-top: 0;"><t t-esc="client_civilite"/> <t t-esc="doc.client_location_id.nom or '...'"/></p>
+                            </div>
+                            <div style="float: right; width: 50%; text-align: center;">
+                                <p style="margin-bottom: 0;"><strong>Le bailleur</strong></p>
+                                <p style="margin-top: 0;"><t t-esc="user.name"/></p>
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

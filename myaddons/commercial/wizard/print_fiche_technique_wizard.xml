@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="commercial_print_client_wizard_form" model="ir.ui.view">
+        <field name="name">commercial.print.client.wizard.form</field>
+        <field name="model">commercial.print.client.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Imprimer">
+                <group>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="available_lot_ids" invisible="1"/>
+                    <field name="type_impression"/>
+                    <field name="lot_id"
+                           invisible="type_impression not in ('fiche_technique', 'attestation_affectation', 'attestation_reservation_cb', 'attestation_provisoire')"
+                           required="type_impression in ('fiche_technique', 'attestation_affectation', 'attestation_reservation_cb', 'attestation_provisoire')"/>
+                    <field name="type_facade"
+                           invisible="type_impression != 'fiche_technique'"
+                           required="type_impression == 'fiche_technique'"/>
+                    <field name="avec_montants"
+                           invisible="type_impression != 'fiche_client'"/>
+                </group>
+                <footer>
+                    <button name="action_print" string="Imprimer" type="object" class="btn-primary"/>
+                    <button string="Annuler" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

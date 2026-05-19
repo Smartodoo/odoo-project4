@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vue Form (Dashboard) -->
+    <record id="commercial_statistique_commercial_view_form" model="ir.ui.view">
+        <field name="name">commercial.statistique.commercial.form</field>
+        <field name="model">commercial.statistique.commercial</field>
+        <field name="arch" type="xml">
+            <form string="Statistique par Commercial">
+                <header>
+                    <button name="action_print" type="object"
+                            string="Imprimer" icon="fa-print"
+                            class="btn-secondary"
+                            invisible="not commercial_id"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="commercial_id"/>
+                        </group>
+                        <group>
+                            <field name="date_du"/>
+                            <field name="date_au"/>
+                        </group>
+                    </group>
+                    <field name="dashboard_html" nolabel="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_statistique_commercial_action" model="ir.actions.act_window">
+        <field name="name">Statistique par Commercial</field>
+        <field name="res_model">commercial.statistique.commercial</field>
+        <field name="view_mode">form</field>
+    </record>
+
+</odoo>

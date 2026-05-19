@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_lot_view_tree" model="ir.ui.view">
+        <field name="name">commercial.lot.tree</field>
+        <field name="model">commercial.lot</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="numero_lot"/>
+                <field name="code_perso"/>
+                <field name="projet_id"/>
+                <field name="bloc_id"/>
+                <field name="etage_id"/>
+                <field name="categorie_id"/>
+                <field name="surface_globale"/>
+                <field name="montant_global"/>
+
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_lot_view_form" model="ir.ui.view">
+        <field name="name">commercial.lot.form</field>
+        <field name="model">commercial.lot</field>
+        <field name="arch" type="xml">
+            <form string="Lot">
+                <sheet>
+                    <!-- En-tête -->
+                    <group>
+                        <group>
+                            <field name="numero_lot"/>
+                            <field name="code_perso"/>
+                        </group>
+                        <group>
+                            <field name="numero_porte"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <!-- Emplacement (colonne gauche) -->
+                        <group string="Emplacement">
+                            <field name="projet_id"/>
+                            <field name="bloc_id"/>
+                            <field name="etage_id"/>
+                            <field name="categorie_id"/>
+                        </group>
+                        <!-- Superficies (colonne droite) -->
+                        <group string="Superficies">
+                            <group>
+                                <field name="surface_01"/>
+                                <field name="surface_02"/>
+                            </group>
+                            <group>
+                                <field name="prix_m2_surface_01"/>
+                                <field name="prix_m2_surface_02"/>
+                            </group>
+                            <group colspan="2">
+                                <field name="surface_globale"/>
+                                <field name="prix_m2_global"/>
+                                <field name="montant_surface_01"/>
+                                <field name="montant_surface_02"/>
+                                <field name="montant_global"/>
+                            </group>
+                        </group>
+                    </group>
+                    <group>
+                        <!-- Colonne gauche : Déclaration fiscale -->
+                        <group string="Déclaration fiscale">
+                            <group>
+                                <field name="prix_m2_fiscal_1"/>
+                                <field name="prix_m2_fiscal_2"/>
+                            </group>
+                            <group>
+                                <field name="prix_m2_ht_fiscal_1"/>
+                                <field name="prix_m2_ht_fiscal_2"/>
+                            </group>
+                            <group colspan="2">
+                                <field name="montant_declare"/>
+                                <field name="tva"/>
+                                <field name="montant_ht"/>
+                            </group>
+                        </group>
+                        <!-- Colonne droite : Consistance + Quotes-parts -->
+                        <group>
+                            <field name="consistance"/>
+                            <field name="quot_part_1"/>
+                            <field name="quot_part_2"/>
+                            <field name="quot_part_3"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_lot_action" model="ir.actions.act_window">
+        <field name="name">Lots</field>
+        <field name="res_model">commercial.lot</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

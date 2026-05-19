@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="commercial.ClientSearchBar">
+        <div t-ref="root" class="d-flex flex-wrap gap-2 align-items-center p-2 mb-2 bg-light rounded border">
+            <i class="fa fa-search text-muted"/>
+            <input type="text" class="form-control form-control-sm" style="max-width: 180px;"
+                   placeholder="Nom"
+                   t-att-value="state.nom"
+                   t-on-input="(ev) => this.onInput('nom', ev)"/>
+            <input type="text" class="form-control form-control-sm" style="max-width: 150px;"
+                   placeholder="Bloc"
+                   t-att-value="state.bloc"
+                   t-on-input="(ev) => this.onInput('bloc', ev)"/>
+            <button t-if="hasActiveFilter"
+                    class="btn btn-outline-secondary btn-sm"
+                    t-on-click="onClear">
+                <i class="fa fa-times"/> Effacer
+            </button>
+        </div>
+    </t>
+</templates>

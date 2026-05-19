@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_ir_attachment_form_inherit_date_exp" model="ir.ui.view">
+        <field name="name">ir.attachment.form.inherit.date.exp</field>
+        <field name="model">ir.attachment</field>
+        <field name="inherit_id" ref="base.view_attachment_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insertion après le champ 'datas' -->
+
+            <xpath expr="//field[@name='datas']" position="after">
+                <field name="date_exp"/>
+            </xpath>
+
+
+        </field>
+    </record>
+
+</odoo>

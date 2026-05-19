@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="commercial_remise_wizard_form" model="ir.ui.view">
+        <field name="name">commercial.remise.wizard.form</field>
+        <field name="model">commercial.remise.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Remise">
+                <group>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="partner_lot_id" string="Lot"/>
+                    <field name="montant_global"/>
+                    <field name="remise"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirmer" class="btn-primary"/>
+                    <button string="Annuler" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

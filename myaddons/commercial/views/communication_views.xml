@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vue formulaire Communication -->
+    <record id="commercial_communication_form" model="ir.ui.view">
+        <field name="name">commercial.communication.form</field>
+        <field name="model">commercial.communication</field>
+        <field name="arch" type="xml">
+            <form string="Communication">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date_heure"/>
+                            <field name="type_communication" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="motif"/>
+                        <field name="resultat"/>
+                    </group>
+                    <group>
+                        <field name="note" placeholder="Détails de la communication..."/>
+                    </group>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="client_interesse_id" invisible="1"/>
+                </sheet>
+                <footer>
+                    <button string="Enregistrer" type="object" name="action_save_and_close" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Supprimer l'ancienne vue héritée qui ciblait page journal -->
+    <delete model="ir.ui.view" search="[('name', '=', 'res.partner.form.communication')]"/>
+
+    <!-- Vue tree Communication -->
+    <record id="commercial_communication_tree" model="ir.ui.view">
+        <field name="name">commercial.communication.tree</field>
+        <field name="model">commercial.communication</field>
+        <field name="arch" type="xml">
+            <tree string="Communications">
+                <field name="date_heure"/>
+                <field name="type_communication" widget="badge"
+                       decoration-info="type_communication == 'entrant'"
+                       decoration-success="type_communication == 'sortant'"/>
+                <field name="motif"/>
+                <field name="resultat"/>
+                <field name="note"/>
+                <field name="commercial_id"/>
+            </tree>
+        </field>
+    </record>
+
+
+</odoo>

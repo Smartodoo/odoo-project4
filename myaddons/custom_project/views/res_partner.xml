@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <!-- Vue Formulaire projects.associated -->
+    <record id="view_project_associated_form" model="ir.ui.view">
+        <field name="name">project.associated.form</field>
+        <field name="model">projects.associated</field>
+        <field name="arch" type="xml">
+
+
+            <form string="Project Associated">
+
+                <header>
+                    <button name="create_custom_project"
+                            string="Create Project"
+                            invisible="is_etb_tph_chellil == True"
+                            type="object"
+                            class="btn-primary"
+                    />
+                    <button name="open_situation"
+                            type="object"
+                            string="Situation ST"
+                            class="oe_stat_button"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group class="col-6">
+                            <field name="project_id"
+                                   domain="[('state', '=', 'confirmed'), ('company_id', '=', company_id)]"/>
+
+                            <field name="state"/>
+                            <field name="retenu_garantie"/>
+                            <field name="retenu_realisation"/>
+                        </group>
+                        <group class="col-6">
+                            <field name="client_id"/>
+                            <field name="company_id"/>
+                            <field name="is_etb_tph_chellil"/>
+                            <field name="original_subcontractor_id" readonly="1"/>
+                            <field name="tax_ids"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Taches">
+                            <group class="col-6">
+                                <field name="lots_id" widget="many2many_tags"/>
+                            </group>
+                            <field name="task_line_ids" nolabel="1" options="{'limit': 10000}"
+                                   widget="section_and_note_one2many">
+                                <tree editable="bottom" infinite="1" nolabel="1"
+                                      default_order="task_id_import_source,no"
+                                      decoration-success="task_id_import_source == 'primary' and not quantity_exceeds"
+                                      decoration-danger="quantity_exceeds"
+                                      options="{'limit': 10000}">
+                                    <field name="quantity_exceeds" column_invisible="True"/>
+                                    <field name="no"/>
+                                    <field name="task_id"
+                                           context="{'default_project_id': parent.project_id}"/>
+                                    <field name="project" column_invisible="1"/>
+                                    <field name="description"/>
+                                    <field name="lot_id" column_invisible="1"/>
+                                    <field name="unit" optional="show"/>
+                                    <field name="quantity_marche" optional="hide"/>
+                                    <field name="quantity_restante" optional="hide"/>
+                                    <field name="quantity" optional="show"/>
+                                    <field name="unit_price" optional="show"/>
+                                    <field name="amount_distributed" optional="hide"/>
+                                    <field name="total_price" optional="show"/>
+                                    <field name="task_id_import_source" column_invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    <div class="text-end mt-2">
+                        <span class="o_form_label" style="color: gray;">Total HT :</span>
+                        <div style="display: inline-block; margin-left: 5px;">
+                            <field name="total_price" readonly="1"
+                                   class="text-end"
+                                   nolabel="1"
+                                   widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="currency_id" invisible="1"/>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-2" invisible="not tax_totale">
+                        <span class="o_form_label" style="color: gray;">TVA :</span>
+                        <div style="display: inline-block; margin-left: 5px;">
+                            <field name="tax_totale" readonly="1"
+                                   class="text-end"
+                                   nolabel="1"
+                                   widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </div>
+                    </div>
+                    <div class="text-end mt-2">
+                        <span class="o_form_label" style="color: gray;">Total TTC:</span>
+                        <div style="display: inline-block; margin-left: 5px;">
+                            <field name="total" readonly="1"
+                                   class="text-end"
+                                   nolabel="1"
+                                   widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </div>
+                    </div>
+                    <div class="text-end mt-2" invisible="not guarantee_retained">
+                        <span class="o_form_label" style="color: gray;">R.G.S :</span>
+                        <div style="display: inline-block; margin-left: 5px;">
+                            <field name="guarantee_retained" readonly="1"
+                                   class="text-end"
+                                   nolabel="1"
+                                   widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </div>
+                    </div>
+                    <div class="text-end mt-2" invisible="not guarantee_realesed">
+                        <span class="o_form_label" style="color: gray;">Retenu réalisé :</span>
+                        <div style="display: inline-block; margin-left: 5px;">
+                            <field name="guarantee_realesed" readonly="1"
+                                   class="text-end"
+                                   nolabel="1"
+                                   widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </div>
+                    </div>
+                    <div class="text-end mt-2">
+                        <span class="o_form_label" style="color: gray;">Net à payer:</span>
+                        <div style="display: inline-block; margin-left: 5px;">
+                            <field name="net_amount" readonly="1"
+                                   class="text-end"
+                                   nolabel="1"
+                                   widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </div>
+                    </div>
+
+
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue Liste projects.associated -->
+    <record id="view_project_associated_tree" model="ir.ui.view">
+        <field name="name">project.associated.tree</field>
+        <field name="model">projects.associated</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="project_id"/>
+                <field name="client_id"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action projects.associated -->
+    <record id="action_open_views_projects_associated" model="ir.actions.act_window">
+        <field name="name">Projets Associés</field>
+        <field name="res_model">projects.associated</field>
+        <field name="context">{'default_original_subcontractor_id': context.get('default_original_subcontractor_id')}
+        </field>
+        <field name="domain">[('original_subcontractor_id', '=', context.get('default_original_subcontractor_id'))]
+        </field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Vue héritée de res.partner -->
+    <record id="view_partner_form_inherited" model="ir.ui.view">
+        <field name="name">res.partner.form_inherited</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Champ représentant -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="nombre_situations" readonly="1"/>
+            </xpath>
+            
+
+
+
+
+            <!-- Bouton Convention (dans la button box) -->
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="open_situat"
+                        string="Situations"
+                        type="object"
+                        invisible="contact_type != 'SUBCONTRACTOR'"
+                        class="oe_stat_button">
+                    <field name="situation_count" widget="statinfo"/>
+                </button>
+                <button name="%(custom_project.action_open_views_projects_associated)d"
+                        string="Convention"
+                        type="action"
+                        class="oe_stat_button"
+                        context="{'default_original_subcontractor_id': active_id}"
+                        invisible="contact_type != 'SUBCONTRACTOR'"
+                        groups="base.group_user">
+                    <field name="nombre_projets" widget="statinfo"/>
+                </button>
+                <button name="action_open_engagments"
+                        string="Engagments"
+                        type="object"
+                        class="oe_stat_button"
+                        context="{'default_original_subcontractor_id': active_id}"
+                        groups="base.group_user" invisible="is_company != False">
+                    <field name="nombre_projets" widget="statinfo" string="Engagments"/>
+                </button>
+            </xpath>
+
+            <!-- Onglet suivi sous-traitant -->
+            <xpath expr="//sheet/notebook" position="inside">
+                <page name="suivi_sous_traitant" string="Suivi Sous-traitant">
+                    <group>
+                        <field name="nombre_projets"/>
+                        <field name="nombre_situations"/>
+                        <field name="company_id"/>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="view_partner_tree_inherited" model="ir.ui.view">
+        <field name="name">res.partner.tree.inherited</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="nombre_projets"/>
+                <field name="nombre_situations"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_purchase_order_form_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add order-level category filter -->
+            <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="before">
+                <field name="product_category_id"/>
+            </xpath>
+
+            <!-- داخل order_line form: عيّن attributes لحقل product_id (domain/context) -->
+            <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="replace">
+                <field name="product_id"/>
+                <!--                <attribute name="domain">[('purchase_ok', '=', True), ('categ_id', '=', product_category_id)]</attribute>-->
+                <!--                <attribute name="context">{'search_default_categ_id': parent.product_category_id}</attribute>-->
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

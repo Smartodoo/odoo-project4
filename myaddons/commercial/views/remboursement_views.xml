@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Séquence REM/0001 -->
+    <record id="seq_commercial_remboursement" model="ir.sequence">
+        <field name="name">Remboursement Commercial</field>
+        <field name="code">commercial.remboursement</field>
+        <field name="prefix">REM/</field>
+        <field name="padding">4</field>
+    </record>
+
+    <!-- Vue formulaire -->
+    <record id="commercial_remboursement_form" model="ir.ui.view">
+        <field name="name">commercial.remboursement.form</field>
+        <field name="model">commercial.remboursement</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirmer" string="Confirmer" type="object"
+                            class="btn-primary" invisible="state != 'brouillon'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="brouillon,confirme"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="versement_id" readonly="state != 'brouillon'"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="client_id" options="{'no_open': True}"/>
+                        </group>
+                        <group>
+                            <field name="montant_verse"/>
+                            <field name="montant_restant"/>
+                            <field name="montant_rembourse" readonly="state != 'brouillon'"/>
+                            <field name="date" readonly="state != 'brouillon'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="note" readonly="state != 'brouillon'" placeholder="Notes..."/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue liste -->
+    <record id="commercial_remboursement_tree" model="ir.ui.view">
+        <field name="name">commercial.remboursement.tree</field>
+        <field name="model">commercial.remboursement</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="versement_id"/>
+                <field name="client_id"/>
+                <field name="date"/>
+                <field name="montant_verse"/>
+                <field name="montant_rembourse"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'brouillon'"
+                       decoration-success="state == 'confirme'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_remboursement_action" model="ir.actions.act_window">
+        <field name="name">Remboursements</field>
+        <field name="res_model">commercial.remboursement</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

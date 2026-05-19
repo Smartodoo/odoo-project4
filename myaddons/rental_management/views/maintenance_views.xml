@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_maintenance" model="ir.actions.act_window">
+        <field name="name">🔧 Maintenances</field>
+        <field name="res_model">property.maintenance</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+
+    <record id="view_maintenance_kanban" model="ir.ui.view">
+        <field name="name">property.maintenance.kanban</field>
+        <field name="model">property.maintenance</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state">
+                <field name="state"/>
+                <field name="priority"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click p-3 mb-2"
+                             t-attf-style="border-left: 4px solid #{record.priority.raw_value == '3' ? '#FF5A5F' : record.priority.raw_value == '2' ? '#FF8C42' : '#2DC071'};">
+                            <div class="d-flex justify-content-between">
+                                <strong><field name="name"/></strong>
+                                <field name="priority" widget="badge"/>
+                            </div>
+                            <div class="text-muted small"><field name="apartment_id"/></div>
+                            <div class="mt-2"><field name="category" widget="badge"/></div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_maintenance_tree" model="ir.ui.view">
+        <field name="name">property.maintenance.tree</field>
+        <field name="model">property.maintenance</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="priority == '3'" decoration-warning="priority == '2'">
+                <field name="name"/>
+                <field name="apartment_id"/>
+                <field name="category"/>
+                <field name="priority" widget="badge"/>
+                <field name="date_reported"/>
+                <field name="assigned_to"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_maintenance_form" model="ir.ui.view">
+        <field name="name">property.maintenance.form</field>
+        <field name="model">property.maintenance</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string=" Confirmer" type="object"
+                            invisible="state != 'new'" class="oe_highlight"/>
+                    <button name="action_start" string=" Démarrer" type="object"
+                            invisible="state != 'confirmed'" class="oe_highlight"/>
+                    <button name="action_wait_parts" string="Attente Pièces" type="object"
+                            invisible="state != 'in_progress'"/>
+                    <button name="action_done" string="Terminer" type="object"
+                            invisible="state not in ('in_progress', 'waiting_parts')" class="oe_highlight"/>
+                    <button name="action_cancel" string="Annuler" type="object"
+                            invisible="state in ('done', 'cancelled')"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="apartment_id"/>
+                            <field name="reported_by"/>
+                            <field name="category"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                        <group>
+                            <field name="date_reported"/>
+                            <field name="date_scheduled"/>
+                            <field name="assigned_to"/>
+                            <field name="provider_id"/>
+                        </group>
+                    </group>
+                    <group string=" Coûts">
+                        <field name="estimated_cost"/>
+                        <field name="actual_cost"/>
+                    </group>
+                    <field name="description" placeholder="Décrivez le problème..."/>
+                    <field name="resolution" placeholder="Résolution..."/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_maintenance" name="🔧 Maintenances" parent="menu_rental_root"
+              action="action_maintenance" sequence="45"/>
+</odoo>

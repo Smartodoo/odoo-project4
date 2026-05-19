@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Héritage : ajouter colonne refund_state sur la vue tree des encaissements -->
+    <record id="caisse_entry_view_tree_inherit_commercial" model="ir.ui.view">
+        <field name="name">caisse.entry.view.tree.inherit.commercial</field>
+        <field name="model">caisse.entry</field>
+        <field name="inherit_id" ref="caisse2.caisse_entry_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="refund_state" widget="badge"
+                       decoration-success="refund_state == 'non_rembourse'"
+                       decoration-warning="refund_state == 'partiellement_rembourse'"
+                       decoration-danger="refund_state == 'totalement_rembourse'"
+                       optional="show"/>
+                <field name="refunded_amount" widget="monetary" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Héritage : ajouter ruban + onglet Remboursements sur l'encaissement caisse -->
+    <record id="caisse_entry_view_form_inherit_commercial" model="ir.ui.view">
+        <field name="name">caisse.entry.view.form.inherit.commercial</field>
+        <field name="model">caisse.entry</field>
+        <field name="inherit_id" ref="caisse2.caisse_entry_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Champ caché pour déclencher le compute -->
+            <xpath expr="//field[@name='description']" position="after">
+                <field name="refund_state" invisible="1"/>
+                <field name="refunded_amount" invisible="1"/>
+            </xpath>
+
+            <!-- Rubans pour l'état du remboursement -->
+            <xpath expr="//widget[@name='web_ribbon'][1]" position="before">
+                <widget name="web_ribbon" title="Totalement remboursé"
+                        bg_color="text-bg-danger"
+                        invisible="refund_state != 'totalement_rembourse'"/>
+                <widget name="web_ribbon" title="Partiellement remboursé"
+                        bg_color="text-bg-warning"
+                        invisible="refund_state != 'partiellement_rembourse'"/>
+            </xpath>
+
+            <!-- Page Remboursements dans le notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Remboursements" name="commercial_remboursements"
+                      invisible="not commercial_remboursement_ids">
+                    <group>
+                        <group>
+                            <field name="refunded_amount" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="refund_state" widget="badge"
+                                   decoration-success="refund_state == 'non_rembourse'"
+                                   decoration-warning="refund_state == 'partiellement_rembourse'"
+                                   decoration-danger="refund_state == 'totalement_rembourse'"/>
+                        </group>
+                    </group>
+                    <field name="commercial_remboursement_ids" readonly="1">
+                        <tree>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="client_id"/>
+                            <field name="montant_rembourse" sum="Total remboursé"/>
+                            <field name="state" widget="badge"
+                                   decoration-info="state == 'brouillon'"
+                                   decoration-success="state == 'confirme'"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Suppression des anciens types pré-chargés -->
+        <delete model="commercial.type.projet" search="[('name', 'in', ['Vente', 'Réservation'])]"/>
+    </data>
+    <data noupdate="1">
+        <record id="commercial_type_projet_location" model="commercial.type.projet">
+            <field name="name">Location</field>
+        </record>
+    </data>
+</odoo>

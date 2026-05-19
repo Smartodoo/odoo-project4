@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_service" model="ir.actions.act_window">
+        <field name="name">🛎️ Prestations</field>
+        <field name="res_model">rental.service</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_service_tree" model="ir.ui.view">
+        <field name="name">rental.service.tree</field>
+        <field name="model">rental.service</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'done'"
+                  decoration-info="state == 'draft'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="rental_id"/>
+                <field name="service_type" widget="badge"/>
+                <field name="description"/>
+                <field name="date"/>
+                <field name="unit_price"/>
+                <field name="quantity"/>
+                <field name="total" sum="Total"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_service_form" model="ir.ui.view">
+        <field name="name">rental.service.form</field>
+        <field name="model">rental.service</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_done" string="Réalisé" type="object" class="oe_highlight"
+                            invisible="state == 'done'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="rental_id" options="{'no_create': True}"/>
+                            <field name="service_type"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="unit_price"/>
+                            <field name="quantity"/>
+                            <field name="total"/>
+                        </group>
+                    </group>
+
+                    <group string="Informations Complémentaires">
+                        <field name="description" placeholder="Détails de la prestation..." style="font-size: 15px;"/>
+                        <field name="notes" placeholder="Notes internes..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <menuitem id="menu_service" name="🛎️ Prestations"
+              parent="menu_rental_root" action="action_service"
+              sequence="60"/>
+</odoo>

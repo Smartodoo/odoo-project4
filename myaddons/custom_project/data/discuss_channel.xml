@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="channel_versement_confirmation" model="discuss.channel">
+            <field name="name">Versements à confirmer</field>
+            <field name="channel_type">channel</field>
+            <field name="description">Canal de notification pour les versements en attente de confirmation par le directeur technique.</field>
+        </record>
+    </data>
+</odoo>

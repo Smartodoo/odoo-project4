@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="type_promotionnel_libre" model="commercial.type.projet">
+            <field name="name">P-Promotionnel libre</field>
+        </record>
+        <record id="type_vente_terrain" model="commercial.type.projet">
+            <field name="name">P-Vente de terrain</field>
+        </record>
+        <record id="type_lpa_1" model="commercial.type.projet">
+            <field name="name">P-LPA 1</field>
+        </record>
+        <record id="type_lpa_2" model="commercial.type.projet">
+            <field name="name">P-LPA 2</field>
+        </record>
+        <record id="type_potentiels" model="commercial.type.projet">
+            <field name="name">P-Potentiels</field>
+        </record>
+        <record id="type_location" model="commercial.type.projet">
+            <field name="name">P-Location</field>
+        </record>
+        <record id="type_fini" model="commercial.type.projet">
+            <field name="name">P-Fini</field>
+        </record>
+        <record id="type_localisation" model="commercial.type.projet">
+            <field name="name">P-Localisation</field>
+        </record>
+    </data>
+</odoo>

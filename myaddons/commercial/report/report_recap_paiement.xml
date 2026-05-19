@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_recap_paiement_template">
+        <t t-call="web.html_container">
+            <t t-call="commercial.external_layout_commercial">
+                <div class="page">
+
+                    <!-- Date d'impression en haut à droite -->
+                    <div style="text-align: right; margin-bottom: 10px;">
+                        <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                    </div>
+
+                    <!-- Titre -->
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #003366; margin-bottom: 5px;">
+                            RÉCAP PAIEMENT
+                        </h2>
+                    </div>
+
+                    <!-- Calcul du total -->
+                    <t t-set="total_montant" t-value="0"/>
+                    <t t-foreach="docs" t-as="doc">
+                        <t t-set="total_montant" t-value="total_montant + (doc.montant or 0)"/>
+                    </t>
+
+                    <!-- Tableau détaillé -->
+                    <h4 style="background-color: #003366; color: white; padding: 8px; margin-bottom: 0;">DÉTAIL DES ÉCHÉANCES</h4>
+                    <table class="table table-sm table-bordered">
+                        <thead style="background-color: #f8f9fa;">
+                            <tr>
+                                <th>Projet</th>
+                                <th>Client</th>
+                                <th>Lot</th>
+                                <th style="text-align: center;">N°</th>
+                                <th style="text-align: center;">Date</th>
+                                <th style="text-align: center;">Date encaissement</th>
+                                <th style="text-align: right;">%</th>
+                                <th style="text-align: right;">Montant</th>
+                                <th>Type</th>
+                                <th style="text-align: center;">État</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="doc">
+                                <tr>
+                                    <td><span t-field="doc.projet_id"/></td>
+                                    <td><span t-field="doc.client_id"/></td>
+                                    <td><span t-field="doc.lot_id"/></td>
+                                    <td style="text-align: center;"><span t-esc="doc.numero"/></td>
+                                    <td style="text-align: center;"><span t-field="doc.date" t-options='{"format": "dd/MM/yyyy"}'/></td>
+                                    <td style="text-align: center;">
+                                        <span t-if="doc.date_encaissement" t-field="doc.date_encaissement" t-options='{"format": "dd/MM/yyyy"}'/>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span t-if="doc.pourcentage" t-esc="'%.2f' % doc.pourcentage"/>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span t-esc="'{:,.2f}'.format(doc.montant or 0)"/>
+                                    </td>
+                                    <td>
+                                        <t t-if="doc.type_echeance == 'cache'">Cache</t>
+                                        <t t-if="doc.type_echeance == 'tranche'">Tranche</t>
+                                        <t t-if="doc.type_echeance == 'cb'">Crédit Bancaire</t>
+                                        <t t-if="doc.type_echeance == 'ap_non_declare'">AP non déclaré</t>
+                                        <t t-if="doc.type_echeance == 'ap_declare'">AP déclaré</t>
+                                        <t t-if="doc.type_echeance == 'coprop'">Copropriété</t>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <t t-if="doc.etat == 'brouillon'"><span style="color: #003366;">Brouillon</span></t>
+                                        <t t-if="doc.etat == 'paye'"><span style="color: #28a745;">Payé</span></t>
+                                        <t t-if="doc.etat == 'annule'"><span style="color: #6c757d;">Annulé</span></t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot style="background-color: #003366; color: white;">
+                            <tr>
+                                <td colspan="7" style="text-align: right;"><strong>TOTAL:</strong></td>
+                                <td style="text-align: right;">
+                                    <strong><span t-esc="'{:,.2f}'.format(total_montant)"/> DA</strong>
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================= ACTION REPORT ================= -->
+    <record id="action_report_recap_paiement" model="ir.actions.report">
+        <field name="name">Récap Paiement</field>
+        <field name="model">commercial.echeance.all</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.report_recap_paiement_template</field>
+        <field name="report_file">commercial.report_recap_paiement_template</field>
+        <field name="print_report_name">
+            'Recap_Paiement_%s' % (time.strftime('%Y%m%d_%H%M%S'))
+        </field>
+        <field name="binding_model_id" ref="model_commercial_echeance_all"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+</odoo>
