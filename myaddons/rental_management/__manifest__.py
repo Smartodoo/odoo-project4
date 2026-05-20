@@ -99,13 +99,13 @@
     ],
     'assets': {
         'web.assets_backend': [
-            #'rental_management/static/src/scss/_design_tokens.scss',
-            #'rental_management/static/src/scss/main.scss',
+            'rental_management/static/src/scss/_design_tokens.scss',
+            'rental_management/static/src/scss/main.scss',
             'rental_management/static/src/js/dashboard_chart.js',
         ],
-        #'web.assets_frontend': [
-            #'rental_management/static/src/css/custom_style.css',
-        #],
+        'web.assets_frontend': [
+            'rental_management/static/src/css/custom_style.css',
+        ],
    },
     'installable': True,
     'application': True,
