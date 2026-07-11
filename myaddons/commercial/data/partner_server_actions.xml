@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Action serveur : Bloquer (gear icon) -->
+    <record id="action_server_partner_bloquer" model="ir.actions.server">
+        <field name="name">Bloquer</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+records.write({'is_blocked': True})
+        </field>
+    </record>
+
+    <!-- Action serveur : Débloquer (gear icon) -->
+    <record id="action_server_partner_debloquer" model="ir.actions.server">
+        <field name="name">Débloquer</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+records.write({'is_blocked': False})
+        </field>
+    </record>
+
+    <!-- Action serveur Imprimer supprimée — remplacée par bouton header contact externe -->
+
+</odoo>

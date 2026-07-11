@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_update_rental_states" model="ir.cron">
+        <field name="name">🤖 Location: Mise à jour auto des états</field>
+        <field name="model_id" ref="model_property_rental"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_update_rental_states()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+
+    <!--<record id="ir_cron_generate_forecast" model="ir.cron">
+        <field name="name">📊 Prévisions: Génération mensuelle</field>
+        <field name="model_id" ref="model_rental_forecast"/>
+        <field name="state">code</field>
+        <field name="code">model.generate_forecast(months_ahead=6)</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">months</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>-->
+</odoo>

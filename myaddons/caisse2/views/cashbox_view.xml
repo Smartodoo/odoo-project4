@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <!-- Cashbox Form View -->
+    <record id="view_cashbox_form" model="ir.ui.view">
+        <field name="name">cashbox.form</field>
+        <field name="model">cashbox</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <header>
+                    <button name="action_recharge_cashbox" type="object" string="Enrichir" class="btn-primary"
+                            invisible="name != 'Caisse Principale'"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archivé" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_entry_ids" type="object" icon="fa-list-ul"
+                                class="oe_stat_button">
+                            <field string="Encaissements" name="entry_count" widget="statinfo"/>
+                        </button>
+                        <button name="action_view_transfer_ids" type="object" icon="fa-list-ul"
+                                class="oe_stat_button">
+                            <field string="Transferts" name="transfer_count" widget="statinfo"/>
+                        </button>
+                        <button name="action_view_supplier_ids" type="object" icon="fa-list-ul"
+                                class="oe_stat_button">
+                            <field string="Payment fournisseur" name="supplier_count" widget="statinfo"/>
+                        </button>
+                        <button name="action_view_caisse_expense_ids" type="object" icon="fa-list-ul"
+                                class="oe_stat_button">
+                            <field string="Paiements Situations" name="expense_count" widget="statinfo"/>
+                        </button>
+                        <button name="action_view_recharge_ids" type="object" icon="fa-list-ul"
+                                class="oe_stat_button">
+                            <field string="Rechargements" name="recharge_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <field name="name" placeholder="Nom de la caisse"/>
+                    </div>
+                    <group class="row">
+                        <group string="">
+                            <field name="active" invisible="1"/>
+                            <field name="responsible_ids"
+                                   options="{'no_create':True,'no_create_edit':True}"
+                                   widget="many2many_avatar_user"/>
+                            <field name="access_users" widget="many2many_tags"/>
+                            <field name="company_currency_id" invisible="1"/>
+                            <field name="total_amount" readonly="1" widget="monetary"/>
+                        </group>
+
+                        <group string="Autres Informations">
+                            <field name="company_id"
+                                   options="{'no_create':True,'no_create_edit':True}"
+                                   readonly="1"
+                            />
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Notes">
+                            <field name="notes" string="" placeholder="Notes Internes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!--  the view tree -->
+    <record id="view_cashbox_tree" model="ir.ui.view">
+        <field name="name">cashbox.tree</field>
+        <field name="model">cashbox</field>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <field name="name"/>
+                <field name="responsible_ids"
+                       widget="many2many_avatar_user"/>
+                <field name="total_amount" widget="monetary"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_cashbox_kanban" model="ir.ui.view">
+        <field name="name">cashbox.kanban</field>
+        <field name="model">cashbox</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard" create="false">
+                <field name="name"/>
+                <field name="total_amount"/>
+                <field name="responsible_ids"/>
+                <field name="company_currency_id"/>
+                <field name="entry_count"/>
+                <field name="supplier_count"/>
+                <field name="expense_count"/>
+                <field name="transfer_count"/>
+                <field name="recharge_count"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill" style="min-width: 320px; margin: 8px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: none;">
+                            <!-- Header with gradient -->
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; color: white;">
+                                <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                                    <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                                        <i class="fa fa-money fa-lg" style="color: white;"/>
+                                    </div>
+                                    <div>
+                                        <h3 style="margin: 0; font-size: 18px; font-weight: 600;">
+                                            <field name="name"/>
+                                        </h3>
+                                        <small style="opacity: 0.8;">Caisse de gestion</small>
+                                    </div>
+                                </div>
+                                <!-- Balance Amount -->
+                                <div style="background: rgba(255,255,255,0.15); border-radius: 10px; padding: 15px; text-align: center;">
+                                    <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">Solde Disponible</span>
+                                    <div style="font-size: 28px; font-weight: 700; margin-top: 5px;">
+                                        <field name="total_amount" widget="monetary"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Stats Grid -->
+                            <div style="padding: 16px; background: #f8f9fa;">
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                    <!-- Encaissements -->
+                                    <button name="action_view_entry_ids" type="object" class="btn p-0 border-0" style="text-decoration: none; background: none;">
+                                        <div style="background: white; border-radius: 10px; padding: 14px; text-align: center; transition: all 0.3s; border: 1px solid #e9ecef; cursor: pointer; width: 100%;">
+                                            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                                <i class="fa fa-arrow-down" style="color: #28a745; font-size: 16px; margin-right: 8px;"/>
+                                                <span style="font-size: 22px; font-weight: 700; color: #28a745;"><t t-esc="record.entry_count.value"/></span>
+                                            </div>
+                                            <span style="font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Encaissements</span>
+                                        </div>
+                                    </button>
+
+                                    <!-- Fournisseurs -->
+                                    <button name="action_view_supplier_ids" type="object" class="btn p-0 border-0" style="text-decoration: none; background: none;">
+                                        <div style="background: white; border-radius: 10px; padding: 14px; text-align: center; transition: all 0.3s; border: 1px solid #e9ecef; cursor: pointer; width: 100%;">
+                                            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                                <i class="fa fa-truck" style="color: #dc3545; font-size: 16px; margin-right: 8px;"/>
+                                                <span style="font-size: 22px; font-weight: 700; color: #dc3545;"><t t-esc="record.supplier_count.value"/></span>
+                                            </div>
+                                            <span style="font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Fournisseurs</span>
+                                        </div>
+                                    </button>
+
+                                    <!-- Situations -->
+                                    <button name="action_view_caisse_expense_ids" type="object" class="btn p-0 border-0" style="text-decoration: none; background: none;">
+                                        <div style="background: white; border-radius: 10px; padding: 14px; text-align: center; transition: all 0.3s; border: 1px solid #e9ecef; cursor: pointer; width: 100%;">
+                                            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                                <i class="fa fa-file-text-o" style="color: #fd7e14; font-size: 16px; margin-right: 8px;"/>
+                                                <span style="font-size: 22px; font-weight: 700; color: #fd7e14;"><t t-esc="record.expense_count.value"/></span>
+                                            </div>
+                                            <span style="font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Situations</span>
+                                        </div>
+                                    </button>
+
+                                    <!-- Transferts -->
+                                    <button name="action_view_transfer_ids" type="object" class="btn p-0 border-0" style="text-decoration: none; background: none;">
+                                        <div style="background: white; border-radius: 10px; padding: 14px; text-align: center; transition: all 0.3s; border: 1px solid #e9ecef; cursor: pointer; width: 100%;">
+                                            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
+                                                <i class="fa fa-exchange" style="color: #17a2b8; font-size: 16px; margin-right: 8px;"/>
+                                                <span style="font-size: 22px; font-weight: 700; color: #17a2b8;"><t t-esc="record.transfer_count.value"/></span>
+                                            </div>
+                                            <span style="font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px;">Transferts</span>
+                                        </div>
+                                    </button>
+                                </div>
+
+                                <!-- Rechargements Button -->
+                                <button name="action_view_recharge_ids" type="object" class="btn p-0 border-0 w-100" style="text-decoration: none; background: none;">
+                                    <div style="margin-top: 10px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 10px; padding: 12px; text-align: center; cursor: pointer;">
+                                        <div style="display: flex; align-items: center; justify-content: center; color: white;">
+                                            <i class="fa fa-plus-circle" style="font-size: 16px; margin-right: 10px;"/>
+                                            <span style="font-weight: 600;"><t t-esc="record.recharge_count.value"/> Rechargement(s)</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- Footer with responsibles -->
+                            <div style="padding: 12px 16px; background: white; border-top: 1px solid #e9ecef;">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div style="display: flex; align-items: center;">
+                                        <i class="fa fa-users" style="color: #6c757d; margin-right: 8px;"/>
+                                        <span style="font-size: 12px; color: #6c757d;">Responsables</span>
+                                    </div>
+                                    <field name="responsible_ids" widget="many2many_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Cashbox Search View -->
+    <record id="view_cashbox_search" model="ir.ui.view">
+        <field name="name">cashbox.search</field>
+        <field name="model">cashbox</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="responsible_ids"/>
+                <field name="company_id"/>
+                <separator/>
+                <filter string="Archivé" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Cashbox Action -->
+    <record id="action_cashbox" model="ir.actions.act_window">
+        <field name="name">Gestion des caisses</field>
+        <field name="res_model">cashbox</field>
+        <field name="domain">[('access_users', 'in', [uid])]</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'create': False}</field>
+    </record>
+
+</odoo>
+
+

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Vue liste -->
+    <record id="view_suivi_tache_tree" model="ir.ui.view">
+        <field name="name">suivi.tache.tree</field>
+        <field name="model">suivi.tache</field>
+        <field name="arch" type="xml">
+            <tree string="Suivi des Tâches">
+                <field name="reference"/>
+                <field name="name"/>
+                <field name="date_effectuee"/>
+                <field name="responsable_id"/>
+                <field name="montant"/>
+
+
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue formulaire -->
+    <record id="view_suivi_tache_form" model="ir.ui.view">
+        <field name="name">suivi.tache.form</field>
+        <field name="model">suivi.tache</field>
+        <field name="arch" type="xml">
+            <form string="Suivi des Tâches">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="reference"/>
+                            <field name="name"/>
+                            <field name="description"/>
+                        </group>
+                        <group>
+                            <field name="montant"/>
+                            <field name="date_effectuee"/>
+                            <field name="responsable_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 🗓️ Vue calendrier -->
+    <record id="view_suivi_tache_calendar" model="ir.ui.view">
+        <field name="name">suivi.tache.calendar</field>
+        <field name="model">suivi.tache</field>
+        <field name="arch" type="xml">
+            <calendar string="Calendrier des Tâches"
+                      date_start="date_effectuee"
+                      color="responsable_id" >
+                <field name="name"/>
+                <field name="montant"/>
+                <field name="responsable_id"/>
+            </calendar>
+        </field>
+    </record>
+
+
+     <record id="action_suivi_tache" model="ir.actions.act_window">
+        <field name="name"> Tâches</field>
+        <field name="res_model">suivi.tache</field>
+        <field name="view_mode">calendar,tree,form</field>
+    </record>
+
+    <menuitem id="menu_suivi_tache" name="Tâches" parent="document_knowledge.menu_document_root_doc" action="action_suivi_tache" sequence="100"/>
+</odoo>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Récap Échéances - Tree View -->
+    <record id="commercial_recap_echeance_view_tree" model="ir.ui.view">
+        <field name="name">commercial.echeance.all.tree</field>
+        <field name="model">commercial.echeance.all</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false">
+                <field name="projet_id"/>
+                <field name="client_id"/>
+                <field name="lot_id"/>
+                <field name="numero"/>
+                <field name="date"/>
+                <field name="date_encaissement"/>
+                <field name="pourcentage"/>
+                <field name="montant" sum="Total"/>
+                <field name="type_echeance"/>
+                <field name="etat" widget="badge"
+                       decoration-info="etat == 'brouillon'"
+                       decoration-success="etat == 'paye'"
+                       decoration-muted="etat == 'annule'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Récap Échéances - Search View -->
+    <record id="commercial_recap_echeance_view_search" model="ir.ui.view">
+        <field name="name">commercial.echeance.all.search</field>
+        <field name="model">commercial.echeance.all</field>
+        <field name="arch" type="xml">
+            <search string="Récap échéances">
+                <field name="client_id"/>
+                <field name="projet_id"/>
+                <field name="lot_id"/>
+                <field name="pourcentage" string="Pourcentage"/>
+                <filter name="filter_brouillon" string="Brouillon" domain="[('etat', '=', 'brouillon')]"/>
+                <filter name="filter_paye" string="Payé" domain="[('etat', '=', 'paye')]"/>
+                <filter name="filter_annule" string="Annulé" domain="[('etat', '=', 'annule')]"/>
+                <separator/>
+                <filter name="filter_cache" string="Cache" domain="[('type_echeance', '=', 'cache')]"/>
+                <filter name="filter_tranche" string="Tranche" domain="[('type_echeance', '=', 'tranche')]"/>
+                <filter name="filter_cb" string="Crédit Bancaire" domain="[('type_echeance', '=', 'cb')]"/>
+                <filter name="filter_ap_non_declare" string="AP non déclaré" domain="[('type_echeance', '=', 'ap_non_declare')]"/>
+                <filter name="filter_ap_declare" string="AP déclaré" domain="[('type_echeance', '=', 'ap_declare')]"/>
+                <filter name="filter_coprop" string="Copropriété" domain="[('type_echeance', '=', 'coprop')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_projet" string="Projet" context="{'group_by': 'projet_id'}"/>
+                    <filter name="group_client" string="Client" context="{'group_by': 'client_id'}"/>
+                    <filter name="group_lot" string="Lot" context="{'group_by': 'lot_id'}"/>
+                    <filter name="group_etat" string="État" context="{'group_by': 'etat'}"/>
+                    <filter name="group_type" string="Type" context="{'group_by': 'type_echeance'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Récap Échéances - Action -->
+    <record id="commercial_recap_echeance_action" model="ir.actions.act_window">
+        <field name="name">Récap paiement</field>
+        <field name="res_model">commercial.echeance.all</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="commercial_recap_echeance_view_search"/>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Server Action pour aperçu PDF des enregistrements sélectionnés -->
+    <record id="action_preview_recap_paiement_multi" model="ir.actions.server">
+        <field name="name">Aperçu PDF</field>
+        <field name="model_id" ref="commercial.model_commercial_echeance_all"/>
+        <field name="binding_model_id" ref="commercial.model_commercial_echeance_all"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_preview_report_multi()</field>
+    </record>
+
+</odoo>

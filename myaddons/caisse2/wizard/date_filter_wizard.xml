@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vue formulaire du wizard -->
+    <record id="date_filter_wizard_form" model="ir.ui.view">
+        <field name="name">date.filter.wizard.form</field>
+        <field name="model">date.filter.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Filtrer par Date">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                    </group>
+                    <group>
+                        <field name="date_to"/>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Appliquer" name="action_apply_filter" type="object" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour ouvrir le wizard - Paiements Fournisseurs -->
+    <record id="action_date_filter_expense_supplier" model="ir.actions.act_window">
+        <field name="name">Filtrer par Date</field>
+        <field name="res_model">date.filter.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{
+            'default_model_name': 'caisse.expense.supplier',
+            'default_date_field': 'date'
+        }</field>
+        <field name="binding_model_id" ref="model_caisse_expense_supplier"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <!-- Action pour ouvrir le wizard - Paiements Situations -->
+    <record id="action_date_filter_expense" model="ir.actions.act_window">
+        <field name="name">Filtrer par Date</field>
+        <field name="res_model">date.filter.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{
+            'default_model_name': 'caisse.expense',
+            'default_date_field': 'date'
+        }</field>
+        <field name="binding_model_id" ref="model_caisse_expense"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <!-- Action pour ouvrir le wizard - Dépenses Globales -->
+    <record id="action_date_filter_expense_globale" model="ir.actions.act_window">
+        <field name="name">Filtrer par Date</field>
+        <field name="res_model">date.filter.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{
+            'default_model_name': 'caisse.expense.globale',
+            'default_date_field': 'date_from'
+        }</field>
+        <field name="binding_model_id" ref="model_caisse_expense_globale"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <!-- Action pour ouvrir le wizard - Récap par Projet -->
+    <record id="action_date_filter_expense_project" model="ir.actions.act_window">
+        <field name="name">Filtrer par Date</field>
+        <field name="res_model">date.filter.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{
+            'default_model_name': 'caisse.expense.project',
+            'default_date_field': 'date_from'
+        }</field>
+        <field name="binding_model_id" ref="model_caisse_expense_project"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="action_report_reservation" model="ir.actions.report">
+        <field name="name">Fiche de Réservation</field>
+        <field name="model">vente.reservation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vente_immobiliere.report_reservation_template</field>
+        <field name="report_file">vente_immobiliere.report_reservation_template</field>
+        <field name="binding_model_id" ref="model_vente_reservation"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

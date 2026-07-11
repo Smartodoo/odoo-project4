@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_vente_immobiliere_root"
+              name="Vente Immobiliere"
+              sequence="50"
+              web_icon="vente_immobiliere,static/description/icon.png"/>
+
+    <!-- Projets -->
+    <menuitem id="menu_vente_projets"
+              name="Projets"
+              parent="menu_vente_immobiliere_root"
+              sequence="10"/>
+
+    <menuitem id="menu_vente_projets_all"
+              name="Tous les Projets"
+              parent="menu_vente_projets"
+              action="action_vente_projet"
+              sequence="10"/>
+
+    <menuitem id="menu_vente_appartements"
+              name="Appartements"
+              parent="menu_vente_projets"
+              action="action_vente_appartement"
+              sequence="20"/>
+
+    <!-- Reservations -->
+    <menuitem id="menu_vente_reservations"
+              name="Réservations"
+              parent="menu_vente_immobiliere_root"
+              sequence="20"/>
+
+    <menuitem id="menu_vente_reservations_all"
+              name="Toutes les Réservations"
+              parent="menu_vente_reservations"
+              action="action_vente_reservation"
+              sequence="10"/>
+
+    <menuitem id="menu_vente_reservations_my"
+              name="Mes Réservations"
+              parent="menu_vente_reservations"
+              action="action_vente_reservation_my"
+              sequence="20"/>
+
+    <!-- Configuration -->
+    <menuitem id="menu_vente_configuration"
+              name="Configuration"
+              parent="menu_vente_immobiliere_root"
+              sequence="90"
+              groups="group_vente_immo_manager"/>
+
+    <menuitem id="menu_vente_wilayas"
+              name="Wilayas"
+              parent="menu_vente_configuration"
+              action="action_vente_wilaya"
+              sequence="10"/>
+
+    <menuitem id="menu_vente_dairas"
+              name="Dairas"
+              parent="menu_vente_configuration"
+              action="action_vente_daira"
+              sequence="20"/>
+
+    <menuitem id="menu_vente_communes"
+              name="Communes"
+              parent="menu_vente_configuration"
+              action="action_vente_commune"
+              sequence="30"/>
+</odoo>

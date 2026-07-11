@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="action_administration_juridique" model="ir.actions.act_window">
+        <field name="name">Suivi Juridique</field>
+        <field name="res_model">administration.juridique</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>
+                Gérez ici vos affaires juridiques : enregistrez les dossiers, audiences et observations.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_administration_credit_bancaire" model="ir.actions.act_window">
+        <field name="name">Suivi des Crédits Bancaires</field>
+        <field name="res_model">administration.credit.bancaire</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>
+                Gérez ici le suivi de vos crédits bancaires : demandes, taux, intérêts et remboursements.
+            </p>
+        </field>
+    </record>
+    <!-- ============================= -->
+    <!-- MENU PRINCIPAL -->
+    <!-- ============================= -->
+    <menuitem id="menu_administration_root"
+              name="Administration"
+              web_icon="administration,static/description/img.png"
+              sequence="10"
+              />
+
+    <!-- Sous-menus vides (actions reliées dans les autres fichiers) -->
+    <menuitem id="menu_administration_juridique"
+              name="Suivi Juridique"
+              parent="menu_administration_root"
+              action="action_administration_juridique"
+              sequence="1"/>
+
+    <menuitem id="menu_administration_credit_bancaire"
+              name="Suivi des Crédits Bancaires"
+              parent="menu_administration_root"
+              action="action_administration_credit_bancaire"
+              sequence="2"/>
+
+    <menuitem id="menu_administration_suivi_g50"
+              name="Suivi G50"
+              parent="menu_administration_root"
+              action="action_suivi_g50"
+              sequence="3"/>
+</odoo>

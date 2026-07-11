@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Paper Format : Paysage A4 -->
+    <record id="paperformat_liste_clients" model="report.paperformat">
+        <field name="name">A4 Paysage - Liste Clients</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">55</field>
+        <field name="margin_bottom">25</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">45</field>
+    </record>
+
+    <!-- Report Action : Liste des Clients -->
+    <record id="action_report_liste_clients" model="ir.actions.report">
+        <field name="name">Liste des Clients</field>
+        <field name="model">res.partner</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.liste_clients_template</field>
+        <field name="report_file">commercial.liste_clients_template</field>
+        <field name="print_report_name">'Liste Clients'</field>
+        <field name="paperformat_id" ref="paperformat_liste_clients"/>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- QWeb Template : Liste des Clients -->
+    <template id="liste_clients_template">
+        <t t-call="web.html_container">
+            <t t-call="commercial.external_layout_commercial">
+                <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 12px;">
+
+                    <!-- Titre -->
+                    <h3 style="text-align: center; font-weight: bold; margin-bottom: 5px; text-decoration: underline; font-size: 20px; color: #003366;">
+                        LISTE DES CLIENTS
+                    </h3>
+
+                    <!-- Sous-titre : Projet -->
+                    <t t-set="projet" t-value="docs[0].commercial_projet_id if docs else False"/>
+                    <div t-if="projet" style="text-align: center; margin-bottom: 20px; font-size: 14px;">
+                        <strong><t t-esc="projet.name"/></strong>
+                    </div>
+
+                    <!-- Date d'impression -->
+                    <div style="text-align: right; margin-bottom: 15px; font-size: 11px;">
+                        Imprimé le : <t t-esc="time.strftime('%d/%m/%Y')"/>
+                    </div>
+
+                    <!-- Tableau des clients -->
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                        <thead>
+                            <tr style="background: #003366; color: #fff;">
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center; width: 4%;">N°</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: left;">Nom</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Téléphone</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Lots</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Bloc</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Étage</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: right;">Montant</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: right;">Payé</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: right;">Reste</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="counter" t-value="0"/>
+                            <t t-foreach="docs" t-as="client">
+                                <t t-set="counter" t-value="counter + 1"/>
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="counter"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc;">
+                                        <t t-esc="client.name or ''"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="client.phone or client.mobile or ''"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-foreach="client.commercial_lot_ids" t-as="lot">
+                                            <t t-esc="lot.numero_lot"/>
+                                            <t t-if="not lot_last">, </t>
+                                        </t>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-foreach="client.commercial_lot_ids" t-as="lot">
+                                            <t t-esc="lot.bloc_id.code or ''"/>
+                                            <t t-if="not lot_last">, </t>
+                                        </t>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-foreach="client.commercial_lot_ids" t-as="lot">
+                                            <t t-esc="lot.etage_id.etiquette or ''"/>
+                                            <t t-if="not lot_last">, </t>
+                                        </t>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">
+                                        <t t-esc="'{:,.2f}'.format(client.montant_global_lots)"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">
+                                        <t t-esc="'{:,.2f}'.format(client.montant_paye_global)"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">
+                                        <t t-esc="'{:,.2f}'.format(client.reste_global)"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Total -->
+                    <div style="margin-top: 20px; text-align: right; font-size: 13px;">
+                        <strong>Nombre total de clients : <t t-esc="len(docs)"/></strong>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

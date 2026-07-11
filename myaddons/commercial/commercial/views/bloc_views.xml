@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_bloc_view_tree" model="ir.ui.view">
+        <field name="name">commercial.bloc.tree</field>
+        <field name="model">commercial.bloc</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="code"/>
+                <field name="projet_id"/>
+                <field name="nbre_etages"/>
+                <field name="mezzanine"/>
+                <field name="nbre_entresols"/>
+                <field name="nbre_soussols"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_bloc_view_form" model="ir.ui.view">
+        <field name="name">commercial.bloc.form</field>
+        <field name="model">commercial.bloc</field>
+        <field name="arch" type="xml">
+            <form string="Bloc">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="projet_id"/>
+                        </group>
+                        <group>
+                            <field name="nbre_etages"/>
+                            <field name="mezzanine"/>
+                            <field name="nbre_entresols"/>
+                            <field name="nbre_soussols"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Étages" name="etages">
+                            <field name="etage_ids">
+                                <tree editable="bottom" >
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="niveau"/>
+                                    <field name="etiquette"/>
+                                    <field name="type_etage"/>
+                                    <field name="nombre_logements"/>
+                                    <field name="superficie"/>
+                                    <field name="observation"/>
+                                    <button name="action_open_form" type="object"
+                                            icon="fa-arrow-right" title="Catégories Lot"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_bloc_action" model="ir.actions.act_window">
+        <field name="name">Blocs</field>
+        <field name="res_model">commercial.bloc</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

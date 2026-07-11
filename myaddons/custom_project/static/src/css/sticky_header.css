@@ -1,0 +1,256 @@
+/* ============================================= */
+/* Modern Design for Convention & Situation Tables */
+/* ============================================= */
+
+/* ---- Table Container Styling ---- */
+.o_form_view .o_field_widget[name="task_line_ids"],
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"],
+.o_form_view .o_field_widget[name="situation_final_ids"] {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+/* ---- Modern Header Styling ---- */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table thead,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table thead,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Header Cells */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table thead th,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table thead th,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table thead th {
+    background: transparent !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 14px 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: none;
+    white-space: nowrap;
+}
+
+/* Header hover effect */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table thead th:hover,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table thead th:hover,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table thead th:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ---- Scrollable Container ---- */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_renderer,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_renderer,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_renderer {
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: auto;
+    display: block;
+}
+
+/* Custom Scrollbar */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_renderer::-webkit-scrollbar,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_renderer::-webkit-scrollbar,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_renderer::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_renderer::-webkit-scrollbar-track,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_renderer::-webkit-scrollbar-track,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_renderer::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_renderer::-webkit-scrollbar-thumb,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_renderer::-webkit-scrollbar-thumb,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_renderer::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+}
+
+/* ---- Table Body Styling ---- */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+/* Body Rows */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody tr,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody tr,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Alternating Row Colors */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody tr:nth-child(even),
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody tr:nth-child(even),
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody tr:nth-child(odd),
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody tr:nth-child(odd),
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+/* Row Hover Effect */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody tr:hover,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody tr:hover,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%) !important;
+    transform: scale(1.001);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+/* Body Cells */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody td,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody td,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tbody td {
+    padding: 12px 12px;
+    font-size: 13px;
+    color: #334155;
+    vertical-align: middle;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* ---- Service (Primary) Row - Green Theme ---- */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody tr.text-success,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody tr.text-success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+    border-left: 4px solid #10b981;
+}
+
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody tr.text-success:hover,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody tr.text-success:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%) !important;
+}
+
+/* ---- Logments (Secondary) Row - Red/Orange Theme ---- */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody tr.text-danger,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody tr.text-danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
+    border-left: 4px solid #ef4444;
+}
+
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody tr.text-danger:hover,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody tr.text-danger:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%) !important;
+}
+
+/* ---- Footer/Sum Row Styling ---- */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tfoot,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tfoot,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tfoot {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tfoot td,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tfoot td,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tfoot td {
+    color: #ffffff !important;
+    font-weight: 700;
+    padding: 14px 12px;
+    font-size: 14px;
+}
+
+/* ---- Input Fields in Editable Mode ---- */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody td input,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody td input,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tbody td input {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    transition: all 0.2s ease;
+}
+
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody td input:focus,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody td input:focus,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tbody td input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    outline: none;
+}
+
+/* ---- Selected Row ---- */
+.o_form_view .o_field_widget[name="task_line_ids"] .o_list_table tbody tr.o_data_row_selected,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_list_table tbody tr.o_data_row_selected,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_list_table tbody tr.o_data_row_selected {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%) !important;
+    border-left: 4px solid #667eea;
+}
+
+/* ============================================= */
+/* Standalone List Views (Situation Final Window) */
+/* ============================================= */
+
+.o_list_view .o_list_table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.o_list_view .o_list_table thead th {
+    background: transparent !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    padding: 14px 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+}
+
+/* ============================================= */
+/* Progress Bar Modern Styling */
+/* ============================================= */
+
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_progressbar,
+.o_list_view .o_progressbar {
+    background: #e2e8f0;
+    border-radius: 10px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_progressbar .o_progressbar_value,
+.o_list_view .o_progressbar .o_progressbar_value {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+/* ============================================= */
+/* Add/Delete Row Buttons */
+/* ============================================= */
+
+.o_form_view .o_field_widget[name="task_line_ids"] .o_field_x2many_list_row_add a,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_field_x2many_list_row_add a,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_field_x2many_list_row_add a {
+    color: #667eea !important;
+    font-weight: 600;
+    padding: 10px 16px;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.o_form_view .o_field_widget[name="task_line_ids"] .o_field_x2many_list_row_add a:hover,
+.o_form_view .o_field_widget[name="situation_sous_traitant_ids"] .o_field_x2many_list_row_add a:hover,
+.o_form_view .o_field_widget[name="situation_final_ids"] .o_field_x2many_list_row_add a:hover {
+    color: #764ba2 !important;
+    text-decoration: none;
+}

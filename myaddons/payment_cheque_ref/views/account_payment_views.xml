@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Wizard d'enregistrement de paiement (depuis une facture) -->
+    <record id="view_account_payment_register_form_inherit_cheque_ref" model="ir.ui.view">
+        <field name="name">account.payment.register.form.inherit.cheque.ref</field>
+        <field name="model">account.payment.register</field>
+        <field name="priority">99</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_method_line_id']" position="after">
+                <field name="payment_method_code" invisible="1"/>
+                <field name="cheque_reference"
+                       string="Référence du chèque"
+                       invisible="payment_method_code != 'cheque_ref'"
+                       required="payment_method_code == 'cheque_ref'"/>
+            </xpath>
+            <!-- Force la caisse à être éditable -->
+            <xpath expr="//field[@name='cashbox_id']" position="attributes">
+                <attribute name="readonly">0</attribute>
+                <attribute name="force_save">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Fiche du paiement (après confirmation) — affiche la référence en lecture -->
+    <record id="view_account_payment_form_inherit_cheque_ref" model="ir.ui.view">
+        <field name="name">account.payment.form.inherit.cheque.ref</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_method_line_id']" position="after">
+                <field name="payment_method_code" invisible="1"/>
+                <field name="cheque_reference"
+                       string="Référence du chèque"
+                       invisible="payment_method_code != 'cheque_ref'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="report_reservation_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center">Fiche de Réservation</h2>
+                        <h3 class="text-center text-muted"><t t-esc="doc.name"/></h3>
+
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Client :</strong></td>
+                                        <td><t t-esc="doc.partner_id.name"/></td>
+                                    </tr>
+                                    <tr t-if="doc.partner_id.phone">
+                                        <td><strong>Téléphone :</strong></td>
+                                        <td><t t-esc="doc.partner_id.phone"/></td>
+                                    </tr>
+                                    <tr t-if="doc.partner_id.email">
+                                        <td><strong>Email :</strong></td>
+                                        <td><t t-esc="doc.partner_id.email"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Commercial :</strong></td>
+                                        <td><t t-esc="doc.user_id.name"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Date de Réservation :</strong></td>
+                                        <td><t t-esc="doc.date_reservation" t-options="{'widget': 'date'}"/></td>
+                                    </tr>
+                                    <tr t-if="doc.date_confirmation">
+                                        <td><strong>Date de Confirmation :</strong></td>
+                                        <td><t t-esc="doc.date_confirmation" t-options="{'widget': 'date'}"/></td>
+                                    </tr>
+                                    <tr t-if="doc.date_vente">
+                                        <td><strong>Date de Vente :</strong></td>
+                                        <td><t t-esc="doc.date_vente" t-options="{'widget': 'date'}"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>État :</strong></td>
+                                        <td><t t-esc="dict(doc._fields['state'].selection).get(doc.state)"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <h4 class="mt-4">Détails de l'Appartement</h4>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Projet</th>
+                                    <th>Bloc</th>
+                                    <th>Étage</th>
+                                    <th>Appartement</th>
+                                    <th>Type</th>
+                                    <th>Surface</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><t t-esc="doc.projet_id.name"/></td>
+                                    <td><t t-esc="doc.appartement_id.bloc_id.name"/></td>
+                                    <td><t t-esc="doc.appartement_id.etage_id.name"/></td>
+                                    <td><t t-esc="doc.appartement_id.name"/></td>
+                                    <td><t t-esc="dict(doc.appartement_id._fields['type'].selection).get(doc.appartement_id.type)" t-if="doc.appartement_id.type"/></td>
+                                    <td><t t-esc="doc.appartement_id.surface"/> m²</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4 class="mt-4">Montant</h4>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th class="text-end">Prix</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        Appartement <t t-esc="doc.appartement_id.name"/> -
+                                        <t t-esc="doc.projet_id.name"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <t t-esc="doc.price" t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div t-if="doc.note" class="mt-4">
+                            <h4>Notes</h4>
+                            <p><t t-esc="doc.note"/></p>
+                        </div>
+
+                        <div class="row mt-5">
+                            <div class="col-6 text-center">
+                                <p>_______________________________</p>
+                                <p><strong>Signature du Client</strong></p>
+                            </div>
+                            <div class="col-6 text-center">
+                                <p>_______________________________</p>
+                                <p><strong>Signature du Commercial</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="etb_tph_header_block" name="ETB TPH CHellil — Bloc d'en-tête">
+        <div style="text-align: center; margin-bottom: 10pt;">
+            <div style="font-family: 'Algerian', 'Old English Text MT', 'Times New Roman', serif;
+                        color: #943634;
+                        font-size: 36pt;
+                        line-height: 1.1;
+                        margin-bottom: 6pt;">
+                ETB TPH CHELIL MOKRANE
+            </div>
+            <div style="font-weight: bold; color: #000; font-size: 11pt; line-height: 1.4;">
+                Adresse : Cité 05 Juillet Ex Gare Routière Bt « G » Tizi-Ouzou 15000
+            </div>
+            <div style="font-weight: bold; color: #000; font-size: 11pt; line-height: 1.4;">
+                Tél/Fax : 026 19 60 72 / Mobile : 0660 99 37 86
+            </div>
+            <div style="font-weight: bold; color: #000; font-size: 11pt; line-height: 1.4;">
+                E-mail : contact@groupe-innovation-dz.com
+            </div>
+            <hr style="border: 0; border-top: 1px solid #000; margin: 8pt 0;"/>
+        </div>
+    </template>
+
+    <template id="etb_tph_layout" name="ETB TPH CHellil Layout Wrapper">
+        <t t-set="_etb_company" t-value="
+            (o.company_id if o is not None and 'company_id' in o._fields else False)
+            or (docs[0].company_id if docs and 'company_id' in docs[0]._fields else False)
+            or env.company"/>
+        <t t-set="_is_etb" t-value="_etb_company and _etb_company.name and _etb_company.name.strip() == 'ETB TPH CHellil'"/>
+        <t t-if="_is_etb">
+            <div class="header">
+                <t t-call="custom_project.etb_tph_header_block"/>
+            </div>
+            <div class="article">
+                <t t-out="0"/>
+            </div>
+        </t>
+        <t t-else="">
+            <t t-call="web.external_layout">
+                <t t-out="0"/>
+            </t>
+        </t>
+    </template>
+</odoo>

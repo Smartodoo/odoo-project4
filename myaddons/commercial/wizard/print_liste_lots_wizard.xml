@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="print_liste_lots_wizard_form" model="ir.ui.view">
+        <field name="name">commercial.print.liste.lots.wizard.form</field>
+        <field name="model">commercial.print.liste.lots.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Imprimer les lots">
+                <group>
+                    <field name="projet_id" invisible="1"/>
+                    <field name="bloc_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                    <field name="etage_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                    <field name="categorie_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                    <field name="state"/>
+                </group>
+                <footer>
+                    <button name="action_print" string="Imprimer" type="object" class="btn-primary" icon="fa-print"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

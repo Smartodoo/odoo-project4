@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--situation s-t views-->
+    <record id="view_tree_situation_S_T" model="ir.ui.view">
+        <field name="name">Situation.S.T.tree</field>
+        <field name="model">situation.sous.traitants</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" default_order="task_id_import_source,num"
+                  decoration-success="type_tasks == 'primary'"
+                  decoration-danger="qty_exceeds_marche">
+                <field name="qty_exceeds_marche" column_invisible="True"/>
+                <field name="project_id" column_invisible="True"/>
+                <field name="original_subcontractor_id" column_invisible="True"/>
+                <field name="num"/>
+                <field name="designation"/>
+                <field name="unit"/>
+                <field name="qty_marche" sum="1"/>
+                <field name="qty_precedente" sum="1"/>
+                <field name="qty_du_mois" sum="1"/>
+                <field name="qty_cummulee" sum="1"/>
+                <field name="prix_unitaire_convention"/>
+                <field name="montant_marche" sum="1"/>
+                <field name="montant_precedent" sum="1"/>
+                <field name="montant_mois" sum="1"/>
+                <field name="montant_cummulee" sum="1"/>
+                <field name="type_tasks"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_form_situation_S_T" model="ir.ui.view">
+        <field name="name">Situation.S.T.form</field>
+        <field name="model">situation.sous.traitants</field>
+        <field name="arch" type="xml">
+            <form string="Situation S-T">
+                <sheet>
+                    <group>
+                        <group class="col-6">
+                            <field name="project_id" invisible="1"/>
+                            <field name="original_subcontractor_id" invisible="1"/>
+                            <field name="num"/>
+                        </group>
+                        <group class="col-6">
+                            <field name="designation"/>
+                            <field name="unit"/>
+                            <field name="qty_marche"/>
+                            <field name="qty_precedente"/>
+                            <field name="qty_du_mois"/>
+                            <field name="qty_cummulee"/>
+                            <field name="prix_unitaire_convention"/>
+                            <field name="montant_marche"/>
+                            <field name="montant_precedent"/>
+                            <field name="montant_mois"/>
+                            <field name="montant_cummulee"/>
+                        </group>
+
+                    </group>
+                </sheet>
+            </form>
+        </field>
+
+    </record>
+    <record id="action_open_view_situation_S_T" model="ir.actions.act_window">
+        <field name="name">Situation S-T</field>
+        <field name="res_model">situation.sous.traitants</field>
+        <field name="domain">
+            [
+            ('project_id', '=', context.get('default_project_id')),
+            ('original_subcontractor_id', '=', context.get('default_original_subcontractor_id'))
+            ]
+        </field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!--situation finale views-->
+    <record id="view_form_situation_final" model="ir.ui.view">
+        <field name="name">Situation.final.view.form</field>
+        <field name="model">situation.final</field>
+        <field name="arch" type="xml">
+            <form string="Situation Final">
+                <sheet>
+                    <group>
+                        <group class="col-6">
+                            <field name="designation2"/>/>
+                        </group>
+                        <group class="col-6">
+                            <field name="quantity_marche"/>
+                            <field name="quantity_cumulee"/>
+                            <field name="montant_marche"/>
+                            <field name="montant_cumulee"/>
+                            <field name="difference1"/>
+                            <field name="difference2"/>
+                            <field name="progress_percentage" widget="progressbar"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_tree_situation_final" model="ir.ui.view">
+        <field name="name">Situation.final.view.tree</field>
+        <field name="model">situation.final</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" decoration-danger="qty_exceeds_marche">
+                <field name="qty_exceeds_marche" column_invisible="True"/>
+                <field name="designation2"/>
+                <field name="quantity_marche"/>
+                <field name="quantity_cumulee"/>
+                <field name="montant_marche"/>
+                <field name="montant_cumulee"/>
+                <field name="difference1"/>
+                <field name="difference2"/>
+                <field name="progress_percentage" widget="progressbar"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_open_view_situation_final" model="ir.actions.act_window">
+        <field name="name">Situation Final</field>
+        <field name="res_model">situation.final</field>
+        <field name="domain">[('project_id', '=', context.get('default_project_id'))]</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!--situation views-->
+    <record id="view_form_situation" model="ir.ui.view">
+        <field name="name">Situation.view.form</field>
+        <field name="model">situation</field>
+        <field name="arch" type="xml">
+            <form string="Situation">
+                <header>
+                    <button name="%(action_report_situation)d"
+                            string="Imprimer la situation"
+                            type="action"
+                            class="oe_highlight"/>
+<!--                    invisible="show_payment_button != True"-->
+                    <button name="open_wizard_payment_situation" type="object" string="Créer Paiement"
+                            class="btn-primary" invisible="1"/>
+                    <field name="totalment_paye" invisible="1"/>
+                    <field name="partiellement_paye" invisible="1"/>
+                    <field name="show_payment_button" invisible="1"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Payé" bg_color="text-bg-success"
+                            invisible="not totalment_paye"/>
+                    <widget name="web_ribbon" title="Partiellement payé" bg_color="text-bg-warning"
+                            invisible="not partiellement_paye"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_preview_report" type="object"
+                                class="oe_stat_button" icon="fa-eye">
+                            <span class="o_stat_text">Aperçu</span>
+                        </button>
+                        <button name="action_open_view_paeiment_situation" type="object" string="Paiements"
+                                class="oe_stat_button" invisible="show_payment_button != True">
+                            <field name="payments_count" widget="statinfo"
+                                   string="Paiements"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group class="col-6">
+                            <field name="number"/>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="retenu_garantie"/>
+                            <field name="retenu_realisation"/>
+                        </group>
+                        <group class="col-6">
+                            <field name="project_id" domain="[('state', '!=', 'draft'), ('company_id', '=', allowed_company_ids[0])]"/>
+                            <field name="project_id1" invisible="1"/>
+                            <field name="type_situation"/>
+                            <field name="original_subcontractor_id"
+                                   domain="[('contact_type', '=', 'SUBCONTRACTOR')]"/>
+                            <field name="previous_existing" invisible="1"/>
+                            <field name="lots_id" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <div class="mt-3"/>
+                    <field name="situation_sous_traitant_ids" nolabel="1">
+                        <tree editable="bottom"
+                              decoration-success="type_tasks == 'primary' and not qty_exceeds_marche"
+                              decoration-danger="type_tasks == 'secondary' or qty_exceeds_marche">
+                            <field name="qty_exceeds_marche" column_invisible="True"/>
+                            <field name="sequence" widget="handle"/>
+                            <field name="project_id" column_invisible="True"/>
+                            <field name="original_subcontractor_id" column_invisible="True"/>
+                            <field name="num" readonly="1" force_save="1"/>
+                            <field name="designation"/>
+                            <field name="unit"/>
+                            <field name="qty_marche" sum="1"/>
+                            <field name="qty_precedente" sum="1"/>
+                            <field name="qty_du_mois" sum="1"/>
+                            <field name="qty_cummulee" sum="1"/>
+                            <field name="prix_unitaire_convention"/>
+                            <field name="montant_marche" sum="1"/>
+                            <field name="montant_precedent" sum="1"/>
+                            <field name="montant_mois" sum="1"/>
+                            <field name="amount_distributed" optional="hide"/>
+                            <field name="amount_task_due" optional="hide"/>
+                            <field name="montant_cummulee" sum="1"/>
+                            <field name="type_tasks"/>
+                        </tree>
+                    </field>
+                    <div class="text-end" invisible="not previous_existing">
+                        <span class="o_form_label" style="color: gray;">Montant de la STP :</span>
+                        <field name="situation_amount_previous" readonly="1"
+                               class="text-end"
+                               nolabel="1"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="currency_id" invisible="1"/>
+                    </div>
+                    <div class="text-end">
+                        <span class="o_form_label" style="color: gray;">Montant T.R :</span>
+                        <field name="total_done_amount" readonly="1"
+                               class="text-end"
+                               nolabel="1"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="currency_id" invisible="1"/>
+                    </div>
+<!--                    <div class="text-end" invisible="not previous_existing">-->
+<!--                        <span class="o_form_label" style="color: gray;">Montant R.Actuel :</span>-->
+<!--                        <field name="situation_amount_difference" readonly="1"-->
+<!--                               class="text-end"-->
+<!--                               nolabel="1"-->
+<!--                               widget="monetary"-->
+<!--                               options="{'currency_field': 'currency_id'}"/>-->
+<!--                        <field name="currency_id" invisible="1"/>-->
+<!--                    </div>-->
+<!--                                        <div class="text-end">-->
+<!--                                            <span class="o_form_label" style="color: gray;">Montant T.Brut de ST :</span>-->
+<!--                                            <field name="situation_amount" readonly="1"-->
+<!--                                                   class="text-end"-->
+<!--                                                   nolabel="1"-->
+<!--                                                   widget="monetary"-->
+<!--                                                   options="{'currency_field': 'currency_id'}"/>-->
+<!--                                            <field name="currency_id" invisible="1"/>-->
+<!--                                        </div>-->
+                    <div class="text-end" invisible="not tva">
+                        <span class="o_form_label" style="color: gray;">TVA    :</span>
+                        <field name="tva" readonly="1"
+                               class="text-end"
+                               nolabel="1"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </div>
+                    <div class="text-end">
+                        <span class="o_form_label" style="color: gray;">Total TTC :</span>
+                        <field name="ttc_amount" readonly="1"
+                               class="text-end"
+                               nolabel="1"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </div>
+
+                    <div class="text-end" invisible="not guarantee_realesed">
+                        <span class="o_form_label" style="color: gray;">Retenu réalisé :</span>
+                        <field name="guarantee_realesed" readonly="1"
+                               class="text-end"
+                               nolabel="1"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </div>
+
+
+
+                    <div class="text-end" invisible="not guarantee_retained">
+                        <span class="o_form_label" style="color: gray;">R.G.S :</span>
+                        <field name="guarantee_retained" readonly="1"
+                               class="text-end"
+                               nolabel="1"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </div>
+                    <div class="text-end">
+                        <span class="o_form_label" style="color: gray;">Net à payer:</span>
+                        <field name="net_amount" readonly="1"
+                               class="text-end"
+                               nolabel="1"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </div>
+                                        <div class="text-end">
+                                            <span class="o_form_label" style="color: gray;">Montant payé:</span>
+                                            <field name="paid_amount" readonly="1"
+                                                   class="text-end"
+                                                   nolabel="1"
+                                                   widget="monetary"
+                                                   options="{'currency_field': 'currency_id'}"/>
+                                        </div>
+                    <div class="text-end">
+                        <span class="o_form_label" style="color: gray;">Reste à payer:</span>
+                        <field name="amount_residual" readonly="1"
+                               class="text-end"
+                               nolabel="1"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </div>
+                    <div class="text-end" invisible="not total_R_G_C">
+                        <span class="o_form_label" style="color: red;">R.G.C :</span>
+                        <field name="total_R_G_C" readonly="1"
+                               class="text-end text-danger"
+                               nolabel="1"
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_tree_situation" model="ir.ui.view">
+        <field name="name">Situation.view.tree</field>
+        <field name="model">situation</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="number"/>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="net_amount" string="Total à payer"/>
+                <field name="state" widget="badge"
+                       decoration-danger="state == 'Non_paye'"
+                       decoration-success="state == 'Totalement_paye' "
+                       decoration-warning="state == 'Partiellement_paye'"
+                />
+            </tree>
+        </field>
+    </record>
+    <record id="action_open_view_situation" model="ir.actions.act_window">
+        <field name="name">Situation</field>
+        <field name="res_model">situation</field>
+        <field name="domain">
+            [
+            ('project_id', '=', context.get('default_project_id')),
+            ('original_subcontractor_id', '=', context.get('default_original_subcontractor_id'))
+            ]
+        </field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+</odoo>

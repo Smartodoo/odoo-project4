@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_cashbox_recharge_form" model="ir.ui.view">
+            <field name="name">cashbox.recharge.form</field>
+            <field name="model">cashbox.recharge</field>
+            <field name="arch" type="xml">
+                <form string="Rechargement de Caisse">
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_preview_report" type="object"
+                                    class="oe_stat_button" icon="fa-eye">
+                                <span class="o_stat_text">Aperçu</span>
+                            </button>
+                        </div>
+                        <group>
+                            <field name="cashbox_id"/>
+                            <field name="company_currency_id" invisible="1"/>
+                            <field name="amount" widget="monetary"/>
+                            <field name="date"/>
+                            <field name="user_id"/>
+                            <field name="note"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="view_cashbox_recharge_tree" model="ir.ui.view">
+            <field name="name">cashbox.recharge.tree</field>
+            <field name="model">cashbox.recharge</field>
+            <field name="arch" type="xml">
+                <tree string="Historique des Rechargements">
+                    <field name="date"/>
+                    <field name="cashbox_id"/>
+                    <field name="amount" widget="monetary" sum="Total"/>
+                    <field name="user_id"/>
+                    <field name="note"/>
+                    <field name="company_currency_id" column_invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="view_cashbox_recharge_search" model="ir.ui.view">
+            <field name="name">cashbox.recharge.search</field>
+            <field name="model">cashbox.recharge</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="cashbox_id"/>
+                    <field name="user_id"/>
+                    <field name="date"/>
+                    <field name="company_id"/>
+
+                    <group expand="0" string="Grouper par">
+                        <filter string="Caisse" name="group_cashbox" context="{'group_by':'cashbox_id'}"/>
+                        <filter string="Utilisateur" name="group_user" context="{'group_by':'user_id'}"/>
+                        <filter string="Date" name="group_date" context="{'group_by':'date'}"/>
+                        <filter string="Société" name="group_company" context="{'group_by':'company_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+</odoo>

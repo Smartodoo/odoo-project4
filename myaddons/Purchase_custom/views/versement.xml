@@ -1,0 +1,145 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="versement_form" model="ir.ui.view">
+        <field name="name">versement_form</field>
+        <field name="model">versement.versement</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <header>
+                    <button name="action_confirmer_versement"
+                            type="object"
+                            invisible="state != 'draft'"
+                            string="Confirmer Versement"
+                            class="oe_stat_button "
+                            widget="statinfo"/>
+                    <button name="action_set_draft" string="Remettre au Brouillon" type="object"
+                            invisible="state != 'done'" class="btn-secondary"/>
+                    <button name="action_payed_versement" string="Terminer" type="object"
+                            invisible="state != 'done'" class="btn-success"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done,payed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_preview_report" type="object"
+                                class="oe_stat_button" icon="fa-eye">
+                            <span class="o_stat_text">Aperçu</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Confirmé" bg_color="text-bg-warning"
+                            invisible="state != 'done'"/>
+                    <widget name="web_ribbon" title="Terminé" bg_color="text-bg-success"
+                            invisible="state != 'payed'"/>
+                    <group>
+                        <field name="name" readonly="True"/>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="date" readonly="state in ['done','payed']"/>
+                            <field name="fournisseur_id" readonly="state in ['done','payed']"/>
+                            <field name="lot" readonly="state in ['done','payed']"/>
+                            <field name="montant_verser" readonly="state in ['done','payed']"/>
+                            <field name="objet" readonly="state in ['done','payed']"/>
+                        </group>
+                        <group>
+                            <field name="purchase_order_ids"
+                                   widget="many2many_tags"
+                                   domain="[('partner_id', '=', fournisseur_id),('state', '=', 'purchase')]"
+                                   readonly="state in ['done','payed']"/>
+                            <field name="project_ids" widget="many2many_tags" readonly="state in ['done','payed']"/>
+                            <field name="montant_deja_paye" readonly="state in ['done','payed']"/>
+                            <field name="montant_total" readonly="state in ['done','payed']"/>
+                            <field name="montant_reste" readonly="state in ['done','payed']"/>
+                        </group>
+                    </group>
+
+
+                    <separator string="Distribution des montants"/>
+
+                    <field name="distribution_montant_ids" readonly="state in ['done','payed']"/>
+
+
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="versement_tree" model="ir.ui.view">
+        <field name="name">versement_tree</field>
+        <field name="model">versement.versement</field>
+        <field name="arch" type="xml">
+            <tree string="">
+                <field name="name"/>
+                <field name="fournisseur_id"/>
+                <field name="purchase_order_ids"
+                       widget="many2many_tags"
+                       domain="[('partner_id', '=', fournisseur_id)]"/>
+                <field name="montant_verser"/>
+                <field name="date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!--view form res.partner inherit-->
+    <record id="view_partner_form_inherited" model="ir.ui.view">
+        <field name="name">res.partner.form_inherited</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="open_versement_supplier"
+                        string="Versements"
+                        type="object"
+                        invisible="contact_type != 'SUPPLIER'"
+                        class="oe_stat_button">
+                    <field name="versement_count" readonly="1" widget="statinfo"/>
+                </button>
+                <button name="open_payments_supplier"
+                        string="Paiements"
+                        type="object"
+                        invisible="contact_type != 'SUPPLIER'"
+                        class="oe_stat_button">
+                    <field name="payment_count" readonly="1" widget="statinfo"/>
+                </button>
+                <button name="open_versements_subcontractor"
+                        string="Versements Sous-traitants"
+                        type="object"
+                        invisible="contact_type != 'SUBCONTRACTOR'"
+                        class="oe_stat_button">
+                    <field name="versement_sub_count" readonly="1" widget="statinfo"/>
+                </button>
+                <button name="open_payments_subcontractor"
+                        string="Paiements Sous-traitants"
+                        type="object"
+                        invisible="contact_type != 'SUBCONTRACTOR'"
+                        class="oe_stat_button">
+                    <field name="payment_count_sub" readonly="1" widget="statinfo"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="credit_subcontractor" invisible="contact_type != 'SUBCONTRACTOR'"/>
+                <field name="credit_supplier" invisible="contact_type != 'SUPPLIER'"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="versement_action" model="ir.actions.act_window">
+        <field name="name">Versement</field>
+        <field name="res_model">versement.versement</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+            id="versement_menu"
+            name="Versement"
+            action="versement_action"
+            parent="purchase.menu_purchase_config"
+            groups="base.group_system,custom_groups.group_financiere"
+            sequence="15"/>
+
+</odoo>

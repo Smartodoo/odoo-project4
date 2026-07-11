@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="group_document_editor" model="res.groups">
+        <field name="name">Editor</field>
+        <field name="category_id" ref="document_knowledge.module_category_knowledge" />
+        <field
+            name="implied_ids"
+            eval="[(4, ref('document_knowledge.group_document_user'))]"
+        />
+    </record>
+    <record id="group_document_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="document_knowledge.module_category_knowledge" />
+        <field name="implied_ids" eval="[(4, ref('group_document_editor'))]" />
+        <field
+            name="users"
+            eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"
+        />
+    </record>
+    <record model="ir.rule" id="document_page_rule">
+        <field name="name">document_page multi-company</field>
+        <field name="model_id" ref="model_document_page" />
+        <field name="global" eval="True" />
+        <field
+            name="domain_force"
+        >['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record model="ir.rule" id="document_page_history_rule">
+        <field name="name">document_page_history multi-company</field>
+        <field name="model_id" ref="model_document_page_history" />
+        <field name="global" eval="True" />
+        <field
+            name="domain_force"
+        >['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
+    <!-- ===== Bloquer la suppression pour le groupe Lecture Seule (Sabrina) ===== -->
+
+    <!-- Bloquer suppression sur document.page -->
+    <record id="rule_no_delete_document_page_readonly" model="ir.rule">
+        <field name="name">Documents: Lecture Seule - Pas de suppression (document.page)</field>
+        <field name="model_id" ref="model_document_page"/>
+        <field name="groups" eval="[(4, ref('custom_project.group_project_readonly'))]"/>
+        <field name="domain_force">[(0, '=', 1)]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Bloquer suppression sur document.page.history -->
+    <record id="rule_no_delete_document_page_history_readonly" model="ir.rule">
+        <field name="name">Documents: Lecture Seule - Pas de suppression (document.page.history)</field>
+        <field name="model_id" ref="model_document_page_history"/>
+        <field name="groups" eval="[(4, ref('custom_project.group_project_readonly'))]"/>
+        <field name="domain_force">[(0, '=', 1)]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Bloquer suppression sur document.document -->
+    <record id="rule_no_delete_document_document_readonly" model="ir.rule">
+        <field name="name">Documents: Lecture Seule - Pas de suppression (document.document)</field>
+        <field name="model_id" ref="model_document_document"/>
+        <field name="groups" eval="[(4, ref('custom_project.group_project_readonly'))]"/>
+        <field name="domain_force">[(0, '=', 1)]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Bloquer suppression sur document.fichier -->
+    <record id="rule_no_delete_document_fichier_readonly" model="ir.rule">
+        <field name="name">Documents: Lecture Seule - Pas de suppression (document.fichier)</field>
+        <field name="model_id" ref="model_document_fichier"/>
+        <field name="groups" eval="[(4, ref('custom_project.group_project_readonly'))]"/>
+        <field name="domain_force">[(0, '=', 1)]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- Bloquer suppression sur suivi.tache -->
+    <record id="rule_no_delete_suivi_tache_readonly" model="ir.rule">
+        <field name="name">Documents: Lecture Seule - Pas de suppression (suivi.tache)</field>
+        <field name="model_id" ref="model_suivi_tache"/>
+        <field name="groups" eval="[(4, ref('custom_project.group_project_readonly'))]"/>
+        <field name="domain_force">[(0, '=', 1)]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+</odoo>

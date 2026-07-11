@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- ===================== WILAYA ===================== -->
+    <record id="view_tree_vente_wilaya" model="ir.ui.view">
+        <field name="name">vente.wilaya.tree</field>
+        <field name="model">vente.wilaya</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="code"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_form_vente_wilaya" model="ir.ui.view">
+        <field name="name">vente.wilaya.form</field>
+        <field name="model">vente.wilaya</field>
+        <field name="arch" type="xml">
+            <form string="Wilaya">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Dairas">
+                            <field name="daira_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_vente_wilaya" model="ir.actions.act_window">
+        <field name="name">Wilayas</field>
+        <field name="res_model">vente.wilaya</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- ===================== DAIRA ===================== -->
+    <record id="view_tree_vente_daira" model="ir.ui.view">
+        <field name="name">vente.daira.tree</field>
+        <field name="model">vente.daira</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="wilaya_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_form_vente_daira" model="ir.ui.view">
+        <field name="name">vente.daira.form</field>
+        <field name="model">vente.daira</field>
+        <field name="arch" type="xml">
+            <form string="Daira">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="wilaya_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Communes">
+                            <field name="commune_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_vente_daira" model="ir.actions.act_window">
+        <field name="name">Dairas</field>
+        <field name="res_model">vente.daira</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- ===================== COMMUNE ===================== -->
+    <record id="view_tree_vente_commune" model="ir.ui.view">
+        <field name="name">vente.commune.tree</field>
+        <field name="model">vente.commune</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="daira_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_form_vente_commune" model="ir.ui.view">
+        <field name="name">vente.commune.form</field>
+        <field name="model">vente.commune</field>
+        <field name="arch" type="xml">
+            <form string="Commune">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="daira_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_vente_commune" model="ir.actions.act_window">
+        <field name="name">Communes</field>
+        <field name="res_model">vente.commune</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

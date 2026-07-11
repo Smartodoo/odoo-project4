@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="caisse_expense_view_tree" model="ir.ui.view">
+        <field name="name">caisse.expense.view.tree</field>
+        <field name="model">caisse.expense</field>
+        <field name="arch" type="xml">
+            <tree create="0">
+                <field name="name"/>
+                <field name="situation_id" optional="show"/>
+                <field name="project_id"/>
+                <field name="cashbox_id" optional="hide"/>
+                <field name="date"/>
+                <field name="description"/>
+                <field name="company_currency_id" column_invisible="1"/>
+                <field name="amount" widget="monetary" options="{'currency_field':'company_currency_id'}"/>
+                <field name="amount_verse" widget="monetary" options="{'currency_field':'company_currency_id'}"
+                />
+                <field name="amount_residual" widget="monetary" options="{'currency_field':'company_currency_id'}"
+                />
+                <field name="state"
+                       widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-success="state == 'approuve'"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="caisse_expense_view_form" model="ir.ui.view">
+        <field name="name">caisse.expense.view.form</field>
+        <field name="model">caisse.expense</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <field name="state" widget="statusbar" invisible="1"/>
+                    <field name="is_totally_paid" invisible="1"/>
+                    <field name="is_partially_paid" invisible="1"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_preview_report" type="object"
+                                class="oe_stat_button" icon="fa-eye">
+                            <span class="o_stat_text">Aperçu</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Payé" bg_color="text-bg-success"
+                            invisible="state != 'approuve' or is_partially_paid == True"/>
+                    <widget name="web_ribbon" title="Partiel" bg_color="text-bg-warning"
+                            invisible="state != 'approuve' or  is_totally_paid == True"/>
+                    <div class="oe_title">
+                        <field name="name"/>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <group string="">
+                                <field name="date" readonly="state != 'draft'"/>
+                                <field name="cashbox_id"
+                                       options="{'no_create':True,'no_create_edit':True, 'no_open':True}"
+                                       readonly="state != 'draft'"/>
+                                <field name="company_currency_id" invisible="1"/>
+                                <field name="amount"
+                                       readonly="1"
+                                       widget="monetary"
+                                />
+                                <field name="amount_verse"
+                                       readonly="1"
+                                       widget="monetary"/>
+
+                                <field name="amount_residual"
+                                       readonly="1"
+                                       widget="monetary"/>
+
+                                <field name="amount_paid"
+                                       readonly="1"
+                                       widget="monetary"/>
+
+                            </group>
+                        </div>
+
+                        <div class="col-md-6">
+                            <group string="">
+                                <field name="description"
+                                       readonly="state != 'draft'"/>
+                                <field name="employee_id"
+                                       readonly="state != 'draft'"/>
+                                <field name="situation_id"/>
+                                <field name="project_id"/>
+                            </group>
+                        </div>
+
+
+                    </div>
+                    <notebook>
+                        <page string="Autres Informations">
+                            <group class="row">
+                                <group>
+                                    <field name="user_id"
+                                           options="{'no_create':True,'no_create_edit':True, 'no_open':True}"/>
+                                    <field name="company_id"
+                                           options="{'no_create':True,'no_create_edit':True, 'no_open':True}"
+                                           readonly="1"
+                                    />
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Notes">
+                            <group>
+                                <field name="notes" string=""
+                                       placeholder="Notes internes"
+                                       readonly="state != 'draft'"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+
+            </form>
+        </field>
+    </record>
+
+    <record id="caisse_expense_view_search" model="ir.ui.view">
+        <field name="name">caisse.expense.view.search</field>
+        <field name="model">caisse.expense</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="situation_id"/>
+                <field name="project_id"/>
+                <field name="cashbox_id"/>
+                <field name="employee_id"/>
+                <field name="date"/>
+
+                <group expand="0" string="Grouper par">
+                    <filter string="Projet" name="project_id" context="{'group_by':'project_id'}"/>
+                    <filter string="Situation" name="situation_id" context="{'group_by':'situation_id'}"/>
+                    <filter string="Caisse" name="cashbox_id" context="{'group_by':'cashbox_id'}"/>
+                    <filter string="Caissier" name="user_id" context="{'group_by':'user_id'}"/>
+                    <filter string="Employé" name="employee_id" context="{'group_by':'employee_id'}"/>
+                    <filter string="Date" name="date_group" context="{'group_by':'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Server Action pour aperçu des enregistrements sélectionnés -->
+    <record id="action_preview_caisse_expense_multi" model="ir.actions.server">
+        <field name="name">Aperçu PDF</field>
+        <field name="model_id" ref="caisse2.model_caisse_expense"/>
+        <field name="binding_model_id" ref="caisse2.model_caisse_expense"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_preview_report_multi()</field>
+    </record>
+
+    <record id="caisse_expense_act_window" model="ir.actions.act_window">
+        <field name="name">Gestion des notes de frais</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">caisse.expense</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+</odoo>

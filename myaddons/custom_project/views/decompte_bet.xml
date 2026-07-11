@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============== DECOMPTE BET (Parent) ============== -->
+
+    <!-- Tree View -->
+    <record id="view_decompte_bet_tree" model="ir.ui.view">
+        <field name="name">decompte.bet.tree</field>
+        <field name="model">decompte.bet</field>
+        <field name="arch" type="xml">
+            <tree string="Décomptes BET">
+                <field name="name"/>
+                <field name="numero_decompte"/>
+                <field name="date_decompte"/>
+                <field name="project_id"/>
+                <field name="bet_name"/>
+                <field name="projet_designation"/>
+                <field name="line_count"/>
+                <field name="montant_total_cumule" sum="Total"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'validated'" decoration-success="state == 'paid'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_decompte_bet_form" model="ir.ui.view">
+        <field name="name">decompte.bet.form</field>
+        <field name="model">decompte.bet</field>
+        <field name="arch" type="xml">
+            <form string="Décompte BET">
+                <header>
+                    <button name="action_validate" type="object" string="Valider" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_paid" type="object" string="Marquer Payé" class="btn-primary" invisible="state != 'validated'"/>
+                    <button name="action_draft" type="object" string="Remettre en Brouillon" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,validated,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                        <h2>
+                            <field name="numero_decompte" placeholder="DECOMPTE N°..."/>
+                        </h2>
+                    </div>
+                    <group>
+                        <group string="Informations BET">
+                            <field name="bet_name" placeholder="Ex: TOUAT KHALIDA"/>
+                            <field name="bet_address" placeholder="Adresse complète"/>
+                            <field name="bet_responsable"/>
+                        </group>
+                        <group string="Informations Projet">
+                            <field name="project_id"/>
+                            <field name="projet_designation" placeholder="Ex: 146 LOGEMENTS MEKLA"/>
+                            <field name="projet_wilaya" placeholder="Ex: TIZI OUZOU"/>
+                            <field name="date_decompte"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="entreprise" placeholder="Ex: ETB TPH CHELIL MOKRANE"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lignes du Décompte" name="lines">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" string="N°" widget="handle"/>
+                                    <field name="name" width="300"/>
+                                    <field name="date"/>
+                                    <field name="quantite_precedent" string="Qté Préc."/>
+                                    <field name="quantite_mois" string="Qté Mois"/>
+                                    <field name="quantite_cumule" string="Qté Cumul"/>
+                                    <field name="prix_unitaire"/>
+                                    <field name="montant_precedent" sum="Total Préc."/>
+                                    <field name="montant_mois" sum="Total Mois"/>
+                                    <field name="montant_cumule" sum="Total Cumul"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <div class="oe_subtotal_footer_separator">
+                                    <label for="montant_total_precedent"/>
+                                    <field name="montant_total_precedent" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </div>
+                                <div class="oe_subtotal_footer_separator">
+                                    <label for="montant_total_mois"/>
+                                    <field name="montant_total_mois" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </div>
+                                <div class="oe_subtotal_footer_separator oe_right">
+                                    <label for="montant_total_cumule" string="MONTANT TOTAL"/>
+                                    <field name="montant_total_cumule" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_subtotal_footer_separator"/>
+                                </div>
+                            </group>
+                        </page>
+                        <page string="Montant en Lettres" name="amount_words">
+                            <group>
+                                <field name="montant_en_lettres" placeholder="Ex: QUATRE VINGT MILLE DINARDS"/>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Notes additionnelles..."/>
+                        </page>
+                    </notebook>
+                    <field name="company_id" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_decompte_bet_search" model="ir.ui.view">
+        <field name="name">decompte.bet.search</field>
+        <field name="model">decompte.bet</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher Décomptes">
+                <field name="name"/>
+                <field name="numero_decompte"/>
+                <field name="project_id"/>
+                <field name="bet_name"/>
+                <field name="projet_designation"/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Validé" name="validated" domain="[('state', '=', 'validated')]"/>
+                <filter string="Payé" name="paid" domain="[('state', '=', 'paid')]"/>
+                <separator/>
+                <group expand="0" string="Grouper par">
+                    <filter string="Projet" name="group_project" context="{'group_by': 'project_id'}"/>
+                    <filter string="BET" name="group_bet" context="{'group_by': 'bet_name'}"/>
+                    <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date_decompte'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============== DECOMPTE BET LINE ============== -->
+
+    <!-- Tree View for Lines (standalone) -->
+    <record id="view_decompte_bet_line_tree" model="ir.ui.view">
+        <field name="name">decompte.bet.line.tree</field>
+        <field name="model">decompte.bet.line</field>
+        <field name="arch" type="xml">
+            <tree string="Lignes de Décompte" default_order="sequence">
+                <field name="sequence" string="N°"/>
+                <field name="decompte_id"/>
+                <field name="project_id"/>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="quantite_precedent"/>
+                <field name="quantite_mois"/>
+                <field name="quantite_cumule"/>
+                <field name="prix_unitaire"/>
+                <field name="montant_precedent" sum="Total"/>
+                <field name="montant_mois" sum="Total"/>
+                <field name="montant_cumule" sum="Total"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View for Lines -->
+    <record id="view_decompte_bet_line_form" model="ir.ui.view">
+        <field name="name">decompte.bet.line.form</field>
+        <field name="model">decompte.bet.line</field>
+        <field name="arch" type="xml">
+            <form string="Ligne de Décompte">
+                <sheet>
+                    <group>
+                        <group string="Informations Générales">
+                            <field name="sequence" string="N°"/>
+                            <field name="name"/>
+                            <field name="decompte_id"/>
+                            <field name="project_id"/>
+                            <field name="date"/>
+                        </group>
+                        <group string="Prix">
+                            <field name="prix_unitaire"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Quantités">
+                            <field name="quantite_precedent"/>
+                            <field name="quantite_mois"/>
+                            <field name="quantite_cumule"/>
+                        </group>
+                        <group string="Montants">
+                            <field name="montant_precedent"/>
+                            <field name="montant_mois"/>
+                            <field name="montant_cumule"/>
+                        </group>
+                    </group>
+                    <group string="Observation">
+                        <field name="observation"/>
+                    </group>
+                    <field name="company_id" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============== ACTIONS ============== -->
+
+    <!-- Action for Decompte BET -->
+    <record id="action_decompte_bet" model="ir.actions.act_window">
+        <field name="name">Décomptes BET</field>
+        <field name="res_model">decompte.bet</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer un nouveau décompte BET
+            </p>
+            <p>
+                Gérez les décomptes et suivez les paiements BET pour vos projets.
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for Lines (all lines view) -->
+    <record id="action_decompte_bet_line" model="ir.actions.act_window">
+        <field name="name">Toutes les Lignes de Décompte</field>
+        <field name="res_model">decompte.bet.line</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune ligne de décompte
+            </p>
+        </field>
+    </record>
+
+ 
+
+    <!-- ============== INHERIT PROJECT FORM ============== -->
+
+    <record id="view_custom_project_form_inherit_decompte" model="ir.ui.view">
+        <field name="name">custom.project.form.inherit.decompte</field>
+        <field name="model">custom.project</field>
+        <field name="inherit_id" ref="custom_project.view_custom_project_form"/>
+        <field name="priority">25</field>
+        <field name="arch" type="xml">
+            <!-- Add stat button for decomptes -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_decomptes" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                    <div class="o_stat_info">
+                        <field name="decompte_count" widget="statinfo" string="Décomptes"/>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

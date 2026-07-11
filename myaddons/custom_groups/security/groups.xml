@@ -1,0 +1,24 @@
+<odoo>
+    <data noupdate="1">
+
+        <!-- Security Category -->
+        <record id="custom_groups" model="ir.module.category">
+            <field name="name">Autres Groupes</field>
+            <field name="sequence">9</field>
+            <field name="exclusive" eval="True"/>
+        </record>
+
+        <!-- Groupe Financière -->
+        <record id="group_financiere" model="res.groups">
+            <field name="name">Groupe Financière</field>
+            <field name="category_id" ref="custom_groups.custom_groups"/>
+        </record>
+
+        <!-- Groupe Technique -->
+        <record id="group_technique" model="res.groups">
+            <field name="name">Groupe Technique</field>
+            <field name="category_id" ref="custom_groups.custom_groups"/>
+        </record>
+
+    </data>
+</odoo>

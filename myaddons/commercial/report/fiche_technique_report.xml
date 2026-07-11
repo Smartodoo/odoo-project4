@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action : Fiche Technique -->
+    <record id="action_report_fiche_technique" model="ir.actions.report">
+        <field name="name">Fiche Technique</field>
+        <field name="model">commercial.print.client.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.fiche_technique_template</field>
+        <field name="report_file">commercial.fiche_technique_template</field>
+        <field name="print_report_name">'Fiche Technique - %s' % object.partner_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Fiche Technique -->
+    <template id="fiche_technique_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="client" t-value="doc.partner_id"/>
+                    <t t-set="lot" t-value="doc.lot_id"/>
+                    <t t-set="projet" t-value="lot.projet_id"/>
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 17px; padding: 40px 50px; position: relative; min-height: 900px;">
+
+                            <!-- Titre -->
+                            <h4 style="text-align: center; font-weight: bold; margin-bottom: 16px; text-decoration: underline; font-size: 24px; color: #003366;">
+                                FICHE TECHNIQUE PROJET (<t t-esc="projet.name or ''"/>)
+                            </h4>
+
+                            <!-- Section 1 : Identité Client -->
+                            <h6 style="font-weight: bold; margin-top: 8px; margin-bottom: 4px; text-decoration: underline; font-size: 19px; color: #003366;">
+                                Identité Client :
+                            </h6>
+                            <div style="margin-bottom: 8px; font-size: 17px;">
+                                <p style="padding: 6px 0; margin: 0;"><strong>Nom et Prénom :</strong> <t t-esc="client.name or ''"/></p>
+                                <p style="padding: 6px 0; margin: 0;"><strong>Adresse :</strong>
+                                    <t t-esc="', '.join([x for x in [client.street or '', client.street2 or '', client.city or '', client.zip or ''] if x])"/>
+                                </p>
+                                <p style="padding: 6px 0; margin: 0;"><strong>Tel :</strong> <t t-esc="client.phone or client.mobile or ''"/></p>
+                                <p style="padding: 6px 0; margin: 0;"><strong>E-Mail :</strong> <t t-esc="client.email or ''"/></p>
+                            </div>
+
+                            <!-- Info Lot -->
+                            <table class="table table-bordered" style="margin-bottom: 8px; font-size: 17px;">
+                                <thead>
+                                    <tr style="background-color: #e0e0e0;">
+                                        <th style="padding: 8px; text-align: center;">Bloc</th>
+                                        <th style="padding: 8px; text-align: center;">LOT</th>
+                                        <th style="padding: 8px; text-align: center;">TYPE</th>
+                                        <th style="padding: 8px; text-align: center;">SURFACE</th>
+                                        <th style="padding: 8px; text-align: center;">ETAGE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 8px; text-align: center;">
+                                            <t t-esc="lot.bloc_id.name or ''"/>
+                                        </td>
+                                        <td style="padding: 8px; text-align: center;">
+                                            <t t-esc="lot.numero_lot or ''"/>
+                                        </td>
+                                        <td style="padding: 8px; text-align: center;">
+                                            <t t-esc="lot.categorie_id.categorie or ''"/>
+                                        </td>
+                                        <td style="padding: 8px; text-align: center;">
+                                            <t t-esc="'%.2f m²' % lot.surface_globale"/>
+                                        </td>
+                                        <td style="padding: 8px; text-align: center;">
+                                            <t t-esc="lot.etage_id.etiquette or ''"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Section 2 : Emplacement du projet -->
+                            <t t-if="projet.emplacement_projet">
+                                <h6 style="font-weight: bold; margin-top: 8px; margin-bottom: 2px; text-decoration: underline; font-size: 19px; color: #003366;">
+                                    Emplacement du projet :
+                                </h6>
+                                <p style="line-height: 1.4; white-space: pre-wrap; margin: 2px 0;"><t t-esc="projet.emplacement_projet"/></p>
+                            </t>
+
+                            <!-- Commodités et finition depuis le bloc selon le type de façade -->
+                            <t t-set="bloc" t-value="lot.bloc_id"/>
+                            <t t-set="commodites" t-value="bloc.facade_interieure_commodites if doc.type_facade == 'interieure' else bloc.facade_posterieure_commodites"/>
+                            <t t-set="finition" t-value="bloc.facade_interieure_finition if doc.type_facade == 'interieure' else bloc.facade_posterieure_finition"/>
+
+                            <!-- Section 3 : Commodités disponible -->
+                            <t t-if="commodites">
+                                <h6 style="font-weight: bold; margin-top: 8px; margin-bottom: 2px; text-decoration: underline; font-size: 19px; color: #003366;">
+                                    Commodités disponible :
+                                </h6>
+                                <ul style="line-height: 1.6; list-style: none; padding-left: 0; margin: 6px 0;">
+                                    <t t-foreach="commodites.split('\n')" t-as="line">
+                                        <t t-if="line.strip()">
+                                            <li style="padding: 6px 0;">- <t t-esc="line.strip()"/></li>
+                                        </t>
+                                    </t>
+                                </ul>
+                            </t>
+
+                            <!-- Section 4 : Type de finition -->
+                            <t t-if="finition">
+                                <h6 style="font-weight: bold; margin-top: 8px; margin-bottom: 2px; text-decoration: underline; font-size: 19px; color: #003366;">
+                                    TYPE DE FINITION :
+                                </h6>
+                                <ul style="line-height: 1.6; list-style: none; padding-left: 0; margin: 6px 0;">
+                                    <t t-foreach="finition.split('\n')" t-as="line">
+                                        <t t-if="line.strip()">
+                                            <li style="padding: 6px 0;">- <t t-esc="line.strip()"/></li>
+                                        </t>
+                                    </t>
+                                </ul>
+                            </t>
+
+                        <!-- Signatures (toujours en bas de la dernière page) -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0 50px; font-size: 17px;">
+                            <div style="float: left; width: 50%; text-align: center;">
+                                <strong>SIGNATURE CLIENT</strong>
+                            </div>
+                            <div style="float: right; width: 50%; text-align: center;">
+                                <strong>SERVICE COMMERCIAL</strong>
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

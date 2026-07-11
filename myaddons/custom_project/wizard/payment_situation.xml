@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<odoo>
+
+    <record id="view_form_paiement_situation" model="ir.ui.view">
+        <field name="name">Paiement.Situation.view.form</field>
+        <field name="model">paiement.situation</field>
+        <field name="arch" type="xml">
+            <form string="Paiement Situation">
+                <header>
+
+                    <button string="Valider" type="object" name="action_validate_payment" class="btn-primary"
+                            groups="base.group_system"/>
+                    <field name="status" widget="statusbar" invisible="1"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Validé" bg_color="text-bg-success"
+                            invisible="status != 'paid'"/>
+                    <group>
+                        <group class="col-6">
+                            <field name="reference" readonly="1"/>
+                            <field name="situation_id" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="project_id" readonly="1"/>
+                            <field name="amount_paid"/>
+                        </group>
+                        <group class="col-6">
+                            <field name="payment_date"/>
+                            <field name="payment_method_id"/>
+                            <!--                                <field name="caisse"/>-->
+                            <field name="note"/>
+                        </group>
+
+                    </group>
+                    <footer>
+                        <button string="Enregistrer" type="object" name="test_log1" class="btn-secondary"/>
+                        <!--                        <button string="Enregistrer" type="object" name="action_confirm_payment" class="btn-primary"/>-->
+                        <button string="Annuler" special="cancel" class="btn-secondary"/>
+                    </footer>
+                </sheet>
+
+            </form>
+        </field>
+    </record>
+    <record id="view_tree_paiement_situation" model="ir.ui.view">
+        <field name="name">Paiement.Situation.view.tree</field>
+        <field name="model">paiement.situation</field>
+        <field name="arch" type="xml">
+            <tree string="Paiement Situation">
+                <field name="reference"/>
+                <field name="payment_date"/>
+                <field name="amount_paid"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

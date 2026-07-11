@@ -1,0 +1,529 @@
+// ═══════════════════════════════════════════════════════════════
+// RENTAL MANAGEMENT — THEME ULTRA-PRO ODOO 17
+// ═══════════════════════════════════════════════════════════════
+
+// ─── ANIMATIONS GLOBALES ───
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.7; }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+}
+
+// ─── BASE ODOO OVERRIDE ───
+.o_web_client {
+    font-family: $font-sans;
+    background: $slate-50;
+}
+
+// ─── FORM SHEET ───
+.o_form_sheet {
+    background: white;
+    border-radius: $radius-2xl;
+    box-shadow: $shadow-lg;
+    border: 1px solid $slate-200;
+    padding: $space-8;
+    animation: fadeInScale $transition-slow;
+}
+
+// ─── KANBAN ───
+.o_kanban_view .o_kanban_record {
+    border-radius: $radius-xl !important;
+    border: 1px solid transparentize($slate-200, 0.2) !important;
+    background: white !important;
+    box-shadow: $shadow-sm !important;
+    transition: all $transition-bounce !important;
+    overflow: hidden !important;
+    position: relative !important;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, $primary-500, $primary-400);
+        opacity: 0;
+        transition: opacity $transition-base;
+    }
+
+    &:hover {
+        transform: translateY(-8px) scale(1.02) !important;
+        box-shadow: $shadow-xl !important;
+        border-color: $primary-200 !important;
+
+        &::before {
+            opacity: 1;
+        }
+    }
+
+    @for $i from 1 through 20 {
+        &:nth-child(#{$i}) {
+            animation: fadeInUp $transition-slow;
+            animation-delay: #{$i * 50}ms;
+            animation-fill-mode: both;
+        }
+    }
+}
+
+// ─── BADGES ───
+.badge-available {
+    background: linear-gradient(135deg, $success-500, $success-600) !important;
+    color: white !important;
+    border-radius: $radius-full !important;
+    padding: $space-1 $space-3 !important;
+    font-weight: $font-semibold !important;
+    font-size: $text-xs !important;
+    box-shadow: 0 2px 8px transparentize($success-500, 0.7) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.badge-occupied {
+    background: linear-gradient(135deg, $danger-500, $danger-600) !important;
+    color: white !important;
+    border-radius: $radius-full !important;
+    padding: $space-1 $space-3 !important;
+    font-weight: $font-semibold !important;
+    font-size: $text-xs !important;
+    box-shadow: 0 2px 8px transparentize($danger-500, 0.7) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.badge-soon {
+    background: linear-gradient(135deg, $warning-500, $warning-600) !important;
+    color: white !important;
+    border-radius: $radius-full !important;
+    padding: $space-1 $space-3 !important;
+    font-weight: $font-semibold !important;
+    font-size: $text-xs !important;
+    box-shadow: 0 2px 8px transparentize($warning-500, 0.7) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.badge-maintenance {
+    background: linear-gradient(135deg, $info-500, $info-600) !important;
+    color: white !important;
+    border-radius: $radius-full !important;
+    padding: $space-1 $space-3 !important;
+    font-weight: $font-semibold !important;
+    font-size: $text-xs !important;
+    box-shadow: 0 2px 8px transparentize($info-500, 0.7) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+// ─── BOUTONS ───
+.btn-primary {
+    background: linear-gradient(135deg, $primary-600, $primary-500) !important;
+    border: none !important;
+    border-radius: $radius-full !important;
+    padding: $space-3 $space-6 !important;
+    font-weight: $font-semibold !important;
+    font-size: $text-sm !important;
+    transition: all $transition-base !important;
+    position: relative !important;
+    overflow: hidden !important;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    &:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: $shadow-glow !important;
+
+        &::after {
+            width: 300px;
+            height: 300px;
+        }
+    }
+
+    &:active {
+        transform: translateY(0) !important;
+    }
+}
+
+// ─── STAT BUTTONS ───
+.oe_stat_button {
+    border-radius: $radius-lg !important;
+    border: 1px solid $slate-200 !important;
+    background: white !important;
+    transition: all $transition-base !important;
+    margin-right: $space-2 !important;
+
+    &:hover {
+        background: $primary-50 !important;
+        border-color: $primary-200 !important;
+        transform: translateY(-2px);
+        box-shadow: $shadow-md;
+    }
+
+    .o_stat_value {
+        font-size: $text-xl !important;
+        font-weight: $font-bold !important;
+        color: $primary-600 !important;
+    }
+
+    .o_stat_text {
+        font-size: $text-xs !important;
+        color: $slate-500 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+    }
+}
+
+// ─── CHATTER ───
+.o_chatter {
+    .o_mail_thread {
+        background: $slate-50;
+        border-radius: $radius-xl;
+        padding: $space-4;
+    }
+
+    .o_mail_message {
+        background: white;
+        border-radius: $radius-lg;
+        padding: $space-4;
+        margin-bottom: $space-3;
+        box-shadow: $shadow-sm;
+        border-left: 3px solid $primary-500;
+        animation: slideInRight $transition-slow;
+    }
+}
+
+// ─── STATUSBAR ───
+.o_statusbar_status {
+    .o_arrow_button {
+        border-radius: $radius-full !important;
+        margin-right: $space-1 !important;
+        font-weight: $font-medium !important;
+        font-size: $text-xs !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        transition: all $transition-base !important;
+
+        &.btn-primary {
+            background: linear-gradient(135deg, $primary-600, $primary-500) !important;
+            box-shadow: $shadow-glow !important;
+        }
+
+        &:not(.btn-primary) {
+            background: $slate-100 !important;
+            color: $slate-600 !important;
+            border: 1px solid $slate-200 !important;
+        }
+    }
+}
+
+// ─── INPUTS ───
+.o_input, .form-control {
+    border-radius: $radius-lg !important;
+    border: 1px solid $slate-200 !important;
+    transition: all $transition-base !important;
+    font-size: $text-sm !important;
+
+    &:focus {
+        border-color: $primary-400 !important;
+        box-shadow: 0 0 0 3px transparentize($primary-500, 0.9) !important;
+        outline: none !important;
+    }
+}
+
+// ─── TABLES ───
+.o_list_view {
+    .o_list_table {
+        border-radius: $radius-xl;
+        overflow: hidden;
+        box-shadow: $shadow-sm;
+
+        thead th {
+            background: $slate-100 !important;
+            color: $slate-700 !important;
+            font-weight: $font-semibold !important;
+            font-size: $text-xs !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            padding: $space-3 $space-4 !important;
+        }
+
+        tbody tr {
+            transition: background $transition-fast;
+
+            &:hover {
+                background: $primary-50 !important;
+            }
+
+            &:nth-child(even) {
+                background: $slate-50;
+            }
+        }
+    }
+}
+
+// ─── KANBAN SPÉCIFIQUE APPARTEMENTS ───
+.rental-apartment-card {
+    .card-image-wrapper {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+
+        img {
+            transition: transform $transition-slow;
+        }
+
+        &:hover img {
+            transform: scale(1.08);
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, transparentize($slate-900, 0.2), transparent);
+            padding: $space-6 $space-4 $space-4;
+        }
+
+        .price-tag {
+            font-size: $text-2xl;
+            font-weight: $font-bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+
+            .currency {
+                font-size: $text-sm;
+                font-weight: $font-normal;
+                opacity: 0.8;
+            }
+        }
+    }
+
+    .comfort-indicator {
+        display: flex;
+        align-items: center;
+        gap: $space-1;
+
+        .comfort-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: $slate-300;
+
+            &.active {
+                background: $warning-500;
+                box-shadow: 0 0 6px transparentize($warning-500, 0.5);
+            }
+        }
+    }
+
+    .equipment-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $space-1;
+
+        .pill {
+            background: $primary-50;
+            color: $primary-700;
+            border: 1px solid $primary-200;
+            border-radius: $radius-full;
+            padding: $space-1 $space-2;
+            font-size: $text-xs;
+            font-weight: $font-medium;
+            transition: all $transition-fast;
+
+            &:hover {
+                background: $primary-100;
+                transform: scale(1.05);
+            }
+        }
+    }
+}
+
+// ─── DASHBOARD KPI CARDS ───
+.kpi-glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: $radius-2xl;
+    padding: $space-6;
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 2px 4px -2px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+    transition: all $transition-bounce;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--card-color), var(--card-color-light));
+    }
+
+    &:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow:
+            0 20px 25px -5px rgba(0, 0, 0, 0.1),
+            0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: $radius-lg;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: $text-xl;
+        margin-bottom: $space-4;
+        background: var(--card-bg);
+        color: var(--card-color);
+    }
+
+    .kpi-value {
+        font-size: $text-3xl;
+        font-weight: $font-extrabold;
+        color: $slate-800;
+        line-height: 1;
+        margin-bottom: $space-1;
+    }
+
+    .kpi-label {
+        font-size: $text-xs;
+        color: $slate-500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: $font-semibold;
+    }
+
+    .kpi-trend {
+        display: inline-flex;
+        align-items: center;
+        gap: $space-1;
+        font-size: $text-xs;
+        font-weight: $font-semibold;
+        margin-top: $space-2;
+        padding: $space-1 $space-2;
+        border-radius: $radius-full;
+
+        &.up {
+            background: $success-100;
+            color: $success-700;
+        }
+
+        &.down {
+            background: $danger-100;
+            color: $danger-700;
+        }
+    }
+}
+
+// ─── DARK MODE (Classe optionnelle) ───
+.o_web_client.dark-mode {
+    background: $slate-900;
+    color: $slate-100;
+
+    .o_form_sheet {
+        background: $slate-800;
+        border-color: $slate-700;
+    }
+
+    .o_kanban_record {
+        background: $slate-800 !important;
+        border-color: $slate-700 !important;
+
+        &:hover {
+            border-color: $primary-700 !important;
+        }
+    }
+
+    .kpi-glass-card {
+        background: rgba(30, 41, 59, 0.7);
+        border-color: rgba(71, 85, 105, 0.5);
+
+        .kpi-value {
+            color: $slate-100;
+        }
+
+        .kpi-label {
+            color: $slate-400;
+        }
+    }
+}
+// ─── LOADING SKELETON ───
+.skeleton {
+    background: linear-gradient(90deg, $slate-200 25%, $slate-100 50%, $slate-200 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: $radius-md;
+}
+
+// ─── TOAST NOTIFICATIONS ───
+.rental-toast {
+    position: fixed;
+    top: $space-4;
+    right: $space-4;
+    z-index: $z-toast;
+    padding: $space-4 $space-6;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-2xl;
+    animation: slideInRight $transition-slow;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+
+    &.success {
+        background: linear-gradient(135deg, $success-600, $success-500);
+        color: white;
+    }
+
+    &.error {
+        background: linear-gradient(135deg, $danger-600, $danger-500);
+        color: white;
+    }
+
+    &.warning {
+        background: linear-gradient(135deg, $warning-600, $warning-500);
+        color: white;
+    }
+}

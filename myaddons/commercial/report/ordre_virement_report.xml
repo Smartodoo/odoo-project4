@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action : Ordre de virement -->
+    <record id="action_report_ordre_virement" model="ir.actions.report">
+        <field name="name">Ordre de virement</field>
+        <field name="model">commercial.print.ordre.virement.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.ordre_virement_template</field>
+        <field name="report_file">commercial.ordre_virement_template</field>
+        <field name="print_report_name">'Ordre de virement - %s' % object.paiement_id.client_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Ordre de virement -->
+    <template id="ordre_virement_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="client" t-value="doc.paiement_id.client_id"/>
+                    <t t-set="client_civilite" t-value="'Mme' if client.genre == 'femme' else 'M.'"/>
+                    <t t-set="echeance" t-value="doc.get_echeance()"/>
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 20px; padding: 50px 60px; position: relative; min-height: 900px;">
+
+                        <!-- Titre -->
+                        <h2 style="text-align: center; font-weight: bold; margin-bottom: 50px; color: #003366; font-size: 28px;">
+                            Ordre de virement
+                        </h2>
+
+                        <!-- Corps -->
+                        <p style="line-height: 2.4;">
+                            <strong>De <t t-esc="client_civilite"/></strong>
+                            <t t-esc="client.name"/>
+                        </p>
+                        <p style="line-height: 2.4;">
+                            <strong>A L'Ordre de :</strong> SARL IMMOBILIERE INNOVATION
+                        </p>
+                        <p style="line-height: 2.4;">
+                            <strong>Motif :</strong>
+                            <t t-esc="doc.get_motif()"/>
+                            client pour achat de logement.
+                        </p>
+                        <p style="line-height: 2.4;">
+                            <strong>D'un montant de :</strong>
+                            <t t-if="echeance">
+                                <strong><t t-esc="'{:,.2f}'.format(echeance.montant).replace(',', ' ')"/> DA</strong>
+                            </t>
+                        </p>
+                        <p style="line-height: 2.4;">
+                            <strong>En lettre :</strong>
+                            <t t-esc="doc.get_montant_en_lettres()"/>
+                        </p>
+
+                        <t t-if="doc.type_virement in ('apport_declare', 'cb')">
+                            <p style="line-height: 2.4;">
+                                <strong>Au compte :</strong>
+                            </p>
+
+                            <!-- Tableau Agence / N° Compte / Adresse -->
+                            <table class="table table-bordered" style="margin-top: 10px; font-size: 20px;">
+                                <thead>
+                                    <tr style="background-color: #e0e0e0;">
+                                        <th style="padding: 12px; text-align: center;">AGENCE</th>
+                                        <th style="padding: 12px; text-align: center;">N° COMPTE</th>
+                                        <th style="padding: 12px; text-align: center;">ADRESSE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <t t-esc="doc.get_agence()"/>
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <t t-esc="doc.get_numero_compte()"/>
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <t t-esc="doc.get_adresse()"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <p style="line-height: 2.4; margin-top: 30px;">
+                            Le présent ordre de virement est valable dix (10) jours a partir du
+                            <t t-if="echeance and echeance.date">
+                                <strong><t t-esc="echeance.date" t-options='{"widget": "date"}'/></strong>
+                            </t>
+                            <t t-else="">..../.../......</t>
+                        </p>
+
+                        <!-- Direction -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0 60px; font-size: 20px;">
+                            <p style="text-align: right; font-weight: bold;">
+                                DIRECTION
+                            </p>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

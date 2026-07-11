@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Séquences pour la référence automatique des échéances -->
+    <record id="seq_commercial_echeance_cb" model="ir.sequence">
+        <field name="name">Échéance Crédit Bancaire</field>
+        <field name="code">commercial.echeance.cb</field>
+        <field name="prefix">PAI-CB/</field>
+        <field name="padding">5</field>
+    </record>
+
+    <record id="seq_commercial_echeance_cache" model="ir.sequence">
+        <field name="name">Échéance Cache</field>
+        <field name="code">commercial.echeance.cache</field>
+        <field name="prefix">PAI-CA/</field>
+        <field name="padding">5</field>
+    </record>
+
+    <record id="seq_commercial_echeance_tranche" model="ir.sequence">
+        <field name="name">Échéance Tranche</field>
+        <field name="code">commercial.echeance.tranche</field>
+        <field name="prefix">PAI-TR/</field>
+        <field name="padding">5</field>
+    </record>
+
+    <!-- Séquence pour la référence automatique de l'échéance apport -->
+    <record id="seq_commercial_echeance_apport" model="ir.sequence">
+        <field name="name">Échéance Apport Personnel</field>
+        <field name="code">commercial.echeance.apport</field>
+        <field name="prefix">PAI-AP/</field>
+        <field name="padding">5</field>
+    </record>
+
+    <!-- Séquence pour la référence automatique de l'échéance apport déclaré -->
+    <record id="seq_commercial_echeance_apport_declare" model="ir.sequence">
+        <field name="name">Échéance Apport Personnel Déclaré</field>
+        <field name="code">commercial.echeance.apport.declare</field>
+        <field name="prefix">PAI-APD/</field>
+        <field name="padding">5</field>
+    </record>
+
+    <!-- Vue formulaire Fiche Paiement -->
+    <record id="commercial_paiement_form" model="ir.ui.view">
+        <field name="name">commercial.paiement.form</field>
+        <field name="model">commercial.paiement</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <header>
+                    <button name="action_print_ordre_virement" string="Imprimer ordre de virement"
+                            type="object" class="btn-secondary"/>
+                    <button name="action_print_coprop" string="Imprimer Copropriété"
+                            type="object" class="btn-secondary"
+                            invisible="montant_coprop &lt;= 0"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <field name="active" invisible="1"/>
+                    <field name="is_locked" invisible="1"/>
+                    <!-- Layout pour Cache / Tranche -->
+                    <group col="3" invisible="type_paiement == 'cb'">
+                        <group>
+                        </group>
+                        <group>
+                            <separator string="Travaux supplémentaires"/>
+                            <field name="nom_travaux_supp"/>
+                            <field name="montant_travaux_supp"/>
+                        </group>
+                        <group>
+                            <field name="type_paiement" readonly="is_locked"/>
+                            <field name="montant_lot" string="Prix de vente" readonly="1"/>
+                            <field name="montant_deja_paye" readonly="1"/>
+                            <field name="reste" readonly="1"/>
+                            <field name="montant_coprop"/>
+                            <div colspan="2" style="background: #7c3aed; color: white; padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: 4px;">
+                                Montant global client :
+                                <field name="montant_global_client" readonly="1" widget="monetary" nolabel="1" style="display: inline; color: white; font-weight: bold;"/>
+                            </div>
+                        </group>
+                    </group>
+                    <!-- Layout pour Crédit Bancaire -->
+                    <group col="3" invisible="type_paiement != 'cb'">
+                        <group>
+                            <separator string="APPORT PERSONNEL"/>
+                            <field name="apport_global" readonly="1"/>
+                            <field name="apport_personnel" readonly="1"/>
+                            <field name="apport_declare" readonly="1"/>
+                            <field name="banque_apport_declare_id" readonly="is_locked"/>
+                        </group>
+                        <group>
+                            <separator string="PARTIE BANQUE"/>
+                            <field name="montant_accorde" readonly="is_locked"/>
+                            <field name="banque_id" readonly="is_locked"/>
+                            <separator string="Travaux supplémentaires"/>
+                            <field name="nom_travaux_supp"/>
+                            <field name="montant_travaux_supp"/>
+                        </group>
+                        <group>
+                            <field name="type_paiement" readonly="is_locked"/>
+                            <field name="montant_lot" string="Prix de vente" readonly="1"/>
+                            <field name="montant_declare" readonly="is_locked"/>
+                            <field name="montant_total_paye" readonly="1"/>
+                            <field name="reste" string="Reste à payer" readonly="1"/>
+                            <field name="montant_coprop"/>
+                            <div colspan="2" style="background: #7c3aed; color: white; padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-top: 4px;">
+                                Montant global client :
+                                <field name="montant_global_client" readonly="1" widget="monetary" nolabel="1" style="display: inline; color: white; font-weight: bold;"/>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Paiement" invisible="type_paiement == 'cb'">
+                            <field name="echeance_ids">
+                                <tree editable="bottom">
+                                    <field name="is_commercial_admin" column_invisible="1"/>
+                                    <field name="notified" column_invisible="1"/>
+                                    <field name="numero" readonly="1" force_save="1"/>
+                                    <field name="date" readonly="etat != 'brouillon'"/>
+                                    <field name="date_encaissement" readonly="etat != 'brouillon'"/>
+                                    <field name="pourcentage" readonly="etat != 'brouillon'"/>
+                                    <field name="montant" string="Montant à payer" sum="Total" readonly="etat != 'brouillon'"/>
+                                    <field name="etat" widget="badge"
+                                           decoration-info="etat == 'brouillon'"
+                                           decoration-success="etat == 'paye'"
+                                           decoration-muted="etat == 'annule'"/>
+                                    <field name="caisse_entry_id" readonly="1" optional="hide"/>
+                                    <button name="action_notifier" string="Notifier"
+                                            type="object" class="btn-info btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or notified"/>
+                                    <button string="Notifié" disabled="1"
+                                            class="btn-light btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or not notified"/>
+                                    <button name="action_confirmer_echeance" string="Confirmer"
+                                            type="object" class="btn-primary"
+                                            confirm="Êtes-vous sûr de vouloir confirmer ce paiement ?"
+                                            invisible="etat in ('paye', 'annule')"
+                                            groups="commercial.group_commercial_admin"/>
+                                    <button name="action_annuler_echeance" string="Annuler"
+                                            type="object" class="btn-danger"
+                                            confirm="Êtes-vous sûr de vouloir annuler cette échéance ?"
+                                            invisible="etat != 'paye'"
+                                            groups="commercial.group_commercial_admin"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Paiement CB" invisible="type_paiement != 'cb'">
+                            <group>
+                                <group>
+                                    <field name="montant_paye_cb" string="Montant payé CB" readonly="1"/>
+                                    <field name="reste_cb" readonly="1"/>
+                                </group>
+                            </group>
+                            <field name="echeance_ids">
+                                <tree editable="bottom">
+                                    <field name="is_commercial_admin" column_invisible="1"/>
+                                    <field name="notified" column_invisible="1"/>
+                                    <field name="numero" readonly="1" force_save="1"/>
+                                    <field name="date" readonly="etat != 'brouillon'"/>
+                                    <field name="date_encaissement" readonly="etat != 'brouillon'"/>
+                                    <field name="pourcentage" readonly="etat != 'brouillon'"/>
+                                    <field name="montant" string="Montant à payer" sum="Total" readonly="etat != 'brouillon'"/>
+                                    <field name="etat" widget="badge"
+                                           decoration-info="etat == 'brouillon'"
+                                           decoration-success="etat == 'paye'"
+                                           decoration-muted="etat == 'annule'"/>
+                                    <field name="caisse_entry_id" readonly="1" optional="hide"/>
+                                    <button name="action_notifier" string="Notifier"
+                                            type="object" class="btn-info btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or notified"/>
+                                    <button string="Notifié" disabled="1"
+                                            class="btn-light btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or not notified"/>
+                                    <button name="action_confirmer_echeance" string="Confirmer"
+                                            type="object" class="btn-primary"
+                                            confirm="Êtes-vous sûr de vouloir confirmer ce paiement ?"
+                                            invisible="etat in ('paye', 'annule')"
+                                            groups="commercial.group_commercial_admin"/>
+                                    <button name="action_annuler_echeance" string="Annuler"
+                                            type="object" class="btn-danger"
+                                            confirm="Êtes-vous sûr de vouloir annuler cette échéance ?"
+                                            invisible="etat != 'paye'"
+                                            groups="commercial.group_commercial_admin"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Paiement AP non déclaré"
+                              invisible="type_paiement != 'cb' or apport_personnel &lt;= 0">
+                            <group>
+                                <group>
+                                    <field name="montant_deja_paye_apport" string="Montant payé par AP" readonly="1"/>
+                                    <field name="reste_apport" readonly="1"/>
+                                </group>
+                            </group>
+                            <field name="echeance_apport_ids">
+                                <tree editable="bottom">
+                                    <field name="is_commercial_admin" column_invisible="1"/>
+                                    <field name="notified" column_invisible="1"/>
+                                    <field name="numero" readonly="1" force_save="1"/>
+                                    <field name="date" readonly="etat != 'brouillon'"/>
+                                    <field name="date_encaissement" readonly="etat != 'brouillon'"/>
+                                    <field name="pourcentage" readonly="etat != 'brouillon'"/>
+                                    <field name="montant" string="Montant à payer" sum="Total" readonly="etat != 'brouillon'"/>
+                                    <field name="etat" widget="badge"
+                                           decoration-info="etat == 'brouillon'"
+                                           decoration-success="etat == 'paye'"
+                                           decoration-muted="etat == 'annule'"/>
+                                    <field name="caisse_entry_id" readonly="1" optional="hide"/>
+                                    <button name="action_notifier" string="Notifier"
+                                            type="object" class="btn-info btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or notified"/>
+                                    <button string="Notifié" disabled="1"
+                                            class="btn-light btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or not notified"/>
+                                    <button name="action_confirmer_echeance_apport" string="Confirmer"
+                                            type="object" class="btn-primary"
+                                            confirm="Êtes-vous sûr de vouloir confirmer ce paiement ?"
+                                            invisible="etat in ('paye', 'annule')"
+                                            groups="commercial.group_commercial_admin"/>
+                                    <button name="action_annuler_echeance_apport" string="Annuler"
+                                            type="object" class="btn-danger"
+                                            confirm="Êtes-vous sûr de vouloir annuler cette échéance ?"
+                                            invisible="etat != 'paye'"
+                                            groups="commercial.group_commercial_admin"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Paiement AP déclaré"
+                              invisible="type_paiement != 'cb' or apport_declare &lt;= 0">
+                            <group>
+                                <group>
+                                    <field name="montant_paye_apport_declare" readonly="1"/>
+                                    <field name="reste_apport_declare" readonly="1"/>
+                                </group>
+                            </group>
+                            <field name="echeance_apport_declare_ids">
+                                <tree editable="bottom">
+                                    <field name="is_commercial_admin" column_invisible="1"/>
+                                    <field name="notified" column_invisible="1"/>
+                                    <field name="numero" readonly="1" force_save="1"/>
+                                    <field name="date" readonly="etat != 'brouillon'"/>
+                                    <field name="date_encaissement" readonly="etat != 'brouillon'"/>
+                                    <field name="pourcentage" readonly="etat != 'brouillon'"/>
+                                    <field name="montant" string="Montant à payer" sum="Total" readonly="etat != 'brouillon'"/>
+                                    <field name="etat" widget="badge"
+                                           decoration-info="etat == 'brouillon'"
+                                           decoration-success="etat == 'paye'"
+                                           decoration-muted="etat == 'annule'"/>
+                                    <field name="caisse_entry_id" readonly="1" optional="hide"/>
+                                    <button name="action_notifier" string="Notifier"
+                                            type="object" class="btn-info btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or notified"/>
+                                    <button string="Notifié" disabled="1"
+                                            class="btn-light btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or not notified"/>
+                                    <button name="action_confirmer_echeance_apport_declare" string="Confirmer"
+                                            type="object" class="btn-primary"
+                                            confirm="Êtes-vous sûr de vouloir confirmer ce paiement ?"
+                                            invisible="etat in ('paye', 'annule')"
+                                            groups="commercial.group_commercial_admin"/>
+                                    <button name="action_annuler_echeance_apport_declare" string="Annuler"
+                                            type="object" class="btn-danger"
+                                            confirm="Êtes-vous sûr de vouloir annuler cette échéance ?"
+                                            invisible="etat != 'paye'"
+                                            groups="commercial.group_commercial_admin"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Paiement Coprop."
+                              invisible="montant_coprop &lt;= 0">
+                            <group>
+                                <group>
+                                    <field name="montant_paye_coprop" readonly="1"/>
+                                    <field name="reste_coprop" readonly="1"/>
+                                </group>
+                            </group>
+                            <field name="echeance_coprop_ids">
+                                <tree editable="bottom">
+                                    <field name="is_commercial_admin" column_invisible="1"/>
+                                    <field name="notified" column_invisible="1"/>
+                                    <field name="numero" readonly="1" force_save="1"/>
+                                    <field name="date" readonly="etat != 'brouillon'"/>
+                                    <field name="montant" readonly="etat != 'brouillon'"/>
+                                    <field name="etat" widget="badge"
+                                           decoration-info="etat == 'brouillon'"
+                                           decoration-success="etat == 'paye'"
+                                           decoration-muted="etat == 'annule'"/>
+                                    <button name="action_notifier" string="Notifier"
+                                            type="object" class="btn-info btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or notified"/>
+                                    <button string="Notifié" disabled="1"
+                                            class="btn-light btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or not notified"/>
+                                    <button name="action_confirmer_coprop" string="Confirmer"
+                                            type="object" class="btn-primary"
+                                            confirm="Êtes-vous sûr de vouloir confirmer ce paiement ?"
+                                            invisible="etat in ('paye', 'annule')"
+                                            groups="commercial.group_commercial_admin"/>
+                                    <button name="action_annuler_coprop" string="Annuler"
+                                            type="object" class="btn-danger"
+                                            confirm="Êtes-vous sûr de vouloir annuler ce paiement ?"
+                                            invisible="etat != 'paye'"
+                                            groups="commercial.group_commercial_admin"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Paiements TS"
+                              invisible="montant_travaux_supp &lt;= 0">
+                            <group>
+                                <group>
+                                    <field name="montant_paye_ts" readonly="1"/>
+                                    <field name="reste_ts" readonly="1"/>
+                                </group>
+                            </group>
+                            <field name="echeance_ts_ids">
+                                <tree editable="bottom">
+                                    <field name="is_commercial_admin" column_invisible="1"/>
+                                    <field name="notified" column_invisible="1"/>
+                                    <field name="numero" readonly="1" force_save="1"/>
+                                    <field name="date" readonly="etat != 'brouillon'"/>
+                                    <field name="montant" readonly="etat != 'brouillon'"/>
+                                    <field name="etat" widget="badge"
+                                           decoration-info="etat == 'brouillon'"
+                                           decoration-success="etat == 'paye'"
+                                           decoration-muted="etat == 'annule'"/>
+                                    <button name="action_notifier" string="Notifier"
+                                            type="object" class="btn-info btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or notified"/>
+                                    <button string="Notifié" disabled="1"
+                                            class="btn-light btn-sm"
+                                            invisible="etat != 'brouillon' or is_commercial_admin or not notified"/>
+                                    <button name="action_confirmer_ts" string="Confirmer"
+                                            type="object" class="btn-primary"
+                                            confirm="Êtes-vous sûr de vouloir confirmer ce paiement ?"
+                                            invisible="etat in ('paye', 'annule')"
+                                            groups="commercial.group_commercial_admin"/>
+                                    <button name="action_annuler_ts" string="Annuler"
+                                            type="object" class="btn-danger"
+                                            confirm="Êtes-vous sûr de vouloir annuler ce paiement ?"
+                                            invisible="etat != 'paye'"
+                                            groups="commercial.group_commercial_admin"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue liste -->
+    <record id="commercial_paiement_tree" model="ir.ui.view">
+        <field name="name">commercial.paiement.tree</field>
+        <field name="model">commercial.paiement</field>
+        <field name="arch" type="xml">
+            <tree create="false">
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="lot_id"/>
+                <field name="montant_lot"/>
+                <field name="type_paiement"/>
+                <field name="montant_deja_paye"/>
+                <field name="reste"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_paiement_action" model="ir.actions.act_window">
+        <field name="name">Fiches Paiement</field>
+        <field name="res_model">commercial.paiement</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

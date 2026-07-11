@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+
+        <record id="cashbox_admin_full_access" model="ir.rule">
+            <field name="name">Cashbox – full access for Administrator</field>
+            <field name="model_id" ref="model_cashbox"/>
+            <!-- a domain that always passes -->
+            <field name="domain_force">[('id', '!=', False)]</field>
+            <!-- only apply this rule to the Admin/System group -->
+            <field name="groups" eval="[(4, ref('caisse2.group_comptable'))]"/>
+        </record>
+
+        <!-- Cashbox visible seulement si user est responsable -->
+        <record id="cashbox_user_rule" model="ir.rule">
+            <field name="name">Cashbox: visibilité par responsable</field>
+            <field name="model_id" ref="model_cashbox"/>
+            <field name="domain_force">[
+                ('responsible_ids', 'in', [user.id])
+                ]
+            </field>
+            <field name="groups" eval="[(4, ref('caisse2.group_caissier'))]"/>
+        </record>
+
+        <!-- Caisse Entry visible seulement si cashbox_id.responsible_ids contient user -->
+        <record id="caisse_entry_user_rule" model="ir.rule">
+            <field name="name">Caisse Entry: visibilité par caisse</field>
+            <field name="model_id" ref="model_caisse_entry"/>
+            <field name="domain_force">[('cashbox_id.responsible_ids', 'in', [user.id])]</field>
+            <field name="groups" eval="[(4, ref('caisse2.group_caissier'))]"/>
+        </record>
+
+        <!-- Caisse Expense (note de frais) visibilité -->
+        <record id="caisse_expense_user_rule" model="ir.rule">
+            <field name="name">Caisse Expense: visibilité par caisse</field>
+            <field name="model_id" ref="model_caisse_expense"/>
+            <field name="domain_force">[('cashbox_id.responsible_ids', 'in', [user.id])]</field>
+            <field name="groups" eval="[(4, ref('caisse2.group_caissier'))]"/>
+        </record>
+
+        <!-- Caisse Expense Supplier visibilité -->
+        <record id="caisse_expense_supplier_user_rule" model="ir.rule">
+            <field name="name">Caisse Fournisseur: visibilité par caisse</field>
+            <field name="model_id" ref="model_caisse_expense_supplier"/>
+            <field name="domain_force">[('cashbox_id.responsible_ids', 'in', [user.id])]</field>
+            <field name="groups" eval="[(4, ref('caisse2.group_caissier'))]"/>
+        </record>
+
+        <!-- Transferts visibilité -->
+<!--        <record id="stock_picking_location_rule" model="ir.rule">-->
+<!--            <field name="name">Stock Picking by Warehouse Locations</field>-->
+<!--            <field name="model_id" ref="stock.model_stock_picking"/>-->
+<!--            <field name="domain_force">-->
+<!--                ['|',-->
+<!--                ('location_id', 'child_of', user.property_warehouse_id.lot_stock_id.id),-->
+<!--                '|',-->
+<!--                ('location_dest_id','child_of', user.property_warehouse_id.lot_stock_id.id),-->
+<!--                '|',-->
+<!--                ('create_uid', '=', user.id),-->
+<!--                ('picking_type_id.code','in',['incoming','outgoing'])-->
+<!--                ]-->
+<!--            </field>-->
+<!--            <field name="groups" eval="[(4, ref('caisse2.group_caissier'))]"/>-->
+<!--        </record>-->
+
+    </data>
+</odoo>
+

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="public_rental_form_pro" name="Réservation Premium">
+        <t t-call="website.layout">
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap"
+                  rel="stylesheet"/>
+            <style>
+                :root {
+                --primary: #4f46e5; --primary-light: #818cf8; --primary-dark: #3730a3;
+                --slate-50: #f8fafc; --slate-200: #e2e8f0; --slate-400: #94a3b8;
+                --slate-500: #64748b; --slate-700: #334155; --slate-800: #1e293b; --slate-900: #0f172a;
+                }
+                body { font-family: 'Inter', sans-serif; background: var(--slate-50); }
+                .hero-section { background: linear-gradient(135deg, var(--slate-900) 0%, var(--primary-dark) 50%,
+                var(--primary) 100%); position: relative; overflow: hidden; }
+                .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid
+                rgba(255, 255, 255, 0.5); border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+                .form-input { border: 2px solid var(--slate-200); border-radius: 16px; padding: 14px 20px; width: 100%;
+                transition: all 0.3s ease; }
+                .form-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(99, 102,
+                241, 0.1); }
+                .form-label { font-weight: 600; color: var(--slate-700); margin-bottom: 8px; display: block; font-size:
+                14px; }
+                .btn-gradient { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white;
+                border: none; border-radius: 16px; padding: 16px 32px; font-weight: 700; width: 100%; transition: all
+                0.3s ease; }
+                .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); }
+                .apartment-card { background: white; border-radius: 20px; overflow: hidden; transition: all 0.4s ease;
+                border: 2px solid transparent; cursor: pointer; }
+                .apartment-card:hover { transform: translateY(-8px); border-color: var(--primary-light); }
+                .apartment-card.selected { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+                }
+                .price-tag { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white;
+                padding: 8px 16px; border-radius: 12px; font-weight: 700; }
+                .feature-pill { background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 10px; font-size:
+                12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+                .step-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; }
+                .step { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center;
+                justify-content: center; font-weight: 700; }
+                .step.active { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+                .step.inactive { background: var(--slate-200); color: var(--slate-400); }
+                .step-line { flex: 1; height: 2px; background: var(--slate-200); }
+                .step-line.active { background: var(--primary); }
+            </style>
+
+            <div class="hero-section py-5">
+                <div class="container text-center text-white">
+                    <h1 class="display-4 fw-bold mb-3">Trouvez votre logement idéal</h1>
+                    <p class="lead opacity-75">Réservez en ligne en quelques clics.</p>
+                </div>
+            </div>
+
+            <div class="container" style="margin-top: -60px;">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="glass-card p-4 p-md-5">
+                            <t t-if="request.params.get('submitted')">
+                                <div class="alert alert-success border-0 rounded-4 p-4 text-center mb-4 shadow-sm">
+                                    <h3>🎉 Demande envoyée !</h3>
+                                    <p class="mb-0">Félicitations ! Votre demande a été enregistrée avec succès.</p>
+                                    <a href="/rental/form" class="btn btn-outline-success btn-sm mt-3">Nouvelle
+                                        réservation
+                                    </a>
+                                </div>
+                            </t>
+
+                            <div class="step-indicator">
+                                <div class="step active">1</div>
+                                <div class="step-line active"></div>
+
+                                <div t-attf-class="step #{success and 'active' or 'active'}">2</div>
+                                <div t-attf-class="step-line #{success and 'active' or ''}"></div>
+
+                                <div t-attf-class="step #{success and 'active' or 'inactive'}">3</div>
+                            </div>
+
+                            <form action="/rental/submit" method="POST" id="rentalForm">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="property_id" id="selected_property_id" required="required"/>
+
+                                <h3 class="mb-4 fw-bold">
+                                    <span class="badge bg-primary me-2">1</span>Choisissez votre appartement
+                                </h3>
+
+                                <div class="row g-4 mb-5">
+                                    <t t-foreach="properties" t-as="prop">
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="apartment-card"
+                                                 t-att-data-apartment-id="prop.id"
+                                                 t-attf-onclick="selectApartment(this, {{prop.id}})"
+                                                 style="cursor: pointer; position: relative; border: 2px solid transparent; transition: 0.3s; border-radius: 20px;">
+
+                                                <div class="selection-check"
+                                                     style="display:none; position:absolute; top:10px; right:10px; background:#4f46e5; color:white; border-radius:50%; width:25px; height:25px; text-align:center; z-index:10;">
+                                                    <i class="fa fa-check" style="line-height:25px; font-size: 12px;"/>
+                                                </div>
+
+                                                <div style="height: 180px; position: relative; overflow: hidden; border-radius: 18px 18px 0 0;">
+                                                    <t t-if="prop.image">
+                                                        <img t-att-src="image_data_uri(prop.image)"
+                                                             style="width: 100%; height: 100%; object-fit: cover;"
+                                                             alt="Appartement"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f1f5f9; color: #cbd5e1;">
+                                                            <i class="fa fa-building fa-3x"/>
+                                                        </div>
+                                                    </t>
+                                                    <div class="price-tag"
+                                                         style="position: absolute; bottom: 16px; right: 16px;">
+                                                        <t t-esc="prop.price_month"/>
+                                                        <span style="font-size: 12px; opacity: 0.8;">DA/mois</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="p-3">
+                                                    <h5 class="fw-bold mb-1 apartment-name">
+                                                        <t t-esc="prop.name"/>
+                                                    </h5>
+                                                    <p class="text-muted small mb-3">
+                                                        <i class="fa fa-map-marker me-1 text-primary"/>
+                                                        <t t-esc="prop.address"/>
+                                                    </p>
+
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        <span class="feature-pill">
+                                                            <t t-esc="prop.type"/>
+                                                        </span>
+                                                        <span class="feature-pill">
+                                                            <i class="fa fa-expand me-1"/>
+                                                            <t t-esc="prop.surface"/>m²
+                                                        </span>
+                                                        <t t-if="prop.is_furnished">
+                                                            <span class="feature-pill">Meublé</span>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <div id="section_customer_info" class="pt-4">
+                                    <h3 class="mb-4 fw-bold">
+                                        <span class="badge bg-primary me-2">2</span>Vos informations
+                                    </h3>
+                                    <div class="row g-3 mb-5">
+                                        <div class="col-12">
+                                            <label class="form-label">Nom complet</label>
+                                            <input type="text" name="name" class="form-input" required="required"
+                                                   placeholder="Mohamed Benali"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" name="email" class="form-input" required="required"
+                                                   placeholder="mohamed@email.com"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Téléphone</label>
+                                            <input type="tel" name="phone" class="form-input" required="required"
+                                                   placeholder="05XXXXXXXX"/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h3 class="mb-4 fw-bold">
+                                    <span class="badge bg-primary me-2">3</span>Dates de séjour
+                                </h3>
+                                <div class="row g-3 mb-5">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Date d'arrivée</label>
+                                        <input type="date" name="start_date" class="form-input" required="required"
+                                               t-att-min="datetime.date.today().strftime('%Y-%m-%d')"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Date de départ</label>
+                                        <input type="date" name="end_date" class="form-input" required="required"/>
+                                    </div>
+                                </div>
+
+                                <div id="selection_summary" class="alert alert-success mt-4 shadow-sm"
+                                     style="display:none; border-left: 5px solid #4f46e5;">
+                                    <i class="fa fa-info-circle me-2"></i>
+                                    Vous avez sélectionné l'appartement :
+                                    <strong id="chosen_apartment_name">...</strong>
+                                </div>
+
+                                <button type="submit" class="btn-gradient py-3 shadow-sm mt-3">
+                                    Envoyer ma réservation
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function selectApartment(element, apartmentId) {
+                const hiddenInput = document.getElementById('selected_property_id');
+                const summaryDiv = document.getElementById('selection_summary');
+                const chosenName = document.getElementById('chosen_apartment_name');
+
+                // Réinitialisation visuelle
+                document.querySelectorAll('.apartment-card').forEach(card => {
+                card.style.border = "1px solid #ddd";
+                card.style.opacity = "1";
+                const badge = card.querySelector('.selection-check');
+                if (badge) { badge.style.display = "none"; }
+                });
+
+                // Sélection de la nouvelle carte
+                element.style.border = "3px solid #4f46e5";
+                document.querySelectorAll('.apartment-card').forEach(card => {
+                if (card !== element) { card.style.opacity = "0.5"; }
+                });
+
+                const activeBadge = element.querySelector('.selection-check');
+                if (activeBadge) { activeBadge.style.display = "block"; }
+
+                // Mise à jour de l'ID pour le formulaire
+                if (hiddenInput) { hiddenInput.value = apartmentId; }
+
+                const nameElement = element.querySelector('.apartment-name');
+
+                // UTILISATION DE &amp;&amp; POUR VALIDER LE XML ODOO
+                if (nameElement &amp;&amp; summaryDiv &amp;&amp; chosenName) {
+                chosenName.innerText = nameElement.innerText;
+                summaryDiv.style.display = "block";
+                }
+
+                // Défilement fluide vers les informations client
+                const nextSection = document.getElementById('section_customer_info');
+                if (nextSection) {
+                nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                }
+            </script>
+        </t>
+    </template>
+</odoo>

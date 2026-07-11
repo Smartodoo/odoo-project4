@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="commercial_print_decharge_location_wizard_form" model="ir.ui.view">
+        <field name="name">commercial.print.decharge.location.wizard.form</field>
+        <field name="model">commercial.print.decharge.location.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Imprimer une décharge de versement">
+                <group>
+                    <field name="location_id" invisible="1"/>
+                    <field name="versement_location_id"/>
+                </group>
+                <footer>
+                    <button name="action_print" string="Imprimer" type="object" class="btn-primary"/>
+                    <button string="Annuler" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

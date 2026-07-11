@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Search View -->
+    <record id="commercial_lot_view_search" model="ir.ui.view">
+        <field name="name">commercial.lot.search</field>
+        <field name="model">commercial.lot</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Lots">
+                <field name="numero_lot" filter_domain="[('numero_lot', 'ilike', self)]"/>
+                <field name="code_perso" filter_domain="[('code_perso', 'ilike', self)]"/>
+                <field name="projet_id" filter_domain="[('projet_id.name', 'ilike', self)]"/>
+                <field name="bloc_id" filter_domain="[('bloc_id.name', 'ilike', self)]"/>
+                <field name="etage_id" filter_domain="[('etage_id.etiquette', 'ilike', self)]"/>
+                <field name="categorie_id" filter_domain="[('categorie_id.categorie', 'ilike', self)]"/>
+                <separator/>
+                <filter name="filter_disponible" string="Disponible" domain="[('state', '=', 'disponible')]"/>
+                <filter name="filter_en_option" string="Pré-réservé" domain="[('state', '=', 'en_option')]"/>
+                <filter name="filter_reserve" string="Réservé" domain="[('state', '=', 'reserve')]"/>
+                <filter name="filter_loue" string="Loué" domain="[('state', '=', 'loue')]"/>
+                <filter name="filter_vendu" string="Vendu" domain="[('state', '=', 'vendu')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_etage" string="Étage" context="{'group_by': 'etage_id'}"/>
+                    <filter name="group_categorie" string="Catégorie" context="{'group_by': 'categorie_id'}"/>
+                    <filter name="group_state" string="Statut" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="commercial_lot_view_tree" model="ir.ui.view">
+        <field name="name">commercial.lot.tree</field>
+        <field name="model">commercial.lot</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'disponible'" decoration-info="state == 'en_option'" decoration-warning="state == 'reserve'" decoration-bf="state == 'loue'" decoration-danger="state == 'vendu'">
+                <field name="numero_lot"/>
+                <field name="code_perso"/>
+                <field name="projet_id"/>
+                <field name="bloc_id"/>
+                <field name="etage_id"/>
+                <field name="categorie_id"/>
+                <field name="surface_globale"/>
+                <field name="montant_global"/>
+                <field name="state" widget="badge" decoration-success="state == 'disponible'" decoration-info="state == 'en_option'" decoration-warning="state == 'reserve'" decoration-bf="state == 'loue'" decoration-danger="state == 'vendu'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_lot_view_form" model="ir.ui.view">
+        <field name="name">commercial.lot.form</field>
+        <field name="model">commercial.lot</field>
+        <field name="arch" type="xml">
+            <form string="Lot">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="disponible,reserve,loue,vendu"/>
+                </header>
+                <sheet>
+                    <field name="full_etage_ids" invisible="1"/>
+
+
+                    <!-- En-tête -->
+                    <group>
+                        <group>
+                            <field name="numero_lot"/>
+                            <field name="code_perso"/>
+                        </group>
+                        <group>
+                            <field name="numero_porte"/>
+                            <field name="montant_mensuel"/>
+                            <field name="client_id" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <!-- Emplacement (colonne gauche) -->
+                        <group string="Emplacement">
+                            <field name="projet_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="bloc_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="etage_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="categorie_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                        <!-- Superficies (colonne droite) -->
+                        <group string="Superficies">
+                            <group>
+                                <field name="surface_01"/>
+                                <field name="surface_02"/>
+                            </group>
+                            <group>
+                                <field name="prix_m2_surface_01"/>
+                                <field name="prix_m2_surface_02"/>
+                            </group>
+                            <group colspan="2">
+                                <field name="surface_globale"/>
+                                <field name="prix_m2_global"/>
+                                <field name="montant_surface_01"/>
+                                <field name="montant_surface_02"/>
+                                <field name="montant_global" readonly="state not in ('disponible', 'en_option')"/>
+                            </group>
+                        </group>
+                    </group>
+                    <group>
+                        <!-- Colonne gauche : Déclaration fiscale -->
+                        <group string="Déclaration fiscale">
+                            <group>
+                                <field name="prix_m2_fiscal_1"/>
+                                <field name="prix_m2_fiscal_2"/>
+                            </group>
+                            <group>
+                                <field name="prix_m2_ht_fiscal_1"/>
+                                <field name="prix_m2_ht_fiscal_2"/>
+                            </group>
+                            <group colspan="2">
+                                <field name="montant_declare"/>
+                                <field name="tva"/>
+                                <field name="montant_ht"/>
+                            </group>
+                        </group>
+                        <!-- Colonne droite : Consistance + Quotes-parts -->
+                        <group>
+                            <field name="consistance"/>
+                            <field name="quot_part_1"/>
+                            <field name="quot_part_2"/>
+                            <field name="quot_part_3"/>
+                        </group>
+                    </group>
+
+                    <!-- Contacts intéressés -->
+                    <notebook>
+                        <page name="current_partners" string="Contacts actuels">
+                            <field name="current_partner_ids" nolabel="1" readonly="1">
+                                <tree create="0" delete="0">
+                                    <field name="name" string="Nom"/>
+                                    <field name="phone" string="Téléphone"/>
+                                    <field name="mobile" string="Mobile"/>
+                                    <field name="type_client_commercial" string="Type" widget="badge"
+                                           decoration-info="type_client_commercial == 'Visiteur'"
+                                           decoration-success="type_client_commercial == 'client'"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="history_partners" string="Anciens intéressés"
+                              badge="interested_partner_count">
+                            <field name="history_partner_ids" nolabel="1" readonly="1">
+                                <tree create="0" delete="0">
+                                    <field name="name" string="Nom"/>
+                                    <field name="phone" string="Téléphone"/>
+                                    <field name="mobile" string="Mobile"/>
+                                    <field name="type_client_commercial" string="Type" widget="badge"
+                                           decoration-info="type_client_commercial == 'Visiteur'"
+                                           decoration-success="type_client_commercial == 'client'"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="commercial_lot_action" model="ir.actions.act_window">
+        <field name="name">Lots</field>
+        <field name="res_model">commercial.lot</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('state', 'in', ('disponible', 'en_option'))]</field>
+    </record>
+
+</odoo>

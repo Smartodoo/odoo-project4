@@ -1,0 +1,611 @@
+<odoo>
+    <data>
+        <!--    list view definition -->
+
+        <record model="ir.ui.view" id="sinistre.list">
+            <field name="name">Sinistre list</field>
+            <field name="model">sinistre</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="vehicle_id"/>
+                    <field name="license_plate"/>
+                    <field name="driver_id"/>
+                    <field name="date_accident"/>
+                    <field name="payment_state"
+                           widget="badge"
+                           decoration-danger="payment_state == 'pas_payé'"
+                           decoration-success="payment_state == 'payé' "
+                           optional="show"/>
+                    <field name="state"
+                           widget="badge"
+                           decoration-danger="state == 'draft'"
+                           decoration-warning="state == 'en_cours'"
+                           decoration-success="state == 'termine'"
+                           optional="show"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--  form view definition -->
+        <record model="ir.ui.view" id="view_form_sinistre">
+            <field name="name">Sinistre form</field>
+            <field name="model">sinistre</field>
+            <field name="arch" type="xml">
+                <form string="Sinistre">
+                    <header>
+                        <button name="%(sinistre.action_report_constat)d" string="Imprimer Constat"
+                                type="action" class="btn-primary" icon="fa-print"/>
+                        <field name="state" widget="statusbar" options="{'clickable': True}"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="Champs vehicule">
+
+                                <field name="vehicle_id" readonly="state == 'termine'"
+                                       context="{'active_test': False}"/>
+                                <field name="license_plate" required="1" readonly="state == 'termine'"/>
+                                <field name="numero_serie" readonly="state == 'termine'"/>
+                                <field name="driver_id" string="Conducteur" required="1" readonly="state == 'termine'"/>
+                                <field name="date_accident" string="Date d'accident" required="1"
+                                       readonly="state == 'termine'"/>
+                                <field name="fautif" readonly="state == 'termine'"/>
+                                <field name="degat_sur_vehicule1" readonly="state == 'termine'" invisible="1"/>
+                                <field name="degat_sur_vehicule_html" required="1" readonly="state == 'termine'"/>
+                                <field name="cout_reparation"/>
+                                <div class="o_td_label">
+                                    <label for="Duree_immobilisation"/>
+                                </div>
+                                <div class="d-flex">
+                                    <field name="Duree_immobilisation"/>
+                                    <span class="o_form_label mx-3 oe_edit_only">
+                                    </span>
+                                    <field name="time_type" nolabel="1"/>
+                                </div>
+                            </group>
+                            <group string="Assurance">
+                                <field name="assurence2" required="1" readonly="state == 'termine'"/>
+                                <field name="agence_assurance1" string="Agence d'assurance" required="1"
+                                       widget='many2one_tags' readonly="state == 'termine'"/>
+                                <field name="numero_police" string="Numéro de police" readonly="state == 'termine'"/>
+                                <field name="date_effet" string="Date d'effet" readonly="state == 'termine'"/>
+                                <field name="date_expertation" string="Date d'expertation"
+                                       readonly="state == 'termine'"/>
+                            </group>
+
+                            <!-- Champs liés au tiers -->
+                            <group string=" Champs liés au tiers">
+                                <field name="accident_type" widget="radio" readonly="state == 'termine'"/>
+
+                                <field name="nom_tiers" required="1" invisible="accident_type =='sans'"
+                                       readonly="state == 'termine'"/>
+                                <field name="prenom_tiers" required="1" invisible="accident_type =='sans'"
+                                       readonly="state == 'termine'"/>
+                                <field name="assurence" required="1" invisible="accident_type =='sans'"
+                                       readonly="state == 'termine'"/>
+                                <field name="agence_assurance2" string="Agence d'assurance" required="1"
+                                       invisible="accident_type =='sans'" readonly="state == 'termine'"/>
+                                <field name="numero_police2" readonly="state == 'termine'"
+                                       invisible="accident_type =='sans'"/>
+                                <field name="degat_sur_vehicule" string=" Dégat sur vehicule" required="1"
+                                       readonly="state == 'termine'" invisible="1"/>
+                                <field name="date_effet_1" string="Date d'effet" readonly="state == 'termine'"
+                                       invisible="accident_type =='sans'"/>
+                                <field name="date_expertation_1" string="Date d'expertation"
+                                       readonly="state == 'termine'" invisible="accident_type =='sans'"/>
+                                <field name="degat_sur_vehicule2" string=" Dégat sur vehicule" required="1"
+                                       invisible="accident_type =='sans'" readonly="state == 'termine'"/>
+                                <field name="technical_file" filename="technical_file_name"
+                                       widget="many2many_binary"
+                                       options="{'no_create': True}" readonly="state == 'termine'"/>
+                                <field name="technical_file_name" invisible="1" readonly="state == 'termine'"/>
+                            </group>
+
+                            <!-- Champs d'expertise et réparation -->
+                            <group string="Expertise et réglement">
+                                <field name="numero_pv" readonly="state == 'termine'"/>
+                                <field name="date_expertise" string="Date d'expertise"
+                                       readonly="state == 'termine'"/>
+                                <field name="nom_expert" string="Nom de l'expert"
+                                       readonly="state == 'termine'"/>
+                                <field name="numero_sinistre" readonly="state == 'termine'"/>
+                                <field name="numero_cloque" string="Numéro de chéque" required="1"
+                                       readonly="state == 'termine'"/>
+                                <field name="date_reparation" string="Date de payment" readonly="state == 'termine'"/>
+
+                                <field name="montant_reparation" string="montant"
+                                       widget="monetary"
+                                       options="{'currency_field': 'currency_id'}"
+                                       placeholder="Montant" required="1" readonly="state == 'termine'"/>
+
+                                <field name="currency_id" invisible="1" readonly="state == 'termine'"/>
+                                <field name="payment_state" string="État du paiement" invisible="1"
+                                       readonly="state == 'termine'"/>
+                            </group>
+
+                        </group>
+                        <separator string="Circonstances de l'accident"/>
+                        <group>
+                            <field name="circonstances" nolabel="1" readonly="state == 'termine'"
+                                   placeholder="Décrivez les circonstances de l'accident..."
+                                   colspan="2"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids" widget="mail_activity"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- search view sinistre -->
+        <record model="ir.ui.view" id="search_view_sinistre">
+            <field name="name">Sinistre search</field>
+            <field name="model">sinistre</field>
+            <field name="arch" type="xml">
+                <search string="Sinistre">
+                    <field name="license_plate"/>
+                    <field name="date_accident"/>
+                    <field name="date_expertise"/>
+                    <field name="date_reparation"/>
+                    <field name="numero_pv"/>
+                    <field name="payment_state"/>
+                    <field name="numero_police"/>
+                    <field name="numero_sinistre"/>
+                    <field name="numero_serie"/>
+                    <field name="state"/>
+                    <filter name="state"
+                            string="État"
+                            context="{'group_by': 'state'}"/>
+                    <filter name="accident_type"
+                            string="Type d'accident"
+                            context="{'group_by': 'accident_type'}"/>
+                </search>
+            </field>
+        </record>
+        <!-- actions opening views  -->
+
+        <record model="ir.actions.act_window" id="sinistre.action_window">
+            <field name="name">Sinistre window</field>
+            <field name="res_model">sinistre</field>
+            <field name="view_mode">tree,form,search</field>
+        </record>
+
+        <!-- server action -->
+
+        <record model="ir.actions.server" id="sinistre.action_server">
+            <field name="name">Sinistre server</field>
+            <field name="model_id" ref="model_sinistre"/>
+            <field name="state">code</field>
+            <field name="code">
+                action = {
+                "type": "ir.actions.act_window",
+                "view_mode": "tree,form",
+                "res_model": model._name,
+                }
+            </field>
+        </record>
+        <!-- fleet.fleet_vehicle_model_view_form inherit-->
+        <record id="fleet_fleet_vehicle_model_view_form_inherit" model="ir.ui.view">
+            <field name="name">fleet.fleet.vehicle.model.form.inherit</field>
+            <field name="model">fleet.vehicle.model</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_model_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet/group/group[1]/field[@name='vehicle_type']" position="after">
+                    <field name="vehicle_type_1" string="Genre de véhicule"
+                           options="{'no_create': True, 'no_create_edit': True}"/>
+                </xpath>
+                <xpath expr="//sheet/group/group[1]/field[@name='vehicle_type']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+            </field>
+        </record>
+
+
+        <!-- form view vehicle type-->
+        <record id="vehicle_type_view_form" model="ir.ui.view">
+            <field name="name">vehicle.type.form</field>
+            <field name="model">vehicle.type</field>
+            <field name="arch" type="xml">
+                <form string="Vehicle Type">
+                    <sheet>
+                        <group>
+                            <field name="name" required="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- list view vehicle type-->
+        <record id="vehicle_type_view_list" model="ir.ui.view">
+            <field name="name">vehicle.type.list</field>
+            <field name="model">vehicle.type</field>
+            <field name="arch" type="xml">
+                <tree string="Vehicle Type">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+        <!-- action vehicle type -->
+        <record id="vehicle_type_action" model="ir.actions.act_window">
+            <field name="name">Genre de véhicule</field>
+            <field name="res_model">vehicle.type</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Sinistre" id="sinistre.menu_root" web_icon="sinistre,static/description/icon.png"
+                  sequence="35"/>
+        <menuitem name="Sinitre" id="sinistre.menu" parent="sinistre.menu_root"
+                  sequence="1"/>
+        <menuitem name="Sinitre" id="sinistre.menu1" parent="sinistre.menu" action="sinistre.action_window"
+                  sequence="1"/>
+        <menuitem name="Imprimer sinistres" id="sinistre.menu2" parent="sinistre.menu"
+                  action="sinistre.action_sinistre_print_wizard"
+                  sequence="2"/>
+
+        <!-- menu vehicle type -->
+        <menuitem id="config_sinistre_menu" name="Configuration" parent="sinistre.menu_root"
+                  sequence="2"/>
+        <menuitem id="vehicle_type_menu" name="Genre de véhicule" parent="sinistre.config_sinistre_menu"
+                  action="vehicle_type_action" sequence="2"/>
+
+        <!-- Vehicle Availability Views -->
+        <record id="vehicle_availability_view_form" model="ir.ui.view">
+            <field name="name">vehicle.availability.form</field>
+            <field name="model">vehicle.availability</field>
+            <field name="arch" type="xml">
+                <form string="Disponibilité du véhicule">
+                    <sheet>
+                        <group>
+                            <field name="name" required="1"/>
+                            <field name="active"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="vehicle_availability_view_list" model="ir.ui.view">
+            <field name="name">vehicle.availability.list</field>
+            <field name="model">vehicle.availability</field>
+            <field name="arch" type="xml">
+                <tree string="Disponibilité du véhicule">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="vehicle_availability_action" model="ir.actions.act_window">
+            <field name="name">Disponibilité du véhicule</field>
+            <field name="res_model">vehicle.availability</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="vehicle_availability_menu" name="Disponibilité du véhicule"
+                  parent="sinistre.config_sinistre_menu"
+                  action="vehicle_availability_action" sequence="3"/>
+
+        <!-- Inherit fleet.vehicle form to add availability field and document fields -->
+        <record id="fleet_vehicle_view_form_inherit_availability" model="ir.ui.view">
+            <field name="name">fleet.vehicle.form.inherit.availability</field>
+            <field name="model">fleet.vehicle</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='future_driver_id']" position="after">
+                    <field name="availability_id"/>
+                </xpath>
+                <xpath expr="//notebook/page[@name='note']" position="after">
+                    <page string="Document" name="document_page">
+                        <group>
+                            <group string="Type de document">
+                                <field name="document_type" widget="radio"/>
+                            </group>
+                            <group string="Informations du document" invisible="not document_type">
+                                <field name="nom_proprietaire" invisible="not document_type"/>
+                                <field name="date_emission" invisible="not document_type"/>
+                                <field name="date_expiration" invisible="document_type != 'carte_jaune'"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Default availability data -->
+        <record id="availability_disponible" model="vehicle.availability">
+            <field name="name">Disponible</field>
+        </record>
+        <record id="availability_non_disponible" model="vehicle.availability">
+            <field name="name">Non disponible</field>
+        </record>
+        <record id="availability_en_maintenance" model="vehicle.availability">
+            <field name="name">En maintenance</field>
+        </record>
+        <record id="availability_a_larret" model="vehicle.availability">
+            <field name="name">À l'arrêt</field>
+        </record>
+
+        <!-- Assurance Type Views -->
+        <record id="assurance_type_view_form" model="ir.ui.view">
+            <field name="name">assurance.type.form</field>
+            <field name="model">assurance.type</field>
+            <field name="arch" type="xml">
+                <form string="Type d'assurance">
+                    <sheet>
+                        <group>
+                            <field name="name" required="1"/>
+                            <field name="active"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="assurance_type_view_list" model="ir.ui.view">
+            <field name="name">assurance.type.list</field>
+            <field name="model">assurance.type</field>
+            <field name="arch" type="xml">
+                <tree string="Type d'assurance">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="assurance_type_action" model="ir.actions.act_window">
+            <field name="name">Type d'assurance</field>
+            <field name="res_model">assurance.type</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="assurance_type_menu" name="Type d'assurance"
+                  parent="sinistre.config_sinistre_menu"
+                  action="assurance_type_action" sequence="4"/>
+
+        <!-- Inherit fleet.vehicle.log.contract form to add assurance fields -->
+        <record id="fleet_vehicle_log_contract_view_form_inherit" model="ir.ui.view">
+            <field name="name">fleet.vehicle.log.contract.form.inherit</field>
+            <field name="model">fleet.vehicle.log.contract</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_log_contract_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet" position="inside">
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_charges" type="object" class="oe_stat_button" icon="fa-gavel">
+                            <field name="charge_count" widget="statinfo" string="Charges"/>
+                        </button>
+                    </div>
+                </xpath>
+                <xpath expr="//field[@name='cost_subtype_id']" position="after">
+                    <field name="is_assurance" invisible="1"/>
+                    <field name="is_vignette" invisible="1"/>
+                    <!-- Assurance fields -->
+                    <field name="type_assurance_id" invisible="not is_assurance"/>
+                    <field name="societe_assurance" invisible="not is_assurance"/>
+                    <field name="numero_police" invisible="not is_assurance"/>
+                    <field name="cout_assurance" invisible="not is_assurance"/>
+                    <field name="description_assurance" invisible="not is_assurance"/>
+                    <!-- Vignette fields -->
+                    <field name="date_emission_vignette" invisible="not is_vignette"/>
+                    <field name="date_expiration_vignette" invisible="not is_vignette"/>
+                    <field name="cout_vignette" invisible="not is_vignette"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Maintenance Type Views -->
+        <record id="maintenance_type_view_form" model="ir.ui.view">
+            <field name="name">maintenance.type.form</field>
+            <field name="model">maintenance.type</field>
+            <field name="arch" type="xml">
+                <form string="Type de maintenance">
+                    <sheet>
+                        <group>
+                            <field name="name" required="1"/>
+                            <field name="active"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="maintenance_type_view_list" model="ir.ui.view">
+            <field name="name">maintenance.type.list</field>
+            <field name="model">maintenance.type</field>
+            <field name="arch" type="xml">
+                <tree string="Type de maintenance">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="maintenance_type_action" model="ir.actions.act_window">
+            <field name="name">Type de maintenance</field>
+            <field name="res_model">maintenance.type</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="maintenance_type_menu" name="Type de maintenance"
+                  parent="sinistre.config_sinistre_menu"
+                  action="maintenance_type_action" sequence="5"/>
+
+        <record id="vidange_type_action" model="ir.actions.act_window">
+            <field name="name">Type de vidange</field>
+            <field name="res_model">vidange.type</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="vidange_type_menu" name="Type de vidange"
+                  parent="sinistre.config_sinistre_menu"
+                  action="vidange_type_action" sequence="6"/>
+
+        <!-- Inherit fleet.vehicle.log.services form to add maintenance/entretien fields -->
+        <record id="fleet_vehicle_log_services_view_form_inherit" model="ir.ui.view">
+            <field name="name">fleet.vehicle.log.services.form.inherit</field>
+            <field name="model">fleet.vehicle.log.services</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_log_services_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='service_type_id']" position="after">
+                    <field name="is_maintenance" invisible="1"/>
+                    <field name="is_entretien" invisible="1"/>
+                    <field name="is_carburant" invisible="1"/>
+                    <field name="is_vidange" invisible="1"/>
+                    <!-- Maintenance fields -->
+                    <field name="type_maintenance_id" invisible="not is_maintenance"/>
+                    <field name="prochain_operation" invisible="not is_maintenance"/>
+                    <field name="description_maintenance" invisible="not is_maintenance"/>
+                    <!-- Entretien fields -->
+                    <field name="nature_entretien" invisible="not is_entretien"/>
+                    <field name="dernier_releve_km" invisible="not is_entretien"/>
+                    <!-- Carburant fields -->
+                    <field name="n_litre" invisible="not is_carburant"/>
+                    <field name="nouveau_releve" invisible="not is_carburant"/>
+                    <field name="mode_paiement" invisible="not is_carburant"/>
+                    <field name="reglement" invisible="not is_carburant"/>
+                    <!-- Vidange fields -->
+                    <field name="nombre_litre_charge" invisible="not is_vidange"/>
+                    <field name="prochain_vidange" invisible="not is_vidange"/>
+                    <field name="type_vidange_id" invisible="not is_vidange"/>
+                </xpath>
+            </field>
+        </record>
+        <!-- Amande et Pénalité Sequence -->
+        <record id="seq_amande_penalite" model="ir.sequence">
+            <field name="name">Amande et Pénalité</field>
+            <field name="code">amande.penalite</field>
+            <field name="prefix">AMP/</field>
+            <field name="suffix">/%(year)s</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+        </record>
+
+        <!-- Amande Penalite Tree View -->
+        <record id="amande_penalite_view_tree" model="ir.ui.view">
+            <field name="name">amande.penalite.tree</field>
+            <field name="model">amande.penalite</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="type"/>
+                    <field name="reference"/>
+                    <field name="date_emission"/>
+                    <field name="date_expiration"/>
+                    <field name="cout"/>
+                    <field name="autorite"/>
+                    <field name="contract_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Amande Penalite Form View -->
+        <record id="amande_penalite_view_form" model="ir.ui.view">
+            <field name="name">amande.penalite.form</field>
+            <field name="model">amande.penalite</field>
+            <field name="arch" type="xml">
+                <form string="Amande et Pénalité">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="name" readonly="1"/></h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="type"/>
+                                <field name="reference"/>
+                                <field name="date_emission"/>
+                                <field name="date_expiration"/>
+                            </group>
+                            <group>
+                                <field name="cout"/>
+                                <field name="autorite"/>
+                                <field name="contract_id"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="description" placeholder="Description..."/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Amande Penalite Action -->
+        <record id="amande_penalite_action" model="ir.actions.act_window">
+            <field name="name">Amandes et Pénalités</field>
+            <field name="res_model">amande.penalite</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="amande_penalite_menu" name="Amandes et Pénalités"
+                  parent="sinistre.config_sinistre_menu"
+                  action="amande_penalite_action" sequence="7"/>
+
+        <!-- Type Amande Penalite Views -->
+        <record id="type_amande_penalite_view_tree" model="ir.ui.view">
+            <field name="name">type.amande.penalite.tree</field>
+            <field name="model">type.amande.penalite</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="type_amande_penalite_view_form" model="ir.ui.view">
+            <field name="name">type.amande.penalite.form</field>
+            <field name="model">type.amande.penalite</field>
+            <field name="arch" type="xml">
+                <form string="Type d'amande et pénalité">
+                    <sheet>
+                        <group>
+                            <field name="name" required="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="type_amande_penalite_action" model="ir.actions.act_window">
+            <field name="name">Type d'amande et pénalité</field>
+            <field name="res_model">type.amande.penalite</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="type_amande_penalite_menu" name="Type d'amande et pénalité"
+                  parent="sinistre.config_sinistre_menu"
+                  action="type_amande_penalite_action" sequence="8"/>
+
+        <!-- Autorite Penalite Views -->
+        <record id="autorite_penalite_view_tree" model="ir.ui.view">
+            <field name="name">autorite.penalite.tree</field>
+            <field name="model">autorite.penalite</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="autorite_penalite_view_form" model="ir.ui.view">
+            <field name="name">autorite.penalite.form</field>
+            <field name="model">autorite.penalite</field>
+            <field name="arch" type="xml">
+                <form string="Autorité de pénalité">
+                    <sheet>
+                        <group>
+                            <field name="name" required="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="autorite_penalite_action" model="ir.actions.act_window">
+            <field name="name">Autorité de pénalité</field>
+            <field name="res_model">autorite.penalite</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="autorite_penalite_menu" name="Autorité de pénalité"
+                  parent="sinistre.config_sinistre_menu"
+                  action="autorite_penalite_action" sequence="9"/>
+    </data>
+</odoo>

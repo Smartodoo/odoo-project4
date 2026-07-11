@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data noupdate="1">
+        <!-- Payment methods -->
+        <record id="account_payment_method_virement_in" model="account.payment.method">
+            <field name="name">Virement</field>
+            <field name="code">VI</field>
+            <field name="payment_type">inbound</field>
+        </record>
+        <record id="account_payment_method_virement_out" model="account.payment.method">
+            <field name="name">Virement</field>
+            <field name="code">VI</field>
+            <field name="payment_type">outbound</field>
+        </record>
+        <record id="account_payment_method_versement_in" model="account.payment.method">
+            <field name="name">Versement</field>
+            <field name="code">VR</field>
+            <field name="payment_type">inbound</field>
+        </record>
+        <record id="account_payment_method_versement_out" model="account.payment.method">
+            <field name="name">Versement</field>
+            <field name="code">VR</field>
+            <field name="payment_type">outbound</field>
+        </record>
+        <record id="account_payment_method_cheque_in" model="account.payment.method">
+            <field name="name">Chèque</field>
+            <field name="code">Chèque</field>
+            <field name="payment_type">inbound</field>
+        </record>
+        <record id="account_payment_method_cheque_out" model="account.payment.method">
+            <field name="name">Chèque</field>
+            <field name="code">Chèque</field>
+            <field name="payment_type">outbound</field>
+        </record>
+        <record id="account_payment_method_espece_in" model="account.payment.method">
+            <field name="name">Espèces</field>
+            <field name="code">ES</field>
+            <field name="payment_type">inbound</field>
+        </record>
+        <record id="account_payment_method_espece_out" model="account.payment.method">
+            <field name="name">Espèces</field>
+            <field name="code">ES</field>
+            <field name="payment_type">outbound</field>
+        </record>
+        <record id="account_payment_method_aterme_in" model="account.payment.method">
+            <field name="name">A terme</field>
+            <field name="code">A-terme</field>
+            <field name="payment_type">inbound</field>
+        </record>
+        <record id="account_payment_method_aterme_out" model="account.payment.method">
+            <field name="name">A terme</field>
+            <field name="code">A-terme</field>
+            <field name="payment_type">outbound</field>
+        </record>
+    </data>
+</odoo>

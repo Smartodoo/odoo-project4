@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="seq_situation" model="ir.sequence">
+            <field name="name">Situation</field>
+            <field name="code">situation</field>
+            <field name="prefix">SIT/</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_versement_subcontractor" model="ir.sequence">
+            <field name="name">Versement Subcontractor</field>
+            <field name="code">versement.subcontractor</field>
+            <field name="prefix">N°</field>
+            <field name="suffix">/%(year)s</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_suivi_coulage" model="ir.sequence">
+            <field name="name">Suivi Coulage</field>
+            <field name="code">suivi.coulage</field>
+            <field name="prefix">SC/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="seq_decompte_bet" model="ir.sequence">
+            <field name="name">Décompte BET</field>
+            <field name="code">decompte.bet</field>
+            <field name="prefix">DEC/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

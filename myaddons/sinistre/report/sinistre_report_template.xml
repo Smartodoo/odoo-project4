@@ -1,0 +1,62 @@
+<odoo>
+    <template id="sinistre_report_template">
+        <t t-call="web.external_layout">
+            <main>
+                <div class="page" style="text_center">
+                    <h2 class="text-center">
+                        Sinistres —
+                        <t t-esc="env.context.get('report_month_name')"/>
+                        <t t-esc="env.context.get('report_year')"/>
+                    </h2>
+                    <br/>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Véhicule</th>
+                                <th>Plaque</th>
+                                <th>Conducteur</th>
+                                <th>Date de l'accident</th>
+                                <th>État de régelement</th>
+                                <th>État</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="docs" t-as="sinistre">
+                                <td>
+                                    <t t-esc="sinistre.vehicle_id.name"/>
+                                </td>
+                                <td>
+                                    <t t-esc="sinistre.license_plate"/>
+                                </td>
+                                <td>
+                                    <t t-esc="sinistre.driver_id.name"/>
+                                </td>
+                                <td>
+                                    <t t-esc="sinistre.date_accident"/>
+                                </td>
+                                <td>
+                                    <t t-if="sinistre.payment_state == 'payé'">Régler</t>
+                                    <t t-if="sinistre.payment_state == 'pas_payé'">Non Réglé</t>
+
+                                </td>
+                                <td>
+                                    <t t-if="sinistre.state == 'draft'">En Attente de PV</t>
+                                    <t t-if="sinistre.state == 'en_cours'">En cours</t>
+                                    <t t-if="sinistre.state == 'terminé'">Clôturé</t>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </t>
+    </template>
+    <record id="action_report_sinistre_by_month" model="ir.actions.report">
+        <field name="name">Sinistres par mois</field>
+        <field name="model">sinistre</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sinistre.sinistre_report_template</field>
+        <field name="report_file">sinistre.sinistre_report_template</field>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- 1. Alerte expiration -->
+        <record id="email_template_rental_expiry" model="mail.template">
+            <field name="name">📧 Alerte expiration location</field>
+            <field name="model_id" ref="model_property_rental"/>
+            <field name="subject">Votre location {{ object.name }} expire bientôt</field>
+            <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted or 'noreply@immobilier.dz') }}</field>
+            <field name="email_to">{{ object.client_id.email }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+                    <h2 style="color: #5E6AD2;">⏰ Votre location arrive à échéance</h2>
+                    <p>Bonjour <strong><t t-out="object.client_id.name"/></strong>,</p>
+                    <p>Votre séjour dans l'appartement <strong><t t-out="object.property_id.name"/></strong> se termine le <strong><t t-out="object.date_end"/></strong>.</p>
+                    <p>Souhaitez-vous prolonger ? Contactez-nous rapidement.</p>
+                    <hr/>
+                    <p style="color: #888; font-size: 12px;">Immobilier Pro — Gestion Locative</p>
+                </div>
+            </field>
+        </record>
+
+        <!-- 2. Relance paiement -->
+        <record id="email_payment_reminder" model="mail.template">
+            <field name="name">📧 Relance paiement</field>
+            <field name="model_id" ref="model_rental_payment"/>
+            <field name="subject">Relance paiement — {{ object.rental_id.name }}</field>
+            <field name="email_from">{{ (object.company_id.email_formatted or 'noreply@immobilier.dz') }}</field>
+            <field name="email_to">{{ object.client_id.email }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial; max-width: 600px; margin: auto;">
+                    <h2 style="color: #FF5A5F;">⚠️ Paiement en attente</h2>
+                    <p>Bonjour <t t-out="object.client_id.name"/>,</p>
+                    <p>Un paiement de <strong><t t-out="object.amount"/> DA</strong> est attendu pour la location <strong><t t-out="object.rental_id.name"/></strong>.</p>
+                    <p>Merci de régulariser votre situation.</p>
+                </div>
+            </field>
+        </record>
+
+        <!-- 3. Maintenance terminée -->
+        <record id="email_maintenance_done" model="mail.template">
+            <field name="name">📧 Maintenance terminée</field>
+            <field name="model_id" ref="model_property_maintenance"/>
+            <field name="subject">✅ Intervention terminée — {{ object.apartment_id.name }}</field>
+            <field name="email_from">{{ (object.company_id.email_formatted or 'noreply@immobilier.dz') }}</field>
+            <field name="email_to">{{ object.reported_by.email }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial; max-width: 600px; margin: auto;">
+                    <h2 style="color: #2DC071;">✅ Votre demande est résolue</h2>
+                    <p>Bonjour,</p>
+                    <p>L'intervention concernant <strong><t t-out="object.apartment_id.name"/></strong> est terminée.</p>
+                    <p><strong>Résolution :</strong> <t t-out="object.resolution or 'Problème résolu par nos techniciens.'"/></p>
+                    <p>Merci pour votre confiance.</p>
+                </div>
+            </field>
+        </record>
+
+        <!-- 4. Expiring reminder (alias pour rental) -->
+        <record id="email_expiring_reminder" model="mail.template">
+            <field name="name">📧 Rappel expiration (Locataire)</field>
+            <field name="model_id" ref="model_property_rental"/>
+            <field name="subject">🔔 Rappel : Location {{ object.name }} — {{ object.days_remaining }} jours restants</field>
+            <field name="email_from">{{ (object.company_id.email_formatted or 'noreply@immobilier.dz') }}</field>
+            <field name="email_to">{{ object.client_id.email }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial; max-width: 600px; margin: auto;">
+                    <h2 style="color: #FF8C42;">🔔 Votre location se termine bientôt</h2>
+                    <p>Bonjour <t t-out="object.client_id.name"/>,</p>
+                    <p>Il ne vous reste plus que <strong><t t-out="object.days_remaining"/> jours</strong> dans l'appartement <strong><t t-out="object.property_id.name"/></strong>.</p>
+                    <p>Pensez à préparer votre départ ou demandez une prolongation.</p>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

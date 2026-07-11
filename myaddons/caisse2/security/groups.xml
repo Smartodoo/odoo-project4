@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <!-- Security Category -->
+        <record id="group_caisse_category" model="ir.module.category">
+            <field name="name">Caisse</field>
+            <field name="description">Gestion des caisses</field>
+            <field name="sequence">5</field>
+        </record>
+
+        <!-- Caissier Group -->
+        <record id="group_caissier" model="res.groups">
+            <field name="name">Caissier</field>
+            <field name="category_id" ref="caisse2.group_caisse_category"/>
+        </record>
+
+        <!-- Comptable Group -->
+        <record id="group_comptable" model="res.groups">
+            <field name="name">Administrateur</field>
+            <field name="category_id" ref="caisse2.group_caisse_category"/>
+            <field name="implied_ids" eval="[(4, ref('caisse2.group_caissier'))]"/>
+        </record>
+
+        <!-- Lecture Seule Group -->
+        <record id="group_lecture_seule" model="res.groups">
+            <field name="name">Lecture Seule</field>
+            <field name="category_id" ref="caisse2.group_caisse_category"/>
+            <field name="comment">Accès en lecture seule - ne peut pas modifier, créer ou supprimer des données de caisse.</field>
+        </record>
+    </data>
+</odoo>

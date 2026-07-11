@@ -1,0 +1,11 @@
+/* Cacher le dialogue Odoo quand le FileViewer s'ouvre */
+.o_dialog:has(.o_commercial_preview_trigger) {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: fixed !important;
+    z-index: -1 !important;
+}
+.o_dialog:has(.o_commercial_preview_trigger) ~ .modal-backdrop {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}

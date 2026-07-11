@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- ACTION LOCATIONS                                                -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <record id="action_property_rental_all" model="ir.actions.act_window">
+        <field name="name">📋 Réservations</field>
+        <field name="res_model">property.rental</field>
+        <field name="view_mode">tree,form,calendar,pivot,graph</field>
+        <field name="context">{'search_default_confirmed': 1}</field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- CALENDAR VIEW                                                   -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_property_rental_calendar" model="ir.ui.view">
+        <field name="name">property.rental.calendar</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <calendar string="Calendrier des Locations"
+                      date_start="date_start"
+                      date_stop="date_end"
+                      color="state">
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="client_id"/>
+                <field name="total_price"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- PIVOT VIEW                                                      -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_property_rental_pivot" model="ir.ui.view">
+        <field name="name">property.rental.pivot</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Locations">
+                <field name="property_id" type="row"/>
+                <field name="period_type" type="col"/>
+                <field name="total_price" type="measure"/>
+                <field name="duration_days" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- GRAPH VIEW                                                      -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_property_rental_graph" model="ir.ui.view">
+        <field name="name">property.rental.graph</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <graph string="Revenus par Période" type="bar">
+                <field name="date_start" interval="month"/>
+                <field name="total_price" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- FORM VIEW — CORRIGÉ                                             -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_property_rental_form" model="ir.ui.view">
+        <field name="name">property.rental.form</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="✅ Confirmer"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_start" string="🟢 Démarrer"
+                            type="object" class="oe_highlight"
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_set_expiring" string="🟠 Bientôt Terminé"
+                            type="object"
+                            invisible="state != 'ongoing'"/>
+                    <button name="action_done" string="Terminer"
+                            type="object" class="oe_highlight"
+                            invisible="state not in ('ongoing', 'expiring')"/>
+                    <button name="action_cancel" string=" Annuler"
+                            type="object"
+                            invisible="state in ('done', 'cancelled')"/>
+                    <button name="action_set_to_draft" string=" Remettre Brouillon"
+                            type="object"
+                            invisible="state != 'confirmed'"/>
+
+                    <button name="action_generate_contract" string="📄 Contrat PDF"
+                            type="object" invisible="state == 'draft'"/>
+                    <button name="action_generate_quittance" string="📄 Quittance"
+                            type="object" invisible="state not in ('confirmed', 'ongoing', 'expiring', 'done')"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,ongoing,expiring,done"/>
+                </header>
+
+                <sheet>
+                    <!-- CHAMPS INVISIBLES REQUIS POUR LES MODIFIERS -->
+                    <field name="is_expiring_soon" invisible="1"/>
+
+                    <!-- Alerte expiration -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not is_expiring_soon or state not in ('ongoing', 'expiring')"
+                         style="border-radius: 16px; border: none; background: linear-gradient(135deg, #fef3c7, #fde68a);
+                                color: #92400e; padding: 20px 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                        <div style="width: 48px; height: 48px; background: #f59e0b; border-radius: 12px;
+                                    display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+                            <i class="fa fa-exclamation-triangle" title="Alerte expiration"/>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 16px;">⚠️ Cette location expire bientôt</div>
+                            <div style="font-size: 14px; opacity: 0.8;">
+                                Il reste
+                                <strong>
+                                    <field name="days_remaining"/>
+                                </strong>
+                                jours.
+                                Pensez à contacter le locataire pour le renouvellement ou l'état des lieux de sortie.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STAT BUTTONS -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_register_payment" type="object"
+                                class="oe_stat_button" icon="fa-credit-card"
+                                invisible="state in ('draft', 'cancelled', 'done')">
+                            <span class="o_stat_text">Payer</span>
+                        </button>
+
+                        <button name="action_create_service" type="object"
+                                class="oe_stat_button" icon="fa-concierge-bell"
+                                invisible="state in ('draft', 'cancelled', 'done')">
+                            <span class="o_stat_text">Service</span>
+                        </button>
+
+                        <button name="action_view_payments" type="object" class="oe_stat_button" icon="fa-money">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="amount_due" widget="monetary"/>
+                                </span>
+                                <span class="o_stat_text">Reste à payer</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <!-- INFOS PRINCIPALES -->
+                    <group>
+                        <group string="👤 LOCATAIRE">
+                            <field name="client_id" widget="res_partner_many2one"
+                                   context="{'default_is_tenant': True}"/>
+                        </group>
+                        <group string="🏠 APPARTEMENT">
+                            <field name="property_id" options="{'no_create': True}"
+                                   domain="[('state', 'in', ['available', 'soon'])]"/>
+                        </group>
+                    </group>
+
+                    <!-- DATES &amp; TARIFICATION -->
+                    <group string="📅 DATES &amp; TARIFICATION">
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group>
+                            <field name="duration_days" readonly="1"/>
+                            <field name="period_type" readonly="1"
+                                   widget="badge"
+                                   decoration-info="period_type == 'day'"
+                                   decoration-success="period_type == 'week'"
+                                   decoration-warning="period_type == 'month'"
+                                   decoration-danger="period_type == 'year'"/>
+                        </group>
+                    </group>
+
+                    <!-- FINANCIER -->
+                    <group string="💰 FINANCIER">
+                        <group>
+                            <field name="unit_price" readonly="0" widget="monetary"/>
+                            <field name="total_price" readonly="1" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="amount_paid" widget="monetary"/>
+                            <field name="amount_due" readonly="1" widget="monetary"/>
+                            <field name="payment_status" widget="badge"
+                                   decoration-danger="payment_status == 'unpaid'"
+                                   decoration-warning="payment_status == 'partial'"
+                                   decoration-success="payment_status == 'paid'"/>
+                        </group>
+                    </group>
+
+                    <!-- CAUTION -->
+                    <group string="🔒 CAUTION">
+                        <group>
+                            <field name="deposit_amount" readonly="0" widget="monetary"/>
+                            <field name="deposit_deduction" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="deposit_returned"/>
+                            <field name="deposit_return_date" invisible="not deposit_returned"/>
+                            <field name="deposit_notes"/>
+                        </group>
+                    </group>
+
+                    <field name="notes" placeholder="Notes additionnelles..."/>
+
+                    <!-- NOTEBOOK -->
+                    <notebook>
+                        <page string="💳 Paiements">
+                            <field name="payment_ids" readonly="0">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="amount"/>
+                                    <field name="payment_method"/>
+                                    <field name="payment_type"/>
+                                    <field name="state" widget="badge"/>
+                                    <button name="action_confirm" string="Confirmer" type="object"
+                                            icon="fa-check" invisible="state != 'draft'"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="🛎️ Prestations">
+                            <field name="service_ids">
+                                <tree editable="bottom">
+                                    <field name="service_type"/>
+                                    <field name="description"/>
+                                    <field name="date"/>
+                                    <field name="unit_price"/>
+                                    <field name="quantity"/>
+                                    <field name="total"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <page string="📋 États des Lieux">
+                            <field name="inspection_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="inspection_type"/>
+                                    <field name="date"/>
+                                    <field name="inspector_id"/>
+                                    <field name="damage_found"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- TREE VIEW                                                       -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_property_rental_tree" model="ir.ui.view">
+        <field name="name">property.rental.tree</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <tree decoration-muted="state == 'done'"
+                  decoration-info="state == 'draft'"
+                  decoration-success="state == 'confirmed'"
+                  decoration-warning="state == 'expiring'">
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="client_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="duration_days"/>
+                <field name="period_type" widget="badge"
+                       decoration-info="period_type == 'day'"
+                       decoration-success="period_type == 'week'"
+                       decoration-warning="period_type == 'month'"
+                       decoration-danger="period_type == 'year'"/>
+                <field name="unit_price" optional="hide"/>
+                <field name="total_price" sum="Total"/>
+                <field name="amount_paid" sum="Payé"/>
+                <field name="amount_due" sum="Reste"/>
+                <field name="payment_status" widget="badge"
+                       decoration-danger="payment_status == 'unpaid'"
+                       decoration-warning="payment_status == 'partial'"
+                       decoration-success="payment_status == 'paid'"/>
+                <field name="state" widget="badge"/>
+                <field name="days_remaining" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SEARCH VIEW                                                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <record id="view_property_rental_search" model="ir.ui.view">
+        <field name="name">property.rental.search</field>
+        <field name="model">property.rental</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="property_id"/>
+
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmé" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="En Cours" name="ongoing" domain="[('state', '=', 'ongoing')]"/>
+                <filter string="Bientôt Terminé" name="expiring" domain="[('state', '=', 'expiring')]"/>
+                <filter string="Terminé" name="done" domain="[('state', '=', 'done')]"/>
+
+                <filter string="Impayé" name="unpaid" domain="[('payment_status', '=', 'unpaid')]"/>
+                <filter string="Partiel" name="partial" domain="[('payment_status', '=', 'partial')]"/>
+                <filter string="Payé" name="paid" domain="[('payment_status', '=', 'paid')]"/>
+
+                <filter string="Journalier" name="period_day" domain="[('period_type', '=', 'day')]"/>
+                <filter string="Hebdo" name="period_week" domain="[('period_type', '=', 'week')]"/>
+                <filter string="Mensuel" name="period_month" domain="[('period_type', '=', 'month')]"/>
+                <filter string="Annuel" name="period_year" domain="[('period_type', '=', 'year')]"/>
+
+                <filter string="Ce mois" name="this_month"
+                        domain="[('date_start', '&gt;=', context_today().strftime('%%Y-%%m-01'))]"/>
+                <filter string="Expire cette semaine" name="expiring_this_week"
+                        domain="[('date_end', '&lt;=', (context_today() + relativedelta(days=7)).strftime('%%Y-%%m-%%d')),
+                                  ('state', 'in', ('ongoing', 'expiring'))]"/>
+
+                <group expand="0" string="Regrouper par">
+                    <filter string="Appartement" name="group_by_apt" context="{'group_by': 'property_id'}"/>
+                    <filter string="Client" name="group_by_client" context="{'group_by': 'client_id'}"/>
+                    <filter string="État" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Type Période" name="group_by_period" context="{'group_by': 'period_type'}"/>
+                    <filter string="Mois" name="group_by_month" context="{'group_by': 'date_start:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- MENU                                                            -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <menuitem id="menu_rent" name="📋 Réservations" parent="menu_rental_root"
+              action="action_property_rental_all" sequence="20"/>
+</odoo>

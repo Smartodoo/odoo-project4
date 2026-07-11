@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_reglement_interieur" model="ir.actions.report">
+        <field name="name">Règlement Intérieur</field>
+        <field name="model">commercial.client.location</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.report_reglement_interieur_template</field>
+        <field name="report_file">commercial.report_reglement_interieur_template</field>
+        <field name="print_report_name">'Reglement Interieur - %s' % object.nom</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="report_reglement_interieur_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; padding: 20px 40px; position: relative; min-height: 900px;">
+
+                        <!-- Titre -->
+                        <h3 style="text-align: center; font-weight: bold; font-size: 18pt; margin-bottom: 20px;">
+                            RÈGLEMENT INTÉRIEUR POUR LA LOCATION DE BUREAU
+                        </h3>
+
+                        <!-- 1. Objet du règlement -->
+                        <p style="font-size: 16pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            1. Objet du règlement
+                        </p>
+                        <p style="font-size: 12pt; line-height: 1.6; text-align: justify;">
+                            Le présent règlement intérieur a pour but de définir les conditions d'utilisation, les droits
+                            et obligations du locataire, ainsi que les règles de vie dans les locaux loués.
+                        </p>
+
+                        <!-- 2. Accès aux locaux -->
+                        <p style="font-size: 16pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            2. Accès aux locaux
+                        </p>
+                        <ul style="list-style-type: disc; padding-left: 30px; font-size: 12pt; line-height: 1.8;">
+                            <li style="margin-bottom: 4px;">
+                                Les bureaux sont accessibles de 08H à 20H, du SAMEDI au JEUDI. Toute utilisation
+                                en dehors de ces horaires doit être expressément autorisée par le bailleur.
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Les clés d'accès (bureau, sanitaire H/F, accès sud) fournis sont personnelles et non
+                                cessibles. En cas de perte, le locataire doit en informer immédiatement le bailleur.
+                            </li>
+                        </ul>
+
+                        <!-- 3. Utilisation des locaux -->
+                        <p style="font-size: 14pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            3. Utilisation des locaux
+                        </p>
+                        <ul style="list-style-type: disc; padding-left: 30px; font-size: 12pt; line-height: 1.8;">
+                            <li style="margin-bottom: 4px;">
+                                Le bureau doit être utilisé exclusivement à des fins professionnelles et dans le respect
+                                des activités autorisées par la loi.
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Toute sous-location, prêt ou mise à disposition à un tiers est strictement interdite
+                                sans l'accord préalable écrit du bailleur.
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Il est interdit d'apporter des modifications aux locaux (cloisonnement, travaux, etc.)
+                                sans l'autorisation écrite du bailleur et à titre informative les travaux d'aménagement
+                                qui seront autorisés soit séparation en verre PVC ou aluminium uniquement.
+                            </li>
+                        </ul>
+
+                        <!-- 4. Hygiène et sécurité -->
+                        <p style="font-size: 16pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            4. Hygiène et sécurité
+                        </p>
+                        <ul style="list-style-type: disc; padding-left: 30px; font-size: 12pt; line-height: 1.8;">
+                            <li style="margin-bottom: 4px;">
+                                Les locataires doivent maintenir les bureaux en bon état de propreté. Tout déchet doit
+                                être jeté dans les espaces prévus à cet effet.
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Il est interdit de fumer dans les locaux (y compris les cigarettes électroniques),
+                                conformément à la législation en vigueur.
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Toute utilisation d'appareils dangereuse ou non conformes aux normes de sécurité est
+                                strictement interdite.
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Les issues de secours et les équipements de sécurité (extincteurs, alarmes) doivent
+                                rester accessibles et en bon état.
+                            </li>
+                        </ul>
+
+                        <!-- 5. Respect des autres occupants -->
+                        <p style="font-size: 14pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            5. Respect des autres occupants
+                        </p>
+                        <ul style="list-style-type: disc; padding-left: 30px; font-size: 12pt; line-height: 1.8;">
+                            <li style="margin-bottom: 4px;">
+                                Les locataires doivent respecter les autres occupants des locaux en veillant à limiter
+                                le bruit (musique, conversations, etc.).
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Tout comportement agressif ou irrespectueux envers les autres locataires ou le personnel
+                                est strictement interdit.
+                            </li>
+                        </ul>
+
+                        <!-- 6. Matériel et mobilier -->
+                        <p style="font-size: 16pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            6. Matériel et mobilier
+                        </p>
+                        <ul style="list-style-type: disc; padding-left: 30px; font-size: 12pt; line-height: 1.8;">
+                            <li style="margin-bottom: 4px;">
+                                Le mobilier et les équipements mis à disposition doivent être utilisés avec soin. Tout
+                                dommage causé par le locataire sera à sa charge.
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Il est interdit d'emporter hors des locaux tout matériel appartenant au bailleur si
+                                trouvé déjà.
+                            </li>
+                        </ul>
+
+                        <!-- 7. Services -->
+                        <p style="font-size: 16pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            7. Services
+                        </p>
+                        <ul style="list-style-type: disc; padding-left: 30px; font-size: 12pt; line-height: 1.8;">
+                            <li style="margin-bottom: 4px;">
+                                Les charges communes telles que (l'électricité des parties, nettoyage des parties
+                                communes..) sont incluses.
+                            </li>
+                        </ul>
+
+                        <!-- 8. Paiement et caution -->
+                        <p style="font-size: 16pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            8. Paiement et caution
+                        </p>
+                        <ul style="list-style-type: disc; padding-left: 30px; font-size: 12pt; line-height: 1.8;">
+                            <li style="margin-bottom: 4px;">
+                                Le loyer doit être réglé selon les modalités précisées dans le contrat une année d'avance
+                                avec un contrat d'un an renouvelable. Tout retard de paiement pourra entraîner des
+                                pénalités ou la résiliation du contrat.
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Une caution de 50 000 DA est obligatoire à la signature et elle sera restituée à la fin
+                                du contrat, sous réserve de l'état des lieux et du respect des obligations contractuelles.
+                            </li>
+                        </ul>
+
+                        <!-- 9. Résiliation et départ -->
+                        <p style="font-size: 18pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            9. Résiliation et départ
+                        </p>
+                        <ul style="list-style-type: disc; padding-left: 30px; font-size: 12pt; line-height: 1.8;">
+                            <li style="margin-bottom: 4px;">
+                                En cas de résiliation du contrat, le locataire doit libérer les locaux à la date convenue
+                                et en bon état.
+                            </li>
+                            <li style="margin-bottom: 4px;">
+                                Un état des lieux sera réalisé à l'entrée et à la sortie.
+                            </li>
+                        </ul>
+
+                        <!-- 10. Sanctions -->
+                        <p style="font-size: 16pt; font-weight: bold; text-decoration: underline; margin-bottom: 6px; margin-top: 16px;">
+                            10. Sanctions
+                        </p>
+                        <ul style="list-style-type: disc; padding-left: 30px; font-size: 12pt; line-height: 1.8;">
+                            <li style="margin-bottom: 4px;">
+                                Toute infraction à ce règlement peut entraîner des sanctions, telles que des
+                                avertissements, des amendes contractuelles ou la résiliation immédiate du contrat.
+                            </li>
+                        </ul>
+
+                        <!-- Signatures -->
+                        <div style="margin-top: 40px; font-size: 12pt; font-weight: bold;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div style="text-align: left;">
+                                    <p>Signature du locataire</p>
+                                    <p style="margin-top: 4px;">BUREAU D'Affaire</p>
+                                    <p style="margin-top: 4px;"><t t-esc="doc.nom or ''"/></p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <p>Signature du bailleur</p>
+                                    <p style="margin-top: 30px;">
+                                        <t t-esc="doc.company_id.name or docs.env.company.name or ''"/>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

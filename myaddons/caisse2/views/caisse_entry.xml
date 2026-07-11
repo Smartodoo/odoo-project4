@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="caisse_entry_view_form" model="ir.ui.view">
+        <field name="name">caisse.entry.view.form</field>
+        <field name="model">caisse.entry</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <field name="state" widget="statusbar" invisible="1"/>
+                </header>
+
+                <sheet>
+                    <widget name="web_ribbon" title="Payé"
+                            bg_color="text-bg-danger"
+                            invisible="state != 'approuve' or not sale_order_id"/>
+                    <widget name="web_ribbon" title="Partiel"
+                            bg_color="text-bg-danger"
+                            invisible="state != 'approuve' or not amount_residual"/>
+
+                    <div class="oe_title">
+                        <field name="name"/>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <group>
+                                <field name="date" readonly="state != 'draft'"/>
+                                <field name="company_currency_id" invisible="1"/>
+                                <field name="cashbox_id"
+                                       readonly="state != 'draft'"
+                                       options="{'no_create':True,'no_create_edit':True, 'no_open':True}"/>
+                                <field name="amount"
+                                       widget="monetary"
+                                       invisible="sale_order_id"
+                                       readonly="state != 'draft'"/>
+                                <field name="description"
+                                       readonly="state != 'draft'"/>
+                            </group>
+                        </div>
+                        <div class="col-md-6">
+                            <group string="Ventes">
+                                <field name="sale_order_id"
+                                       options="{'no_create':True,'no_create_edit':True,}"
+                                       readonly="state != 'draft'"
+                                />
+                                <field name="client"
+                                       readonly="1"
+                                />
+                                <field name="amount"
+                                       string="Total Bon de commande"
+                                       widget="monetary"
+                                       invisible="not sale_order_id"
+                                       readonly="1"/>
+                                <field name="amount_verse"
+                                       invisible="not sale_order_id"
+                                       widget="monetary"
+                                       readonly="1"/>
+
+                                <field name="amount_residual"
+                                       invisible="not sale_order_id"
+                                       readonly="1"/>
+                                <field name="amount_paid"
+                                       invisible="not sale_order_id"
+                                       readonly="state != 'draft'"/>
+
+
+                            </group>
+                        </div>
+                    </div>
+                    <notebook>
+                        <page string="Autres Informations">
+                            <group class="row">
+                                <group>
+                                    <field name="user_id"
+                                           options="{'no_create':True,'no_create_edit':True, 'no_open':True}"/>
+                                    <field name="company_id"
+                                           options="{'no_create':True,'no_create_edit':True, 'no_open':True}"
+                                           readonly="1"
+                                    />
+                                </group>
+
+                            </group>
+
+                        </page>
+                        <page string="Notes">
+                            <group>
+                                <field name="notes" string=""
+                                       placeholder="Notes internes"
+                                       readonly="state != 'draft'"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="caisse_entry_view_tree" model="ir.ui.view">
+        <field name="name">caisse.entry.view.tree</field>
+        <field name="model">caisse.entry</field>
+        <field name="arch" type="xml">
+            <tree create="0">
+                <field name="name"/>
+                <field name="sale_order_id"/>
+                <field name="cashbox_id" optional="hide"/>
+                <field name="date"/>
+                <field name="description"/>
+                <field name="amount" widget="monetary"/>
+                <field name="amount_verse" widget="monetary" optional="hide"/>
+                <field name="amount_paid" sum="Total amount paid" widget="monetary" optional="hide"/>
+                <field name="amount_residual" widget="monetary" optional="hide"/>
+                <field name="company_currency_id" optional="hide"/>
+                <field name="banque_id" optional="show"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-success="state == 'approuve' "/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="caisse_entry_view_search" model="ir.ui.view">
+        <field name="name">caisse.entry.view.search</field>
+        <field name="model">caisse.entry</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="cashbox_id"/>
+                <field name="client"/>
+                <field name="sale_order_id"/>
+                <field name="date"/>
+                <field name="banque_id" string="Banque"
+                       filter_domain="['|', ('banque_id.bank_id.name', 'ilike', self), ('banque_id.acc_number', 'ilike', self)]"/>
+                <group expand="0">
+                    <filter string="Caisse" name="cashbox_id" context="{'group_by':'cashbox_id'}"/>
+                    <filter string="Caissier" name="user_id" context="{'group_by':'user_id'}"/>
+                    <filter string="Date" name="date" context="{'group_by':'date'}"/>
+                    <filter string="client" name="client" context="{'group_by':'client'}"/>
+                    <filter string="Bon de commande" name="sale_order_id" context="{'group_by':'sale_order_id'}"/>
+                    <filter string="Banque" name="group_banque" context="{'group_by':'banque_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="caisse_entry_act_window" model="ir.actions.act_window">
+        <field name="name">Gestion des encaissements</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">caisse.entry</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

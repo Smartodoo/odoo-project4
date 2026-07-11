@@ -1,0 +1,40 @@
+<!--
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_forecast" model="ir.actions.act_window">
+        <field name="name">📈 Prévisions</field>
+        <field name="res_model">rental.forecast</field>
+        <field name="view_mode">tree,form,graph</field>
+    </record>
+
+    <record id="view_forecast_tree" model="ir.ui.view">
+        <field name="name">rental.forecast.tree</field>
+        <field name="model">rental.forecast</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="trend == 'up'"
+                  decoration-danger="trend == 'down'">
+                <field name="month"/>
+                <field name="predicted_occupancy"/>
+                <field name="predicted_revenue" sum="Total Prévu"/>
+                <field name="actual_revenue" sum="Total Réel"/>
+                <field name="variance"/>
+                <field name="trend" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_forecast_graph" model="ir.ui.view">
+        <field name="name">rental.forecast.graph</field>
+        <field name="model">rental.forecast</field>
+        <field name="arch" type="xml">
+            <graph type="line">
+                <field name="month" interval="month"/>
+                <field name="predicted_revenue" type="measure"/>
+                <field name="actual_revenue" type="measure"/>
+            </graph>
+        </field>&lt;!&ndash;&ndash;&gt;
+    </record>
+
+    <menuitem id="menu_forecast" name="📈 Prévisions" parent="menu_rental_root"
+              action="action_forecast" sequence="70"/>
+</odoo>-->

@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="commercial_projet_view_tree" model="ir.ui.view">
+        <field name="name">commercial.projet.tree</field>
+        <field name="model">commercial.projet</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="type_projet_ids" widget="many2many_tags"/>
+                <field name="wilaya_id"/>
+                <field name="avancement" widget="percentpie"/>
+                <field name="bloc_count" string="Blocs"/>
+                <field name="lot_count" string="Lots"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="commercial_projet_view_form" model="ir.ui.view">
+        <field name="name">commercial.projet.form</field>
+        <field name="model">commercial.projet</field>
+        <field name="arch" type="xml">
+            <form string="Projet">
+                <header>
+                    <button name="action_validate" type="object"
+                            string="Valider" class="btn-primary"
+                            invisible="state != 'draft'"
+                            confirm="Voulez-vous vraiment valider ce projet ? Les champs ne seront plus modifiables."/>
+                    <button name="action_set_draft" type="object"
+                            string="Modifier" class="btn-secondary"
+                            invisible="state != 'validated'"
+                            groups="commercial.group_commercial_admin"/>
+                    <button name="%(commercial.action_report_fiche_projet)d" type="action"
+                            string="Imprimer fiche projet" class="btn-secondary"
+                            icon="fa-print"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,validated"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <field name="name" readonly="state == 'validated'"/>
+                    <!-- Notebook -->
+                    <notebook>
+                        <!-- Page Informations générales -->
+                        <page string="Informations générales" name="informations_generales">
+                            <group>
+                                <group>
+                                    <field name="intitule_administratif" readonly="state == 'validated'"/>
+                                    <field name="code" readonly="state == 'validated'"/>
+                                    <field name="type_projet_ids" widget="many2many_tags" readonly="state == 'validated'"/>
+                                </group>
+                                <group>
+                                    <field name="avancement" widget="progressbar" options="{'editable': True}" readonly="state == 'validated'"/>
+                                    <field name="date_debut" readonly="state == 'validated'"/>
+                                    <field name="duree_realisation" readonly="state == 'validated'"/>
+                                    <field name="date_achevement" readonly="state == 'validated'"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Page Supplémentaire -->
+                        <page string="Supplémentaire" name="supplementaire">
+                            <group>
+                                <field name="programme" readonly="state == 'validated'"/>
+                            </group>
+                            <group>
+                                <field name="emplacement_projet" readonly="state == 'validated'"/>
+                            </group>
+                            <group>
+                                <field name="description" readonly="state == 'validated'"/>
+                            </group>
+                            <group>
+                                <field name="note_versement"/>
+                            </group>
+                        </page>
+
+                        <!-- Page Localisation -->
+                        <page string="Localisation" name="localisation">
+                            <group>
+                                <group>
+                                    <field name="pays_id" readonly="state == 'validated'"/>
+                                    <field name="wilaya_id" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" readonly="state == 'validated'"/>
+                                    <field name="daira_id" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" readonly="state == 'validated'"/>
+                                    <field name="commune_id" options="{'no_create': True, 'no_create_edit': True, 'no_quick_create': True}" readonly="state == 'validated'"/>
+                                </group>
+                                <group>
+                                    <field name="section" readonly="state == 'validated'"/>
+                                    <field name="lieu_dit" readonly="state == 'validated'"/>
+                                    <field name="repere" readonly="state == 'validated'"/>
+                                    <field name="adresse" readonly="state == 'validated'"/>
+                                    <field name="superficie_terrain" readonly="state == 'validated'"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Page Identification -->
+                        <page string="Identification" name="identification">
+                            <!-- Identification juridique et technique -->
+                            <separator string=" Identification juridique et technique"/>
+                            <group>
+                                <group>
+                                    <field name="conservation_fonciere" readonly="state == 'validated'"/>
+                                    <field name="livret_foncier" readonly="state == 'validated'"/>
+                                </group>
+                                <group>
+                                    <field name="delivre_le" readonly="state == 'validated'"/>
+                                    <field name="delivre_par" readonly="state == 'validated'"/>
+                                </group>
+                            </group>
+
+                            <!--  Acte notarié -->
+                            <separator string=" Acte notarié"/>
+                            <group>
+                                <group>
+                                    <field name="acte_numero_enregistrement" readonly="state == 'validated'"/>
+                                    <field name="acte_date_publication" readonly="state == 'validated'"/>
+                                </group>
+                                <group>
+                                    <field name="acte_volume" readonly="state == 'validated'"/>
+                                    <field name="acte_folio" readonly="state == 'validated'"/>
+                                </group>
+                            </group>
+
+                            <!--  État descriptif de division -->
+                            <separator string=" État descriptif de division"/>
+                            <group>
+                                <group>
+                                    <field name="edd_numero_enregistrement" readonly="state == 'validated'"/>
+                                    <field name="edd_date_publication" readonly="state == 'validated'"/>
+                                    <field name="reference_cadastrale" readonly="state == 'validated'"/>
+                                </group>
+                                <group>
+                                    <field name="edd_volume" readonly="state == 'validated'"/>
+                                    <field name="edd_folio" readonly="state == 'validated'"/>
+                                </group>
+                            </group>
+
+                            <!-- 3-2 Permis et Certificat -->
+                            <separator string=" Permis et Certificat"/>
+                            <group col="3">
+
+                                <!-- Groupe 1 -->
+                                <group string="Permis de lotir">
+                                    <field name="permis_lotir_numero" readonly="state == 'validated'"/>
+                                    <field name="permis_lotir_date" readonly="state == 'validated'"/>
+                                    <field name="permis_lotir_par" readonly="state == 'validated'"/>
+                                </group>
+
+                                <!-- Groupe 2 -->
+                                <group string="Certificat d'aménagement">
+                                    <field name="certificat_amenagement_numero" readonly="state == 'validated'"/>
+                                    <field name="certificat_amenagement_date" readonly="state == 'validated'"/>
+                                    <field name="certificat_amenagement_par" readonly="state == 'validated'"/>
+                                </group>
+
+                                <!-- Groupe 3 -->
+                                <group string="Permis de construire">
+                                    <field name="permis_construire_numero" readonly="state == 'validated'"/>
+                                    <field name="permis_construire_date" readonly="state == 'validated'"/>
+                                    <field name="permis_construire_par" readonly="state == 'validated'"/>
+                                </group>
+
+                            </group>
+                        </page>
+
+                        <!-- Page Blocs -->
+                        <page string="Blocs" name="blocs">
+                            <field name="bloc_ids" widget="navigable_one2many" nolabel="1" readonly="state == 'validated'">
+                                <tree>
+                                    <field name="code"/>
+                                    <field name="nbre_etages"/>
+                                    <field name="mezzanine"/>
+                                    <field name="nbre_entresols"/>
+                                    <field name="nbre_soussols"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- Page Documents -->
+                        <page string="Documents" name="documents">
+                            <field name="document_ids" nolabel="1" widget="many2many_binary"
+                                   readonly="state == 'validated'"/>
+                        </page>
+
+                    </notebook>
+
+                    <field name="company_id" invisible="1"/>
+                    <field name="user_id" invisible="1"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="commercial_projet_view_search" model="ir.ui.view">
+        <field name="name">commercial.projet.search</field>
+        <field name="model">commercial.projet</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="intitule_administratif"/>
+                <field name="code"/>
+                <field name="wilaya_id"/>
+                <field name="type_projet_ids"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_wilaya" string="Wilaya" context="{'group_by': 'wilaya_id'}"/>
+                    <filter name="group_type" string="Type" context="{'group_by': 'type_projet_ids'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Kanban View -->
+    <record id="commercial_projet_view_kanban" model="ir.ui.view">
+        <field name="name">commercial.projet.kanban</field>
+        <field name="model">commercial.projet</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <field name="name"/>
+                <field name="type_projet_ids"/>
+                <field name="wilaya_id"/>
+                <field name="avancement"/>
+                <field name="bloc_count"/>
+                <field name="lot_count"/>
+                <field name="logement_count"/>
+                <field name="parking_count"/>
+                <field name="date_debut"/>
+                <field name="date_achevement"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click o_kanban_record" style="min-height: 200px; max-width: 340px; border-radius: 12px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin: 6px; display: flex; flex-direction: column;">
+
+                            <!-- Header coloré -->
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 14px 16px; border-radius: 12px 12px 0 0;">
+                                <div style="display: flex; align-items: center;">
+                                    <div style="background: rgba(255,255,255,0.2); border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                        <i class="fa fa-building" style="color: #fff; font-size: 16px;"/>
+                                    </div>
+                                    <strong style="color: #fff; font-size: 14px; line-height: 1.3;">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                            </div>
+
+                            <!-- Body -->
+                            <div style="padding: 12px 16px; flex: 1; display: flex; flex-direction: column; background: #fff;">
+                                <!-- Type projet tags -->
+                                <div style="min-height: 26px; margin-bottom: 8px;">
+                                    <field name="type_projet_ids" widget="many2many_tags"/>
+                                </div>
+
+                                <!-- Wilaya -->
+                                <div style="min-height: 22px; margin-bottom: 8px; color: #555; font-size: 13px;">
+                                    <t t-if="record.wilaya_id.value">
+                                        <i class="fa fa-map-marker" style="color: #e74c3c; margin-right: 6px;"/>
+                                        <span><field name="wilaya_id"/></span>
+                                    </t>
+                                    <t t-else="">
+                                        <span style="color: #ccc; font-style: italic;">
+                                            <i class="fa fa-map-marker" style="margin-right: 6px;"/>Aucune wilaya
+                                        </span>
+                                    </t>
+                                </div>
+
+                                <!-- Dates -->
+                                <div style="min-height: 22px; margin-bottom: 10px; color: #555; font-size: 12px;">
+                                    <t t-if="record.date_debut.value">
+                                        <i class="fa fa-calendar" style="color: #3498db; margin-right: 4px;"/>
+                                        <field name="date_debut"/>
+                                        <t t-if="record.date_achevement.value">
+                                            <span style="margin: 0 4px;">-</span>
+                                            <field name="date_achevement"/>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <span style="color: #ccc; font-style: italic;">
+                                            <i class="fa fa-calendar" style="margin-right: 4px;"/>Aucune date
+                                        </span>
+                                    </t>
+                                </div>
+
+                                <!-- Spacer -->
+                                <div style="flex: 1;"/>
+
+                                <!-- Stats badges -->
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid #f0f0f0;">
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <span style="background: #eef2ff; color: #667eea; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                            <i class="fa fa-building" style="margin-right: 4px;"/>
+                                            <field name="bloc_count"/> Blocs
+                                        </span>
+                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                            <i class="fa fa-home" style="margin-right: 4px;"/>
+                                            <field name="logement_count"/> Logements
+                                        </span>
+                                        <span style="background: #fef3e2; color: #e67e22; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                            <i class="fa fa-car" style="margin-right: 4px;"/>
+                                            <field name="parking_count"/> Parkings
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Progress bar -->
+                                <div style="margin-top: 10px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                        <span style="font-size: 11px; color: #888; font-weight: 600;">Avancement</span>
+                                        <span style="font-size: 11px; font-weight: 700; color: #667eea;">
+                                            <field name="avancement"/>%
+                                        </span>
+                                    </div>
+                                    <div style="background: #e9ecef; border-radius: 10px; height: 8px; overflow: hidden;">
+                                        <div t-attf-style="width: #{Math.min(record.avancement.raw_value || 0, 100)}%; height: 100%; border-radius: 10px; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s;"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Action Projets Promotionnels (exclut les projets de type Location) -->
+    <record id="commercial_projet_action" model="ir.actions.act_window">
+        <field name="name">Projets Promotionnels</field>
+        <field name="res_model">commercial.projet</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="commercial_projet_view_search"/>
+        <field name="domain" eval="['!', ('type_projet_ids', 'in', [ref('commercial_type_projet_location')])]"/>
+    </record>
+
+    <!-- Action Projets Locations (uniquement les projets de type Location) -->
+    <record id="commercial_projet_location_action" model="ir.actions.act_window">
+        <field name="name">Projets Locations</field>
+        <field name="res_model">commercial.projet</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="commercial_projet_view_search"/>
+        <field name="domain" eval="[('type_projet_ids', 'in', [ref('commercial_type_projet_location')])]"/>
+        <field name="context" eval="{'default_type_projet_ids': [(4, ref('commercial_type_projet_location'))]}"/>
+    </record>
+
+    <!-- ====== Type de projet : vues et action ====== -->
+    <record id="commercial_type_projet_view_tree" model="ir.ui.view">
+        <field name="name">commercial.type.projet.tree</field>
+        <field name="model">commercial.type.projet</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="commercial_type_projet_action" model="ir.actions.act_window">
+        <field name="name">Types de projet</field>
+        <field name="res_model">commercial.type.projet</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <!-- ====== Wilaya : vues et action ====== -->
+    <record id="commercial_wilaya_view_tree" model="ir.ui.view">
+        <field name="name">commercial.wilaya.tree</field>
+        <field name="model">commercial.wilaya</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="country_id"/>
+                <field name="code"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="commercial_wilaya_view_search" model="ir.ui.view">
+        <field name="name">commercial.wilaya.search</field>
+        <field name="model">commercial.wilaya</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="country_id"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_country" string="Pays" context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="commercial_wilaya_action" model="ir.actions.act_window">
+        <field name="name">Wilayas / Régions</field>
+        <field name="res_model">commercial.wilaya</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="commercial_wilaya_view_search"/>
+    </record>
+
+    <!-- ====== Daïra : vues et action ====== -->
+    <record id="commercial_daira_view_tree" model="ir.ui.view">
+        <field name="name">commercial.daira.tree</field>
+        <field name="model">commercial.daira</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="country_id"/>
+                <field name="wilaya_id"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="commercial_daira_view_search" model="ir.ui.view">
+        <field name="name">commercial.daira.search</field>
+        <field name="model">commercial.daira</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="wilaya_id"/>
+                <field name="country_id"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_country" string="Pays" context="{'group_by': 'country_id'}"/>
+                    <filter name="group_wilaya" string="Wilaya" context="{'group_by': 'wilaya_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="commercial_daira_action" model="ir.actions.act_window">
+        <field name="name">Daïras</field>
+        <field name="res_model">commercial.daira</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="commercial_daira_view_search"/>
+    </record>
+
+    <!-- ====== Commune : vues et action ====== -->
+    <record id="commercial_commune_view_tree" model="ir.ui.view">
+        <field name="name">commercial.commune.tree</field>
+        <field name="model">commercial.commune</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="country_id"/>
+                <field name="wilaya_id"/>
+                <field name="daira_id"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="commercial_commune_view_search" model="ir.ui.view">
+        <field name="name">commercial.commune.search</field>
+        <field name="model">commercial.commune</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="daira_id"/>
+                <field name="wilaya_id"/>
+                <field name="country_id"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_country" string="Pays" context="{'group_by': 'country_id'}"/>
+                    <filter name="group_wilaya" string="Wilaya" context="{'group_by': 'wilaya_id'}"/>
+                    <filter name="group_daira" string="Daïra" context="{'group_by': 'daira_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="commercial_commune_action" model="ir.actions.act_window">
+        <field name="name">Communes</field>
+        <field name="res_model">commercial.commune</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="commercial_commune_view_search"/>
+    </record>
+
+    <!-- ====== Type de lot : vues et action ====== -->
+    <record id="commercial_type_lot_view_tree" model="ir.ui.view">
+        <field name="name">commercial.type.lot.tree</field>
+        <field name="model">commercial.type.lot</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="commercial_type_lot_action" model="ir.actions.act_window">
+        <field name="name">Types de lot</field>
+        <field name="res_model">commercial.type.lot</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <!-- ====== Nature de catégorie : vues et action ====== -->
+    <record id="commercial_nature_categorie_view_tree" model="ir.ui.view">
+        <field name="name">commercial.nature.categorie.tree</field>
+        <field name="model">commercial.nature.categorie</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="commercial_nature_categorie_action" model="ir.actions.act_window">
+        <field name="name">Natures de catégorie</field>
+        <field name="res_model">commercial.nature.categorie</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+</odoo>

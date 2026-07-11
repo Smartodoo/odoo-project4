@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Ajout du champ custom_invoice_number sur le formulaire facture -->
+    <record id="view_move_form_inherit_custom_invoice_number" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.custom.invoice.number</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- Place le champ après payment_reference dans le groupe header_right -->
+            <xpath expr="//group[@id='header_right_group']/field[@name='payment_reference']" position="after">
+                <field name="custom_invoice_number"
+                       string="Numéro de facture"
+                       placeholder="Numéro personnalisé (optionnel)"
+                       invisible="move_type not in ('out_invoice','out_refund','in_invoice','in_refund','out_receipt','in_receipt')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Colonne dans la liste factures -->
+    <record id="view_invoice_tree_inherit_custom_invoice_number" model="ir.ui.view">
+        <field name="name">account.move.tree.inherit.custom.invoice.number</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="custom_invoice_number" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

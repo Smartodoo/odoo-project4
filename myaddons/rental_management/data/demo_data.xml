@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Appartements démo -->
+        <record id="demo_apt_1" model="property.apartment">
+            <field name="name">APT-101 — Résidence Lumière</field>
+            <field name="type">f2</field>
+            <field name="address">12 Rue Didouche Mourad, Alger Centre</field>
+            <field name="block">A</field>
+            <field name="floor">3</field>
+            <field name="surface">65</field>
+            <field name="price_day">3500</field>
+            <field name="price_week">21000</field>
+            <field name="price_month">75000</field>
+            <field name="price_year">800000</field>
+            <field name="is_furnished">True</field>
+            <field name="has_wifi">True</field>
+            <field name="has_ac">True</field>
+            <field name="has_parking">True</field>
+        </record>
+
+        <record id="demo_apt_2" model="property.apartment">
+            <field name="name">APT-205 — Résidence Lumière</field>
+            <field name="type">studio</field>
+            <field name="address">12 Rue Didouche Mourad, Alger Centre</field>
+            <field name="block">B</field>
+            <field name="floor">2</field>
+            <field name="surface">30</field>
+            <field name="price_day">2000</field>
+            <field name="price_month">45000</field>
+            <field name="is_furnished">True</field>
+            <field name="has_wifi">True</field>
+        </record>
+
+        <!-- Dashboard record (obligatoire pour que l'action res_id=1 fonctionne) -->
+        <record id="default_dashboard" model="rental.dashboard">
+            <field name="id">1</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,2804 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- 01 - Adrar                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_01_adrar" model="commercial.commune">
+            <field name="name">Adrar</field>
+            <field name="daira_id" ref="daira_01_adrar"/>
+        </record>
+        <record id="commune_01_bouda" model="commercial.commune">
+            <field name="name">Bouda</field>
+            <field name="daira_id" ref="daira_01_adrar"/>
+        </record>
+        <record id="commune_01_ouled_ahmed_timmi" model="commercial.commune">
+            <field name="name">Ouled Ahmed Timmi</field>
+            <field name="daira_id" ref="daira_01_adrar"/>
+        </record>
+        <record id="commune_01_timekten" model="commercial.commune">
+            <field name="name">Timekten</field>
+            <field name="daira_id" ref="daira_01_adrar"/>
+        </record>
+        <record id="commune_01_reggane" model="commercial.commune">
+            <field name="name">Reggane</field>
+            <field name="daira_id" ref="daira_01_reggane"/>
+        </record>
+        <record id="commune_01_sali" model="commercial.commune">
+            <field name="name">Sali</field>
+            <field name="daira_id" ref="daira_01_reggane"/>
+        </record>
+        <record id="commune_01_timimoun" model="commercial.commune">
+            <field name="name">Timimoun</field>
+            <field name="daira_id" ref="daira_01_timimoun"/>
+        </record>
+        <record id="commune_01_ouled_said" model="commercial.commune">
+            <field name="name">Ouled Said</field>
+            <field name="daira_id" ref="daira_01_timimoun"/>
+        </record>
+        <record id="commune_01_kali" model="commercial.commune">
+            <field name="name">Kali</field>
+            <field name="daira_id" ref="daira_01_timimoun"/>
+        </record>
+        <record id="commune_01_in_salah" model="commercial.commune">
+            <field name="name">In Salah</field>
+            <field name="daira_id" ref="daira_01_in_salah"/>
+        </record>
+        <record id="commune_01_in_ghar" model="commercial.commune">
+            <field name="name">In Ghar</field>
+            <field name="daira_id" ref="daira_01_in_salah"/>
+        </record>
+        <record id="commune_01_foggaret_ezzoubia" model="commercial.commune">
+            <field name="name">Foggaret Ezzoubia</field>
+            <field name="daira_id" ref="daira_01_in_salah"/>
+        </record>
+        <record id="commune_01_aoulef" model="commercial.commune">
+            <field name="name">Aoulef</field>
+            <field name="daira_id" ref="daira_01_aoulef"/>
+        </record>
+        <record id="commune_01_timokten" model="commercial.commune">
+            <field name="name">Timokten</field>
+            <field name="daira_id" ref="daira_01_aoulef"/>
+        </record>
+        <record id="commune_01_akabli" model="commercial.commune">
+            <field name="name">Akabli</field>
+            <field name="daira_id" ref="daira_01_aoulef"/>
+        </record>
+        <record id="commune_01_tit" model="commercial.commune">
+            <field name="name">Tit</field>
+            <field name="daira_id" ref="daira_01_tit"/>
+        </record>
+        <record id="commune_01_bordj_badji_mokhtar" model="commercial.commune">
+            <field name="name">Bordj Badji Mokhtar</field>
+            <field name="daira_id" ref="daira_01_bordj_badji_mokhtar"/>
+        </record>
+        <record id="commune_01_timiaouine" model="commercial.commune">
+            <field name="name">Timiaouine</field>
+            <field name="daira_id" ref="daira_01_bordj_badji_mokhtar"/>
+        </record>
+        <record id="commune_01_tsabit" model="commercial.commune">
+            <field name="name">Tsabit</field>
+            <field name="daira_id" ref="daira_01_tsabit"/>
+        </record>
+        <record id="commune_01_tamest" model="commercial.commune">
+            <field name="name">Tamest</field>
+            <field name="daira_id" ref="daira_01_tsabit"/>
+        </record>
+        <record id="commune_01_fenoughil" model="commercial.commune">
+            <field name="name">Fenoughil</field>
+            <field name="daira_id" ref="daira_01_fenoughil"/>
+        </record>
+        <record id="commune_01_tamentit" model="commercial.commune">
+            <field name="name">Tamentit</field>
+            <field name="daira_id" ref="daira_01_fenoughil"/>
+        </record>
+        <record id="commune_01_charouine" model="commercial.commune">
+            <field name="name">Charouine</field>
+            <field name="daira_id" ref="daira_01_charouine"/>
+        </record>
+        <record id="commune_01_ouled_aissa" model="commercial.commune">
+            <field name="name">Ouled Aissa</field>
+            <field name="daira_id" ref="daira_01_charouine"/>
+        </record>
+        <record id="commune_01_talmine" model="commercial.commune">
+            <field name="name">Talmine</field>
+            <field name="daira_id" ref="daira_01_charouine"/>
+        </record>
+        <record id="commune_01_deldoul" model="commercial.commune">
+            <field name="name">Deldoul</field>
+            <field name="daira_id" ref="daira_01_charouine"/>
+        </record>
+        <record id="commune_01_zaouiet_kounta" model="commercial.commune">
+            <field name="name">Zaouiet Kounta</field>
+            <field name="daira_id" ref="daira_01_zaouiet_kounta"/>
+        </record>
+        <record id="commune_01_sebaa" model="commercial.commune">
+            <field name="name">Sebaa</field>
+            <field name="daira_id" ref="daira_01_zaouiet_kounta"/>
+        </record>
+        <record id="commune_01_in_zeghmir" model="commercial.commune">
+            <field name="name">In Zeghmir</field>
+            <field name="daira_id" ref="daira_01_zaouiet_kounta"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 02 - Chlef                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_02_chlef" model="commercial.commune">
+            <field name="name">Chlef</field>
+            <field name="daira_id" ref="daira_02_chlef"/>
+        </record>
+        <record id="commune_02_sendjas" model="commercial.commune">
+            <field name="name">Sendjas</field>
+            <field name="daira_id" ref="daira_02_chlef"/>
+        </record>
+        <record id="commune_02_oum_drou" model="commercial.commune">
+            <field name="name">Oum Drou</field>
+            <field name="daira_id" ref="daira_02_chlef"/>
+        </record>
+        <record id="commune_02_tenes" model="commercial.commune">
+            <field name="name">Tenes</field>
+            <field name="daira_id" ref="daira_02_tenes"/>
+        </record>
+        <record id="commune_02_sidi_akkacha" model="commercial.commune">
+            <field name="name">Sidi Akkacha</field>
+            <field name="daira_id" ref="daira_02_tenes"/>
+        </record>
+        <record id="commune_02_el_marsa_tenes" model="commercial.commune">
+            <field name="name">El Marsa</field>
+            <field name="daira_id" ref="daira_02_tenes"/>
+        </record>
+        <record id="commune_02_abou_el_hassan" model="commercial.commune">
+            <field name="name">Abou El Hassan</field>
+            <field name="daira_id" ref="daira_02_abou_el_hassan"/>
+        </record>
+        <record id="commune_02_beni_rached" model="commercial.commune">
+            <field name="name">Beni Rached</field>
+            <field name="daira_id" ref="daira_02_abou_el_hassan"/>
+        </record>
+        <record id="commune_02_moussadek" model="commercial.commune">
+            <field name="name">Moussadek</field>
+            <field name="daira_id" ref="daira_02_abou_el_hassan"/>
+        </record>
+        <record id="commune_02_el_karimia" model="commercial.commune">
+            <field name="name">El Karimia</field>
+            <field name="daira_id" ref="daira_02_el_karimia"/>
+        </record>
+        <record id="commune_02_harchoun" model="commercial.commune">
+            <field name="name">Harchoun</field>
+            <field name="daira_id" ref="daira_02_el_karimia"/>
+        </record>
+        <record id="commune_02_tadjena" model="commercial.commune">
+            <field name="name">Tadjena</field>
+            <field name="daira_id" ref="daira_02_el_karimia"/>
+        </record>
+        <record id="commune_02_oued_fodda" model="commercial.commune">
+            <field name="name">Oued Fodda</field>
+            <field name="daira_id" ref="daira_02_oued_fodda"/>
+        </record>
+        <record id="commune_02_ouled_abbes" model="commercial.commune">
+            <field name="name">Ouled Abbes</field>
+            <field name="daira_id" ref="daira_02_oued_fodda"/>
+        </record>
+        <record id="commune_02_breira" model="commercial.commune">
+            <field name="name">Breira</field>
+            <field name="daira_id" ref="daira_02_oued_fodda"/>
+        </record>
+        <record id="commune_02_ain_merane" model="commercial.commune">
+            <field name="name">Ain Merane</field>
+            <field name="daira_id" ref="daira_02_ain_merane"/>
+        </record>
+        <record id="commune_02_oued_sly" model="commercial.commune">
+            <field name="name">Oued Sly</field>
+            <field name="daira_id" ref="daira_02_ain_merane"/>
+        </record>
+        <record id="commune_02_arib" model="commercial.commune">
+            <field name="name">Arib</field>
+            <field name="daira_id" ref="daira_02_ain_merane"/>
+        </record>
+        <record id="commune_02_boukadir" model="commercial.commune">
+            <field name="name">Boukadir</field>
+            <field name="daira_id" ref="daira_02_boukadir"/>
+        </record>
+        <record id="commune_02_sobha" model="commercial.commune">
+            <field name="name">Sobha</field>
+            <field name="daira_id" ref="daira_02_boukadir"/>
+        </record>
+        <record id="commune_02_ouled_fares" model="commercial.commune">
+            <field name="name">Ouled Fares</field>
+            <field name="daira_id" ref="daira_02_boukadir"/>
+        </record>
+        <record id="commune_02_el_marsa" model="commercial.commune">
+            <field name="name">El Marsa</field>
+            <field name="daira_id" ref="daira_02_el_marsa"/>
+        </record>
+        <record id="commune_02_ouled_ben_abdelkader" model="commercial.commune">
+            <field name="name">Ouled Ben Abdelkader</field>
+            <field name="daira_id" ref="daira_02_ouled_ben_abdelkader"/>
+        </record>
+        <record id="commune_02_benairia" model="commercial.commune">
+            <field name="name">Benairia</field>
+            <field name="daira_id" ref="daira_02_ouled_ben_abdelkader"/>
+        </record>
+        <record id="commune_02_hadjadj" model="commercial.commune">
+            <field name="name">Hadjadj</field>
+            <field name="daira_id" ref="daira_02_ouled_ben_abdelkader"/>
+        </record>
+        <record id="commune_02_zeboudja" model="commercial.commune">
+            <field name="name">Zeboudja</field>
+            <field name="daira_id" ref="daira_02_zeboudja"/>
+        </record>
+        <record id="commune_02_labiod_medjadja" model="commercial.commune">
+            <field name="name">Labiod Medjadja</field>
+            <field name="daira_id" ref="daira_02_zeboudja"/>
+        </record>
+        <record id="commune_02_bouzghaia" model="commercial.commune">
+            <field name="name">Bouzghaia</field>
+            <field name="daira_id" ref="daira_02_zeboudja"/>
+        </record>
+        <record id="commune_02_beni_haoua" model="commercial.commune">
+            <field name="name">Beni Haoua</field>
+            <field name="daira_id" ref="daira_02_beni_haoua"/>
+        </record>
+        <record id="commune_02_ain_laloui" model="commercial.commune">
+            <field name="name">Ain Laloui</field>
+            <field name="daira_id" ref="daira_02_beni_haoua"/>
+        </record>
+        <record id="commune_02_taougrit" model="commercial.commune">
+            <field name="name">Taougrit</field>
+            <field name="daira_id" ref="daira_02_taougrit"/>
+        </record>
+        <record id="commune_02_herenfa" model="commercial.commune">
+            <field name="name">Herenfa</field>
+            <field name="daira_id" ref="daira_02_taougrit"/>
+        </record>
+        <record id="commune_02_dahra" model="commercial.commune">
+            <field name="name">Dahra</field>
+            <field name="daira_id" ref="daira_02_taougrit"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 03 - Laghouat                                                -->
+        <!-- ============================================================ -->
+        <record id="commune_03_laghouat" model="commercial.commune">
+            <field name="name">Laghouat</field>
+            <field name="daira_id" ref="daira_03_laghouat"/>
+        </record>
+        <record id="commune_03_kheneg" model="commercial.commune">
+            <field name="name">Kheneg</field>
+            <field name="daira_id" ref="daira_03_laghouat"/>
+        </record>
+        <record id="commune_03_mekhareg" model="commercial.commune">
+            <field name="name">Mekhareg</field>
+            <field name="daira_id" ref="daira_03_laghouat"/>
+        </record>
+        <record id="commune_03_aflou" model="commercial.commune">
+            <field name="name">Aflou</field>
+            <field name="daira_id" ref="daira_03_aflou"/>
+        </record>
+        <record id="commune_03_oued_morra_aflou" model="commercial.commune">
+            <field name="name">Oued Morra</field>
+            <field name="daira_id" ref="daira_03_aflou"/>
+        </record>
+        <record id="commune_03_gueltat_sidi_saad_aflou" model="commercial.commune">
+            <field name="name">Gueltat Sidi Saad</field>
+            <field name="daira_id" ref="daira_03_aflou"/>
+        </record>
+        <record id="commune_03_ksar_el_hirane" model="commercial.commune">
+            <field name="name">Ksar El Hirane</field>
+            <field name="daira_id" ref="daira_03_ksar_el_hirane"/>
+        </record>
+        <record id="commune_03_tadjmout_ksar" model="commercial.commune">
+            <field name="name">Tadjmout</field>
+            <field name="daira_id" ref="daira_03_ksar_el_hirane"/>
+        </record>
+        <record id="commune_03_el_haouaita_ksar" model="commercial.commune">
+            <field name="name">El Haouaita</field>
+            <field name="daira_id" ref="daira_03_ksar_el_hirane"/>
+        </record>
+        <record id="commune_03_hassi_rmel" model="commercial.commune">
+            <field name="name">Hassi R'Mel</field>
+            <field name="daira_id" ref="daira_03_hassi_rmel"/>
+        </record>
+        <record id="commune_03_hassi_delaa_rmel" model="commercial.commune">
+            <field name="name">Hassi Delaa</field>
+            <field name="daira_id" ref="daira_03_hassi_rmel"/>
+        </record>
+        <record id="commune_03_ain_madhi" model="commercial.commune">
+            <field name="name">Ain Madhi</field>
+            <field name="daira_id" ref="daira_03_ain_madhi"/>
+        </record>
+        <record id="commune_03_tadjrouna" model="commercial.commune">
+            <field name="name">Tadjrouna</field>
+            <field name="daira_id" ref="daira_03_ain_madhi"/>
+        </record>
+        <record id="commune_03_brida" model="commercial.commune">
+            <field name="name">Brida</field>
+            <field name="daira_id" ref="daira_03_brida"/>
+        </record>
+        <record id="commune_03_el_ghicha_brida" model="commercial.commune">
+            <field name="name">El Ghicha</field>
+            <field name="daira_id" ref="daira_03_brida"/>
+        </record>
+        <record id="commune_03_el_assafia" model="commercial.commune">
+            <field name="name">El Assafia</field>
+            <field name="daira_id" ref="daira_03_brida"/>
+        </record>
+        <record id="commune_03_gueltat_sidi_saad" model="commercial.commune">
+            <field name="name">Gueltat Sidi Saad</field>
+            <field name="daira_id" ref="daira_03_gueltat_sidi_saad"/>
+        </record>
+        <record id="commune_03_sidi_makhlouf_gueltat" model="commercial.commune">
+            <field name="name">Sidi Makhlouf</field>
+            <field name="daira_id" ref="daira_03_gueltat_sidi_saad"/>
+        </record>
+        <record id="commune_03_el_haouaita" model="commercial.commune">
+            <field name="name">El Haouaita</field>
+            <field name="daira_id" ref="daira_03_el_haouaita"/>
+        </record>
+        <record id="commune_03_hassi_delaa" model="commercial.commune">
+            <field name="name">Hassi Delaa</field>
+            <field name="daira_id" ref="daira_03_hassi_delaa"/>
+        </record>
+        <record id="commune_03_oued_morra" model="commercial.commune">
+            <field name="name">Oued Morra</field>
+            <field name="daira_id" ref="daira_03_oued_morra"/>
+        </record>
+        <record id="commune_03_taouiala" model="commercial.commune">
+            <field name="name">Taouiala</field>
+            <field name="daira_id" ref="daira_03_oued_morra"/>
+        </record>
+        <record id="commune_03_beidha" model="commercial.commune">
+            <field name="name">Beidha</field>
+            <field name="daira_id" ref="daira_03_oued_morra"/>
+        </record>
+        <record id="commune_03_sidi_makhlouf" model="commercial.commune">
+            <field name="name">Sidi Makhlouf</field>
+            <field name="daira_id" ref="daira_03_sidi_makhlouf"/>
+        </record>
+        <record id="commune_03_ain_sidi_ali" model="commercial.commune">
+            <field name="name">Ain Sidi Ali</field>
+            <field name="daira_id" ref="daira_03_sidi_makhlouf"/>
+        </record>
+        <record id="commune_03_tadjmout" model="commercial.commune">
+            <field name="name">Tadjmout</field>
+            <field name="daira_id" ref="daira_03_tadjmout"/>
+        </record>
+        <record id="commune_03_ain_mahdi" model="commercial.commune">
+            <field name="name">Ain Mahdi</field>
+            <field name="daira_id" ref="daira_03_tadjmout"/>
+        </record>
+        <record id="commune_03_el_ghicha" model="commercial.commune">
+            <field name="name">El Ghicha</field>
+            <field name="daira_id" ref="daira_03_el_ghicha"/>
+        </record>
+        <record id="commune_03_sebgag" model="commercial.commune">
+            <field name="name">Sebgag</field>
+            <field name="daira_id" ref="daira_03_el_ghicha"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 04 - Oum El Bouaghi                                          -->
+        <!-- ============================================================ -->
+        <record id="commune_04_oum_el_bouaghi" model="commercial.commune">
+            <field name="name">Oum El Bouaghi</field>
+            <field name="daira_id" ref="daira_04_oum_el_bouaghi"/>
+        </record>
+        <record id="commune_04_ain_zitoun" model="commercial.commune">
+            <field name="name">Ain Zitoun</field>
+            <field name="daira_id" ref="daira_04_oum_el_bouaghi"/>
+        </record>
+        <record id="commune_04_behir_chergui" model="commercial.commune">
+            <field name="name">Behir Chergui</field>
+            <field name="daira_id" ref="daira_04_oum_el_bouaghi"/>
+        </record>
+        <record id="commune_04_ain_beida" model="commercial.commune">
+            <field name="name">Ain Beida</field>
+            <field name="daira_id" ref="daira_04_ain_beida"/>
+        </record>
+        <record id="commune_04_berriche" model="commercial.commune">
+            <field name="name">Berriche</field>
+            <field name="daira_id" ref="daira_04_ain_beida"/>
+        </record>
+        <record id="commune_04_el_amiria" model="commercial.commune">
+            <field name="name">El Amiria</field>
+            <field name="daira_id" ref="daira_04_ain_beida"/>
+        </record>
+        <record id="commune_04_ain_mlila" model="commercial.commune">
+            <field name="name">Ain M'lila</field>
+            <field name="daira_id" ref="daira_04_ain_mlila"/>
+        </record>
+        <record id="commune_04_ouled_hamla_mlila" model="commercial.commune">
+            <field name="name">Ouled Hamla</field>
+            <field name="daira_id" ref="daira_04_ain_mlila"/>
+        </record>
+        <record id="commune_04_ksar_sbahi" model="commercial.commune">
+            <field name="name">Ksar Sbahi</field>
+            <field name="daira_id" ref="daira_04_ksar_sbahi"/>
+        </record>
+        <record id="commune_04_bir_chouhada" model="commercial.commune">
+            <field name="name">Bir Chouhada</field>
+            <field name="daira_id" ref="daira_04_ksar_sbahi"/>
+        </record>
+        <record id="commune_04_ain_fakroun" model="commercial.commune">
+            <field name="name">Ain Fakroun</field>
+            <field name="daira_id" ref="daira_04_ain_fakroun"/>
+        </record>
+        <record id="commune_04_ain_babouche_fakroun" model="commercial.commune">
+            <field name="name">Ain Babouche</field>
+            <field name="daira_id" ref="daira_04_ain_fakroun"/>
+        </record>
+        <record id="commune_04_sigus" model="commercial.commune">
+            <field name="name">Sigus</field>
+            <field name="daira_id" ref="daira_04_sigus"/>
+        </record>
+        <record id="commune_04_ain_kercha" model="commercial.commune">
+            <field name="name">Ain Kercha</field>
+            <field name="daira_id" ref="daira_04_sigus"/>
+        </record>
+        <record id="commune_04_el_belala" model="commercial.commune">
+            <field name="name">El Belala</field>
+            <field name="daira_id" ref="daira_04_sigus"/>
+        </record>
+        <record id="commune_04_dhalaa" model="commercial.commune">
+            <field name="name">Dhalaa</field>
+            <field name="daira_id" ref="daira_04_dhalaa"/>
+        </record>
+        <record id="commune_04_ain_diss" model="commercial.commune">
+            <field name="name">Ain Diss</field>
+            <field name="daira_id" ref="daira_04_dhalaa"/>
+        </record>
+        <record id="commune_04_rahia" model="commercial.commune">
+            <field name="name">Rahia</field>
+            <field name="daira_id" ref="daira_04_dhalaa"/>
+        </record>
+        <record id="commune_04_ain_babouche" model="commercial.commune">
+            <field name="name">Ain Babouche</field>
+            <field name="daira_id" ref="daira_04_ain_babouche"/>
+        </record>
+        <record id="commune_04_hanchir_toumghani" model="commercial.commune">
+            <field name="name">Hanchir Toumghani</field>
+            <field name="daira_id" ref="daira_04_ain_babouche"/>
+        </record>
+        <record id="commune_04_souk_naamane" model="commercial.commune">
+            <field name="name">Souk Naamane</field>
+            <field name="daira_id" ref="daira_04_souk_naamane"/>
+        </record>
+        <record id="commune_04_ouled_gacem" model="commercial.commune">
+            <field name="name">Ouled Gacem</field>
+            <field name="daira_id" ref="daira_04_souk_naamane"/>
+        </record>
+        <record id="commune_04_meskiana" model="commercial.commune">
+            <field name="name">Meskiana</field>
+            <field name="daira_id" ref="daira_04_meskiana"/>
+        </record>
+        <record id="commune_04_fkirina_mesk" model="commercial.commune">
+            <field name="name">Fkirina</field>
+            <field name="daira_id" ref="daira_04_meskiana"/>
+        </record>
+        <record id="commune_04_ouled_hamla" model="commercial.commune">
+            <field name="name">Ouled Hamla</field>
+            <field name="daira_id" ref="daira_04_ouled_hamla"/>
+        </record>
+        <record id="commune_04_fkirina" model="commercial.commune">
+            <field name="name">F'Kirina</field>
+            <field name="daira_id" ref="daira_04_fkirina"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 05 - Batna                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_05_batna" model="commercial.commune">
+            <field name="name">Batna</field>
+            <field name="daira_id" ref="daira_05_batna"/>
+        </record>
+        <record id="commune_05_fesdis" model="commercial.commune">
+            <field name="name">Fesdis</field>
+            <field name="daira_id" ref="daira_05_batna"/>
+        </record>
+        <record id="commune_05_oued_chaaba" model="commercial.commune">
+            <field name="name">Oued Chaaba</field>
+            <field name="daira_id" ref="daira_05_batna"/>
+        </record>
+        <record id="commune_05_barika" model="commercial.commune">
+            <field name="name">Barika</field>
+            <field name="daira_id" ref="daira_05_barika"/>
+        </record>
+        <record id="commune_05_bitam" model="commercial.commune">
+            <field name="name">Bitam</field>
+            <field name="daira_id" ref="daira_05_barika"/>
+        </record>
+        <record id="commune_05_mdoukal" model="commercial.commune">
+            <field name="name">M'Doukal</field>
+            <field name="daira_id" ref="daira_05_barika"/>
+        </record>
+        <record id="commune_05_djezzar_barika" model="commercial.commune">
+            <field name="name">Djezzar</field>
+            <field name="daira_id" ref="daira_05_barika"/>
+        </record>
+        <record id="commune_05_ain_touta" model="commercial.commune">
+            <field name="name">Ain Touta</field>
+            <field name="daira_id" ref="daira_05_ain_touta"/>
+        </record>
+        <record id="commune_05_hidoussa" model="commercial.commune">
+            <field name="name">Hidoussa</field>
+            <field name="daira_id" ref="daira_05_ain_touta"/>
+        </record>
+        <record id="commune_05_el_madher_touta" model="commercial.commune">
+            <field name="name">El Madher</field>
+            <field name="daira_id" ref="daira_05_ain_touta"/>
+        </record>
+        <record id="commune_05_ngaous" model="commercial.commune">
+            <field name="name">N'Gaous</field>
+            <field name="daira_id" ref="daira_05_ngaous"/>
+        </record>
+        <record id="commune_05_sefiane" model="commercial.commune">
+            <field name="name">Sefiane</field>
+            <field name="daira_id" ref="daira_05_ngaous"/>
+        </record>
+        <record id="commune_05_ras_el_aioun_ngaous" model="commercial.commune">
+            <field name="name">Ras El Aioun</field>
+            <field name="daira_id" ref="daira_05_ngaous"/>
+        </record>
+        <record id="commune_05_ouled_si_slimane_ngaous" model="commercial.commune">
+            <field name="name">Ouled Si Slimane</field>
+            <field name="daira_id" ref="daira_05_ngaous"/>
+        </record>
+        <record id="commune_05_arris" model="commercial.commune">
+            <field name="name">Arris</field>
+            <field name="daira_id" ref="daira_05_arris"/>
+        </record>
+        <record id="commune_05_tighanimine" model="commercial.commune">
+            <field name="name">Tighanimine</field>
+            <field name="daira_id" ref="daira_05_arris"/>
+        </record>
+        <record id="commune_05_merouana" model="commercial.commune">
+            <field name="name">Merouana</field>
+            <field name="daira_id" ref="daira_05_merouana"/>
+        </record>
+        <record id="commune_05_oued_el_ma" model="commercial.commune">
+            <field name="name">Oued El Ma</field>
+            <field name="daira_id" ref="daira_05_merouana"/>
+        </record>
+        <record id="commune_05_tazoult" model="commercial.commune">
+            <field name="name">Tazoult</field>
+            <field name="daira_id" ref="daira_05_tazoult"/>
+        </record>
+        <record id="commune_05_timgad_tazoult" model="commercial.commune">
+            <field name="name">Timgad</field>
+            <field name="daira_id" ref="daira_05_tazoult"/>
+        </record>
+        <record id="commune_05_seriana" model="commercial.commune">
+            <field name="name">Seriana</field>
+            <field name="daira_id" ref="daira_05_seriana"/>
+        </record>
+        <record id="commune_05_ain_yagout" model="commercial.commune">
+            <field name="name">Ain Yagout</field>
+            <field name="daira_id" ref="daira_05_seriana"/>
+        </record>
+        <record id="commune_05_menaa" model="commercial.commune">
+            <field name="name">Menaa</field>
+            <field name="daira_id" ref="daira_05_menaa"/>
+        </record>
+        <record id="commune_05_tigharghar" model="commercial.commune">
+            <field name="name">Tigharghar</field>
+            <field name="daira_id" ref="daira_05_menaa"/>
+        </record>
+        <record id="commune_05_ras_el_aioun" model="commercial.commune">
+            <field name="name">Ras El Aioun</field>
+            <field name="daira_id" ref="daira_05_ras_el_aioun"/>
+        </record>
+        <record id="commune_05_talkhamt" model="commercial.commune">
+            <field name="name">Talkhamt</field>
+            <field name="daira_id" ref="daira_05_ras_el_aioun"/>
+        </record>
+        <record id="commune_05_chemora" model="commercial.commune">
+            <field name="name">Chemora</field>
+            <field name="daira_id" ref="daira_05_chemora"/>
+        </record>
+        <record id="commune_05_ouled_aouf" model="commercial.commune">
+            <field name="name">Ouled Aouf</field>
+            <field name="daira_id" ref="daira_05_chemora"/>
+        </record>
+        <record id="commune_05_ouled_si_slimane" model="commercial.commune">
+            <field name="name">Ouled Si Slimane</field>
+            <field name="daira_id" ref="daira_05_ouled_si_slimane"/>
+        </record>
+        <record id="commune_05_boumagueur" model="commercial.commune">
+            <field name="name">Boumagueur</field>
+            <field name="daira_id" ref="daira_05_ouled_si_slimane"/>
+        </record>
+        <record id="commune_05_ichemoul" model="commercial.commune">
+            <field name="name">Ichemoul</field>
+            <field name="daira_id" ref="daira_05_ichemoul"/>
+        </record>
+        <record id="commune_05_foum_toub" model="commercial.commune">
+            <field name="name">Foum Toub</field>
+            <field name="daira_id" ref="daira_05_ichemoul"/>
+        </record>
+        <record id="commune_05_inoughissen" model="commercial.commune">
+            <field name="name">Inoughissen</field>
+            <field name="daira_id" ref="daira_05_ichemoul"/>
+        </record>
+        <record id="commune_05_timgad" model="commercial.commune">
+            <field name="name">Timgad</field>
+            <field name="daira_id" ref="daira_05_timgad"/>
+        </record>
+        <record id="commune_05_ouyoun_el_assafir" model="commercial.commune">
+            <field name="name">Ouyoun El Assafir</field>
+            <field name="daira_id" ref="daira_05_timgad"/>
+        </record>
+        <record id="commune_05_el_madher" model="commercial.commune">
+            <field name="name">El Madher</field>
+            <field name="daira_id" ref="daira_05_el_madher"/>
+        </record>
+        <record id="commune_05_djerma" model="commercial.commune">
+            <field name="name">Djerma</field>
+            <field name="daira_id" ref="daira_05_el_madher"/>
+        </record>
+        <record id="commune_05_djezzar" model="commercial.commune">
+            <field name="name">Djezzar</field>
+            <field name="daira_id" ref="daira_05_djezzar"/>
+        </record>
+        <record id="commune_05_ouled_ammar" model="commercial.commune">
+            <field name="name">Ouled Ammar</field>
+            <field name="daira_id" ref="daira_05_djezzar"/>
+        </record>
+        <record id="commune_05_ain_djasser" model="commercial.commune">
+            <field name="name">Ain Djasser</field>
+            <field name="daira_id" ref="daira_05_ain_djasser"/>
+        </record>
+        <record id="commune_05_ouled_sellam" model="commercial.commune">
+            <field name="name">Ouled Sellam</field>
+            <field name="daira_id" ref="daira_05_ain_djasser"/>
+        </record>
+        <record id="commune_05_maafa" model="commercial.commune">
+            <field name="name">Maafa</field>
+            <field name="daira_id" ref="daira_05_ain_djasser"/>
+        </record>
+        <record id="commune_05_tkout" model="commercial.commune">
+            <field name="name">Tkout</field>
+            <field name="daira_id" ref="daira_05_tkout"/>
+        </record>
+        <record id="commune_05_ghassira" model="commercial.commune">
+            <field name="name">Ghassira</field>
+            <field name="daira_id" ref="daira_05_tkout"/>
+        </record>
+        <record id="commune_05_theniet_el_abed_tkout" model="commercial.commune">
+            <field name="name">Theniet El Abed</field>
+            <field name="daira_id" ref="daira_05_tkout"/>
+        </record>
+        <record id="commune_05_seggana" model="commercial.commune">
+            <field name="name">Seggana</field>
+            <field name="daira_id" ref="daira_05_seggana"/>
+        </record>
+        <record id="commune_05_lemsane" model="commercial.commune">
+            <field name="name">Lemsane</field>
+            <field name="daira_id" ref="daira_05_seggana"/>
+        </record>
+        <record id="commune_05_tilatou" model="commercial.commune">
+            <field name="name">Tilatou</field>
+            <field name="daira_id" ref="daira_05_seggana"/>
+        </record>
+        <record id="commune_05_bouzina" model="commercial.commune">
+            <field name="name">Bouzina</field>
+            <field name="daira_id" ref="daira_05_bouzina"/>
+        </record>
+        <record id="commune_05_larbaa" model="commercial.commune">
+            <field name="name">Larbaa</field>
+            <field name="daira_id" ref="daira_05_bouzina"/>
+        </record>
+        <record id="commune_05_teniet_el_abed" model="commercial.commune">
+            <field name="name">Teniet El Abed</field>
+            <field name="daira_id" ref="daira_05_teniet_el_abed"/>
+        </record>
+        <record id="commune_05_taxlent" model="commercial.commune">
+            <field name="name">Taxlent</field>
+            <field name="daira_id" ref="daira_05_teniet_el_abed"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 06 - Bejaia                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_06_bejaia" model="commercial.commune">
+            <field name="name">Bejaia</field>
+            <field name="daira_id" ref="daira_06_bejaia"/>
+        </record>
+        <record id="commune_06_oued_ghir" model="commercial.commune">
+            <field name="name">Oued Ghir</field>
+            <field name="daira_id" ref="daira_06_bejaia"/>
+        </record>
+        <record id="commune_06_toudja" model="commercial.commune">
+            <field name="name">Toudja</field>
+            <field name="daira_id" ref="daira_06_bejaia"/>
+        </record>
+        <record id="commune_06_akbou" model="commercial.commune">
+            <field name="name">Akbou</field>
+            <field name="daira_id" ref="daira_06_akbou"/>
+        </record>
+        <record id="commune_06_amalou" model="commercial.commune">
+            <field name="name">Amalou</field>
+            <field name="daira_id" ref="daira_06_akbou"/>
+        </record>
+        <record id="commune_06_ighram" model="commercial.commune">
+            <field name="name">Ighram</field>
+            <field name="daira_id" ref="daira_06_akbou"/>
+        </record>
+        <record id="commune_06_sidi_aich" model="commercial.commune">
+            <field name="name">Sidi Aich</field>
+            <field name="daira_id" ref="daira_06_sidi_aich"/>
+        </record>
+        <record id="commune_06_sidi_ayad" model="commercial.commune">
+            <field name="name">Sidi Ayad</field>
+            <field name="daira_id" ref="daira_06_sidi_aich"/>
+        </record>
+        <record id="commune_06_mcisna" model="commercial.commune">
+            <field name="name">Mcisna</field>
+            <field name="daira_id" ref="daira_06_sidi_aich"/>
+        </record>
+        <record id="commune_06_amizour" model="commercial.commune">
+            <field name="name">Amizour</field>
+            <field name="daira_id" ref="daira_06_amizour"/>
+        </record>
+        <record id="commune_06_semaoun" model="commercial.commune">
+            <field name="name">Semaoun</field>
+            <field name="daira_id" ref="daira_06_amizour"/>
+        </record>
+        <record id="commune_06_feraoun" model="commercial.commune">
+            <field name="name">Feraoun</field>
+            <field name="daira_id" ref="daira_06_amizour"/>
+        </record>
+        <record id="commune_06_el_kseur" model="commercial.commune">
+            <field name="name">El Kseur</field>
+            <field name="daira_id" ref="daira_06_el_kseur"/>
+        </record>
+        <record id="commune_06_tala_hamza" model="commercial.commune">
+            <field name="name">Tala Hamza</field>
+            <field name="daira_id" ref="daira_06_el_kseur"/>
+        </record>
+        <record id="commune_06_taourirt_ighil" model="commercial.commune">
+            <field name="name">Taourirt Ighil</field>
+            <field name="daira_id" ref="daira_06_el_kseur"/>
+        </record>
+        <record id="commune_06_tichy" model="commercial.commune">
+            <field name="name">Tichy</field>
+            <field name="daira_id" ref="daira_06_tichy"/>
+        </record>
+        <record id="commune_06_aokas_tichy" model="commercial.commune">
+            <field name="name">Aokas</field>
+            <field name="daira_id" ref="daira_06_tichy"/>
+        </record>
+        <record id="commune_06_tizi_nberber" model="commercial.commune">
+            <field name="name">Tizi N'Berber</field>
+            <field name="daira_id" ref="daira_06_tichy"/>
+        </record>
+        <record id="commune_06_melbou" model="commercial.commune">
+            <field name="name">Melbou</field>
+            <field name="daira_id" ref="daira_06_tichy"/>
+        </record>
+        <record id="commune_06_barbacha" model="commercial.commune">
+            <field name="name">Barbacha</field>
+            <field name="daira_id" ref="daira_06_barbacha"/>
+        </record>
+        <record id="commune_06_kendira" model="commercial.commune">
+            <field name="name">Kendira</field>
+            <field name="daira_id" ref="daira_06_barbacha"/>
+        </record>
+        <record id="commune_06_beni_djellil" model="commercial.commune">
+            <field name="name">Beni Djellil</field>
+            <field name="daira_id" ref="daira_06_barbacha"/>
+        </record>
+        <record id="commune_06_darguina" model="commercial.commune">
+            <field name="name">Darguina</field>
+            <field name="daira_id" ref="daira_06_darguina"/>
+        </record>
+        <record id="commune_06_taskeriout" model="commercial.commune">
+            <field name="name">Taskeriout</field>
+            <field name="daira_id" ref="daira_06_darguina"/>
+        </record>
+        <record id="commune_06_ait_smail" model="commercial.commune">
+            <field name="name">Ait Smail</field>
+            <field name="daira_id" ref="daira_06_darguina"/>
+        </record>
+        <record id="commune_06_ifri_ouzellaguen" model="commercial.commune">
+            <field name="name">Ifri Ouzellaguen</field>
+            <field name="daira_id" ref="daira_06_ifri_ouzellaguen"/>
+        </record>
+        <record id="commune_06_ouzellaguen" model="commercial.commune">
+            <field name="name">Ouzellaguen</field>
+            <field name="daira_id" ref="daira_06_ifri_ouzellaguen"/>
+        </record>
+        <record id="commune_06_bouhamza" model="commercial.commune">
+            <field name="name">Bouhamza</field>
+            <field name="daira_id" ref="daira_06_ifri_ouzellaguen"/>
+        </record>
+        <record id="commune_06_seddouk" model="commercial.commune">
+            <field name="name">Seddouk</field>
+            <field name="daira_id" ref="daira_06_seddouk"/>
+        </record>
+        <record id="commune_06_boudjellil" model="commercial.commune">
+            <field name="name">Boudjellil</field>
+            <field name="daira_id" ref="daira_06_seddouk"/>
+        </record>
+        <record id="commune_06_kherrata" model="commercial.commune">
+            <field name="name">Kherrata</field>
+            <field name="daira_id" ref="daira_06_kherrata"/>
+        </record>
+        <record id="commune_06_draa_el_gaid" model="commercial.commune">
+            <field name="name">Draa El Gaid</field>
+            <field name="daira_id" ref="daira_06_kherrata"/>
+        </record>
+        <record id="commune_06_tamridjet" model="commercial.commune">
+            <field name="name">Tamridjet</field>
+            <field name="daira_id" ref="daira_06_kherrata"/>
+        </record>
+        <record id="commune_06_tazmalt" model="commercial.commune">
+            <field name="name">Tazmalt</field>
+            <field name="daira_id" ref="daira_06_tazmalt"/>
+        </record>
+        <record id="commune_06_beni_melikeche" model="commercial.commune">
+            <field name="name">Beni Melikeche</field>
+            <field name="daira_id" ref="daira_06_tazmalt"/>
+        </record>
+        <record id="commune_06_ait_rzine" model="commercial.commune">
+            <field name="name">Ait R'Zine</field>
+            <field name="daira_id" ref="daira_06_tazmalt"/>
+        </record>
+        <record id="commune_06_adekar" model="commercial.commune">
+            <field name="name">Adekar</field>
+            <field name="daira_id" ref="daira_06_adekar"/>
+        </record>
+        <record id="commune_06_chemini" model="commercial.commune">
+            <field name="name">Chemini</field>
+            <field name="daira_id" ref="daira_06_chemini"/>
+        </record>
+        <record id="commune_06_souk_oufella" model="commercial.commune">
+            <field name="name">Souk Oufella</field>
+            <field name="daira_id" ref="daira_06_chemini"/>
+        </record>
+        <record id="commune_06_tibane" model="commercial.commune">
+            <field name="name">Tibane</field>
+            <field name="daira_id" ref="daira_06_chemini"/>
+        </record>
+        <record id="commune_06_souk_el_tenine" model="commercial.commune">
+            <field name="name">Souk El Tenine</field>
+            <field name="daira_id" ref="daira_06_souk_el_tenine"/>
+        </record>
+        <record id="commune_06_aokas" model="commercial.commune">
+            <field name="name">Aokas</field>
+            <field name="daira_id" ref="daira_06_aokas"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 07 - Biskra                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_07_biskra" model="commercial.commune">
+            <field name="name">Biskra</field>
+            <field name="daira_id" ref="daira_07_biskra"/>
+        </record>
+        <record id="commune_07_el_hadjeb" model="commercial.commune">
+            <field name="name">El Hadjeb</field>
+            <field name="daira_id" ref="daira_07_biskra"/>
+        </record>
+        <record id="commune_07_chetma" model="commercial.commune">
+            <field name="name">Chetma</field>
+            <field name="daira_id" ref="daira_07_biskra"/>
+        </record>
+        <record id="commune_07_branis" model="commercial.commune">
+            <field name="name">Branis</field>
+            <field name="daira_id" ref="daira_07_biskra"/>
+        </record>
+        <record id="commune_07_ouled_djellal" model="commercial.commune">
+            <field name="name">Ouled Djellal</field>
+            <field name="daira_id" ref="daira_07_ouled_djellal"/>
+        </record>
+        <record id="commune_07_ech_chaiba" model="commercial.commune">
+            <field name="name">Ech Chaiba</field>
+            <field name="daira_id" ref="daira_07_ouled_djellal"/>
+        </record>
+        <record id="commune_07_doucen" model="commercial.commune">
+            <field name="name">Doucen</field>
+            <field name="daira_id" ref="daira_07_ouled_djellal"/>
+        </record>
+        <record id="commune_07_sidi_khaled_djellal" model="commercial.commune">
+            <field name="name">Sidi Khaled</field>
+            <field name="daira_id" ref="daira_07_ouled_djellal"/>
+        </record>
+        <record id="commune_07_sidi_okba" model="commercial.commune">
+            <field name="name">Sidi Okba</field>
+            <field name="daira_id" ref="daira_07_sidi_okba"/>
+        </record>
+        <record id="commune_07_el_haouch" model="commercial.commune">
+            <field name="name">El Haouch</field>
+            <field name="daira_id" ref="daira_07_sidi_okba"/>
+        </record>
+        <record id="commune_07_ain_naga" model="commercial.commune">
+            <field name="name">Ain Naga</field>
+            <field name="daira_id" ref="daira_07_sidi_okba"/>
+        </record>
+        <record id="commune_07_tolga" model="commercial.commune">
+            <field name="name">Tolga</field>
+            <field name="daira_id" ref="daira_07_tolga"/>
+        </record>
+        <record id="commune_07_bouchagroune" model="commercial.commune">
+            <field name="name">Bouchagroune</field>
+            <field name="daira_id" ref="daira_07_tolga"/>
+        </record>
+        <record id="commune_07_bordj_ben_azzouz" model="commercial.commune">
+            <field name="name">Bordj Ben Azzouz</field>
+            <field name="daira_id" ref="daira_07_tolga"/>
+        </record>
+        <record id="commune_07_lichana" model="commercial.commune">
+            <field name="name">Lichana</field>
+            <field name="daira_id" ref="daira_07_tolga"/>
+        </record>
+        <record id="commune_07_foughala_tolga" model="commercial.commune">
+            <field name="name">Foughala</field>
+            <field name="daira_id" ref="daira_07_tolga"/>
+        </record>
+        <record id="commune_07_zeribet_el_oued" model="commercial.commune">
+            <field name="name">Zeribet El Oued</field>
+            <field name="daira_id" ref="daira_07_zeribet_el_oued"/>
+        </record>
+        <record id="commune_07_el_mizaraa" model="commercial.commune">
+            <field name="name">El Mizaraa</field>
+            <field name="daira_id" ref="daira_07_zeribet_el_oued"/>
+        </record>
+        <record id="commune_07_khangat_sidi_nadji" model="commercial.commune">
+            <field name="name">Khangat Sidi Nadji</field>
+            <field name="daira_id" ref="daira_07_zeribet_el_oued"/>
+        </record>
+        <record id="commune_07_el_kantara" model="commercial.commune">
+            <field name="name">El Kantara</field>
+            <field name="daira_id" ref="daira_07_el_kantara"/>
+        </record>
+        <record id="commune_07_ain_zaatout" model="commercial.commune">
+            <field name="name">Ain Zaatout</field>
+            <field name="daira_id" ref="daira_07_el_kantara"/>
+        </record>
+        <record id="commune_07_djemorah" model="commercial.commune">
+            <field name="name">Djemorah</field>
+            <field name="daira_id" ref="daira_07_el_kantara"/>
+        </record>
+        <record id="commune_07_djamorah" model="commercial.commune">
+            <field name="name">Djamorah</field>
+            <field name="daira_id" ref="daira_07_djamorah"/>
+        </record>
+        <record id="commune_07_foughala" model="commercial.commune">
+            <field name="name">Foughala</field>
+            <field name="daira_id" ref="daira_07_foughala"/>
+        </record>
+        <record id="commune_07_lioua_foughala" model="commercial.commune">
+            <field name="name">Lioua</field>
+            <field name="daira_id" ref="daira_07_foughala"/>
+        </record>
+        <record id="commune_07_el_outaya" model="commercial.commune">
+            <field name="name">El Outaya</field>
+            <field name="daira_id" ref="daira_07_foughala"/>
+        </record>
+        <record id="commune_07_sidi_khaled" model="commercial.commune">
+            <field name="name">Sidi Khaled</field>
+            <field name="daira_id" ref="daira_07_sidi_khaled"/>
+        </record>
+        <record id="commune_07_besbes" model="commercial.commune">
+            <field name="name">Besbes</field>
+            <field name="daira_id" ref="daira_07_sidi_khaled"/>
+        </record>
+        <record id="commune_07_ras_el_miad" model="commercial.commune">
+            <field name="name">Ras El Miad</field>
+            <field name="daira_id" ref="daira_07_sidi_khaled"/>
+        </record>
+        <record id="commune_07_ourlal" model="commercial.commune">
+            <field name="name">Ourlal</field>
+            <field name="daira_id" ref="daira_07_ourlal"/>
+        </record>
+        <record id="commune_07_lioua" model="commercial.commune">
+            <field name="name">Lioua</field>
+            <field name="daira_id" ref="daira_07_ourlal"/>
+        </record>
+        <record id="commune_07_el_ghrous" model="commercial.commune">
+            <field name="name">El Ghrous</field>
+            <field name="daira_id" ref="daira_07_ourlal"/>
+        </record>
+        <record id="commune_07_mchouneche" model="commercial.commune">
+            <field name="name">M'Chouneche</field>
+            <field name="daira_id" ref="daira_07_mchouneche"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 08 - Bechar                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_08_bechar" model="commercial.commune">
+            <field name="name">Bechar</field>
+            <field name="daira_id" ref="daira_08_bechar"/>
+        </record>
+        <record id="commune_08_kenadsa" model="commercial.commune">
+            <field name="name">Kenadsa</field>
+            <field name="daira_id" ref="daira_08_kenadsa"/>
+        </record>
+        <record id="commune_08_mougheul" model="commercial.commune">
+            <field name="name">Mougheul</field>
+            <field name="daira_id" ref="daira_08_kenadsa"/>
+        </record>
+        <record id="commune_08_abadla" model="commercial.commune">
+            <field name="name">Abadla</field>
+            <field name="daira_id" ref="daira_08_abadla"/>
+        </record>
+        <record id="commune_08_erg_ferradj" model="commercial.commune">
+            <field name="name">Erg Ferradj</field>
+            <field name="daira_id" ref="daira_08_abadla"/>
+        </record>
+        <record id="commune_08_beni_ounif" model="commercial.commune">
+            <field name="name">Beni Ounif</field>
+            <field name="daira_id" ref="daira_08_beni_ounif"/>
+        </record>
+        <record id="commune_08_taghit" model="commercial.commune">
+            <field name="name">Taghit</field>
+            <field name="daira_id" ref="daira_08_taghit"/>
+        </record>
+        <record id="commune_08_igli" model="commercial.commune">
+            <field name="name">Igli</field>
+            <field name="daira_id" ref="daira_08_igli"/>
+        </record>
+        <record id="commune_08_tabelbala" model="commercial.commune">
+            <field name="name">Tabelbala</field>
+            <field name="daira_id" ref="daira_08_tabelbala"/>
+        </record>
+        <record id="commune_08_beni_abbes" model="commercial.commune">
+            <field name="name">Beni Abbes</field>
+            <field name="daira_id" ref="daira_08_beni_abbes"/>
+        </record>
+        <record id="commune_08_el_ouata" model="commercial.commune">
+            <field name="name">El Ouata</field>
+            <field name="daira_id" ref="daira_08_el_ouata"/>
+        </record>
+        <record id="commune_08_lahmar" model="commercial.commune">
+            <field name="name">Lahmar</field>
+            <field name="daira_id" ref="daira_08_lahmar"/>
+        </record>
+        <record id="commune_08_meridja" model="commercial.commune">
+            <field name="name">Meridja</field>
+            <field name="daira_id" ref="daira_08_lahmar"/>
+        </record>
+        <record id="commune_08_mechraa_houari" model="commercial.commune">
+            <field name="name">Mechraa Houari</field>
+            <field name="daira_id" ref="daira_08_mechraa_houari"/>
+        </record>
+        <record id="commune_08_boukais" model="commercial.commune">
+            <field name="name">Boukais</field>
+            <field name="daira_id" ref="daira_08_mechraa_houari"/>
+        </record>
+        <record id="commune_08_tamtert" model="commercial.commune">
+            <field name="name">Tamtert</field>
+            <field name="daira_id" ref="daira_08_tamtert"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 09 - Blida                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_09_blida" model="commercial.commune">
+            <field name="name">Blida</field>
+            <field name="daira_id" ref="daira_09_blida"/>
+        </record>
+        <record id="commune_09_ben_khelil" model="commercial.commune">
+            <field name="name">Ben Khelil</field>
+            <field name="daira_id" ref="daira_09_blida"/>
+        </record>
+        <record id="commune_09_ouled_yaich" model="commercial.commune">
+            <field name="name">Ouled Yaich</field>
+            <field name="daira_id" ref="daira_09_blida"/>
+        </record>
+        <record id="commune_09_boufarik" model="commercial.commune">
+            <field name="name">Boufarik</field>
+            <field name="daira_id" ref="daira_09_boufarik"/>
+        </record>
+        <record id="commune_09_soumaa" model="commercial.commune">
+            <field name="name">Soumaa</field>
+            <field name="daira_id" ref="daira_09_boufarik"/>
+        </record>
+        <record id="commune_09_guerrouaou" model="commercial.commune">
+            <field name="name">Guerrouaou</field>
+            <field name="daira_id" ref="daira_09_boufarik"/>
+        </record>
+        <record id="commune_09_bougara" model="commercial.commune">
+            <field name="name">Bougara</field>
+            <field name="daira_id" ref="daira_09_bougara"/>
+        </record>
+        <record id="commune_09_hammam_melouane" model="commercial.commune">
+            <field name="name">Hammam Melouane</field>
+            <field name="daira_id" ref="daira_09_bougara"/>
+        </record>
+        <record id="commune_09_ain_romana" model="commercial.commune">
+            <field name="name">Ain Romana</field>
+            <field name="daira_id" ref="daira_09_bougara"/>
+        </record>
+        <record id="commune_09_larbaa" model="commercial.commune">
+            <field name="name">Larbaa</field>
+            <field name="daira_id" ref="daira_09_larbaa"/>
+        </record>
+        <record id="commune_09_oued_el_alleug_larbaa" model="commercial.commune">
+            <field name="name">Oued El Alleug</field>
+            <field name="daira_id" ref="daira_09_larbaa"/>
+        </record>
+        <record id="commune_09_meftah" model="commercial.commune">
+            <field name="name">Meftah</field>
+            <field name="daira_id" ref="daira_09_larbaa"/>
+        </record>
+        <record id="commune_09_djebabra" model="commercial.commune">
+            <field name="name">Djebabra</field>
+            <field name="daira_id" ref="daira_09_larbaa"/>
+        </record>
+        <record id="commune_09_mouzaia" model="commercial.commune">
+            <field name="name">Mouzaia</field>
+            <field name="daira_id" ref="daira_09_mouzaia"/>
+        </record>
+        <record id="commune_09_chiffa" model="commercial.commune">
+            <field name="name">Chiffa</field>
+            <field name="daira_id" ref="daira_09_mouzaia"/>
+        </record>
+        <record id="commune_09_el_affroun" model="commercial.commune">
+            <field name="name">El Affroun</field>
+            <field name="daira_id" ref="daira_09_mouzaia"/>
+        </record>
+        <record id="commune_09_chebli" model="commercial.commune">
+            <field name="name">Chebli</field>
+            <field name="daira_id" ref="daira_09_mouzaia"/>
+        </record>
+        <record id="commune_09_oued_el_alleug" model="commercial.commune">
+            <field name="name">Oued El Alleug</field>
+            <field name="daira_id" ref="daira_09_oued_el_alleug"/>
+        </record>
+        <record id="commune_09_beni_tamou" model="commercial.commune">
+            <field name="name">Beni Tamou</field>
+            <field name="daira_id" ref="daira_09_oued_el_alleug"/>
+        </record>
+        <record id="commune_09_beni_mered" model="commercial.commune">
+            <field name="name">Beni Mered</field>
+            <field name="daira_id" ref="daira_09_oued_el_alleug"/>
+        </record>
+        <record id="commune_09_bouinan" model="commercial.commune">
+            <field name="name">Bouinan</field>
+            <field name="daira_id" ref="daira_09_bouinan"/>
+        </record>
+        <record id="commune_09_souhane" model="commercial.commune">
+            <field name="name">Souhane</field>
+            <field name="daira_id" ref="daira_09_bouinan"/>
+        </record>
+        <record id="commune_09_ouled_slama" model="commercial.commune">
+            <field name="name">Ouled Slama</field>
+            <field name="daira_id" ref="daira_09_bouinan"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 10 - Bouira                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_10_bouira" model="commercial.commune">
+            <field name="name">Bouira</field>
+            <field name="daira_id" ref="daira_10_bouira"/>
+        </record>
+        <record id="commune_10_el_hachimia_bouira" model="commercial.commune">
+            <field name="name">El Hachimia</field>
+            <field name="daira_id" ref="daira_10_bouira"/>
+        </record>
+        <record id="commune_10_ain_el_hadjar" model="commercial.commune">
+            <field name="name">Ain El Hadjar</field>
+            <field name="daira_id" ref="daira_10_bouira"/>
+        </record>
+        <record id="commune_10_lakhdaria" model="commercial.commune">
+            <field name="name">Lakhdaria</field>
+            <field name="daira_id" ref="daira_10_lakhdaria"/>
+        </record>
+        <record id="commune_10_bouderbala" model="commercial.commune">
+            <field name="name">Bouderbala</field>
+            <field name="daira_id" ref="daira_10_lakhdaria"/>
+        </record>
+        <record id="commune_10_maala" model="commercial.commune">
+            <field name="name">Maala</field>
+            <field name="daira_id" ref="daira_10_lakhdaria"/>
+        </record>
+        <record id="commune_10_guerrouma" model="commercial.commune">
+            <field name="name">Guerrouma</field>
+            <field name="daira_id" ref="daira_10_lakhdaria"/>
+        </record>
+        <record id="commune_10_sour_el_ghozlane" model="commercial.commune">
+            <field name="name">Sour El Ghozlane</field>
+            <field name="daira_id" ref="daira_10_sour_el_ghozlane"/>
+        </record>
+        <record id="commune_10_maamora" model="commercial.commune">
+            <field name="name">Maamora</field>
+            <field name="daira_id" ref="daira_10_sour_el_ghozlane"/>
+        </record>
+        <record id="commune_10_dechmia" model="commercial.commune">
+            <field name="name">Dechmia</field>
+            <field name="daira_id" ref="daira_10_sour_el_ghozlane"/>
+        </record>
+        <record id="commune_10_ain_bessem" model="commercial.commune">
+            <field name="name">Ain Bessem</field>
+            <field name="daira_id" ref="daira_10_ain_bessem"/>
+        </record>
+        <record id="commune_10_ain_laloui" model="commercial.commune">
+            <field name="name">Ain Laloui</field>
+            <field name="daira_id" ref="daira_10_ain_bessem"/>
+        </record>
+        <record id="commune_10_raouraoua" model="commercial.commune">
+            <field name="name">Raouraoua</field>
+            <field name="daira_id" ref="daira_10_ain_bessem"/>
+        </record>
+        <record id="commune_10_mchedallah" model="commercial.commune">
+            <field name="name">M'Chedallah</field>
+            <field name="daira_id" ref="daira_10_mchedallah"/>
+        </record>
+        <record id="commune_10_saharidj" model="commercial.commune">
+            <field name="name">Saharidj</field>
+            <field name="daira_id" ref="daira_10_mchedallah"/>
+        </record>
+        <record id="commune_10_aghbalou_mched" model="commercial.commune">
+            <field name="name">Aghbalou</field>
+            <field name="daira_id" ref="daira_10_mchedallah"/>
+        </record>
+        <record id="commune_10_bechloul" model="commercial.commune">
+            <field name="name">Bechloul</field>
+            <field name="daira_id" ref="daira_10_bechloul"/>
+        </record>
+        <record id="commune_10_aomar" model="commercial.commune">
+            <field name="name">Aomar</field>
+            <field name="daira_id" ref="daira_10_bechloul"/>
+        </record>
+        <record id="commune_10_el_adjiba" model="commercial.commune">
+            <field name="name">El Adjiba</field>
+            <field name="daira_id" ref="daira_10_bechloul"/>
+        </record>
+        <record id="commune_10_bordj_okhriss" model="commercial.commune">
+            <field name="name">Bordj Okhriss</field>
+            <field name="daira_id" ref="daira_10_bordj_okhriss"/>
+        </record>
+        <record id="commune_10_ahl_el_ksar" model="commercial.commune">
+            <field name="name">Ahl El Ksar</field>
+            <field name="daira_id" ref="daira_10_bordj_okhriss"/>
+        </record>
+        <record id="commune_10_ridane" model="commercial.commune">
+            <field name="name">Ridane</field>
+            <field name="daira_id" ref="daira_10_bordj_okhriss"/>
+        </record>
+        <record id="commune_10_el_hachimia" model="commercial.commune">
+            <field name="name">El Hachimia</field>
+            <field name="daira_id" ref="daira_10_el_hachimia"/>
+        </record>
+        <record id="commune_10_ain_turk" model="commercial.commune">
+            <field name="name">Ain Turk</field>
+            <field name="daira_id" ref="daira_10_el_hachimia"/>
+        </record>
+        <record id="commune_10_ouled_rached" model="commercial.commune">
+            <field name="name">Ouled Rached</field>
+            <field name="daira_id" ref="daira_10_el_hachimia"/>
+        </record>
+        <record id="commune_10_haizer" model="commercial.commune">
+            <field name="name">Haizer</field>
+            <field name="daira_id" ref="daira_10_haizer"/>
+        </record>
+        <record id="commune_10_ath_laaziz" model="commercial.commune">
+            <field name="name">Ath Laaziz</field>
+            <field name="daira_id" ref="daira_10_haizer"/>
+        </record>
+        <record id="commune_10_taghzout" model="commercial.commune">
+            <field name="name">Taghzout</field>
+            <field name="daira_id" ref="daira_10_haizer"/>
+        </record>
+        <record id="commune_10_kadiria" model="commercial.commune">
+            <field name="name">Kadiria</field>
+            <field name="daira_id" ref="daira_10_kadiria"/>
+        </record>
+        <record id="commune_10_hanif" model="commercial.commune">
+            <field name="name">Hanif</field>
+            <field name="daira_id" ref="daira_10_kadiria"/>
+        </record>
+        <record id="commune_10_bir_ghbalou" model="commercial.commune">
+            <field name="name">Bir Ghbalou</field>
+            <field name="daira_id" ref="daira_10_bir_ghbalou"/>
+        </record>
+        <record id="commune_10_djebahia" model="commercial.commune">
+            <field name="name">Djebahia</field>
+            <field name="daira_id" ref="daira_10_bir_ghbalou"/>
+        </record>
+        <record id="commune_10_el_mokrani" model="commercial.commune">
+            <field name="name">El Mokrani</field>
+            <field name="daira_id" ref="daira_10_bir_ghbalou"/>
+        </record>
+        <record id="commune_10_aghbalou" model="commercial.commune">
+            <field name="name">Aghbalou</field>
+            <field name="daira_id" ref="daira_10_aghbalou"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 11 - Tamanrasset                                             -->
+        <!-- ============================================================ -->
+        <record id="commune_11_tamanrasset" model="commercial.commune">
+            <field name="name">Tamanrasset</field>
+            <field name="daira_id" ref="daira_11_tamanrasset"/>
+        </record>
+        <record id="commune_11_in_guezzam" model="commercial.commune">
+            <field name="name">In Guezzam</field>
+            <field name="daira_id" ref="daira_11_in_guezzam"/>
+        </record>
+        <record id="commune_11_tin_zaouatine_guezzam" model="commercial.commune">
+            <field name="name">Tin Zaouatine</field>
+            <field name="daira_id" ref="daira_11_in_guezzam"/>
+        </record>
+        <record id="commune_11_tazrouk" model="commercial.commune">
+            <field name="name">Tazrouk</field>
+            <field name="daira_id" ref="daira_11_tazrouk"/>
+        </record>
+        <record id="commune_11_ideles_tazrouk" model="commercial.commune">
+            <field name="name">Ideles</field>
+            <field name="daira_id" ref="daira_11_tazrouk"/>
+        </record>
+        <record id="commune_11_abalessa" model="commercial.commune">
+            <field name="name">Abalessa</field>
+            <field name="daira_id" ref="daira_11_abalessa"/>
+        </record>
+        <record id="commune_11_ideles" model="commercial.commune">
+            <field name="name">Ideles</field>
+            <field name="daira_id" ref="daira_11_ideles"/>
+        </record>
+        <record id="commune_11_tin_zaouatine" model="commercial.commune">
+            <field name="name">Tin Zaouatine</field>
+            <field name="daira_id" ref="daira_11_tin_zaouatine"/>
+        </record>
+        <record id="commune_11_in_amguel" model="commercial.commune">
+            <field name="name">In Amguel</field>
+            <field name="daira_id" ref="daira_11_in_amguel"/>
+        </record>
+        <record id="commune_11_silet" model="commercial.commune">
+            <field name="name">Silet</field>
+            <field name="daira_id" ref="daira_11_silet"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 12 - Tebessa                                                 -->
+        <!-- ============================================================ -->
+        <record id="commune_12_tebessa" model="commercial.commune">
+            <field name="name">Tebessa</field>
+            <field name="daira_id" ref="daira_12_tebessa"/>
+        </record>
+        <record id="commune_12_hammamet_teb" model="commercial.commune">
+            <field name="name">Hammamet</field>
+            <field name="daira_id" ref="daira_12_tebessa"/>
+        </record>
+        <record id="commune_12_bekkaria_teb" model="commercial.commune">
+            <field name="name">Bekkaria</field>
+            <field name="daira_id" ref="daira_12_tebessa"/>
+        </record>
+        <record id="commune_12_bir_el_ater" model="commercial.commune">
+            <field name="name">Bir El Ater</field>
+            <field name="daira_id" ref="daira_12_bir_el_ater"/>
+        </record>
+        <record id="commune_12_el_ogla_bir" model="commercial.commune">
+            <field name="name">El Ogla</field>
+            <field name="daira_id" ref="daira_12_bir_el_ater"/>
+        </record>
+        <record id="commune_12_negrine_bir" model="commercial.commune">
+            <field name="name">Negrine</field>
+            <field name="daira_id" ref="daira_12_bir_el_ater"/>
+        </record>
+        <record id="commune_12_cheria" model="commercial.commune">
+            <field name="name">Cheria</field>
+            <field name="daira_id" ref="daira_12_cheria"/>
+        </record>
+        <record id="commune_12_el_ogla_du_malha" model="commercial.commune">
+            <field name="name">El Ogla du Malha</field>
+            <field name="daira_id" ref="daira_12_cheria"/>
+        </record>
+        <record id="commune_12_thlidjene" model="commercial.commune">
+            <field name="name">Thlidjene</field>
+            <field name="daira_id" ref="daira_12_cheria"/>
+        </record>
+        <record id="commune_12_ouenza" model="commercial.commune">
+            <field name="name">Ouenza</field>
+            <field name="daira_id" ref="daira_12_ouenza"/>
+        </record>
+        <record id="commune_12_el_meridj" model="commercial.commune">
+            <field name="name">El Meridj</field>
+            <field name="daira_id" ref="daira_12_ouenza"/>
+        </record>
+        <record id="commune_12_boukhadra" model="commercial.commune">
+            <field name="name">Boukhadra</field>
+            <field name="daira_id" ref="daira_12_ouenza"/>
+        </record>
+        <record id="commune_12_el_aouinet_ouenza" model="commercial.commune">
+            <field name="name">El Aouinet</field>
+            <field name="daira_id" ref="daira_12_ouenza"/>
+        </record>
+        <record id="commune_12_el_aouinet" model="commercial.commune">
+            <field name="name">El Aouinet</field>
+            <field name="daira_id" ref="daira_12_el_aouinet"/>
+        </record>
+        <record id="commune_12_safsaf_el_ouesra" model="commercial.commune">
+            <field name="name">Safsaf El Ouesra</field>
+            <field name="daira_id" ref="daira_12_el_aouinet"/>
+        </record>
+        <record id="commune_12_morsott" model="commercial.commune">
+            <field name="name">Morsott</field>
+            <field name="daira_id" ref="daira_12_morsott"/>
+        </record>
+        <record id="commune_12_el_kouif_morsott" model="commercial.commune">
+            <field name="name">El Kouif</field>
+            <field name="daira_id" ref="daira_12_morsott"/>
+        </record>
+        <record id="commune_12_ain_zerga" model="commercial.commune">
+            <field name="name">Ain Zerga</field>
+            <field name="daira_id" ref="daira_12_morsott"/>
+        </record>
+        <record id="commune_12_el_kouif" model="commercial.commune">
+            <field name="name">El Kouif</field>
+            <field name="daira_id" ref="daira_12_el_kouif"/>
+        </record>
+        <record id="commune_12_negrine" model="commercial.commune">
+            <field name="name">Negrine</field>
+            <field name="daira_id" ref="daira_12_negrine"/>
+        </record>
+        <record id="commune_12_ferkane" model="commercial.commune">
+            <field name="name">Ferkane</field>
+            <field name="daira_id" ref="daira_12_negrine"/>
+        </record>
+        <record id="commune_12_el_ogla" model="commercial.commune">
+            <field name="name">El Ogla</field>
+            <field name="daira_id" ref="daira_12_el_ogla"/>
+        </record>
+        <record id="commune_12_hammamet" model="commercial.commune">
+            <field name="name">Hammamet</field>
+            <field name="daira_id" ref="daira_12_hammamet"/>
+        </record>
+        <record id="commune_12_bekkaria" model="commercial.commune">
+            <field name="name">Bekkaria</field>
+            <field name="daira_id" ref="daira_12_bekkaria"/>
+        </record>
+        <record id="commune_12_stah_guentis" model="commercial.commune">
+            <field name="name">Stah Guentis</field>
+            <field name="daira_id" ref="daira_12_bekkaria"/>
+        </record>
+        <record id="commune_12_oum_ali" model="commercial.commune">
+            <field name="name">Oum Ali</field>
+            <field name="daira_id" ref="daira_12_oum_ali"/>
+        </record>
+        <record id="commune_12_tlidjene" model="commercial.commune">
+            <field name="name">Tlidjene</field>
+            <field name="daira_id" ref="daira_12_oum_ali"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 13 - Tlemcen                                                 -->
+        <!-- ============================================================ -->
+        <record id="commune_13_tlemcen" model="commercial.commune">
+            <field name="name">Tlemcen</field>
+            <field name="daira_id" ref="daira_13_tlemcen"/>
+        </record>
+        <record id="commune_13_beni_mester" model="commercial.commune">
+            <field name="name">Beni Mester</field>
+            <field name="daira_id" ref="daira_13_tlemcen"/>
+        </record>
+        <record id="commune_13_maghnia" model="commercial.commune">
+            <field name="name">Maghnia</field>
+            <field name="daira_id" ref="daira_13_maghnia"/>
+        </record>
+        <record id="commune_13_hammam_boughrara" model="commercial.commune">
+            <field name="name">Hammam Boughrara</field>
+            <field name="daira_id" ref="daira_13_maghnia"/>
+        </record>
+        <record id="commune_13_ghazaouet" model="commercial.commune">
+            <field name="name">Ghazaouet</field>
+            <field name="daira_id" ref="daira_13_ghazaouet"/>
+        </record>
+        <record id="commune_13_souahlia" model="commercial.commune">
+            <field name="name">Souahlia</field>
+            <field name="daira_id" ref="daira_13_ghazaouet"/>
+        </record>
+        <record id="commune_13_nedroma" model="commercial.commune">
+            <field name="name">Nedroma</field>
+            <field name="daira_id" ref="daira_13_nedroma"/>
+        </record>
+        <record id="commune_13_djebala" model="commercial.commune">
+            <field name="name">Djebala</field>
+            <field name="daira_id" ref="daira_13_nedroma"/>
+        </record>
+        <record id="commune_13_remchi" model="commercial.commune">
+            <field name="name">Remchi</field>
+            <field name="daira_id" ref="daira_13_remchi"/>
+        </record>
+        <record id="commune_13_ain_youcef" model="commercial.commune">
+            <field name="name">Ain Youcef</field>
+            <field name="daira_id" ref="daira_13_remchi"/>
+        </record>
+        <record id="commune_13_sebdou" model="commercial.commune">
+            <field name="name">Sebdou</field>
+            <field name="daira_id" ref="daira_13_sebdou"/>
+        </record>
+        <record id="commune_13_el_gor" model="commercial.commune">
+            <field name="name">El Gor</field>
+            <field name="daira_id" ref="daira_13_sebdou"/>
+        </record>
+        <record id="commune_13_bab_el_assa" model="commercial.commune">
+            <field name="name">Bab El Assa</field>
+            <field name="daira_id" ref="daira_13_bab_el_assa"/>
+        </record>
+        <record id="commune_13_beni_snous" model="commercial.commune">
+            <field name="name">Beni Snous</field>
+            <field name="daira_id" ref="daira_13_beni_snous"/>
+        </record>
+        <record id="commune_13_beni_bahdel" model="commercial.commune">
+            <field name="name">Beni Bahdel</field>
+            <field name="daira_id" ref="daira_13_beni_snous"/>
+        </record>
+        <record id="commune_13_sidi_djillali" model="commercial.commune">
+            <field name="name">Sidi Djillali</field>
+            <field name="daira_id" ref="daira_13_sidi_djillali"/>
+        </record>
+        <record id="commune_13_mansourah" model="commercial.commune">
+            <field name="name">Mansourah</field>
+            <field name="daira_id" ref="daira_13_mansourah"/>
+        </record>
+        <record id="commune_13_ain_fezza" model="commercial.commune">
+            <field name="name">Ain Fezza</field>
+            <field name="daira_id" ref="daira_13_mansourah"/>
+        </record>
+        <record id="commune_13_ouled_mimoun" model="commercial.commune">
+            <field name="name">Ouled Mimoun</field>
+            <field name="daira_id" ref="daira_13_ouled_mimoun"/>
+        </record>
+        <record id="commune_13_amieur" model="commercial.commune">
+            <field name="name">Amieur</field>
+            <field name="daira_id" ref="daira_13_ouled_mimoun"/>
+        </record>
+        <record id="commune_13_fellaoucene" model="commercial.commune">
+            <field name="name">Fellaoucene</field>
+            <field name="daira_id" ref="daira_13_fellaoucene"/>
+        </record>
+        <record id="commune_13_honaine" model="commercial.commune">
+            <field name="name">Honaine</field>
+            <field name="daira_id" ref="daira_13_honaine"/>
+        </record>
+        <record id="commune_13_chetouane" model="commercial.commune">
+            <field name="name">Chetouane</field>
+            <field name="daira_id" ref="daira_13_chetouane"/>
+        </record>
+        <record id="commune_13_ain_el_hout" model="commercial.commune">
+            <field name="name">Ain El Hout</field>
+            <field name="daira_id" ref="daira_13_chetouane"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 14 - Tiaret                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_14_tiaret" model="commercial.commune">
+            <field name="name">Tiaret</field>
+            <field name="daira_id" ref="daira_14_tiaret"/>
+        </record>
+        <record id="commune_14_medrissa" model="commercial.commune">
+            <field name="name">Medrissa</field>
+            <field name="daira_id" ref="daira_14_tiaret"/>
+        </record>
+        <record id="commune_14_ksar_chellala" model="commercial.commune">
+            <field name="name">Ksar Chellala</field>
+            <field name="daira_id" ref="daira_14_ksar_chellala"/>
+        </record>
+        <record id="commune_14_serguine" model="commercial.commune">
+            <field name="name">Serguine</field>
+            <field name="daira_id" ref="daira_14_ksar_chellala"/>
+        </record>
+        <record id="commune_14_frenda" model="commercial.commune">
+            <field name="name">Frenda</field>
+            <field name="daira_id" ref="daira_14_frenda"/>
+        </record>
+        <record id="commune_14_ain_el_hadid" model="commercial.commune">
+            <field name="name">Ain El Hadid</field>
+            <field name="daira_id" ref="daira_14_frenda"/>
+        </record>
+        <record id="commune_14_sougueur" model="commercial.commune">
+            <field name="name">Sougueur</field>
+            <field name="daira_id" ref="daira_14_sougueur"/>
+        </record>
+        <record id="commune_14_dahmouni" model="commercial.commune">
+            <field name="name">Dahmouni</field>
+            <field name="daira_id" ref="daira_14_dahmouni"/>
+        </record>
+        <record id="commune_14_ain_deheb" model="commercial.commune">
+            <field name="name">Ain Deheb</field>
+            <field name="daira_id" ref="daira_14_ain_deheb"/>
+        </record>
+        <record id="commune_14_naima" model="commercial.commune">
+            <field name="name">Naima</field>
+            <field name="daira_id" ref="daira_14_ain_deheb"/>
+        </record>
+        <record id="commune_14_mechraa_sfa" model="commercial.commune">
+            <field name="name">Mechraa Sfa</field>
+            <field name="daira_id" ref="daira_14_mechraa_sfa"/>
+        </record>
+        <record id="commune_14_mahdia" model="commercial.commune">
+            <field name="name">Mahdia</field>
+            <field name="daira_id" ref="daira_14_mahdia"/>
+        </record>
+        <record id="commune_14_hamadia" model="commercial.commune">
+            <field name="name">Hamadia</field>
+            <field name="daira_id" ref="daira_14_hamadia"/>
+        </record>
+        <record id="commune_14_rechaiga" model="commercial.commune">
+            <field name="name">Rechaiga</field>
+            <field name="daira_id" ref="daira_14_hamadia"/>
+        </record>
+        <record id="commune_14_medroussa" model="commercial.commune">
+            <field name="name">Medroussa</field>
+            <field name="daira_id" ref="daira_14_medroussa"/>
+        </record>
+        <record id="commune_14_rahouia" model="commercial.commune">
+            <field name="name">Rahouia</field>
+            <field name="daira_id" ref="daira_14_rahouia"/>
+        </record>
+        <record id="commune_14_guertoufa" model="commercial.commune">
+            <field name="name">Guertoufa</field>
+            <field name="daira_id" ref="daira_14_rahouia"/>
+        </record>
+        <record id="commune_14_oued_lilli" model="commercial.commune">
+            <field name="name">Oued Lilli</field>
+            <field name="daira_id" ref="daira_14_oued_lilli"/>
+        </record>
+        <record id="commune_14_djillali_ben_amar" model="commercial.commune">
+            <field name="name">Djillali Ben Amar</field>
+            <field name="daira_id" ref="daira_14_oued_lilli"/>
+        </record>
+        <record id="commune_14_ain_bouchekif" model="commercial.commune">
+            <field name="name">Ain Bouchekif</field>
+            <field name="daira_id" ref="daira_14_ain_bouchekif"/>
+        </record>
+        <record id="commune_14_meghila" model="commercial.commune">
+            <field name="name">Meghila</field>
+            <field name="daira_id" ref="daira_14_meghila"/>
+        </record>
+        <record id="commune_14_tagdemt" model="commercial.commune">
+            <field name="name">Tagdemt</field>
+            <field name="daira_id" ref="daira_14_meghila"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 15 - Tizi Ouzou                                              -->
+        <!-- ============================================================ -->
+        <record id="commune_15_tizi_ouzou" model="commercial.commune">
+            <field name="name">Tizi Ouzou</field>
+            <field name="daira_id" ref="daira_15_tizi_ouzou"/>
+        </record>
+        <record id="commune_15_ain_el_hammam" model="commercial.commune">
+            <field name="name">Ain El Hammam</field>
+            <field name="daira_id" ref="daira_15_ain_el_hammam"/>
+        </record>
+        <record id="commune_15_ait_yahia" model="commercial.commune">
+            <field name="name">Ait Yahia</field>
+            <field name="daira_id" ref="daira_15_ain_el_hammam"/>
+        </record>
+        <record id="commune_15_azazga" model="commercial.commune">
+            <field name="name">Azazga</field>
+            <field name="daira_id" ref="daira_15_azazga"/>
+        </record>
+        <record id="commune_15_freha" model="commercial.commune">
+            <field name="name">Freha</field>
+            <field name="daira_id" ref="daira_15_azazga"/>
+        </record>
+        <record id="commune_15_yakourene" model="commercial.commune">
+            <field name="name">Yakourene</field>
+            <field name="daira_id" ref="daira_15_azazga"/>
+        </record>
+        <record id="commune_15_draa_ben_khedda" model="commercial.commune">
+            <field name="name">Draa Ben Khedda</field>
+            <field name="daira_id" ref="daira_15_draa_ben_khedda"/>
+        </record>
+        <record id="commune_15_tirmitine" model="commercial.commune">
+            <field name="name">Tirmitine</field>
+            <field name="daira_id" ref="daira_15_draa_ben_khedda"/>
+        </record>
+        <record id="commune_15_sidi_naamane" model="commercial.commune">
+            <field name="name">Sidi Naamane</field>
+            <field name="daira_id" ref="daira_15_draa_ben_khedda"/>
+        </record>
+        <record id="commune_15_larbaa_nath_irathen" model="commercial.commune">
+            <field name="name">Larbaa Nath Irathen</field>
+            <field name="daira_id" ref="daira_15_larbaa_nath_irathen"/>
+        </record>
+        <record id="commune_15_ait_oumalou" model="commercial.commune">
+            <field name="name">Ait Oumalou</field>
+            <field name="daira_id" ref="daira_15_larbaa_nath_irathen"/>
+        </record>
+        <record id="commune_15_boghni" model="commercial.commune">
+            <field name="name">Boghni</field>
+            <field name="daira_id" ref="daira_15_boghni"/>
+        </record>
+        <record id="commune_15_assi_youcef" model="commercial.commune">
+            <field name="name">Assi Youcef</field>
+            <field name="daira_id" ref="daira_15_boghni"/>
+        </record>
+        <record id="commune_15_bounouh" model="commercial.commune">
+            <field name="name">Bounouh</field>
+            <field name="daira_id" ref="daira_15_boghni"/>
+        </record>
+        <record id="commune_15_draa_el_mizan" model="commercial.commune">
+            <field name="name">Draa El Mizan</field>
+            <field name="daira_id" ref="daira_15_draa_el_mizan"/>
+        </record>
+        <record id="commune_15_frikat" model="commercial.commune">
+            <field name="name">Frikat</field>
+            <field name="daira_id" ref="daira_15_draa_el_mizan"/>
+        </record>
+        <record id="commune_15_iferhounene" model="commercial.commune">
+            <field name="name">Iferhounene</field>
+            <field name="daira_id" ref="daira_15_iferhounene"/>
+        </record>
+        <record id="commune_15_beni_douala" model="commercial.commune">
+            <field name="name">Beni Douala</field>
+            <field name="daira_id" ref="daira_15_beni_douala"/>
+        </record>
+        <record id="commune_15_beni_aissi" model="commercial.commune">
+            <field name="name">Beni Aissi</field>
+            <field name="daira_id" ref="daira_15_beni_douala"/>
+        </record>
+        <record id="commune_15_mekla" model="commercial.commune">
+            <field name="name">Mekla</field>
+            <field name="daira_id" ref="daira_15_mekla"/>
+        </record>
+        <record id="commune_15_souamaa" model="commercial.commune">
+            <field name="name">Souamaa</field>
+            <field name="daira_id" ref="daira_15_mekla"/>
+        </record>
+        <record id="commune_15_ouaguenoun" model="commercial.commune">
+            <field name="name">Ouaguenoun</field>
+            <field name="daira_id" ref="daira_15_ouaguenoun"/>
+        </record>
+        <record id="commune_15_ait_aissa_mimoun" model="commercial.commune">
+            <field name="name">Ait Aissa Mimoun</field>
+            <field name="daira_id" ref="daira_15_ouaguenoun"/>
+        </record>
+        <record id="commune_15_tigzirt" model="commercial.commune">
+            <field name="name">Tigzirt</field>
+            <field name="daira_id" ref="daira_15_tigzirt"/>
+        </record>
+        <record id="commune_15_iflissen" model="commercial.commune">
+            <field name="name">Iflissen</field>
+            <field name="daira_id" ref="daira_15_tigzirt"/>
+        </record>
+        <record id="commune_15_azeffoun" model="commercial.commune">
+            <field name="name">Azeffoun</field>
+            <field name="daira_id" ref="daira_15_azeffoun"/>
+        </record>
+        <record id="commune_15_ait_chafaa" model="commercial.commune">
+            <field name="name">Ait Chafaa</field>
+            <field name="daira_id" ref="daira_15_azeffoun"/>
+        </record>
+        <record id="commune_15_bouzeguene" model="commercial.commune">
+            <field name="name">Bouzeguene</field>
+            <field name="daira_id" ref="daira_15_bouzeguene"/>
+        </record>
+        <record id="commune_15_idjeur" model="commercial.commune">
+            <field name="name">Idjeur</field>
+            <field name="daira_id" ref="daira_15_bouzeguene"/>
+        </record>
+        <record id="commune_15_ouadhia" model="commercial.commune">
+            <field name="name">Ouadhia</field>
+            <field name="daira_id" ref="daira_15_ouadhia"/>
+        </record>
+        <record id="commune_15_agouni_gueghrane" model="commercial.commune">
+            <field name="name">Agouni Gueghrane</field>
+            <field name="daira_id" ref="daira_15_ouadhia"/>
+        </record>
+        <record id="commune_15_maatkas" model="commercial.commune">
+            <field name="name">Maatkas</field>
+            <field name="daira_id" ref="daira_15_maatkas"/>
+        </record>
+        <record id="commune_15_souk_el_tenine" model="commercial.commune">
+            <field name="name">Souk El Tenine</field>
+            <field name="daira_id" ref="daira_15_maatkas"/>
+        </record>
+        <record id="commune_15_beni_yenni" model="commercial.commune">
+            <field name="name">Beni Yenni</field>
+            <field name="daira_id" ref="daira_15_beni_yenni"/>
+        </record>
+        <record id="commune_15_iboudrarene" model="commercial.commune">
+            <field name="name">Iboudrarene</field>
+            <field name="daira_id" ref="daira_15_beni_yenni"/>
+        </record>
+        <record id="commune_15_tizi_gheniff" model="commercial.commune">
+            <field name="name">Tizi Gheniff</field>
+            <field name="daira_id" ref="daira_15_tizi_gheniff"/>
+        </record>
+        <record id="commune_15_mkira" model="commercial.commune">
+            <field name="name">M'Kira</field>
+            <field name="daira_id" ref="daira_15_tizi_gheniff"/>
+        </record>
+        <record id="commune_15_iferhounen" model="commercial.commune">
+            <field name="name">Iferhounen</field>
+            <field name="daira_id" ref="daira_15_iferhounen"/>
+        </record>
+        <record id="commune_15_makouda" model="commercial.commune">
+            <field name="name">Makouda</field>
+            <field name="daira_id" ref="daira_15_makouda"/>
+        </record>
+        <record id="commune_15_tizi_rached" model="commercial.commune">
+            <field name="name">Tizi Rached</field>
+            <field name="daira_id" ref="daira_15_makouda"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 16 - Alger                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_16_alger_centre" model="commercial.commune">
+            <field name="name">Alger Centre</field>
+            <field name="daira_id" ref="daira_16_alger_centre"/>
+        </record>
+        <record id="commune_16_sidi_mhamed" model="commercial.commune">
+            <field name="name">Sidi M'Hamed</field>
+            <field name="daira_id" ref="daira_16_sidi_mhamed"/>
+        </record>
+        <record id="commune_16_el_mouradia" model="commercial.commune">
+            <field name="name">El Mouradia</field>
+            <field name="daira_id" ref="daira_16_sidi_mhamed"/>
+        </record>
+        <record id="commune_16_el_madania" model="commercial.commune">
+            <field name="name">El Madania</field>
+            <field name="daira_id" ref="daira_16_el_madania"/>
+        </record>
+        <record id="commune_16_el_biar" model="commercial.commune">
+            <field name="name">El Biar</field>
+            <field name="daira_id" ref="daira_16_el_madania"/>
+        </record>
+        <record id="commune_16_ben_aknoun" model="commercial.commune">
+            <field name="name">Ben Aknoun</field>
+            <field name="daira_id" ref="daira_16_el_madania"/>
+        </record>
+        <record id="commune_16_bab_el_oued" model="commercial.commune">
+            <field name="name">Bab El Oued</field>
+            <field name="daira_id" ref="daira_16_bab_el_oued"/>
+        </record>
+        <record id="commune_16_oued_koriche" model="commercial.commune">
+            <field name="name">Oued Koriche</field>
+            <field name="daira_id" ref="daira_16_bab_el_oued"/>
+        </record>
+        <record id="commune_16_bologhine" model="commercial.commune">
+            <field name="name">Bologhine</field>
+            <field name="daira_id" ref="daira_16_bab_el_oued"/>
+        </record>
+        <record id="commune_16_bouzareah" model="commercial.commune">
+            <field name="name">Bouzareah</field>
+            <field name="daira_id" ref="daira_16_bouzareah"/>
+        </record>
+        <record id="commune_16_beni_messous" model="commercial.commune">
+            <field name="name">Beni Messous</field>
+            <field name="daira_id" ref="daira_16_bouzareah"/>
+        </record>
+        <record id="commune_16_bir_mourad_rais" model="commercial.commune">
+            <field name="name">Bir Mourad Rais</field>
+            <field name="daira_id" ref="daira_16_bir_mourad_rais"/>
+        </record>
+        <record id="commune_16_dely_ibrahim" model="commercial.commune">
+            <field name="name">Dely Ibrahim</field>
+            <field name="daira_id" ref="daira_16_bir_mourad_rais"/>
+        </record>
+        <record id="commune_16_hussein_dey" model="commercial.commune">
+            <field name="name">Hussein Dey</field>
+            <field name="daira_id" ref="daira_16_hussein_dey"/>
+        </record>
+        <record id="commune_16_kouba" model="commercial.commune">
+            <field name="name">Kouba</field>
+            <field name="daira_id" ref="daira_16_hussein_dey"/>
+        </record>
+        <record id="commune_16_el_magharia" model="commercial.commune">
+            <field name="name">El Magharia</field>
+            <field name="daira_id" ref="daira_16_hussein_dey"/>
+        </record>
+        <record id="commune_16_dar_el_beida" model="commercial.commune">
+            <field name="name">Dar El Beida</field>
+            <field name="daira_id" ref="daira_16_dar_el_beida"/>
+        </record>
+        <record id="commune_16_bab_ezzouar" model="commercial.commune">
+            <field name="name">Bab Ezzouar</field>
+            <field name="daira_id" ref="daira_16_dar_el_beida"/>
+        </record>
+        <record id="commune_16_bordj_el_kiffan" model="commercial.commune">
+            <field name="name">Bordj El Kiffan</field>
+            <field name="daira_id" ref="daira_16_dar_el_beida"/>
+        </record>
+        <record id="commune_16_el_harrach" model="commercial.commune">
+            <field name="name">El Harrach</field>
+            <field name="daira_id" ref="daira_16_dar_el_beida"/>
+        </record>
+        <record id="commune_16_cheraga" model="commercial.commune">
+            <field name="name">Cheraga</field>
+            <field name="daira_id" ref="daira_16_cheraga"/>
+        </record>
+        <record id="commune_16_ouled_fayet" model="commercial.commune">
+            <field name="name">Ouled Fayet</field>
+            <field name="daira_id" ref="daira_16_cheraga"/>
+        </record>
+        <record id="commune_16_el_achour" model="commercial.commune">
+            <field name="name">El Achour</field>
+            <field name="daira_id" ref="daira_16_cheraga"/>
+        </record>
+        <record id="commune_16_baraki" model="commercial.commune">
+            <field name="name">Baraki</field>
+            <field name="daira_id" ref="daira_16_baraki"/>
+        </record>
+        <record id="commune_16_les_eucalyptus" model="commercial.commune">
+            <field name="name">Les Eucalyptus</field>
+            <field name="daira_id" ref="daira_16_baraki"/>
+        </record>
+        <record id="commune_16_sidi_moussa" model="commercial.commune">
+            <field name="name">Sidi Moussa</field>
+            <field name="daira_id" ref="daira_16_baraki"/>
+        </record>
+        <record id="commune_16_draria" model="commercial.commune">
+            <field name="name">Draria</field>
+            <field name="daira_id" ref="daira_16_draria"/>
+        </record>
+        <record id="commune_16_baba_hassen" model="commercial.commune">
+            <field name="name">Baba Hassen</field>
+            <field name="daira_id" ref="daira_16_draria"/>
+        </record>
+        <record id="commune_16_khraicia" model="commercial.commune">
+            <field name="name">Khraicia</field>
+            <field name="daira_id" ref="daira_16_draria"/>
+        </record>
+        <record id="commune_16_birtouta" model="commercial.commune">
+            <field name="name">Birtouta</field>
+            <field name="daira_id" ref="daira_16_birtouta"/>
+        </record>
+        <record id="commune_16_ouled_chebel" model="commercial.commune">
+            <field name="name">Ouled Chebel</field>
+            <field name="daira_id" ref="daira_16_birtouta"/>
+        </record>
+        <record id="commune_16_tessala_el_merdja" model="commercial.commune">
+            <field name="name">Tessala El Merdja</field>
+            <field name="daira_id" ref="daira_16_birtouta"/>
+        </record>
+        <record id="commune_16_zeralda" model="commercial.commune">
+            <field name="name">Zeralda</field>
+            <field name="daira_id" ref="daira_16_zeralda"/>
+        </record>
+        <record id="commune_16_mahelma" model="commercial.commune">
+            <field name="name">Mahelma</field>
+            <field name="daira_id" ref="daira_16_zeralda"/>
+        </record>
+        <record id="commune_16_rahmania" model="commercial.commune">
+            <field name="name">Rahmania</field>
+            <field name="daira_id" ref="daira_16_zeralda"/>
+        </record>
+        <record id="commune_16_souidania" model="commercial.commune">
+            <field name="name">Souidania</field>
+            <field name="daira_id" ref="daira_16_zeralda"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 17 - Djelfa                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_17_djelfa" model="commercial.commune">
+            <field name="name">Djelfa</field>
+            <field name="daira_id" ref="daira_17_djelfa"/>
+        </record>
+        <record id="commune_17_messaad" model="commercial.commune">
+            <field name="name">Messaad</field>
+            <field name="daira_id" ref="daira_17_messaad"/>
+        </record>
+        <record id="commune_17_guettara" model="commercial.commune">
+            <field name="name">Guettara</field>
+            <field name="daira_id" ref="daira_17_messaad"/>
+        </record>
+        <record id="commune_17_ain_oussera" model="commercial.commune">
+            <field name="name">Ain Oussera</field>
+            <field name="daira_id" ref="daira_17_ain_oussera"/>
+        </record>
+        <record id="commune_17_benhar" model="commercial.commune">
+            <field name="name">Benhar</field>
+            <field name="daira_id" ref="daira_17_ain_oussera"/>
+        </record>
+        <record id="commune_17_hassi_bahbah" model="commercial.commune">
+            <field name="name">Hassi Bahbah</field>
+            <field name="daira_id" ref="daira_17_hassi_bahbah"/>
+        </record>
+        <record id="commune_17_zaafrane" model="commercial.commune">
+            <field name="name">Zaafrane</field>
+            <field name="daira_id" ref="daira_17_hassi_bahbah"/>
+        </record>
+        <record id="commune_17_birine" model="commercial.commune">
+            <field name="name">Birine</field>
+            <field name="daira_id" ref="daira_17_birine"/>
+        </record>
+        <record id="commune_17_bouira_lahdab" model="commercial.commune">
+            <field name="name">Bouira Lahdab</field>
+            <field name="daira_id" ref="daira_17_birine"/>
+        </record>
+        <record id="commune_17_charef" model="commercial.commune">
+            <field name="name">Charef</field>
+            <field name="daira_id" ref="daira_17_charef"/>
+        </record>
+        <record id="commune_17_ain_chouhada" model="commercial.commune">
+            <field name="name">Ain Chouhada</field>
+            <field name="daira_id" ref="daira_17_charef"/>
+        </record>
+        <record id="commune_17_had_sahary" model="commercial.commune">
+            <field name="name">Had Sahary</field>
+            <field name="daira_id" ref="daira_17_had_sahary"/>
+        </record>
+        <record id="commune_17_guernini" model="commercial.commune">
+            <field name="name">Guernini</field>
+            <field name="daira_id" ref="daira_17_had_sahary"/>
+        </record>
+        <record id="commune_17_moudjebara" model="commercial.commune">
+            <field name="name">Moudjebara</field>
+            <field name="daira_id" ref="daira_17_moudjebara"/>
+        </record>
+        <record id="commune_17_selmana" model="commercial.commune">
+            <field name="name">Selmana</field>
+            <field name="daira_id" ref="daira_17_moudjebara"/>
+        </record>
+        <record id="commune_17_sed_rahal" model="commercial.commune">
+            <field name="name">Sed Rahal</field>
+            <field name="daira_id" ref="daira_17_sed_rahal"/>
+        </record>
+        <record id="commune_17_el_idrissia" model="commercial.commune">
+            <field name="name">El Idrissia</field>
+            <field name="daira_id" ref="daira_17_sed_rahal"/>
+        </record>
+        <record id="commune_17_faidh_el_botma" model="commercial.commune">
+            <field name="name">Faidh El Botma</field>
+            <field name="daira_id" ref="daira_17_faidh_el_botma"/>
+        </record>
+        <record id="commune_17_sidi_ladjel" model="commercial.commune">
+            <field name="name">Sidi Ladjel</field>
+            <field name="daira_id" ref="daira_17_faidh_el_botma"/>
+        </record>
+        <record id="commune_17_dar_chioukh" model="commercial.commune">
+            <field name="name">Dar Chioukh</field>
+            <field name="daira_id" ref="daira_17_dar_chioukh"/>
+        </record>
+        <record id="commune_17_mliliha" model="commercial.commune">
+            <field name="name">M'Liliha</field>
+            <field name="daira_id" ref="daira_17_mliliha"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 18 - Jijel                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_18_jijel" model="commercial.commune">
+            <field name="name">Jijel</field>
+            <field name="daira_id" ref="daira_18_jijel"/>
+        </record>
+        <record id="commune_18_kaous" model="commercial.commune">
+            <field name="name">Kaous</field>
+            <field name="daira_id" ref="daira_18_jijel"/>
+        </record>
+        <record id="commune_18_el_milia" model="commercial.commune">
+            <field name="name">El Milia</field>
+            <field name="daira_id" ref="daira_18_el_milia"/>
+        </record>
+        <record id="commune_18_taher" model="commercial.commune">
+            <field name="name">Taher</field>
+            <field name="daira_id" ref="daira_18_taher"/>
+        </record>
+        <record id="commune_18_emir_abdelkader" model="commercial.commune">
+            <field name="name">Emir Abdelkader</field>
+            <field name="daira_id" ref="daira_18_taher"/>
+        </record>
+        <record id="commune_18_chekfa" model="commercial.commune">
+            <field name="name">Chekfa</field>
+            <field name="daira_id" ref="daira_18_taher"/>
+        </record>
+        <record id="commune_18_texenna" model="commercial.commune">
+            <field name="name">Texenna</field>
+            <field name="daira_id" ref="daira_18_texenna"/>
+        </record>
+        <record id="commune_18_selma_ben_ziada" model="commercial.commune">
+            <field name="name">Selma Ben Ziada</field>
+            <field name="daira_id" ref="daira_18_texenna"/>
+        </record>
+        <record id="commune_18_chahna" model="commercial.commune">
+            <field name="name">Chahna</field>
+            <field name="daira_id" ref="daira_18_chahna"/>
+        </record>
+        <record id="commune_18_djimla" model="commercial.commune">
+            <field name="name">Djimla</field>
+            <field name="daira_id" ref="daira_18_djimla"/>
+        </record>
+        <record id="commune_18_settara" model="commercial.commune">
+            <field name="name">Settara</field>
+            <field name="daira_id" ref="daira_18_settara"/>
+        </record>
+        <record id="commune_18_bordj_thar" model="commercial.commune">
+            <field name="name">Bordj T'Har</field>
+            <field name="daira_id" ref="daira_18_settara"/>
+        </record>
+        <record id="commune_18_el_ancer" model="commercial.commune">
+            <field name="name">El Ancer</field>
+            <field name="daira_id" ref="daira_18_el_ancer"/>
+        </record>
+        <record id="commune_18_sidi_abdelaziz" model="commercial.commune">
+            <field name="name">Sidi Abdelaziz</field>
+            <field name="daira_id" ref="daira_18_el_ancer"/>
+        </record>
+        <record id="commune_18_sidi_marouf" model="commercial.commune">
+            <field name="name">Sidi Marouf</field>
+            <field name="daira_id" ref="daira_18_sidi_marouf"/>
+        </record>
+        <record id="commune_18_el_aouana" model="commercial.commune">
+            <field name="name">El Aouana</field>
+            <field name="daira_id" ref="daira_18_el_aouana"/>
+        </record>
+        <record id="commune_18_ziama_mansouriah" model="commercial.commune">
+            <field name="name">Ziama Mansouriah</field>
+            <field name="daira_id" ref="daira_18_ziama_mansouriah"/>
+        </record>
+        <record id="commune_18_erraguene" model="commercial.commune">
+            <field name="name">Erraguene</field>
+            <field name="daira_id" ref="daira_18_ziama_mansouriah"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 19 - Setif                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_19_setif" model="commercial.commune">
+            <field name="name">Setif</field>
+            <field name="daira_id" ref="daira_19_setif"/>
+        </record>
+        <record id="commune_19_mezloug" model="commercial.commune">
+            <field name="name">Mezloug</field>
+            <field name="daira_id" ref="daira_19_setif"/>
+        </record>
+        <record id="commune_19_el_eulma" model="commercial.commune">
+            <field name="name">El Eulma</field>
+            <field name="daira_id" ref="daira_19_el_eulma"/>
+        </record>
+        <record id="commune_19_bazer_sakra" model="commercial.commune">
+            <field name="name">Bazer Sakra</field>
+            <field name="daira_id" ref="daira_19_el_eulma"/>
+        </record>
+        <record id="commune_19_ain_oulmene" model="commercial.commune">
+            <field name="name">Ain Oulmene</field>
+            <field name="daira_id" ref="daira_19_ain_oulmene"/>
+        </record>
+        <record id="commune_19_ain_lahdjar" model="commercial.commune">
+            <field name="name">Ain Lahdjar</field>
+            <field name="daira_id" ref="daira_19_ain_oulmene"/>
+        </record>
+        <record id="commune_19_beni_ourtilane" model="commercial.commune">
+            <field name="name">Beni Ourtilane</field>
+            <field name="daira_id" ref="daira_19_beni_ourtilane"/>
+        </record>
+        <record id="commune_19_bougaa" model="commercial.commune">
+            <field name="name">Bougaa</field>
+            <field name="daira_id" ref="daira_19_bougaa"/>
+        </record>
+        <record id="commune_19_ain_arnat" model="commercial.commune">
+            <field name="name">Ain Arnat</field>
+            <field name="daira_id" ref="daira_19_ain_arnat"/>
+        </record>
+        <record id="commune_19_el_ouricia" model="commercial.commune">
+            <field name="name">El Ouricia</field>
+            <field name="daira_id" ref="daira_19_ain_arnat"/>
+        </record>
+        <record id="commune_19_ain_azel" model="commercial.commune">
+            <field name="name">Ain Azel</field>
+            <field name="daira_id" ref="daira_19_ain_azel"/>
+        </record>
+        <record id="commune_19_ain_el_kebira" model="commercial.commune">
+            <field name="name">Ain El Kebira</field>
+            <field name="daira_id" ref="daira_19_ain_el_kebira"/>
+        </record>
+        <record id="commune_19_babor" model="commercial.commune">
+            <field name="name">Babor</field>
+            <field name="daira_id" ref="daira_19_babor"/>
+        </record>
+        <record id="commune_19_bouandas" model="commercial.commune">
+            <field name="name">Bouandas</field>
+            <field name="daira_id" ref="daira_19_bouandas"/>
+        </record>
+        <record id="commune_19_guenzet" model="commercial.commune">
+            <field name="name">Guenzet</field>
+            <field name="daira_id" ref="daira_19_guenzet"/>
+        </record>
+        <record id="commune_19_hammam_guergour" model="commercial.commune">
+            <field name="name">Hammam Guergour</field>
+            <field name="daira_id" ref="daira_19_hammam_guergour"/>
+        </record>
+        <record id="commune_19_hammam_soukhna" model="commercial.commune">
+            <field name="name">Hammam Soukhna</field>
+            <field name="daira_id" ref="daira_19_hammam_soukhna"/>
+        </record>
+        <record id="commune_19_maoklane" model="commercial.commune">
+            <field name="name">Maoklane</field>
+            <field name="daira_id" ref="daira_19_maoklane"/>
+        </record>
+        <record id="commune_19_salah_bey" model="commercial.commune">
+            <field name="name">Salah Bey</field>
+            <field name="daira_id" ref="daira_19_salah_bey"/>
+        </record>
+        <record id="commune_19_bir_el_arch" model="commercial.commune">
+            <field name="name">Bir El Arch</field>
+            <field name="daira_id" ref="daira_19_bir_el_arch"/>
+        </record>
+        <record id="commune_19_djemila" model="commercial.commune">
+            <field name="name">Djemila</field>
+            <field name="daira_id" ref="daira_19_djemila"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 20 - Saida                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_20_saida" model="commercial.commune">
+            <field name="name">Saida</field>
+            <field name="daira_id" ref="daira_20_saida"/>
+        </record>
+        <record id="commune_20_ain_el_hadjar" model="commercial.commune">
+            <field name="name">Ain El Hadjar</field>
+            <field name="daira_id" ref="daira_20_ain_el_hadjar"/>
+        </record>
+        <record id="commune_20_doui_thabet" model="commercial.commune">
+            <field name="name">Doui Thabet</field>
+            <field name="daira_id" ref="daira_20_ain_el_hadjar"/>
+        </record>
+        <record id="commune_20_youb" model="commercial.commune">
+            <field name="name">Youb</field>
+            <field name="daira_id" ref="daira_20_youb"/>
+        </record>
+        <record id="commune_20_sidi_ahmed" model="commercial.commune">
+            <field name="name">Sidi Ahmed</field>
+            <field name="daira_id" ref="daira_20_youb"/>
+        </record>
+        <record id="commune_20_hassasna" model="commercial.commune">
+            <field name="name">Hassasna</field>
+            <field name="daira_id" ref="daira_20_hassasna"/>
+        </record>
+        <record id="commune_20_ain_sekhouna" model="commercial.commune">
+            <field name="name">Ain Sekhouna</field>
+            <field name="daira_id" ref="daira_20_hassasna"/>
+        </record>
+        <record id="commune_20_sidi_boubekeur" model="commercial.commune">
+            <field name="name">Sidi Boubekeur</field>
+            <field name="daira_id" ref="daira_20_sidi_boubekeur"/>
+        </record>
+        <record id="commune_20_ouled_brahim" model="commercial.commune">
+            <field name="name">Ouled Brahim</field>
+            <field name="daira_id" ref="daira_20_ouled_brahim"/>
+        </record>
+        <record id="commune_20_moulay_larbi" model="commercial.commune">
+            <field name="name">Moulay Larbi</field>
+            <field name="daira_id" ref="daira_20_ouled_brahim"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 21 - Skikda                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_21_skikda" model="commercial.commune"><field name="name">Skikda</field><field name="daira_id" ref="daira_21_skikda"/></record>
+        <record id="commune_21_hamadi_krouma" model="commercial.commune"><field name="name">Hamadi Krouma</field><field name="daira_id" ref="daira_21_skikda"/></record>
+        <record id="commune_21_collo" model="commercial.commune"><field name="name">Collo</field><field name="daira_id" ref="daira_21_collo"/></record>
+        <record id="commune_21_azzaba" model="commercial.commune"><field name="name">Azzaba</field><field name="daira_id" ref="daira_21_azzaba"/></record>
+        <record id="commune_21_el_harrouch" model="commercial.commune"><field name="name">El Harrouch</field><field name="daira_id" ref="daira_21_el_harrouch"/></record>
+        <record id="commune_21_zerdezas" model="commercial.commune"><field name="name">Zerdezas</field><field name="daira_id" ref="daira_21_el_harrouch"/></record>
+        <record id="commune_21_tamalous" model="commercial.commune"><field name="name">Tamalous</field><field name="daira_id" ref="daira_21_tamalous"/></record>
+        <record id="commune_21_kerkera" model="commercial.commune"><field name="name">Kerkera</field><field name="daira_id" ref="daira_21_tamalous"/></record>
+        <record id="commune_21_sidi_mezghiche" model="commercial.commune"><field name="name">Sidi Mezghiche</field><field name="daira_id" ref="daira_21_sidi_mezghiche"/></record>
+        <record id="commune_21_ramdane_djamel" model="commercial.commune"><field name="name">Ramdane Djamel</field><field name="daira_id" ref="daira_21_ramdane_djamel"/></record>
+        <record id="commune_21_ben_azzouz" model="commercial.commune"><field name="name">Ben Azzouz</field><field name="daira_id" ref="daira_21_ben_azzouz"/></record>
+        <record id="commune_21_oum_toub" model="commercial.commune"><field name="name">Oum Toub</field><field name="daira_id" ref="daira_21_oum_toub"/></record>
+        <record id="commune_21_ain_kechra" model="commercial.commune"><field name="name">Ain Kechra</field><field name="daira_id" ref="daira_21_ain_kechra"/></record>
+        <record id="commune_21_ouled_attia" model="commercial.commune"><field name="name">Ouled Attia</field><field name="daira_id" ref="daira_21_ouled_attia"/></record>
+        <record id="commune_21_zitouna" model="commercial.commune"><field name="name">Zitouna</field><field name="daira_id" ref="daira_21_zitouna"/></record>
+        <record id="commune_21_fil_fila" model="commercial.commune"><field name="name">Fil Fila</field><field name="daira_id" ref="daira_21_zitouna"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 22 - Sidi Bel Abbes                                          -->
+        <!-- ============================================================ -->
+        <record id="commune_22_sidi_bel_abbes" model="commercial.commune"><field name="name">Sidi Bel Abbes</field><field name="daira_id" ref="daira_22_sidi_bel_abbes"/></record>
+        <record id="commune_22_sidi_lahcene" model="commercial.commune"><field name="name">Sidi Lahcene</field><field name="daira_id" ref="daira_22_sidi_bel_abbes"/></record>
+        <record id="commune_22_telagh" model="commercial.commune"><field name="name">Telagh</field><field name="daira_id" ref="daira_22_telagh"/></record>
+        <record id="commune_22_sfisef" model="commercial.commune"><field name="name">Sfisef</field><field name="daira_id" ref="daira_22_sfisef"/></record>
+        <record id="commune_22_ben_badis" model="commercial.commune"><field name="name">Ben Badis</field><field name="daira_id" ref="daira_22_ben_badis"/></record>
+        <record id="commune_22_ain_el_berd" model="commercial.commune"><field name="name">Ain El Berd</field><field name="daira_id" ref="daira_22_ain_el_berd"/></record>
+        <record id="commune_22_ras_el_ma" model="commercial.commune"><field name="name">Ras El Ma</field><field name="daira_id" ref="daira_22_ras_el_ma"/></record>
+        <record id="commune_22_tenira" model="commercial.commune"><field name="name">Tenira</field><field name="daira_id" ref="daira_22_tenira"/></record>
+        <record id="commune_22_marhoum" model="commercial.commune"><field name="name">Marhoum</field><field name="daira_id" ref="daira_22_marhoum"/></record>
+        <record id="commune_22_merine" model="commercial.commune"><field name="name">Merine</field><field name="daira_id" ref="daira_22_merine"/></record>
+        <record id="commune_22_tessala" model="commercial.commune"><field name="name">Tessala</field><field name="daira_id" ref="daira_22_merine"/></record>
+        <record id="commune_22_moulay_slissen" model="commercial.commune"><field name="name">Moulay Slissen</field><field name="daira_id" ref="daira_22_moulay_slissen"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 23 - Annaba                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_23_annaba" model="commercial.commune"><field name="name">Annaba</field><field name="daira_id" ref="daira_23_annaba"/></record>
+        <record id="commune_23_berrahal" model="commercial.commune"><field name="name">Berrahal</field><field name="daira_id" ref="daira_23_berrahal"/></record>
+        <record id="commune_23_oued_el_aneb" model="commercial.commune"><field name="name">Oued El Aneb</field><field name="daira_id" ref="daira_23_berrahal"/></record>
+        <record id="commune_23_el_hadjar" model="commercial.commune"><field name="name">El Hadjar</field><field name="daira_id" ref="daira_23_el_hadjar"/></record>
+        <record id="commune_23_sidi_amar" model="commercial.commune"><field name="name">Sidi Amar</field><field name="daira_id" ref="daira_23_el_hadjar"/></record>
+        <record id="commune_23_ain_el_berda" model="commercial.commune"><field name="name">Ain El Berda</field><field name="daira_id" ref="daira_23_ain_el_berda"/></record>
+        <record id="commune_23_cheurfa" model="commercial.commune"><field name="name">Cheurfa</field><field name="daira_id" ref="daira_23_ain_el_berda"/></record>
+        <record id="commune_23_el_bouni" model="commercial.commune"><field name="name">El Bouni</field><field name="daira_id" ref="daira_23_el_bouni"/></record>
+        <record id="commune_23_chetaibi" model="commercial.commune"><field name="name">Chetaibi</field><field name="daira_id" ref="daira_23_chetaibi"/></record>
+        <record id="commune_23_seraidi" model="commercial.commune"><field name="name">Seraidi</field><field name="daira_id" ref="daira_23_chetaibi"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 24 - Guelma                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_24_guelma" model="commercial.commune"><field name="name">Guelma</field><field name="daira_id" ref="daira_24_guelma"/></record>
+        <record id="commune_24_belkheir" model="commercial.commune"><field name="name">Belkheir</field><field name="daira_id" ref="daira_24_guelma"/></record>
+        <record id="commune_24_bouchegouf" model="commercial.commune"><field name="name">Bouchegouf</field><field name="daira_id" ref="daira_24_bouchegouf"/></record>
+        <record id="commune_24_medjez_amar" model="commercial.commune"><field name="name">Medjez Amar</field><field name="daira_id" ref="daira_24_bouchegouf"/></record>
+        <record id="commune_24_oued_zenati" model="commercial.commune"><field name="name">Oued Zenati</field><field name="daira_id" ref="daira_24_oued_zenati"/></record>
+        <record id="commune_24_heliopolis" model="commercial.commune"><field name="name">Heliopolis</field><field name="daira_id" ref="daira_24_heliopolis"/></record>
+        <record id="commune_24_hammam_debagh" model="commercial.commune"><field name="name">Hammam Debagh</field><field name="daira_id" ref="daira_24_hammam_debagh"/></record>
+        <record id="commune_24_khezaras" model="commercial.commune"><field name="name">Khezaras</field><field name="daira_id" ref="daira_24_khezaras"/></record>
+        <record id="commune_24_nechmaya" model="commercial.commune"><field name="name">Nechmaya</field><field name="daira_id" ref="daira_24_khezaras"/></record>
+        <record id="commune_24_ain_makhlouf" model="commercial.commune"><field name="name">Ain Makhlouf</field><field name="daira_id" ref="daira_24_ain_makhlouf"/></record>
+        <record id="commune_24_tamlouka" model="commercial.commune"><field name="name">Tamlouka</field><field name="daira_id" ref="daira_24_ain_makhlouf"/></record>
+        <record id="commune_24_hammam_nbail" model="commercial.commune"><field name="name">Hammam N'Bail</field><field name="daira_id" ref="daira_24_hammam_nbail"/></record>
+        <record id="commune_24_guelaat_bou_sbaa" model="commercial.commune"><field name="name">Guelaat Bou Sbaa</field><field name="daira_id" ref="daira_24_guelaat_bou_sbaa"/></record>
+        <record id="commune_24_ain_larbi" model="commercial.commune"><field name="name">Ain Larbi</field><field name="daira_id" ref="daira_24_ain_larbi"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 25 - Constantine                                             -->
+        <!-- ============================================================ -->
+        <record id="commune_25_constantine" model="commercial.commune"><field name="name">Constantine</field><field name="daira_id" ref="daira_25_constantine"/></record>
+        <record id="commune_25_el_khroub" model="commercial.commune"><field name="name">El Khroub</field><field name="daira_id" ref="daira_25_el_khroub"/></record>
+        <record id="commune_25_ouled_rahmoun" model="commercial.commune"><field name="name">Ouled Rahmoun</field><field name="daira_id" ref="daira_25_el_khroub"/></record>
+        <record id="commune_25_ain_smara" model="commercial.commune"><field name="name">Ain Smara</field><field name="daira_id" ref="daira_25_ain_smara"/></record>
+        <record id="commune_25_hamma_bouziane" model="commercial.commune"><field name="name">Hamma Bouziane</field><field name="daira_id" ref="daira_25_hamma_bouziane"/></record>
+        <record id="commune_25_didouche_mourad" model="commercial.commune"><field name="name">Didouche Mourad</field><field name="daira_id" ref="daira_25_hamma_bouziane"/></record>
+        <record id="commune_25_zighoud_youcef" model="commercial.commune"><field name="name">Zighoud Youcef</field><field name="daira_id" ref="daira_25_zighoud_youcef"/></record>
+        <record id="commune_25_beni_hamidene" model="commercial.commune"><field name="name">Beni Hamidene</field><field name="daira_id" ref="daira_25_zighoud_youcef"/></record>
+        <record id="commune_25_ibn_ziad" model="commercial.commune"><field name="name">Ibn Ziad</field><field name="daira_id" ref="daira_25_ibn_ziad"/></record>
+        <record id="commune_25_messaoud_boudjeriou" model="commercial.commune"><field name="name">Messaoud Boudjeriou</field><field name="daira_id" ref="daira_25_ibn_ziad"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 26 - Medea                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_26_medea" model="commercial.commune"><field name="name">Medea</field><field name="daira_id" ref="daira_26_medea"/></record>
+        <record id="commune_26_berrouaghia" model="commercial.commune"><field name="name">Berrouaghia</field><field name="daira_id" ref="daira_26_berrouaghia"/></record>
+        <record id="commune_26_ksar_el_boukhari" model="commercial.commune"><field name="name">Ksar El Boukhari</field><field name="daira_id" ref="daira_26_ksar_el_boukhari"/></record>
+        <record id="commune_26_tablat" model="commercial.commune"><field name="name">Tablat</field><field name="daira_id" ref="daira_26_tablat"/></record>
+        <record id="commune_26_beni_slimane" model="commercial.commune"><field name="name">Beni Slimane</field><field name="daira_id" ref="daira_26_beni_slimane"/></record>
+        <record id="commune_26_ain_boucif" model="commercial.commune"><field name="name">Ain Boucif</field><field name="daira_id" ref="daira_26_ain_boucif"/></record>
+        <record id="commune_26_ouamri" model="commercial.commune"><field name="name">Ouamri</field><field name="daira_id" ref="daira_26_ouamri"/></record>
+        <record id="commune_26_ouzera" model="commercial.commune"><field name="name">Ouzera</field><field name="daira_id" ref="daira_26_ouzera"/></record>
+        <record id="commune_26_si_mahdjoub" model="commercial.commune"><field name="name">Si Mahdjoub</field><field name="daira_id" ref="daira_26_si_mahdjoub"/></record>
+        <record id="commune_26_chahbounia" model="commercial.commune"><field name="name">Chahbounia</field><field name="daira_id" ref="daira_26_chahbounia"/></record>
+        <record id="commune_26_aziz" model="commercial.commune"><field name="name">Aziz</field><field name="daira_id" ref="daira_26_aziz"/></record>
+        <record id="commune_26_souagui" model="commercial.commune"><field name="name">Souagui</field><field name="daira_id" ref="daira_26_aziz"/></record>
+        <record id="commune_26_el_omaria" model="commercial.commune"><field name="name">El Omaria</field><field name="daira_id" ref="daira_26_el_omaria"/></record>
+        <record id="commune_26_mihoub" model="commercial.commune"><field name="name">Mihoub</field><field name="daira_id" ref="daira_26_mihoub"/></record>
+        <record id="commune_26_seghouane" model="commercial.commune"><field name="name">Seghouane</field><field name="daira_id" ref="daira_26_seghouane"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 27 - Mostaganem                                              -->
+        <!-- ============================================================ -->
+        <record id="commune_27_mostaganem" model="commercial.commune"><field name="name">Mostaganem</field><field name="daira_id" ref="daira_27_mostaganem"/></record>
+        <record id="commune_27_ain_nouissy" model="commercial.commune"><field name="name">Ain Nouissy</field><field name="daira_id" ref="daira_27_ain_nouissy"/></record>
+        <record id="commune_27_ain_tedeles" model="commercial.commune"><field name="name">Ain Tedeles</field><field name="daira_id" ref="daira_27_ain_tedeles"/></record>
+        <record id="commune_27_achaacha" model="commercial.commune"><field name="name">Achaacha</field><field name="daira_id" ref="daira_27_achaacha"/></record>
+        <record id="commune_27_hassi_mameche" model="commercial.commune"><field name="name">Hassi Mameche</field><field name="daira_id" ref="daira_27_hassi_mameche"/></record>
+        <record id="commune_27_sidi_ali" model="commercial.commune"><field name="name">Sidi Ali</field><field name="daira_id" ref="daira_27_sidi_ali"/></record>
+        <record id="commune_27_sidi_lakhdar" model="commercial.commune"><field name="name">Sidi Lakhdar</field><field name="daira_id" ref="daira_27_sidi_lakhdar"/></record>
+        <record id="commune_27_bouguirat" model="commercial.commune"><field name="name">Bouguirat</field><field name="daira_id" ref="daira_27_bouguirat"/></record>
+        <record id="commune_27_mesra" model="commercial.commune"><field name="name">Mesra</field><field name="daira_id" ref="daira_27_mesra"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 28 - M'Sila                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_28_msila" model="commercial.commune"><field name="name">M'Sila</field><field name="daira_id" ref="daira_28_msila"/></record>
+        <record id="commune_28_bou_saada" model="commercial.commune"><field name="name">Bou Saada</field><field name="daira_id" ref="daira_28_bou_saada"/></record>
+        <record id="commune_28_ain_el_hadjel" model="commercial.commune"><field name="name">Ain El Hadjel</field><field name="daira_id" ref="daira_28_ain_el_hadjel"/></record>
+        <record id="commune_28_sidi_aissa" model="commercial.commune"><field name="name">Sidi Aissa</field><field name="daira_id" ref="daira_28_sidi_aissa"/></record>
+        <record id="commune_28_hammam_dalaa" model="commercial.commune"><field name="name">Hammam Dalaa</field><field name="daira_id" ref="daira_28_hammam_dalaa"/></record>
+        <record id="commune_28_maadid" model="commercial.commune"><field name="name">Maadid</field><field name="daira_id" ref="daira_28_hammam_dalaa"/></record>
+        <record id="commune_28_magra" model="commercial.commune"><field name="name">Magra</field><field name="daira_id" ref="daira_28_magra"/></record>
+        <record id="commune_28_berhoum" model="commercial.commune"><field name="name">Berhoum</field><field name="daira_id" ref="daira_28_magra"/></record>
+        <record id="commune_28_ain_el_melh" model="commercial.commune"><field name="name">Ain El Melh</field><field name="daira_id" ref="daira_28_ain_el_melh"/></record>
+        <record id="commune_28_khoubana" model="commercial.commune"><field name="name">Khoubana</field><field name="daira_id" ref="daira_28_khoubana"/></record>
+        <record id="commune_28_ouled_sidi_brahim" model="commercial.commune"><field name="name">Ouled Sidi Brahim</field><field name="daira_id" ref="daira_28_ouled_sidi_brahim"/></record>
+        <record id="commune_28_ben_srour" model="commercial.commune"><field name="name">Ben Srour</field><field name="daira_id" ref="daira_28_ben_srour"/></record>
+        <record id="commune_28_djebel_messaad" model="commercial.commune"><field name="name">Djebel Messaad</field><field name="daira_id" ref="daira_28_djebel_messaad"/></record>
+        <record id="commune_28_medjedel" model="commercial.commune"><field name="name">Medjedel</field><field name="daira_id" ref="daira_28_medjedel"/></record>
+        <record id="commune_28_ouled_derradj" model="commercial.commune"><field name="name">Ouled Derradj</field><field name="daira_id" ref="daira_28_ouled_derradj"/></record>
+        <record id="commune_28_bir_foda" model="commercial.commune"><field name="name">Bir Foda</field><field name="daira_id" ref="daira_28_bir_foda"/></record>
+        <record id="commune_28_chellal" model="commercial.commune"><field name="name">Chellal</field><field name="daira_id" ref="daira_28_bir_foda"/></record>
+        <record id="commune_28_mcif" model="commercial.commune"><field name="name">M'Cif</field><field name="daira_id" ref="daira_28_mcif"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 29 - Mascara                                                 -->
+        <!-- ============================================================ -->
+        <record id="commune_29_mascara" model="commercial.commune"><field name="name">Mascara</field><field name="daira_id" ref="daira_29_mascara"/></record>
+        <record id="commune_29_sig" model="commercial.commune"><field name="name">Sig</field><field name="daira_id" ref="daira_29_sig"/></record>
+        <record id="commune_29_tighennif" model="commercial.commune"><field name="name">Tighennif</field><field name="daira_id" ref="daira_29_tighennif"/></record>
+        <record id="commune_29_ain_fares" model="commercial.commune"><field name="name">Ain Fares</field><field name="daira_id" ref="daira_29_ain_fares"/></record>
+        <record id="commune_29_hachem" model="commercial.commune"><field name="name">Hachem</field><field name="daira_id" ref="daira_29_hachem"/></record>
+        <record id="commune_29_oued_el_abtal" model="commercial.commune"><field name="name">Oued El Abtal</field><field name="daira_id" ref="daira_29_oued_el_abtal"/></record>
+        <record id="commune_29_mohammadia" model="commercial.commune"><field name="name">Mohammadia</field><field name="daira_id" ref="daira_29_mohammadia"/></record>
+        <record id="commune_29_bou_hanifia" model="commercial.commune"><field name="name">Bou Hanifia</field><field name="daira_id" ref="daira_29_bou_hanifia"/></record>
+        <record id="commune_29_ain_fakan" model="commercial.commune"><field name="name">Ain Fakan</field><field name="daira_id" ref="daira_29_ain_fakan"/></record>
+        <record id="commune_29_ghriss" model="commercial.commune"><field name="name">Ghriss</field><field name="daira_id" ref="daira_29_ghriss"/></record>
+        <record id="commune_29_oggaz" model="commercial.commune"><field name="name">Oggaz</field><field name="daira_id" ref="daira_29_oggaz"/></record>
+        <record id="commune_29_hacine" model="commercial.commune"><field name="name">Hacine</field><field name="daira_id" ref="daira_29_hacine"/></record>
+        <record id="commune_29_oued_taria" model="commercial.commune"><field name="name">Oued Taria</field><field name="daira_id" ref="daira_29_oued_taria"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 30 - Ouargla                                                 -->
+        <!-- ============================================================ -->
+        <record id="commune_30_ouargla" model="commercial.commune"><field name="name">Ouargla</field><field name="daira_id" ref="daira_30_ouargla"/></record>
+        <record id="commune_30_touggourt" model="commercial.commune"><field name="name">Touggourt</field><field name="daira_id" ref="daira_30_touggourt"/></record>
+        <record id="commune_30_hassi_messaoud" model="commercial.commune"><field name="name">Hassi Messaoud</field><field name="daira_id" ref="daira_30_hassi_messaoud"/></record>
+        <record id="commune_30_temacine" model="commercial.commune"><field name="name">Temacine</field><field name="daira_id" ref="daira_30_temacine"/></record>
+        <record id="commune_30_el_hadjira" model="commercial.commune"><field name="name">El Hadjira</field><field name="daira_id" ref="daira_30_el_hadjira"/></record>
+        <record id="commune_30_megarine" model="commercial.commune"><field name="name">Megarine</field><field name="daira_id" ref="daira_30_megarine"/></record>
+        <record id="commune_30_taibet" model="commercial.commune"><field name="name">Taibet</field><field name="daira_id" ref="daira_30_taibet"/></record>
+        <record id="commune_30_ngoussa" model="commercial.commune"><field name="name">N'Goussa</field><field name="daira_id" ref="daira_30_ngoussa"/></record>
+        <record id="commune_30_sidi_khouiled" model="commercial.commune"><field name="name">Sidi Khouiled</field><field name="daira_id" ref="daira_30_sidi_khouiled"/></record>
+        <record id="commune_30_el_borma" model="commercial.commune"><field name="name">El Borma</field><field name="daira_id" ref="daira_30_el_borma"/></record>
+        <record id="commune_30_rouissat" model="commercial.commune"><field name="name">Rouissat</field><field name="daira_id" ref="daira_30_rouissat"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 31 - Oran                                                    -->
+        <!-- ============================================================ -->
+        <record id="commune_31_oran" model="commercial.commune"><field name="name">Oran</field><field name="daira_id" ref="daira_31_oran"/></record>
+        <record id="commune_31_bir_el_djir" model="commercial.commune"><field name="name">Bir El Djir</field><field name="daira_id" ref="daira_31_bir_el_djir"/></record>
+        <record id="commune_31_hassi_bounif" model="commercial.commune"><field name="name">Hassi Bounif</field><field name="daira_id" ref="daira_31_bir_el_djir"/></record>
+        <record id="commune_31_ain_turk" model="commercial.commune"><field name="name">Ain Turk</field><field name="daira_id" ref="daira_31_ain_turk"/></record>
+        <record id="commune_31_mers_el_kebir" model="commercial.commune"><field name="name">Mers El Kebir</field><field name="daira_id" ref="daira_31_ain_turk"/></record>
+        <record id="commune_31_bousfer" model="commercial.commune"><field name="name">Bousfer</field><field name="daira_id" ref="daira_31_ain_turk"/></record>
+        <record id="commune_31_es_senia" model="commercial.commune"><field name="name">Es Senia</field><field name="daira_id" ref="daira_31_es_senia"/></record>
+        <record id="commune_31_arzew" model="commercial.commune"><field name="name">Arzew</field><field name="daira_id" ref="daira_31_arzew"/></record>
+        <record id="commune_31_bethioua" model="commercial.commune"><field name="name">Bethioua</field><field name="daira_id" ref="daira_31_bethioua"/></record>
+        <record id="commune_31_ain_el_bia" model="commercial.commune"><field name="name">Ain El Bia</field><field name="daira_id" ref="daira_31_bethioua"/></record>
+        <record id="commune_31_oued_tlelat" model="commercial.commune"><field name="name">Oued Tlelat</field><field name="daira_id" ref="daira_31_oued_tlelat"/></record>
+        <record id="commune_31_tafraoui" model="commercial.commune"><field name="name">Tafraoui</field><field name="daira_id" ref="daira_31_oued_tlelat"/></record>
+        <record id="commune_31_gdyel" model="commercial.commune"><field name="name">Gdyel</field><field name="daira_id" ref="daira_31_gdyel"/></record>
+        <record id="commune_31_boutlelis" model="commercial.commune"><field name="name">Boutlelis</field><field name="daira_id" ref="daira_31_boutlelis"/></record>
+        <record id="commune_31_misserghin" model="commercial.commune"><field name="name">Misserghin</field><field name="daira_id" ref="daira_31_boutlelis"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 32 - El Bayadh                                               -->
+        <!-- ============================================================ -->
+        <record id="commune_32_el_bayadh" model="commercial.commune"><field name="name">El Bayadh</field><field name="daira_id" ref="daira_32_el_bayadh"/></record>
+        <record id="commune_32_bougtob" model="commercial.commune"><field name="name">Bougtob</field><field name="daira_id" ref="daira_32_bougtob"/></record>
+        <record id="commune_32_el_abiodh_sidi_cheikh" model="commercial.commune"><field name="name">El Abiodh Sidi Cheikh</field><field name="daira_id" ref="daira_32_el_abiodh_sidi_cheikh"/></record>
+        <record id="commune_32_brezina" model="commercial.commune"><field name="name">Brezina</field><field name="daira_id" ref="daira_32_brezina"/></record>
+        <record id="commune_32_labiod_sidi_cheikh" model="commercial.commune"><field name="name">Labiod Sidi Cheikh</field><field name="daira_id" ref="daira_32_labiod_sidi_cheikh"/></record>
+        <record id="commune_32_ain_el_orak" model="commercial.commune"><field name="name">Ain El Orak</field><field name="daira_id" ref="daira_32_ain_el_orak"/></record>
+        <record id="commune_32_chellala" model="commercial.commune"><field name="name">Chellala</field><field name="daira_id" ref="daira_32_chellala"/></record>
+        <record id="commune_32_boualem" model="commercial.commune"><field name="name">Boualem</field><field name="daira_id" ref="daira_32_boualem"/></record>
+        <record id="commune_32_rogassa" model="commercial.commune"><field name="name">Rogassa</field><field name="daira_id" ref="daira_32_rogassa"/></record>
+        <record id="commune_32_ghassoul" model="commercial.commune"><field name="name">Ghassoul</field><field name="daira_id" ref="daira_32_ghassoul"/></record>
+        <record id="commune_32_arbaouat" model="commercial.commune"><field name="name">Arbaouat</field><field name="daira_id" ref="daira_32_arbaouat"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 33 - Illizi                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_33_illizi" model="commercial.commune"><field name="name">Illizi</field><field name="daira_id" ref="daira_33_illizi"/></record>
+        <record id="commune_33_djanet" model="commercial.commune"><field name="name">Djanet</field><field name="daira_id" ref="daira_33_djanet"/></record>
+        <record id="commune_33_in_amenas" model="commercial.commune"><field name="name">In Amenas</field><field name="daira_id" ref="daira_33_in_amenas"/></record>
+        <record id="commune_33_bordj_omar_driss" model="commercial.commune"><field name="name">Bordj Omar Driss</field><field name="daira_id" ref="daira_33_bordj_omar_driss"/></record>
+        <record id="commune_33_debdeb" model="commercial.commune"><field name="name">Debdeb</field><field name="daira_id" ref="daira_33_debdeb"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 34 - Bordj Bou Arreridj                                      -->
+        <!-- ============================================================ -->
+        <record id="commune_34_bordj_bou_arreridj" model="commercial.commune"><field name="name">Bordj Bou Arreridj</field><field name="daira_id" ref="daira_34_bordj_bou_arreridj"/></record>
+        <record id="commune_34_ras_el_oued" model="commercial.commune"><field name="name">Ras El Oued</field><field name="daira_id" ref="daira_34_ras_el_oued"/></record>
+        <record id="commune_34_medjana" model="commercial.commune"><field name="name">Medjana</field><field name="daira_id" ref="daira_34_medjana"/></record>
+        <record id="commune_34_bordj_zemoura" model="commercial.commune"><field name="name">Bordj Zemoura</field><field name="daira_id" ref="daira_34_bordj_zemoura"/></record>
+        <record id="commune_34_mansourah" model="commercial.commune"><field name="name">Mansourah</field><field name="daira_id" ref="daira_34_mansourah"/></record>
+        <record id="commune_34_bir_kasdali" model="commercial.commune"><field name="name">Bir Kasdali</field><field name="daira_id" ref="daira_34_bir_kasdali"/></record>
+        <record id="commune_34_el_hamadia" model="commercial.commune"><field name="name">El Hamadia</field><field name="daira_id" ref="daira_34_el_hamadia"/></record>
+        <record id="commune_34_djaafra" model="commercial.commune"><field name="name">Djaafra</field><field name="daira_id" ref="daira_34_djaafra"/></record>
+        <record id="commune_34_teniet_en_nasr" model="commercial.commune"><field name="name">Teniet En Nasr</field><field name="daira_id" ref="daira_34_djaafra"/></record>
+        <record id="commune_34_bordj_ghedir" model="commercial.commune"><field name="name">Bordj Ghedir</field><field name="daira_id" ref="daira_34_bordj_ghedir"/></record>
+        <record id="commune_34_ain_taghrout" model="commercial.commune"><field name="name">Ain Taghrout</field><field name="daira_id" ref="daira_34_ain_taghrout"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 35 - Boumerdes                                               -->
+        <!-- ============================================================ -->
+        <record id="commune_35_boumerdes" model="commercial.commune"><field name="name">Boumerdes</field><field name="daira_id" ref="daira_35_boumerdes"/></record>
+        <record id="commune_35_tidjelabine" model="commercial.commune"><field name="name">Tidjelabine</field><field name="daira_id" ref="daira_35_boumerdes"/></record>
+        <record id="commune_35_bordj_menaiel" model="commercial.commune"><field name="name">Bordj Menaiel</field><field name="daira_id" ref="daira_35_bordj_menaiel"/></record>
+        <record id="commune_35_si_mustapha" model="commercial.commune"><field name="name">Si Mustapha</field><field name="daira_id" ref="daira_35_bordj_menaiel"/></record>
+        <record id="commune_35_dellys" model="commercial.commune"><field name="name">Dellys</field><field name="daira_id" ref="daira_35_dellys"/></record>
+        <record id="commune_35_baghlia_dellys" model="commercial.commune"><field name="name">Baghlia</field><field name="daira_id" ref="daira_35_dellys"/></record>
+        <record id="commune_35_isser" model="commercial.commune"><field name="name">Isser</field><field name="daira_id" ref="daira_35_isser"/></record>
+        <record id="commune_35_chabet_el_ameur" model="commercial.commune"><field name="name">Chabet El Ameur</field><field name="daira_id" ref="daira_35_isser"/></record>
+        <record id="commune_35_khemis_el_khechna" model="commercial.commune"><field name="name">Khemis El Khechna</field><field name="daira_id" ref="daira_35_khemis_el_khechna"/></record>
+        <record id="commune_35_ouled_moussa" model="commercial.commune"><field name="name">Ouled Moussa</field><field name="daira_id" ref="daira_35_khemis_el_khechna"/></record>
+        <record id="commune_35_naciria" model="commercial.commune"><field name="name">Naciria</field><field name="daira_id" ref="daira_35_naciria"/></record>
+        <record id="commune_35_djinet" model="commercial.commune"><field name="name">Djinet</field><field name="daira_id" ref="daira_35_naciria"/></record>
+        <record id="commune_35_baghlia" model="commercial.commune"><field name="name">Baghlia</field><field name="daira_id" ref="daira_35_baghlia"/></record>
+        <record id="commune_35_boudouaou" model="commercial.commune"><field name="name">Boudouaou</field><field name="daira_id" ref="daira_35_boudouaou"/></record>
+        <record id="commune_35_hammadi" model="commercial.commune"><field name="name">Hammadi</field><field name="daira_id" ref="daira_35_boudouaou"/></record>
+        <record id="commune_35_thenia" model="commercial.commune"><field name="name">Thenia</field><field name="daira_id" ref="daira_35_thenia"/></record>
+        <record id="commune_35_souk_el_had" model="commercial.commune"><field name="name">Souk El Had</field><field name="daira_id" ref="daira_35_thenia"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 36 - El Tarf                                                 -->
+        <!-- ============================================================ -->
+        <record id="commune_36_el_tarf" model="commercial.commune"><field name="name">El Tarf</field><field name="daira_id" ref="daira_36_el_tarf"/></record>
+        <record id="commune_36_ben_mhidi" model="commercial.commune"><field name="name">Ben M'Hidi</field><field name="daira_id" ref="daira_36_ben_mhidi"/></record>
+        <record id="commune_36_bouhadjar" model="commercial.commune"><field name="name">Bouhadjar</field><field name="daira_id" ref="daira_36_bouhadjar"/></record>
+        <record id="commune_36_drean" model="commercial.commune"><field name="name">Drean</field><field name="daira_id" ref="daira_36_drean"/></record>
+        <record id="commune_36_chihani" model="commercial.commune"><field name="name">Chihani</field><field name="daira_id" ref="daira_36_drean"/></record>
+        <record id="commune_36_el_kala" model="commercial.commune"><field name="name">El Kala</field><field name="daira_id" ref="daira_36_el_kala"/></record>
+        <record id="commune_36_besbes" model="commercial.commune"><field name="name">Besbes</field><field name="daira_id" ref="daira_36_besbes"/></record>
+        <record id="commune_36_bouteldja" model="commercial.commune"><field name="name">Bouteldja</field><field name="daira_id" ref="daira_36_bouteldja"/></record>
+        <record id="commune_36_ain_el_assel" model="commercial.commune"><field name="name">Ain El Assel</field><field name="daira_id" ref="daira_36_ain_el_assel"/></record>
+        <record id="commune_36_lac_des_oiseaux" model="commercial.commune"><field name="name">Lac des Oiseaux</field><field name="daira_id" ref="daira_36_lac_des_oiseaux"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 37 - Tindouf                                                 -->
+        <!-- ============================================================ -->
+        <record id="commune_37_tindouf" model="commercial.commune"><field name="name">Tindouf</field><field name="daira_id" ref="daira_37_tindouf"/></record>
+        <record id="commune_37_oum_el_assel" model="commercial.commune"><field name="name">Oum El Assel</field><field name="daira_id" ref="daira_37_oum_el_assel"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 38 - Tissemsilt                                              -->
+        <!-- ============================================================ -->
+        <record id="commune_38_tissemsilt" model="commercial.commune"><field name="name">Tissemsilt</field><field name="daira_id" ref="daira_38_tissemsilt"/></record>
+        <record id="commune_38_bordj_bounaama" model="commercial.commune"><field name="name">Bordj Bounaama</field><field name="daira_id" ref="daira_38_bordj_bounaama"/></record>
+        <record id="commune_38_boucaid" model="commercial.commune"><field name="name">Boucaid</field><field name="daira_id" ref="daira_38_bordj_bounaama"/></record>
+        <record id="commune_38_theniet_el_had" model="commercial.commune"><field name="name">Theniet El Had</field><field name="daira_id" ref="daira_38_theniet_el_had"/></record>
+        <record id="commune_38_lardjem" model="commercial.commune"><field name="name">Lardjem</field><field name="daira_id" ref="daira_38_lardjem"/></record>
+        <record id="commune_38_lazharia" model="commercial.commune"><field name="name">Lazharia</field><field name="daira_id" ref="daira_38_lazharia"/></record>
+        <record id="commune_38_ammari" model="commercial.commune"><field name="name">Ammari</field><field name="daira_id" ref="daira_38_ammari"/></record>
+        <record id="commune_38_ouled_bessam" model="commercial.commune"><field name="name">Ouled Bessam</field><field name="daira_id" ref="daira_38_ouled_bessam"/></record>
+        <record id="commune_38_khemisti" model="commercial.commune"><field name="name">Khemisti</field><field name="daira_id" ref="daira_38_khemisti"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 39 - El Oued                                                 -->
+        <!-- ============================================================ -->
+        <record id="commune_39_el_oued" model="commercial.commune"><field name="name">El Oued</field><field name="daira_id" ref="daira_39_el_oued"/></record>
+        <record id="commune_39_kouinine" model="commercial.commune"><field name="name">Kouinine</field><field name="daira_id" ref="daira_39_el_oued"/></record>
+        <record id="commune_39_guemar" model="commercial.commune"><field name="name">Guemar</field><field name="daira_id" ref="daira_39_guemar"/></record>
+        <record id="commune_39_robbah" model="commercial.commune"><field name="name">Robbah</field><field name="daira_id" ref="daira_39_robbah"/></record>
+        <record id="commune_39_bayadha" model="commercial.commune"><field name="name">Bayadha</field><field name="daira_id" ref="daira_39_bayadha"/></record>
+        <record id="commune_39_nakhla" model="commercial.commune"><field name="name">Nakhla</field><field name="daira_id" ref="daira_39_bayadha"/></record>
+        <record id="commune_39_debila" model="commercial.commune"><field name="name">Debila</field><field name="daira_id" ref="daira_39_debila"/></record>
+        <record id="commune_39_hassani_abdelkrim" model="commercial.commune"><field name="name">Hassani Abdelkrim</field><field name="daira_id" ref="daira_39_hassani_abdelkrim"/></record>
+        <record id="commune_39_hassi_khalifa" model="commercial.commune"><field name="name">Hassi Khalifa</field><field name="daira_id" ref="daira_39_hassi_khalifa"/></record>
+        <record id="commune_39_taleb_larbi" model="commercial.commune"><field name="name">Taleb Larbi</field><field name="daira_id" ref="daira_39_taleb_larbi"/></record>
+        <record id="commune_39_djamaa" model="commercial.commune"><field name="name">Djamaa</field><field name="daira_id" ref="daira_39_djamaa"/></record>
+        <record id="commune_39_reguiba" model="commercial.commune"><field name="name">Reguiba</field><field name="daira_id" ref="daira_39_reguiba"/></record>
+        <record id="commune_39_magrane" model="commercial.commune"><field name="name">Magrane</field><field name="daira_id" ref="daira_39_magrane"/></record>
+        <record id="commune_39_oued_el_alenda" model="commercial.commune"><field name="name">Oued El Alenda</field><field name="daira_id" ref="daira_39_oued_el_alenda"/></record>
+        <record id="commune_39_mghaier" model="commercial.commune"><field name="name">M'Ghaier</field><field name="daira_id" ref="daira_39_mghaier"/></record>
+        <record id="commune_39_still" model="commercial.commune"><field name="name">Still</field><field name="daira_id" ref="daira_39_still"/></record>
+        <record id="commune_39_oum_touyour" model="commercial.commune"><field name="name">Oum Touyour</field><field name="daira_id" ref="daira_39_oum_touyour"/></record>
+        <record id="commune_39_ben_guecha" model="commercial.commune"><field name="name">Ben Guecha</field><field name="daira_id" ref="daira_39_ben_guecha"/></record>
+        <record id="commune_39_hamraia" model="commercial.commune"><field name="name">Hamraia</field><field name="daira_id" ref="daira_39_hamraia"/></record>
+        <record id="commune_39_el_ogla" model="commercial.commune"><field name="name">El Ogla</field><field name="daira_id" ref="daira_39_el_ogla"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 40 - Khenchela                                               -->
+        <!-- ============================================================ -->
+        <record id="commune_40_khenchela" model="commercial.commune"><field name="name">Khenchela</field><field name="daira_id" ref="daira_40_khenchela"/></record>
+        <record id="commune_40_kais" model="commercial.commune"><field name="name">Kais</field><field name="daira_id" ref="daira_40_kais"/></record>
+        <record id="commune_40_el_mahmal" model="commercial.commune"><field name="name">El Mahmal</field><field name="daira_id" ref="daira_40_kais"/></record>
+        <record id="commune_40_ain_touila" model="commercial.commune"><field name="name">Ain Touila</field><field name="daira_id" ref="daira_40_ain_touila"/></record>
+        <record id="commune_40_babar" model="commercial.commune"><field name="name">Babar</field><field name="daira_id" ref="daira_40_babar"/></record>
+        <record id="commune_40_chechar" model="commercial.commune"><field name="name">Chechar</field><field name="daira_id" ref="daira_40_chechar"/></record>
+        <record id="commune_40_bouhmama" model="commercial.commune"><field name="name">Bouhmama</field><field name="daira_id" ref="daira_40_bouhmama"/></record>
+        <record id="commune_40_el_hamma" model="commercial.commune"><field name="name">El Hamma</field><field name="daira_id" ref="daira_40_el_hamma"/></record>
+        <record id="commune_40_ouled_rechache" model="commercial.commune"><field name="name">Ouled Rechache</field><field name="daira_id" ref="daira_40_ouled_rechache"/></record>
+        <record id="commune_40_tamza" model="commercial.commune"><field name="name">Tamza</field><field name="daira_id" ref="daira_40_tamza"/></record>
+        <record id="commune_40_ensigha" model="commercial.commune"><field name="name">Ensigha</field><field name="daira_id" ref="daira_40_ensigha"/></record>
+        <record id="commune_40_yabous" model="commercial.commune"><field name="name">Yabous</field><field name="daira_id" ref="daira_40_yabous"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 41 - Souk Ahras                                              -->
+        <!-- ============================================================ -->
+        <record id="commune_41_souk_ahras" model="commercial.commune"><field name="name">Souk Ahras</field><field name="daira_id" ref="daira_41_souk_ahras"/></record>
+        <record id="commune_41_sedrata" model="commercial.commune"><field name="name">Sedrata</field><field name="daira_id" ref="daira_41_sedrata"/></record>
+        <record id="commune_41_bir_bouhouche" model="commercial.commune"><field name="name">Bir Bouhouche</field><field name="daira_id" ref="daira_41_bir_bouhouche"/></record>
+        <record id="commune_41_merahna" model="commercial.commune"><field name="name">Merahna</field><field name="daira_id" ref="daira_41_merahna"/></record>
+        <record id="commune_41_ouled_driss" model="commercial.commune"><field name="name">Ouled Driss</field><field name="daira_id" ref="daira_41_ouled_driss"/></record>
+        <record id="commune_41_haddada" model="commercial.commune"><field name="name">Haddada</field><field name="daira_id" ref="daira_41_haddada"/></record>
+        <record id="commune_41_taoura" model="commercial.commune"><field name="name">Taoura</field><field name="daira_id" ref="daira_41_taoura"/></record>
+        <record id="commune_41_mechroha" model="commercial.commune"><field name="name">Mechroha</field><field name="daira_id" ref="daira_41_taoura"/></record>
+        <record id="commune_41_mdaourouch" model="commercial.commune"><field name="name">M'Daourouch</field><field name="daira_id" ref="daira_41_mdaourouch"/></record>
+        <record id="commune_41_oum_el_adhaim" model="commercial.commune"><field name="name">Oum El Adhaim</field><field name="daira_id" ref="daira_41_oum_el_adhaim"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 42 - Tipaza                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_42_tipaza" model="commercial.commune"><field name="name">Tipaza</field><field name="daira_id" ref="daira_42_tipaza"/></record>
+        <record id="commune_42_sidi_rached" model="commercial.commune"><field name="name">Sidi Rached</field><field name="daira_id" ref="daira_42_tipaza"/></record>
+        <record id="commune_42_hadjout" model="commercial.commune"><field name="name">Hadjout</field><field name="daira_id" ref="daira_42_hadjout"/></record>
+        <record id="commune_42_kolea" model="commercial.commune"><field name="name">Kolea</field><field name="daira_id" ref="daira_42_kolea"/></record>
+        <record id="commune_42_douaouda" model="commercial.commune"><field name="name">Douaouda</field><field name="daira_id" ref="daira_42_kolea"/></record>
+        <record id="commune_42_cherchell" model="commercial.commune"><field name="name">Cherchell</field><field name="daira_id" ref="daira_42_cherchell"/></record>
+        <record id="commune_42_sidi_ghiles" model="commercial.commune"><field name="name">Sidi Ghiles</field><field name="daira_id" ref="daira_42_cherchell"/></record>
+        <record id="commune_42_bou_ismail" model="commercial.commune"><field name="name">Bou Ismail</field><field name="daira_id" ref="daira_42_bou_ismail"/></record>
+        <record id="commune_42_ain_tagourait" model="commercial.commune"><field name="name">Ain Tagourait</field><field name="daira_id" ref="daira_42_bou_ismail"/></record>
+        <record id="commune_42_gouraya" model="commercial.commune"><field name="name">Gouraya</field><field name="daira_id" ref="daira_42_gouraya"/></record>
+        <record id="commune_42_messelmoun" model="commercial.commune"><field name="name">Messelmoun</field><field name="daira_id" ref="daira_42_gouraya"/></record>
+        <record id="commune_42_damous" model="commercial.commune"><field name="name">Damous</field><field name="daira_id" ref="daira_42_damous"/></record>
+        <record id="commune_42_fouka" model="commercial.commune"><field name="name">Fouka</field><field name="daira_id" ref="daira_42_fouka"/></record>
+        <record id="commune_42_ahmer_el_ain" model="commercial.commune"><field name="name">Ahmer El Ain</field><field name="daira_id" ref="daira_42_ahmer_el_ain"/></record>
+        <record id="commune_42_sidi_amar" model="commercial.commune"><field name="name">Sidi Amar</field><field name="daira_id" ref="daira_42_sidi_amar"/></record>
+        <record id="commune_42_nador" model="commercial.commune"><field name="name">Nador</field><field name="daira_id" ref="daira_42_sidi_amar"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 43 - Mila                                                    -->
+        <!-- ============================================================ -->
+        <record id="commune_43_mila" model="commercial.commune"><field name="name">Mila</field><field name="daira_id" ref="daira_43_mila"/></record>
+        <record id="commune_43_ferdjioua" model="commercial.commune"><field name="name">Ferdjioua</field><field name="daira_id" ref="daira_43_ferdjioua"/></record>
+        <record id="commune_43_chelghoum_laid" model="commercial.commune"><field name="name">Chelghoum Laid</field><field name="daira_id" ref="daira_43_chelghoum_laid"/></record>
+        <record id="commune_43_ain_beida_harriche" model="commercial.commune"><field name="name">Ain Beida Harriche</field><field name="daira_id" ref="daira_43_ain_beida_harriche"/></record>
+        <record id="commune_43_grarem_gouga" model="commercial.commune"><field name="name">Grarem Gouga</field><field name="daira_id" ref="daira_43_grarem_gouga"/></record>
+        <record id="commune_43_oued_endja" model="commercial.commune"><field name="name">Oued Endja</field><field name="daira_id" ref="daira_43_oued_endja"/></record>
+        <record id="commune_43_rouached" model="commercial.commune"><field name="name">Rouached</field><field name="daira_id" ref="daira_43_rouached"/></record>
+        <record id="commune_43_sidi_merouane" model="commercial.commune"><field name="name">Sidi Merouane</field><field name="daira_id" ref="daira_43_sidi_merouane"/></record>
+        <record id="commune_43_tassadane_haddada" model="commercial.commune"><field name="name">Tassadane Haddada</field><field name="daira_id" ref="daira_43_tassadane_haddada"/></record>
+        <record id="commune_43_terrai_bainen" model="commercial.commune"><field name="name">Terrai Bainen</field><field name="daira_id" ref="daira_43_terrai_bainen"/></record>
+        <record id="commune_43_teleghma" model="commercial.commune"><field name="name">Teleghma</field><field name="daira_id" ref="daira_43_teleghma"/></record>
+        <record id="commune_43_ain_tine" model="commercial.commune"><field name="name">Ain Tine</field><field name="daira_id" ref="daira_43_ain_tine"/></record>
+        <record id="commune_43_oued_athmania" model="commercial.commune"><field name="name">Oued Athmania</field><field name="daira_id" ref="daira_43_oued_athmania"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 44 - Ain Defla                                               -->
+        <!-- ============================================================ -->
+        <record id="commune_44_ain_defla" model="commercial.commune"><field name="name">Ain Defla</field><field name="daira_id" ref="daira_44_ain_defla"/></record>
+        <record id="commune_44_miliana" model="commercial.commune"><field name="name">Miliana</field><field name="daira_id" ref="daira_44_miliana"/></record>
+        <record id="commune_44_khemis_miliana" model="commercial.commune"><field name="name">Khemis Miliana</field><field name="daira_id" ref="daira_44_khemis_miliana"/></record>
+        <record id="commune_44_djendel" model="commercial.commune"><field name="name">Djendel</field><field name="daira_id" ref="daira_44_djendel"/></record>
+        <record id="commune_44_el_attaf" model="commercial.commune"><field name="name">El Attaf</field><field name="daira_id" ref="daira_44_el_attaf"/></record>
+        <record id="commune_44_hammam_righa" model="commercial.commune"><field name="name">Hammam Righa</field><field name="daira_id" ref="daira_44_hammam_righa"/></record>
+        <record id="commune_44_el_abadia" model="commercial.commune"><field name="name">El Abadia</field><field name="daira_id" ref="daira_44_el_abadia"/></record>
+        <record id="commune_44_bathia" model="commercial.commune"><field name="name">Bathia</field><field name="daira_id" ref="daira_44_bathia"/></record>
+        <record id="commune_44_ain_lechiakh" model="commercial.commune"><field name="name">Ain Lechiakh</field><field name="daira_id" ref="daira_44_ain_lechiakh"/></record>
+        <record id="commune_44_boumedfaa" model="commercial.commune"><field name="name">Boumedfaa</field><field name="daira_id" ref="daira_44_boumedfaa"/></record>
+        <record id="commune_44_djelida" model="commercial.commune"><field name="name">Djelida</field><field name="daira_id" ref="daira_44_djelida"/></record>
+        <record id="commune_44_bordj_emir_khaled" model="commercial.commune"><field name="name">Bordj Emir Khaled</field><field name="daira_id" ref="daira_44_bordj_emir_khaled"/></record>
+        <record id="commune_44_rouina" model="commercial.commune"><field name="name">Rouina</field><field name="daira_id" ref="daira_44_rouina"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 45 - Naama                                                   -->
+        <!-- ============================================================ -->
+        <record id="commune_45_naama" model="commercial.commune"><field name="name">Naama</field><field name="daira_id" ref="daira_45_naama"/></record>
+        <record id="commune_45_mekmen_ben_amar" model="commercial.commune"><field name="name">Mekmen Ben Amar</field><field name="daira_id" ref="daira_45_naama"/></record>
+        <record id="commune_45_ain_sefra" model="commercial.commune"><field name="name">Ain Sefra</field><field name="daira_id" ref="daira_45_ain_sefra"/></record>
+        <record id="commune_45_mecheria" model="commercial.commune"><field name="name">Mecheria</field><field name="daira_id" ref="daira_45_mecheria"/></record>
+        <record id="commune_45_tiout" model="commercial.commune"><field name="name">Tiout</field><field name="daira_id" ref="daira_45_tiout"/></record>
+        <record id="commune_45_sfissifa" model="commercial.commune"><field name="name">Sfissifa</field><field name="daira_id" ref="daira_45_sfissifa"/></record>
+        <record id="commune_45_moghrar" model="commercial.commune"><field name="name">Moghrar</field><field name="daira_id" ref="daira_45_moghrar"/></record>
+        <record id="commune_45_asla" model="commercial.commune"><field name="name">Asla</field><field name="daira_id" ref="daira_45_asla"/></record>
+        <record id="commune_45_djenien_bourezg" model="commercial.commune"><field name="name">Djenien Bourezg</field><field name="daira_id" ref="daira_45_djenien_bourezg"/></record>
+        <record id="commune_45_ain_ben_khelil" model="commercial.commune"><field name="name">Ain Ben Khelil</field><field name="daira_id" ref="daira_45_djenien_bourezg"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 46 - Ain Temouchent                                          -->
+        <!-- ============================================================ -->
+        <record id="commune_46_ain_temouchent" model="commercial.commune"><field name="name">Ain Temouchent</field><field name="daira_id" ref="daira_46_ain_temouchent"/></record>
+        <record id="commune_46_hammam_bou_hadjar" model="commercial.commune"><field name="name">Hammam Bou Hadjar</field><field name="daira_id" ref="daira_46_hammam_bou_hadjar"/></record>
+        <record id="commune_46_el_malah" model="commercial.commune"><field name="name">El Malah</field><field name="daira_id" ref="daira_46_el_malah"/></record>
+        <record id="commune_46_el_amria" model="commercial.commune"><field name="name">El Amria</field><field name="daira_id" ref="daira_46_el_amria"/></record>
+        <record id="commune_46_ain_el_arbaa" model="commercial.commune"><field name="name">Ain El Arbaa</field><field name="daira_id" ref="daira_46_ain_el_arbaa"/></record>
+        <record id="commune_46_beni_saf" model="commercial.commune"><field name="name">Beni Saf</field><field name="daira_id" ref="daira_46_beni_saf"/></record>
+        <record id="commune_46_oulhaca_el_gheraba" model="commercial.commune"><field name="name">Oulhaca El Gheraba</field><field name="daira_id" ref="daira_46_oulhaca_el_gheraba"/></record>
+        <record id="commune_46_ain_kihal" model="commercial.commune"><field name="name">Ain Kihal</field><field name="daira_id" ref="daira_46_ain_kihal"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 47 - Ghardaia                                                -->
+        <!-- ============================================================ -->
+        <record id="commune_47_ghardaia" model="commercial.commune"><field name="name">Ghardaia</field><field name="daira_id" ref="daira_47_ghardaia"/></record>
+        <record id="commune_47_metlili" model="commercial.commune"><field name="name">Metlili</field><field name="daira_id" ref="daira_47_metlili"/></record>
+        <record id="commune_47_sebseb" model="commercial.commune"><field name="name">Sebseb</field><field name="daira_id" ref="daira_47_metlili"/></record>
+        <record id="commune_47_el_meniaa" model="commercial.commune"><field name="name">El Meniaa</field><field name="daira_id" ref="daira_47_el_meniaa"/></record>
+        <record id="commune_47_berriane" model="commercial.commune"><field name="name">Berriane</field><field name="daira_id" ref="daira_47_berriane"/></record>
+        <record id="commune_47_daya_ben_dahoua" model="commercial.commune"><field name="name">Daya Ben Dahoua</field><field name="daira_id" ref="daira_47_daya_ben_dahoua"/></record>
+        <record id="commune_47_guerrara" model="commercial.commune"><field name="name">Guerrara</field><field name="daira_id" ref="daira_47_guerrara"/></record>
+        <record id="commune_47_bounoura" model="commercial.commune"><field name="name">Bounoura</field><field name="daira_id" ref="daira_47_bounoura"/></record>
+        <record id="commune_47_el_atteuf" model="commercial.commune"><field name="name">El Atteuf</field><field name="daira_id" ref="daira_47_el_atteuf"/></record>
+        <record id="commune_47_zelfana" model="commercial.commune"><field name="name">Zelfana</field><field name="daira_id" ref="daira_47_zelfana"/></record>
+        <record id="commune_47_mansourah" model="commercial.commune"><field name="name">Mansourah</field><field name="daira_id" ref="daira_47_mansourah"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 48 - Relizane                                                -->
+        <!-- ============================================================ -->
+        <record id="commune_48_relizane" model="commercial.commune"><field name="name">Relizane</field><field name="daira_id" ref="daira_48_relizane"/></record>
+        <record id="commune_48_oued_rhiou" model="commercial.commune"><field name="name">Oued Rhiou</field><field name="daira_id" ref="daira_48_oued_rhiou"/></record>
+        <record id="commune_48_mazouna" model="commercial.commune"><field name="name">Mazouna</field><field name="daira_id" ref="daira_48_mazouna"/></record>
+        <record id="commune_48_mendes" model="commercial.commune"><field name="name">Mendes</field><field name="daira_id" ref="daira_48_mendes"/></record>
+        <record id="commune_48_zammoura" model="commercial.commune"><field name="name">Zammoura</field><field name="daira_id" ref="daira_48_zammoura"/></record>
+        <record id="commune_48_ain_tarek" model="commercial.commune"><field name="name">Ain Tarek</field><field name="daira_id" ref="daira_48_ain_tarek"/></record>
+        <record id="commune_48_sidi_mhamed_ben_ali" model="commercial.commune"><field name="name">Sidi M'Hamed Ben Ali</field><field name="daira_id" ref="daira_48_sidi_mhamed_ben_ali"/></record>
+        <record id="commune_48_yellel" model="commercial.commune"><field name="name">Yellel</field><field name="daira_id" ref="daira_48_yellel"/></record>
+        <record id="commune_48_el_matmar" model="commercial.commune"><field name="name">El Matmar</field><field name="daira_id" ref="daira_48_el_matmar"/></record>
+        <record id="commune_48_el_hamadna" model="commercial.commune"><field name="name">El Hamadna</field><field name="daira_id" ref="daira_48_el_hamadna"/></record>
+        <record id="commune_48_ouarizane" model="commercial.commune"><field name="name">Ouarizane</field><field name="daira_id" ref="daira_48_ouarizane"/></record>
+        <record id="commune_48_ammi_moussa" model="commercial.commune"><field name="name">Ammi Moussa</field><field name="daira_id" ref="daira_48_ammi_moussa"/></record>
+        <record id="commune_48_djidioua" model="commercial.commune"><field name="name">Djidioua</field><field name="daira_id" ref="daira_48_djidioua"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 49 - El M'Ghair                                              -->
+        <!-- ============================================================ -->
+        <record id="commune_49_el_mghair" model="commercial.commune"><field name="name">El M'Ghair</field><field name="daira_id" ref="daira_49_el_mghair"/></record>
+        <record id="commune_49_djamaa" model="commercial.commune"><field name="name">Djamaa</field><field name="daira_id" ref="daira_49_djamaa"/></record>
+        <record id="commune_49_sidi_amrane" model="commercial.commune"><field name="name">Sidi Amrane</field><field name="daira_id" ref="daira_49_sidi_amrane"/></record>
+        <record id="commune_49_oum_touyour" model="commercial.commune"><field name="name">Oum Touyour</field><field name="daira_id" ref="daira_49_oum_touyour"/></record>
+        <record id="commune_49_still" model="commercial.commune"><field name="name">Still</field><field name="daira_id" ref="daira_49_still"/></record>
+        <record id="commune_49_tendla" model="commercial.commune"><field name="name">Tendla</field><field name="daira_id" ref="daira_49_still"/></record>
+        <record id="commune_49_mrara" model="commercial.commune"><field name="name">M'Rara</field><field name="daira_id" ref="daira_49_mrara"/></record>
+        <record id="commune_49_sidi_khellil" model="commercial.commune"><field name="name">Sidi Khellil</field><field name="daira_id" ref="daira_49_sidi_khellil"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 50 - El Meniaa                                               -->
+        <!-- ============================================================ -->
+        <record id="commune_50_el_meniaa" model="commercial.commune"><field name="name">El Meniaa</field><field name="daira_id" ref="daira_50_el_meniaa"/></record>
+        <record id="commune_50_hassi_gara" model="commercial.commune"><field name="name">Hassi Gara</field><field name="daira_id" ref="daira_50_hassi_gara"/></record>
+        <record id="commune_50_hassi_el_gara" model="commercial.commune"><field name="name">Hassi El Gara</field><field name="daira_id" ref="daira_50_hassi_el_gara"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 51 - Ouled Djellal                                           -->
+        <!-- ============================================================ -->
+        <record id="commune_51_ouled_djellal" model="commercial.commune"><field name="name">Ouled Djellal</field><field name="daira_id" ref="daira_51_ouled_djellal"/></record>
+        <record id="commune_51_sidi_khaled" model="commercial.commune"><field name="name">Sidi Khaled</field><field name="daira_id" ref="daira_51_sidi_khaled"/></record>
+        <record id="commune_51_ras_el_miad" model="commercial.commune"><field name="name">Ras El Miad</field><field name="daira_id" ref="daira_51_sidi_khaled"/></record>
+        <record id="commune_51_ech_chaiba" model="commercial.commune"><field name="name">Ech Chaiba</field><field name="daira_id" ref="daira_51_ech_chaiba"/></record>
+        <record id="commune_51_doucen" model="commercial.commune"><field name="name">Doucen</field><field name="daira_id" ref="daira_51_doucen"/></record>
+        <record id="commune_51_besbes" model="commercial.commune"><field name="name">Besbes</field><field name="daira_id" ref="daira_51_besbes"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 52 - Bordj Badji Mokhtar                                     -->
+        <!-- ============================================================ -->
+        <record id="commune_52_bordj_badji_mokhtar" model="commercial.commune"><field name="name">Bordj Badji Mokhtar</field><field name="daira_id" ref="daira_52_bordj_badji_mokhtar"/></record>
+        <record id="commune_52_timiaouine" model="commercial.commune"><field name="name">Timiaouine</field><field name="daira_id" ref="daira_52_timiaouine"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 53 - Beni Abbes                                              -->
+        <!-- ============================================================ -->
+        <record id="commune_53_beni_abbes" model="commercial.commune"><field name="name">Beni Abbes</field><field name="daira_id" ref="daira_53_beni_abbes"/></record>
+        <record id="commune_53_igli" model="commercial.commune"><field name="name">Igli</field><field name="daira_id" ref="daira_53_igli"/></record>
+        <record id="commune_53_tabelbala" model="commercial.commune"><field name="name">Tabelbala</field><field name="daira_id" ref="daira_53_tabelbala"/></record>
+        <record id="commune_53_tamtert" model="commercial.commune"><field name="name">Tamtert</field><field name="daira_id" ref="daira_53_tamtert"/></record>
+        <record id="commune_53_el_ouata" model="commercial.commune"><field name="name">El Ouata</field><field name="daira_id" ref="daira_53_el_ouata"/></record>
+        <record id="commune_53_kerzaz" model="commercial.commune"><field name="name">Kerzaz</field><field name="daira_id" ref="daira_53_kerzaz"/></record>
+        <record id="commune_53_ouled_khoudir" model="commercial.commune"><field name="name">Ouled Khoudir</field><field name="daira_id" ref="daira_53_ouled_khoudir"/></record>
+        <record id="commune_53_beni_ikhlef" model="commercial.commune"><field name="name">Beni Ikhlef</field><field name="daira_id" ref="daira_53_beni_ikhlef"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 54 - In Salah                                                -->
+        <!-- ============================================================ -->
+        <record id="commune_54_in_salah" model="commercial.commune"><field name="name">In Salah</field><field name="daira_id" ref="daira_54_in_salah"/></record>
+        <record id="commune_54_in_ghar" model="commercial.commune"><field name="name">In Ghar</field><field name="daira_id" ref="daira_54_in_ghar"/></record>
+        <record id="commune_54_foggaret_ezzoubia" model="commercial.commune"><field name="name">Foggaret Ezzoubia</field><field name="daira_id" ref="daira_54_foggaret_ezzoubia"/></record>
+        <record id="commune_54_ain_el_hadjel" model="commercial.commune"><field name="name">Ain El Hadjel</field><field name="daira_id" ref="daira_54_ain_el_hadjel"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 55 - In Guezzam                                              -->
+        <!-- ============================================================ -->
+        <record id="commune_55_in_guezzam" model="commercial.commune"><field name="name">In Guezzam</field><field name="daira_id" ref="daira_55_in_guezzam"/></record>
+        <record id="commune_55_tin_zaouatine" model="commercial.commune"><field name="name">Tin Zaouatine</field><field name="daira_id" ref="daira_55_tin_zaouatine"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 56 - Touggourt                                               -->
+        <!-- ============================================================ -->
+        <record id="commune_56_touggourt" model="commercial.commune"><field name="name">Touggourt</field><field name="daira_id" ref="daira_56_touggourt"/></record>
+        <record id="commune_56_nezla" model="commercial.commune"><field name="name">Nezla</field><field name="daira_id" ref="daira_56_touggourt"/></record>
+        <record id="commune_56_temacine" model="commercial.commune"><field name="name">Temacine</field><field name="daira_id" ref="daira_56_temacine"/></record>
+        <record id="commune_56_blidet_amor" model="commercial.commune"><field name="name">Blidet Amor</field><field name="daira_id" ref="daira_56_temacine"/></record>
+        <record id="commune_56_taibet" model="commercial.commune"><field name="name">Taibet</field><field name="daira_id" ref="daira_56_taibet"/></record>
+        <record id="commune_56_megarine" model="commercial.commune"><field name="name">Megarine</field><field name="daira_id" ref="daira_56_megarine"/></record>
+        <record id="commune_56_mnaguer" model="commercial.commune"><field name="name">M'Naguer</field><field name="daira_id" ref="daira_56_mnaguer"/></record>
+        <record id="commune_56_benaceur" model="commercial.commune"><field name="name">Benaceur</field><field name="daira_id" ref="daira_56_benaceur"/></record>
+        <record id="commune_56_el_hadjira" model="commercial.commune"><field name="name">El Hadjira</field><field name="daira_id" ref="daira_56_el_hadjira"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 57 - Djanet                                                  -->
+        <!-- ============================================================ -->
+        <record id="commune_57_djanet" model="commercial.commune"><field name="name">Djanet</field><field name="daira_id" ref="daira_57_djanet"/></record>
+        <record id="commune_57_bordj_el_haouas" model="commercial.commune"><field name="name">Bordj El Haouas</field><field name="daira_id" ref="daira_57_bordj_el_haouas"/></record>
+        <record id="commune_57_tarat" model="commercial.commune"><field name="name">Tarat</field><field name="daira_id" ref="daira_57_tarat"/></record>
+
+        <!-- ============================================================ -->
+        <!-- 58 - In Amenas                                               -->
+        <!-- ============================================================ -->
+        <record id="commune_58_in_amenas" model="commercial.commune"><field name="name">In Amenas</field><field name="daira_id" ref="daira_58_in_amenas"/></record>
+        <record id="commune_58_debdeb" model="commercial.commune"><field name="name">Debdeb</field><field name="daira_id" ref="daira_58_debdeb"/></record>
+        <record id="commune_58_bordj_omar_driss" model="commercial.commune"><field name="name">Bordj Omar Driss</field><field name="daira_id" ref="daira_58_bordj_omar_driss"/></record>
+
+    </data>
+</odoo>

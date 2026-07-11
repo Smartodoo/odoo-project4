@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Menu racine -->
+    <menuitem id="commercial_menu_root"
+              name="Commercial"
+              web_icon="commercial,static/description/img.png"
+              sequence="50"/>
+
+    <!-- Sous-menus -->
+    <menuitem id="commercial_menu_projet"
+              name="Projets"
+              parent="commercial_menu_root"
+              action="commercial_projet_action"
+              sequence="10"/>
+
+    <menuitem id="commercial_menu_lot"
+              name="Lots"
+              parent="commercial_menu_root"
+              action="commercial_lot_action"
+              sequence="20"/>
+
+    <menuitem id="commercial_menu_etage"
+              name="Etages"
+              parent="commercial_menu_root"
+              action="commercial_etage_action"
+              sequence="30"/>
+
+
+</odoo>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_statistique" model="ir.actions.report">
+        <field name="name">Statistique des ventes</field>
+        <field name="model">commercial.statistique</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.report_statistique_template</field>
+        <field name="report_file">commercial.report_statistique_template</field>
+        <field name="print_report_name">'Statistique - %s' % object.projet_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <template id="report_statistique_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="data" t-value="doc._get_report_data()"/>
+                    <div class="page" style="font-family:'Times New Roman', Times, serif;font-size:14px;padding:30px 40px;">
+
+                        <!-- EN-TETE -->
+                        <div style="background:#003366;color:#fff;padding:16px 20px;border-radius:8px;margin-bottom:16px;">
+                            <h2 style="margin:0 0 10px 0;font-size:24px;color:#fff;">
+                                Statistique des ventes — <span style="font-weight:800;"><t t-esc="doc.projet_id.name"/></span>
+                            </h2>
+                            <div style="display:flex;gap:30px;font-size:14px;color:#ddd;">
+                                <span>Total Lots : <strong t-esc="data['total_lots']"/></span>
+                                <span>Vendus/Réservés : <strong t-esc="data['n_vendu'] + data['n_reserve']"/></span>
+                                <span>Vente globale : <strong><t t-esc="'{:.1f}'.format(data['pct_global'])"/>%</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- CARTES RESUME -->
+                        <table style="width:100%;margin-bottom:16px;border-collapse:collapse;">
+                            <tr>
+                                <td style="width:25%;padding:8px;border:1px solid #dee2e6;text-align:center;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">Disponible</div>
+                                    <div style="font-size:22px;font-weight:800;color:#28a745;" t-esc="data['n_dispo']"/>
+                                </td>
+                                <td style="width:25%;padding:8px;border:1px solid #dee2e6;text-align:center;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">Pré-réservation</div>
+                                    <div style="font-size:22px;font-weight:800;color:#17a2b8;" t-esc="data['n_option']"/>
+                                </td>
+                                <td style="width:25%;padding:8px;border:1px solid #dee2e6;text-align:center;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">Réservé</div>
+                                    <div style="font-size:22px;font-weight:800;color:#e67e00;" t-esc="data['n_reserve']"/>
+                                </td>
+                                <td style="width:25%;padding:8px;border:1px solid #dee2e6;text-align:center;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">Vendu</div>
+                                    <div style="font-size:22px;font-weight:800;color:#6f42c1;" t-esc="data['n_vendu']"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- CA -->
+                        <table style="width:100%;margin-bottom:16px;border-collapse:collapse;">
+                            <tr>
+                                <td style="width:50%;padding:8px;border:1px solid #dee2e6;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">CA Prévisionnel</div>
+                                    <div style="font-size:16px;font-weight:800;color:#1a237e;" t-esc="doc._format_amount(data['ca_prev'])"/>
+                                </td>
+                                <td style="width:50%;padding:8px;border:1px solid #dee2e6;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">CA Actuel</div>
+                                    <div style="font-size:16px;font-weight:800;color:#28a745;" t-esc="doc._format_amount(data['ca_actuel'])"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- TABLEAU PAR BLOC -->
+                        <h4 style="margin:16px 0 8px 0;font-size:15px;color:#003366;font-weight:bold;">Statistiques par Bloc</h4>
+                        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+                            <thead>
+                                <tr style="background:#f0f0f0;">
+                                    <th style="padding:8px 10px;text-align:left;border:1px solid #dee2e6;">Bloc</th>
+                                    <th style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;">Total</th>
+                                    <th style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;color:#28a745;">Dispo.</th>
+                                    <th style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;color:#17a2b8;">Pré-rés.</th>
+                                    <th style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;color:#e67e00;">Réservé</th>
+                                    <th style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;color:#6f42c1;">Vendu</th>
+                                    <th style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;">% Vente</th>
+                                    <th style="padding:8px 10px;text-align:right;border:1px solid #dee2e6;">CA Prév.</th>
+                                    <th style="padding:8px 10px;text-align:right;border:1px solid #dee2e6;">CA Actuel</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="data['blocs']" t-as="b">
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:8px 10px;font-weight:600;border:1px solid #dee2e6;" t-esc="b['code']"/>
+                                        <td style="padding:8px 10px;text-align:center;font-weight:700;border:1px solid #dee2e6;" t-esc="b['total']"/>
+                                        <td style="padding:8px 10px;text-align:center;color:#28a745;border:1px solid #dee2e6;" t-esc="b['dispo']"/>
+                                        <td style="padding:8px 10px;text-align:center;color:#17a2b8;border:1px solid #dee2e6;" t-esc="b['option']"/>
+                                        <td style="padding:8px 10px;text-align:center;color:#e67e00;border:1px solid #dee2e6;" t-esc="b['reserve']"/>
+                                        <td style="padding:8px 10px;text-align:center;color:#6f42c1;border:1px solid #dee2e6;" t-esc="b['vendu']"/>
+                                        <td style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;">
+                                            <t t-esc="'{:.1f}%'.format(b['pct'])"/>
+                                        </td>
+                                        <td style="padding:8px 10px;text-align:right;border:1px solid #dee2e6;" t-esc="doc._format_amount(b['ca_prev'])"/>
+                                        <td style="padding:8px 10px;text-align:right;font-weight:600;border:1px solid #dee2e6;" t-esc="doc._format_amount(b['ca_actuel'])"/>
+                                    </tr>
+                                </t>
+                                <tr style="background:#f0f0f0;font-weight:700;">
+                                    <td style="padding:8px 10px;border:1px solid #dee2e6;">TOTAL</td>
+                                    <td style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;" t-esc="data['total_lots']"/>
+                                    <td style="padding:8px 10px;text-align:center;color:#28a745;border:1px solid #dee2e6;" t-esc="data['n_dispo']"/>
+                                    <td style="padding:8px 10px;text-align:center;color:#17a2b8;border:1px solid #dee2e6;" t-esc="data['n_option']"/>
+                                    <td style="padding:8px 10px;text-align:center;color:#e67e00;border:1px solid #dee2e6;" t-esc="data['n_reserve']"/>
+                                    <td style="padding:8px 10px;text-align:center;color:#6f42c1;border:1px solid #dee2e6;" t-esc="data['n_vendu']"/>
+                                    <td style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;">
+                                        <t t-esc="'{:.1f}%'.format(data['pct_global'])"/>
+                                    </td>
+                                    <td style="padding:8px 10px;text-align:right;border:1px solid #dee2e6;" t-esc="doc._format_amount(data['ca_prev'])"/>
+                                    <td style="padding:8px 10px;text-align:right;border:1px solid #dee2e6;" t-esc="doc._format_amount(data['ca_actuel'])"/>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- TABLEAU DETAIL PAR LOT -->
+                        <h4 style="margin:16px 0 8px 0;font-size:15px;color:#003366;font-weight:bold;">Détail par Lot</h4>
+                        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                            <thead>
+                                <tr style="background:#f0f0f0;">
+                                    <th style="padding:7px 8px;text-align:left;border:1px solid #dee2e6;">N° Lot</th>
+                                    <th style="padding:7px 8px;text-align:left;border:1px solid #dee2e6;">Bloc</th>
+                                    <th style="padding:7px 8px;text-align:left;border:1px solid #dee2e6;">Étage</th>
+                                    <th style="padding:7px 8px;text-align:left;border:1px solid #dee2e6;">Type</th>
+                                    <th style="padding:7px 8px;text-align:left;border:1px solid #dee2e6;">Nature</th>
+                                    <th style="padding:7px 8px;text-align:right;border:1px solid #dee2e6;">Surface</th>
+                                    <th style="padding:7px 8px;text-align:right;border:1px solid #dee2e6;">Prix Net</th>
+                                    <th style="padding:7px 8px;text-align:right;border:1px solid #dee2e6;">Payé</th>
+                                    <th style="padding:7px 8px;text-align:right;border:1px solid #dee2e6;">Reste</th>
+                                    <th style="padding:7px 8px;text-align:center;border:1px solid #dee2e6;">%</th>
+                                    <th style="padding:7px 8px;text-align:center;border:1px solid #dee2e6;">État</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="data['lots']" t-as="lot">
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:8px 10px;font-weight:600;border:1px solid #dee2e6;" t-esc="lot['numero']"/>
+                                        <td style="padding:8px 10px;border:1px solid #dee2e6;" t-esc="lot['bloc']"/>
+                                        <td style="padding:8px 10px;border:1px solid #dee2e6;" t-esc="lot['etage']"/>
+                                        <td style="padding:8px 10px;border:1px solid #dee2e6;" t-esc="lot['type']"/>
+                                        <td style="padding:8px 10px;border:1px solid #dee2e6;" t-esc="lot['nature']"/>
+                                        <td style="padding:8px 10px;text-align:right;border:1px solid #dee2e6;">
+                                            <t t-esc="'{:.2f}'.format(lot['surface'])"/>
+                                        </td>
+                                        <td style="padding:8px 10px;text-align:right;border:1px solid #dee2e6;" t-esc="doc._format_amount(lot['prix_net'])"/>
+                                        <td style="padding:8px 10px;text-align:right;color:#28a745;font-weight:600;border:1px solid #dee2e6;" t-esc="doc._format_amount(lot['paid'])"/>
+                                        <td style="padding:8px 10px;text-align:right;color:#dc3545;border:1px solid #dee2e6;" t-esc="doc._format_amount(lot['reste'])"/>
+                                        <td style="padding:8px 10px;text-align:center;font-weight:700;border:1px solid #dee2e6;">
+                                            <t t-esc="'{:.1f}%'.format(lot['pct'])"/>
+                                        </td>
+                                        <td style="padding:8px 10px;text-align:center;border:1px solid #dee2e6;" t-esc="lot['state']"/>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="view_purchase_order_form_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/div[1]" position="before">
+                <widget name="web_ribbon" title="Payé"
+                        invisible="amount_due_purchase > 0 or amount_paid_purchase == 0 or state != 'purchase'"/>
+                <widget name="web_ribbon" title="Paiement Partiel"
+                        invisible="amount_paid_purchase == 0 or amount_due_purchase == 0 or state != 'purchase'"/>
+                <widget name="web_ribbon" title="A terme" invisible="not is_payment_term_purchase"/>
+            </xpath>
+            <xpath expr="//field[@name='date_approve']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <!-- Force date_planned invisible -->
+            <xpath expr="//field[@name='date_planned']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="is_payment_term_purchase" invisible="1"/>
+                <field name="active"/>
+            </xpath>
+            <xpath expr="//field[@name='date_order']" position="after">
+                <field name="date_bon"/>
+                <field name="project_id" options="{'no_create':True,'no_create_edit':True}"/>
+                <field name="show_payment_button_purchase" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='date_order']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_create_invoice']" position="replace">
+                <button name="action_create_invoice" string="Create Bill" type="object" class="oe_highlight"
+                        context="{'create_bill':True}"
+                        invisible="state not in ('purchase', 'done') or invoice_status in ('no', 'invoiced') or show_payment_button_purchase != True"
+                        data-hotkey="w"/>
+            </xpath>
+            <!--invisible="state not in ('purchase') or amount_due_purchase == 0 or show_payment_button_purchase != True"-->
+            <xpath expr="//button[@name='action_rfq_send']" position="after">
+                <button name="action_register_payment"
+                        string="Enregistrer un paiement"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="1"/>
+            </xpath>
+            <!-- Cacher le bouton Annuler standard d'Odoo -->
+            <xpath expr="//button[@name='button_cancel']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <!-- Bouton Annuler accessible à tout moment pour corriger les erreurs -->
+            <xpath expr="//header" position="inside">
+                <button name="action_cancel" string="Annuler" type="object"
+                        class="btn-secondary"
+                        invisible="state == 'cancel'"
+                        confirm="Voulez-vous vraiment annuler ce bon de commande ? Les réceptions validées seront également annulées."
+                        groups="base.group_system"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button type="object" name="action_open_payments"
+                        context="{'create': 0, 'edit': 0}"
+                        class="oe_stat_button"
+                        invisible="show_payment_button_purchase != True"
+                        icon="fa-credit-card">
+                    <div class="o_stat_info">
+                        <field name="payment_count_purchase" widget="statinfo" string="Paiements"/>
+                    </div>
+                </button>
+                <button type="object" name="action_preview_bon_commande"
+                        class="oe_stat_button"
+                        icon="fa-eye">
+                    <span class="o_stat_text">Aperçu Bon de Commande</span>
+                </button>
+            </xpath>
+            <xpath expr="//notebook/page[1]/group/group[2]" position="after">
+                <group string="Paiements" class="oe_subtotal_footer" colspan="2" name="purchase_total">
+                    <field name="amount_paid_purchase" colspan="2" readonly="1" force_save="1"/>
+                    <field name="amount_due_purchase" colspan="2" readonly="1" invisible="amount_due_purchase == 0"
+                           class="text-danger" force_save="1"/>
+                </group>
+            </xpath>
+            <!-- Ajout des champs N° BL et N° Facture dans Autres Informations (visible uniquement à l'état Bon de commande) -->
+            <xpath expr="//field[@name='fiscal_position_id']" position="after">
+                <field name="num_bl" invisible="state != 'purchase'"/>
+                <field name="num_facture" invisible="state != 'purchase'"/>
+            </xpath>
+            <!--            <xpath expr="//header//button[@name='action_view_picking']" position="replace">-->
+            <!--                <button name="action_view_picking"-->
+            <!--                        string="Receive Products" class="oe_highlight" type="object"-->
+            <!--                        invisible="is_shipped or state not in ('purchase', 'done') or incoming_picking_count == 0"-->
+            <!--                        data-hotkey="y" groups="stock.group_stock_user"/>-->
+            <!--            </xpath>-->
+        </field>
+    </record>
+    <record id="view_tree_purchase_order_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.tree.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="arch" type="xml">
+            <!-- Supprimer le dashboard KPIs en haut de la liste -->
+            <xpath expr="//tree" position="attributes">
+                <attribute name="js_class"></attribute>
+                <attribute name="sample">0</attribute>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="active"/>
+            </xpath>
+            <xpath expr="//field[@name='date_order']" position="replace">
+                <field name="date_bon"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_payment_inherit" model="ir.ui.view">
+        <field name="name">account.payment.form.inherit.purchase</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount']" position="after">
+                <field name="amount_purchase" invisible="1"/>
+                <field name="amount_due_purchase" invisible="1"/>
+                <field name="amount_in_letters" invisible="1"/>
+            </xpath>
+            <xpath expr="//button[@name='action_post']" position="replace">
+                <button name="action_post" string="Confirmer" type="object" class="oe_highlight"
+                        invisible="state != 'draft'" data-hotkey="q"
+                        groups="base.group_system"/>
+            </xpath>
+            <xpath expr="//button[@name='action_cancel']" position="replace">
+                <button name="action_cancel" string="Anuuler" type="object"
+                        invisible="not id or state != 'draft'" data-hotkey="x"
+                        groups="base.group_system"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vue facture fournisseur : ajout champ Bons de commande -->
+    <record id="view_account_move_form_inherit_purchase" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.purchase.custom</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='purchase_vendor_bill_id']" position="after">
+                <field name="purchase_order_ids" widget="many2many_tags"
+                       invisible="move_type != 'in_invoice'"
+                       required="0"
+                       options="{'no_create': True, 'no_create_edit': True}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!--  Action serveur : Créer les paiements automatiquement -->
+    <record id="action_create_auto_payments_purchase" model="ir.actions.server">
+        <field name="name">Créer des paiements automatiquement</field>
+        <field name="model_id" ref="purchase.model_purchase_order"/>
+        <field name="state">code</field>
+        <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+        <field name="binding_view_types">list</field>
+        <field name="code">
+            action = records.action_create_auto_payments()
+        </field>
+    </record>
+
+    <!--  Action serveur : Créer une facture globale pour les bons sélectionnés -->
+    <record id="action_create_grouped_invoice_purchase" model="ir.actions.server">
+        <field name="name">Créer une facture groupée</field>
+        <field name="model_id" ref="purchase.model_purchase_order"/>
+        <field name="state">code</field>
+        <field name="binding_model_id" ref="purchase.model_purchase_order"/>
+        <field name="binding_view_types">list</field>
+        <field name="code">
+            action = records.action_create_grouped_invoice()
+        </field>
+    </record>
+</odoo>

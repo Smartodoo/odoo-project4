@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vue formulaire Document (popup) -->
+    <record id="commercial_document_partner_form" model="ir.ui.view">
+        <field name="name">commercial.document.partner.form</field>
+        <field name="model">commercial.document.partner</field>
+        <field name="arch" type="xml">
+            <form string="Document">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="type_document"/>
+                            <field name="numero_document"/>
+                        </group>
+                        <group>
+                            <field name="date_delivrance"/>
+                            <field name="delivre_par"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="fichier" filename="fichier_name"/>
+                        <field name="fichier_name" invisible="1"/>
+                        <field name="document_valide"/>
+                    </group>
+                    <field name="partner_id" invisible="1"/>
+                </sheet>
+                <footer>
+                    <button string="Enregistrer" type="object" name="action_save_and_close" class="btn-primary"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue kanban Document -->
+    <record id="commercial_document_partner_kanban" model="ir.ui.view">
+        <field name="name">commercial.document.partner.kanban</field>
+        <field name="model">commercial.document.partner</field>
+        <field name="arch" type="xml">
+            <kanban create="false">
+                <field name="id"/>
+                <field name="type_document"/>
+                <field name="numero_document"/>
+                <field name="date_delivrance"/>
+                <field name="delivre_par"/>
+                <field name="document_valide"/>
+                <field name="fichier"/>
+                <field name="fichier_name"/>
+                <field name="fichier_type"/>
+                <field name="write_uid"/>
+                <field name="write_date"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click"
+                             style="width: 320px; min-height: 180px; border: 1px solid #ccc; border-radius: 6px; background: #fff; padding: 0; margin: 4px; display: inline-block; vertical-align: top; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+
+                            <!-- Header: Type document + Badge validé -->
+                            <div style="background: #f8f9fa; border-bottom: 1px solid #e9ecef; padding: 10px 14px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-weight: 700; font-size: 13px; text-transform: uppercase; color: #333; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    <field name="type_document"/>
+                                </span>
+                                <t t-if="record.document_valide.raw_value">
+                                    <span style="background: #28a745; color: #fff; font-size: 11px; padding: 2px 10px; border-radius: 12px; font-weight: 600;">
+                                        Validé
+                                    </span>
+                                </t>
+                                <t t-else="">
+                                    <span style="background: #adb5bd; color: #fff; font-size: 11px; padding: 2px 10px; border-radius: 12px; font-weight: 600;">
+                                        Non validé
+                                    </span>
+                                </t>
+                            </div>
+
+                            <!-- Body: Details left + Icon right -->
+                            <div style="display: flex; padding: 12px 14px 8px 14px; align-items: flex-start;">
+                                <!-- Left: Document details -->
+                                <div style="flex: 1; font-size: 12px; color: #555; line-height: 1.8;">
+                                    <div t-if="record.numero_document.value">
+                                        <span style="font-weight: 600; color: #333;">N° </span>
+                                        <span><field name="numero_document"/></span>
+                                    </div>
+                                    <div t-if="record.date_delivrance.value">
+                                        <span style="font-weight: 600; color: #333;">Date
+                                        </span>
+                                        <span><field name="date_delivrance"/></span>
+                                    </div>
+                                </div>
+                                <!-- Right: File type icon -->
+                                <div style="margin-left: 12px; display: flex; flex-direction: column; align-items: center; min-width: 60px;">
+                                    <t t-if="record.fichier_type.value == 'PDF'">
+                                        <i class="fa fa-file-pdf-o" style="font-size: 40px; color: #dc3545;"/>
+                                    </t>
+                                    <t t-elif="['PNG','JPG','JPEG','GIF','BMP'].indexOf(record.fichier_type.value) &gt;= 0">
+                                        <i class="fa fa-file-image-o" style="font-size: 40px; color: #0d6efd;"/>
+                                    </t>
+                                    <t t-else="">
+                                        <i class="fa fa-file-o" style="font-size: 40px; color: #6c757d;"/>
+                                    </t>
+                                    <span t-if="record.fichier_type.value" style="font-size: 10px; color: #888; margin-top: 4px;">
+                                        .<field name="fichier_type"/>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Footer: Modification info + Action buttons -->
+                            <div style="border-top: 1px solid #e9ecef; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 11px; color: #888; line-height: 1.5;">
+                                    <div>Modifié par : <field name="write_uid"/></div>
+                                    <div><field name="write_date"/></div>
+                                </div>
+                                <div style="display: flex; gap: 6px;">
+                                    <button name="action_view_file" type="object"
+                                            class="btn btn-sm btn-outline-primary"
+                                            style="padding: 2px 8px; font-size: 12px;"
+                                            title="Ouvrir" icon="fa-eye"/>
+                                    <button name="action_download" type="object"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            style="padding: 2px 8px; font-size: 12px;"
+                                            title="Télécharger" icon="fa-download"/>
+                                    <button name="action_confirm_delete" type="object"
+                                            class="btn btn-sm btn-outline-danger"
+                                            style="padding: 2px 8px; font-size: 12px;"
+                                            title="Supprimer" icon="fa-trash"/>
+                                </div>
+                            </div>
+
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Supprimer l'ancienne vue qui ciblait page journal -->
+    <delete model="ir.ui.view" search="[('name', '=', 'res.partner.form.documents')]"/>
+
+    <!-- Ajout de la page Documents dans le contact externe -->
+    <record id="view_partner_form_documents" model="ir.ui.view">
+        <field name="name">res.partner.form.documents</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="view_partner_form_hide_for_externe"/>
+        <field name="priority">115</field>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='information_externe']" position="after">
+                <page name="documents" string="Documents" invisible="contact_category != 'interne'">
+                    <div class="mb-3">
+                        <button name="action_add_document" type="object"
+                                string="Ajouter un document"
+                                class="btn-secondary"/>
+                    </div>
+                    <field name="document_ids" mode="kanban" nolabel="1"
+                           context="{'default_partner_id': id}"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

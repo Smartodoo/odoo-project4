@@ -1,0 +1,2860 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- 01 - Adrar                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_01" model="commercial.wilaya">
+            <field name="name">Adrar</field>
+            <field name="code">01</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_01_adrar" model="commercial.daira">
+            <field name="name">Adrar</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_reggane" model="commercial.daira">
+            <field name="name">Reggane</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_timimoun" model="commercial.daira">
+            <field name="name">Timimoun</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_in_salah" model="commercial.daira">
+            <field name="name">In Salah</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_aoulef" model="commercial.daira">
+            <field name="name">Aoulef</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_tit" model="commercial.daira">
+            <field name="name">Tit</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_bordj_badji_mokhtar" model="commercial.daira">
+            <field name="name">Bordj Badji Mokhtar</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_tsabit" model="commercial.daira">
+            <field name="name">Tsabit</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_fenoughil" model="commercial.daira">
+            <field name="name">Fenoughil</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_charouine" model="commercial.daira">
+            <field name="name">Charouine</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+        <record id="daira_01_zaouiet_kounta" model="commercial.daira">
+            <field name="name">Zaouiet Kounta</field>
+            <field name="wilaya_id" ref="wilaya_01"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 02 - Chlef                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_02" model="commercial.wilaya">
+            <field name="name">Chlef</field>
+            <field name="code">02</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_02_chlef" model="commercial.daira">
+            <field name="name">Chlef</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_tenes" model="commercial.daira">
+            <field name="name">Ténès</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_abou_el_hassan" model="commercial.daira">
+            <field name="name">Abou El Hassan</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_el_karimia" model="commercial.daira">
+            <field name="name">El Karimia</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_oued_fodda" model="commercial.daira">
+            <field name="name">Oued Fodda</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_ain_merane" model="commercial.daira">
+            <field name="name">Ain Merane</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_boukadir" model="commercial.daira">
+            <field name="name">Boukadir</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_el_marsa" model="commercial.daira">
+            <field name="name">El Marsa</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_ouled_ben_abdelkader" model="commercial.daira">
+            <field name="name">Ouled Ben Abdelkader</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_zeboudja" model="commercial.daira">
+            <field name="name">Zeboudja</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_beni_haoua" model="commercial.daira">
+            <field name="name">Beni Haoua</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_oued_sly" model="commercial.daira">
+            <field name="name">Oued Sly</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+        <record id="daira_02_taougrit" model="commercial.daira">
+            <field name="name">Taougrit</field>
+            <field name="wilaya_id" ref="wilaya_02"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 03 - Laghouat                                                -->
+        <!-- ============================================================ -->
+        <record id="wilaya_03" model="commercial.wilaya">
+            <field name="name">Laghouat</field>
+            <field name="code">03</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_03_laghouat" model="commercial.daira">
+            <field name="name">Laghouat</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_aflou" model="commercial.daira">
+            <field name="name">Aflou</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_ksar_el_hirane" model="commercial.daira">
+            <field name="name">Ksar El Hirane</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_hassi_rmel" model="commercial.daira">
+            <field name="name">Hassi R'Mel</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_ain_madhi" model="commercial.daira">
+            <field name="name">Ain Madhi</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_brida" model="commercial.daira">
+            <field name="name">Brida</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_gueltat_sidi_saad" model="commercial.daira">
+            <field name="name">Gueltat Sidi Saad</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_el_haouaita" model="commercial.daira">
+            <field name="name">El Haouaita</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_hassi_delaa" model="commercial.daira">
+            <field name="name">Hassi Delaa</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_oued_morra" model="commercial.daira">
+            <field name="name">Oued Morra</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_sidi_makhlouf" model="commercial.daira">
+            <field name="name">Sidi Makhlouf</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_tadjmout" model="commercial.daira">
+            <field name="name">Tadjmout</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+        <record id="daira_03_el_ghicha" model="commercial.daira">
+            <field name="name">El Ghicha</field>
+            <field name="wilaya_id" ref="wilaya_03"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 04 - Oum El Bouaghi                                          -->
+        <!-- ============================================================ -->
+        <record id="wilaya_04" model="commercial.wilaya">
+            <field name="name">Oum El Bouaghi</field>
+            <field name="code">04</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_04_oum_el_bouaghi" model="commercial.daira">
+            <field name="name">Oum El Bouaghi</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_ain_beida" model="commercial.daira">
+            <field name="name">Ain Beida</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_ain_mlila" model="commercial.daira">
+            <field name="name">Ain M'lila</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_ksar_sbahi" model="commercial.daira">
+            <field name="name">Ksar Sbahi</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_ain_fakroun" model="commercial.daira">
+            <field name="name">Ain Fakroun</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_sigus" model="commercial.daira">
+            <field name="name">Sigus</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_dhalaa" model="commercial.daira">
+            <field name="name">Dhalaa</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_ain_babouche" model="commercial.daira">
+            <field name="name">Ain Babouche</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_souk_naamane" model="commercial.daira">
+            <field name="name">Souk Naamane</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_meskiana" model="commercial.daira">
+            <field name="name">Meskiana</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_ouled_hamla" model="commercial.daira">
+            <field name="name">Ouled Hamla</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+        <record id="daira_04_fkirina" model="commercial.daira">
+            <field name="name">F'Kirina</field>
+            <field name="wilaya_id" ref="wilaya_04"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 05 - Batna                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_05" model="commercial.wilaya">
+            <field name="name">Batna</field>
+            <field name="code">05</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_05_batna" model="commercial.daira">
+            <field name="name">Batna</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_barika" model="commercial.daira">
+            <field name="name">Barika</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_ain_touta" model="commercial.daira">
+            <field name="name">Ain Touta</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_ngaous" model="commercial.daira">
+            <field name="name">N'Gaous</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_arris" model="commercial.daira">
+            <field name="name">Arris</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_merouana" model="commercial.daira">
+            <field name="name">Merouana</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_tazoult" model="commercial.daira">
+            <field name="name">Tazoult</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_seriana" model="commercial.daira">
+            <field name="name">Seriana</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_menaa" model="commercial.daira">
+            <field name="name">Menaa</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_ras_el_aioun" model="commercial.daira">
+            <field name="name">Ras El Aioun</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_chemora" model="commercial.daira">
+            <field name="name">Chemora</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_ouled_si_slimane" model="commercial.daira">
+            <field name="name">Ouled Si Slimane</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_ichemoul" model="commercial.daira">
+            <field name="name">Ichemoul</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_timgad" model="commercial.daira">
+            <field name="name">Timgad</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_el_madher" model="commercial.daira">
+            <field name="name">El Madher</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_djezzar" model="commercial.daira">
+            <field name="name">Djezzar</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_ain_djasser" model="commercial.daira">
+            <field name="name">Ain Djasser</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_tkout" model="commercial.daira">
+            <field name="name">Tkout</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_seggana" model="commercial.daira">
+            <field name="name">Seggana</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_bouzina" model="commercial.daira">
+            <field name="name">Bouzina</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+        <record id="daira_05_teniet_el_abed" model="commercial.daira">
+            <field name="name">Teniet El Abed</field>
+            <field name="wilaya_id" ref="wilaya_05"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 06 - Bejaia                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_06" model="commercial.wilaya">
+            <field name="name">Béjaïa</field>
+            <field name="code">06</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_06_bejaia" model="commercial.daira">
+            <field name="name">Béjaïa</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_akbou" model="commercial.daira">
+            <field name="name">Akbou</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_sidi_aich" model="commercial.daira">
+            <field name="name">Sidi Aïch</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_amizour" model="commercial.daira">
+            <field name="name">Amizour</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_el_kseur" model="commercial.daira">
+            <field name="name">El Kseur</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_tichy" model="commercial.daira">
+            <field name="name">Tichy</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_barbacha" model="commercial.daira">
+            <field name="name">Barbacha</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_darguina" model="commercial.daira">
+            <field name="name">Darguina</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_ifri_ouzellaguen" model="commercial.daira">
+            <field name="name">Ifri Ouzellaguen</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_seddouk" model="commercial.daira">
+            <field name="name">Seddouk</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_kherrata" model="commercial.daira">
+            <field name="name">Kherrata</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_tazmalt" model="commercial.daira">
+            <field name="name">Tazmalt</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_adekar" model="commercial.daira">
+            <field name="name">Adekar</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_chemini" model="commercial.daira">
+            <field name="name">Chemini</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_souk_el_tenine" model="commercial.daira">
+            <field name="name">Souk El Ténine</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+        <record id="daira_06_aokas" model="commercial.daira">
+            <field name="name">Aokas</field>
+            <field name="wilaya_id" ref="wilaya_06"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 07 - Biskra                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_07" model="commercial.wilaya">
+            <field name="name">Biskra</field>
+            <field name="code">07</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_07_biskra" model="commercial.daira">
+            <field name="name">Biskra</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_ouled_djellal" model="commercial.daira">
+            <field name="name">Ouled Djellal</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_sidi_okba" model="commercial.daira">
+            <field name="name">Sidi Okba</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_tolga" model="commercial.daira">
+            <field name="name">Tolga</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_zeribet_el_oued" model="commercial.daira">
+            <field name="name">Zeribet El Oued</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_el_kantara" model="commercial.daira">
+            <field name="name">El Kantara</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_djamorah" model="commercial.daira">
+            <field name="name">Djamorah</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_foughala" model="commercial.daira">
+            <field name="name">Foughala</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_sidi_khaled" model="commercial.daira">
+            <field name="name">Sidi Khaled</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_ourlal" model="commercial.daira">
+            <field name="name">Ourlal</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_mchouneche" model="commercial.daira">
+            <field name="name">M'Chouneche</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+        <record id="daira_07_lioua" model="commercial.daira">
+            <field name="name">Lioua</field>
+            <field name="wilaya_id" ref="wilaya_07"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 08 - Bechar                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_08" model="commercial.wilaya">
+            <field name="name">Béchar</field>
+            <field name="code">08</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_08_bechar" model="commercial.daira">
+            <field name="name">Béchar</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_kenadsa" model="commercial.daira">
+            <field name="name">Kenadsa</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_abadla" model="commercial.daira">
+            <field name="name">Abadla</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_beni_ounif" model="commercial.daira">
+            <field name="name">Beni Ounif</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_taghit" model="commercial.daira">
+            <field name="name">Taghit</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_igli" model="commercial.daira">
+            <field name="name">Igli</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_tabelbala" model="commercial.daira">
+            <field name="name">Tabelbala</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_beni_abbes" model="commercial.daira">
+            <field name="name">Béni Abbès</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_el_ouata" model="commercial.daira">
+            <field name="name">El Ouata</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_lahmar" model="commercial.daira">
+            <field name="name">Lahmar</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_mechraa_houari" model="commercial.daira">
+            <field name="name">Mechraa Houari</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+        <record id="daira_08_tamtert" model="commercial.daira">
+            <field name="name">Tamtert</field>
+            <field name="wilaya_id" ref="wilaya_08"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 09 - Blida                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_09" model="commercial.wilaya">
+            <field name="name">Blida</field>
+            <field name="code">09</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_09_blida" model="commercial.daira">
+            <field name="name">Blida</field>
+            <field name="wilaya_id" ref="wilaya_09"/>
+        </record>
+        <record id="daira_09_boufarik" model="commercial.daira">
+            <field name="name">Boufarik</field>
+            <field name="wilaya_id" ref="wilaya_09"/>
+        </record>
+        <record id="daira_09_bougara" model="commercial.daira">
+            <field name="name">Bougara</field>
+            <field name="wilaya_id" ref="wilaya_09"/>
+        </record>
+        <record id="daira_09_larbaa" model="commercial.daira">
+            <field name="name">Larbaa</field>
+            <field name="wilaya_id" ref="wilaya_09"/>
+        </record>
+        <record id="daira_09_mouzaia" model="commercial.daira">
+            <field name="name">Mouzaia</field>
+            <field name="wilaya_id" ref="wilaya_09"/>
+        </record>
+        <record id="daira_09_oued_el_alleug" model="commercial.daira">
+            <field name="name">Oued El Alleug</field>
+            <field name="wilaya_id" ref="wilaya_09"/>
+        </record>
+        <record id="daira_09_bouinan" model="commercial.daira">
+            <field name="name">Bouinan</field>
+            <field name="wilaya_id" ref="wilaya_09"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 10 - Bouira                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_10" model="commercial.wilaya">
+            <field name="name">Bouira</field>
+            <field name="code">10</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_10_bouira" model="commercial.daira">
+            <field name="name">Bouira</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_lakhdaria" model="commercial.daira">
+            <field name="name">Lakhdaria</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_sour_el_ghozlane" model="commercial.daira">
+            <field name="name">Sour El Ghozlane</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_ain_bessem" model="commercial.daira">
+            <field name="name">Ain Bessem</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_mchedallah" model="commercial.daira">
+            <field name="name">M'Chedallah</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_bechloul" model="commercial.daira">
+            <field name="name">Bechloul</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_bordj_okhriss" model="commercial.daira">
+            <field name="name">Bordj Okhriss</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_el_hachimia" model="commercial.daira">
+            <field name="name">El Hachimia</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_haizer" model="commercial.daira">
+            <field name="name">Haizer</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_kadiria" model="commercial.daira">
+            <field name="name">Kadiria</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_bir_ghbalou" model="commercial.daira">
+            <field name="name">Bir Ghbalou</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+        <record id="daira_10_aghbalou" model="commercial.daira">
+            <field name="name">Aghbalou</field>
+            <field name="wilaya_id" ref="wilaya_10"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 11 - Tamanrasset                                             -->
+        <!-- ============================================================ -->
+        <record id="wilaya_11" model="commercial.wilaya">
+            <field name="name">Tamanrasset</field>
+            <field name="code">11</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_11_tamanrasset" model="commercial.daira">
+            <field name="name">Tamanrasset</field>
+            <field name="wilaya_id" ref="wilaya_11"/>
+        </record>
+        <record id="daira_11_in_guezzam" model="commercial.daira">
+            <field name="name">In Guezzam</field>
+            <field name="wilaya_id" ref="wilaya_11"/>
+        </record>
+        <record id="daira_11_tazrouk" model="commercial.daira">
+            <field name="name">Tazrouk</field>
+            <field name="wilaya_id" ref="wilaya_11"/>
+        </record>
+        <record id="daira_11_abalessa" model="commercial.daira">
+            <field name="name">Abalessa</field>
+            <field name="wilaya_id" ref="wilaya_11"/>
+        </record>
+        <record id="daira_11_ideles" model="commercial.daira">
+            <field name="name">Ideles</field>
+            <field name="wilaya_id" ref="wilaya_11"/>
+        </record>
+        <record id="daira_11_tin_zaouatine" model="commercial.daira">
+            <field name="name">Tin Zaouatine</field>
+            <field name="wilaya_id" ref="wilaya_11"/>
+        </record>
+        <record id="daira_11_in_amguel" model="commercial.daira">
+            <field name="name">In Amguel</field>
+            <field name="wilaya_id" ref="wilaya_11"/>
+        </record>
+        <record id="daira_11_silet" model="commercial.daira">
+            <field name="name">Silet</field>
+            <field name="wilaya_id" ref="wilaya_11"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 12 - Tebessa                                                 -->
+        <!-- ============================================================ -->
+        <record id="wilaya_12" model="commercial.wilaya">
+            <field name="name">Tébessa</field>
+            <field name="code">12</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_12_tebessa" model="commercial.daira">
+            <field name="name">Tébessa</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_bir_el_ater" model="commercial.daira">
+            <field name="name">Bir El Ater</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_cheria" model="commercial.daira">
+            <field name="name">Cheria</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_ouenza" model="commercial.daira">
+            <field name="name">Ouenza</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_el_aouinet" model="commercial.daira">
+            <field name="name">El Aouinet</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_morsott" model="commercial.daira">
+            <field name="name">Morsott</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_el_kouif" model="commercial.daira">
+            <field name="name">El Kouif</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_negrine" model="commercial.daira">
+            <field name="name">Negrine</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_el_ogla" model="commercial.daira">
+            <field name="name">El Ogla</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_hammamet" model="commercial.daira">
+            <field name="name">Hammamet</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_bekkaria" model="commercial.daira">
+            <field name="name">Bekkaria</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+        <record id="daira_12_oum_ali" model="commercial.daira">
+            <field name="name">Oum Ali</field>
+            <field name="wilaya_id" ref="wilaya_12"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 13 - Tlemcen                                                 -->
+        <!-- ============================================================ -->
+        <record id="wilaya_13" model="commercial.wilaya">
+            <field name="name">Tlemcen</field>
+            <field name="code">13</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_13_tlemcen" model="commercial.daira">
+            <field name="name">Tlemcen</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_maghnia" model="commercial.daira">
+            <field name="name">Maghnia</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_ghazaouet" model="commercial.daira">
+            <field name="name">Ghazaouet</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_nedroma" model="commercial.daira">
+            <field name="name">Nedroma</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_remchi" model="commercial.daira">
+            <field name="name">Remchi</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_sebdou" model="commercial.daira">
+            <field name="name">Sebdou</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_bab_el_assa" model="commercial.daira">
+            <field name="name">Bab El Assa</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_beni_snous" model="commercial.daira">
+            <field name="name">Beni Snous</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_sidi_djillali" model="commercial.daira">
+            <field name="name">Sidi Djillali</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_mansourah" model="commercial.daira">
+            <field name="name">Mansourah</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_ouled_mimoun" model="commercial.daira">
+            <field name="name">Ouled Mimoun</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_fellaoucene" model="commercial.daira">
+            <field name="name">Fellaoucene</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_honaine" model="commercial.daira">
+            <field name="name">Honaine</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+        <record id="daira_13_chetouane" model="commercial.daira">
+            <field name="name">Chetouane</field>
+            <field name="wilaya_id" ref="wilaya_13"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 14 - Tiaret                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_14" model="commercial.wilaya">
+            <field name="name">Tiaret</field>
+            <field name="code">14</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_14_tiaret" model="commercial.daira">
+            <field name="name">Tiaret</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_ksar_chellala" model="commercial.daira">
+            <field name="name">Ksar Chellala</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_frenda" model="commercial.daira">
+            <field name="name">Frenda</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_sougueur" model="commercial.daira">
+            <field name="name">Sougueur</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_dahmouni" model="commercial.daira">
+            <field name="name">Dahmouni</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_ain_deheb" model="commercial.daira">
+            <field name="name">Ain Deheb</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_mechraa_sfa" model="commercial.daira">
+            <field name="name">Mechraâ Sfa</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_mahdia" model="commercial.daira">
+            <field name="name">Mahdia</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_hamadia" model="commercial.daira">
+            <field name="name">Hamadia</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_medroussa" model="commercial.daira">
+            <field name="name">Medroussa</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_rahouia" model="commercial.daira">
+            <field name="name">Rahouia</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_oued_lilli" model="commercial.daira">
+            <field name="name">Oued Lilli</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_ain_bouchekif" model="commercial.daira">
+            <field name="name">Ain Bouchekif</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+        <record id="daira_14_meghila" model="commercial.daira">
+            <field name="name">Meghila</field>
+            <field name="wilaya_id" ref="wilaya_14"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 15 - Tizi Ouzou                                              -->
+        <!-- ============================================================ -->
+        <record id="wilaya_15" model="commercial.wilaya">
+            <field name="name">Tizi Ouzou</field>
+            <field name="code">15</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_15_tizi_ouzou" model="commercial.daira">
+            <field name="name">Tizi Ouzou</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_ain_el_hammam" model="commercial.daira">
+            <field name="name">Ain El Hammam</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_azazga" model="commercial.daira">
+            <field name="name">Azazga</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_draa_ben_khedda" model="commercial.daira">
+            <field name="name">Draa Ben Khedda</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_larbaa_nath_irathen" model="commercial.daira">
+            <field name="name">Larbaa Nath Irathen</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_boghni" model="commercial.daira">
+            <field name="name">Boghni</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_draa_el_mizan" model="commercial.daira">
+            <field name="name">Draa El Mizan</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_iferhounene" model="commercial.daira">
+            <field name="name">Iferhounene</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_beni_douala" model="commercial.daira">
+            <field name="name">Beni Douala</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_mekla" model="commercial.daira">
+            <field name="name">Mekla</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_ouaguenoun" model="commercial.daira">
+            <field name="name">Ouaguenoun</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_tigzirt" model="commercial.daira">
+            <field name="name">Tigzirt</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_azeffoun" model="commercial.daira">
+            <field name="name">Azeffoun</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_bouzeguene" model="commercial.daira">
+            <field name="name">Bouzeguene</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_ouadhia" model="commercial.daira">
+            <field name="name">Ouadhia</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_maatkas" model="commercial.daira">
+            <field name="name">Maatkas</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_beni_yenni" model="commercial.daira">
+            <field name="name">Beni Yenni</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_tizi_gheniff" model="commercial.daira">
+            <field name="name">Tizi Gheniff</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_iferhounen" model="commercial.daira">
+            <field name="name">Iferhounen</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+        <record id="daira_15_makouda" model="commercial.daira">
+            <field name="name">Makouda</field>
+            <field name="wilaya_id" ref="wilaya_15"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 16 - Alger                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_16" model="commercial.wilaya">
+            <field name="name">Alger</field>
+            <field name="code">16</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_16_alger_centre" model="commercial.daira">
+            <field name="name">Alger Centre</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_sidi_mhamed" model="commercial.daira">
+            <field name="name">Sidi M'Hamed</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_el_madania" model="commercial.daira">
+            <field name="name">El Madania</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_bab_el_oued" model="commercial.daira">
+            <field name="name">Bab El Oued</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_bouzareah" model="commercial.daira">
+            <field name="name">Bouzaréah</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_bir_mourad_rais" model="commercial.daira">
+            <field name="name">Bir Mourad Raïs</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_hussein_dey" model="commercial.daira">
+            <field name="name">Hussein Dey</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_dar_el_beida" model="commercial.daira">
+            <field name="name">Dar El Beïda</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_cheraga" model="commercial.daira">
+            <field name="name">Chéraga</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_baraki" model="commercial.daira">
+            <field name="name">Baraki</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_draria" model="commercial.daira">
+            <field name="name">Draria</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_birtouta" model="commercial.daira">
+            <field name="name">Birtouta</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+        <record id="daira_16_zeralda" model="commercial.daira">
+            <field name="name">Zeralda</field>
+            <field name="wilaya_id" ref="wilaya_16"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 17 - Djelfa                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_17" model="commercial.wilaya">
+            <field name="name">Djelfa</field>
+            <field name="code">17</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_17_djelfa" model="commercial.daira">
+            <field name="name">Djelfa</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_messaad" model="commercial.daira">
+            <field name="name">Messaad</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_ain_oussera" model="commercial.daira">
+            <field name="name">Ain Oussera</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_hassi_bahbah" model="commercial.daira">
+            <field name="name">Hassi Bahbah</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_birine" model="commercial.daira">
+            <field name="name">Birine</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_charef" model="commercial.daira">
+            <field name="name">Charef</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_had_sahary" model="commercial.daira">
+            <field name="name">Had Sahary</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_moudjebara" model="commercial.daira">
+            <field name="name">Moudjebara</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_sed_rahal" model="commercial.daira">
+            <field name="name">Sed Rahal</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_faidh_el_botma" model="commercial.daira">
+            <field name="name">Faidh El Botma</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_dar_chioukh" model="commercial.daira">
+            <field name="name">Dar Chioukh</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+        <record id="daira_17_mliliha" model="commercial.daira">
+            <field name="name">M'Liliha</field>
+            <field name="wilaya_id" ref="wilaya_17"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 18 - Jijel                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_18" model="commercial.wilaya">
+            <field name="name">Jijel</field>
+            <field name="code">18</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_18_jijel" model="commercial.daira">
+            <field name="name">Jijel</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_el_milia" model="commercial.daira">
+            <field name="name">El Milia</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_taher" model="commercial.daira">
+            <field name="name">Taher</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_texenna" model="commercial.daira">
+            <field name="name">Texenna</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_chahna" model="commercial.daira">
+            <field name="name">Chahna</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_djimla" model="commercial.daira">
+            <field name="name">Djimla</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_settara" model="commercial.daira">
+            <field name="name">Settara</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_el_ancer" model="commercial.daira">
+            <field name="name">El Ancer</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_sidi_marouf" model="commercial.daira">
+            <field name="name">Sidi Marouf</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_el_aouana" model="commercial.daira">
+            <field name="name">El Aouana</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+        <record id="daira_18_ziama_mansouriah" model="commercial.daira">
+            <field name="name">Ziama Mansouriah</field>
+            <field name="wilaya_id" ref="wilaya_18"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 19 - Setif                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_19" model="commercial.wilaya">
+            <field name="name">Sétif</field>
+            <field name="code">19</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_19_setif" model="commercial.daira">
+            <field name="name">Sétif</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_el_eulma" model="commercial.daira">
+            <field name="name">El Eulma</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_ain_oulmene" model="commercial.daira">
+            <field name="name">Ain Oulmene</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_beni_ourtilane" model="commercial.daira">
+            <field name="name">Beni Ourtilane</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_bougaa" model="commercial.daira">
+            <field name="name">Bougaa</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_ain_arnat" model="commercial.daira">
+            <field name="name">Ain Arnat</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_ain_azel" model="commercial.daira">
+            <field name="name">Ain Azel</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_ain_el_kebira" model="commercial.daira">
+            <field name="name">Ain El Kebira</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_babor" model="commercial.daira">
+            <field name="name">Babor</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_bouandas" model="commercial.daira">
+            <field name="name">Bouandas</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_guenzet" model="commercial.daira">
+            <field name="name">Guenzet</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_hammam_guergour" model="commercial.daira">
+            <field name="name">Hammam Guergour</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_hammam_soukhna" model="commercial.daira">
+            <field name="name">Hammam Soukhna</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_maoklane" model="commercial.daira">
+            <field name="name">Maoklane</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_salah_bey" model="commercial.daira">
+            <field name="name">Salah Bey</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_bir_el_arch" model="commercial.daira">
+            <field name="name">Bir El Arch</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+        <record id="daira_19_djemila" model="commercial.daira">
+            <field name="name">Djemila</field>
+            <field name="wilaya_id" ref="wilaya_19"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 20 - Saida                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_20" model="commercial.wilaya">
+            <field name="name">Saïda</field>
+            <field name="code">20</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_20_saida" model="commercial.daira">
+            <field name="name">Saïda</field>
+            <field name="wilaya_id" ref="wilaya_20"/>
+        </record>
+        <record id="daira_20_ain_el_hadjar" model="commercial.daira">
+            <field name="name">Ain El Hadjar</field>
+            <field name="wilaya_id" ref="wilaya_20"/>
+        </record>
+        <record id="daira_20_youb" model="commercial.daira">
+            <field name="name">Youb</field>
+            <field name="wilaya_id" ref="wilaya_20"/>
+        </record>
+        <record id="daira_20_hassasna" model="commercial.daira">
+            <field name="name">Hassasna</field>
+            <field name="wilaya_id" ref="wilaya_20"/>
+        </record>
+        <record id="daira_20_sidi_boubekeur" model="commercial.daira">
+            <field name="name">Sidi Boubekeur</field>
+            <field name="wilaya_id" ref="wilaya_20"/>
+        </record>
+        <record id="daira_20_ouled_brahim" model="commercial.daira">
+            <field name="name">Ouled Brahim</field>
+            <field name="wilaya_id" ref="wilaya_20"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 21 - Skikda                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_21" model="commercial.wilaya">
+            <field name="name">Skikda</field>
+            <field name="code">21</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_21_skikda" model="commercial.daira">
+            <field name="name">Skikda</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_collo" model="commercial.daira">
+            <field name="name">Collo</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_azzaba" model="commercial.daira">
+            <field name="name">Azzaba</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_el_harrouch" model="commercial.daira">
+            <field name="name">El Harrouch</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_tamalous" model="commercial.daira">
+            <field name="name">Tamalous</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_sidi_mezghiche" model="commercial.daira">
+            <field name="name">Sidi Mezghiche</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_ramdane_djamel" model="commercial.daira">
+            <field name="name">Ramdane Djamel</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_ben_azzouz" model="commercial.daira">
+            <field name="name">Ben Azzouz</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_oum_toub" model="commercial.daira">
+            <field name="name">Oum Toub</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_ain_kechra" model="commercial.daira">
+            <field name="name">Ain Kechra</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_ouled_attia" model="commercial.daira">
+            <field name="name">Ouled Attia</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+        <record id="daira_21_zitouna" model="commercial.daira">
+            <field name="name">Zitouna</field>
+            <field name="wilaya_id" ref="wilaya_21"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 22 - Sidi Bel Abbes                                          -->
+        <!-- ============================================================ -->
+        <record id="wilaya_22" model="commercial.wilaya">
+            <field name="name">Sidi Bel Abbès</field>
+            <field name="code">22</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_22_sidi_bel_abbes" model="commercial.daira">
+            <field name="name">Sidi Bel Abbès</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+        <record id="daira_22_telagh" model="commercial.daira">
+            <field name="name">Telagh</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+        <record id="daira_22_sfisef" model="commercial.daira">
+            <field name="name">Sfisef</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+        <record id="daira_22_ben_badis" model="commercial.daira">
+            <field name="name">Ben Badis</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+        <record id="daira_22_ain_el_berd" model="commercial.daira">
+            <field name="name">Ain El Berd</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+        <record id="daira_22_ras_el_ma" model="commercial.daira">
+            <field name="name">Ras El Ma</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+        <record id="daira_22_tenira" model="commercial.daira">
+            <field name="name">Tenira</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+        <record id="daira_22_marhoum" model="commercial.daira">
+            <field name="name">Marhoum</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+        <record id="daira_22_merine" model="commercial.daira">
+            <field name="name">Merine</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+        <record id="daira_22_moulay_slissen" model="commercial.daira">
+            <field name="name">Moulay Slissen</field>
+            <field name="wilaya_id" ref="wilaya_22"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 23 - Annaba                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_23" model="commercial.wilaya">
+            <field name="name">Annaba</field>
+            <field name="code">23</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_23_annaba" model="commercial.daira">
+            <field name="name">Annaba</field>
+            <field name="wilaya_id" ref="wilaya_23"/>
+        </record>
+        <record id="daira_23_berrahal" model="commercial.daira">
+            <field name="name">Berrahal</field>
+            <field name="wilaya_id" ref="wilaya_23"/>
+        </record>
+        <record id="daira_23_el_hadjar" model="commercial.daira">
+            <field name="name">El Hadjar</field>
+            <field name="wilaya_id" ref="wilaya_23"/>
+        </record>
+        <record id="daira_23_ain_el_berda" model="commercial.daira">
+            <field name="name">Ain El Berda</field>
+            <field name="wilaya_id" ref="wilaya_23"/>
+        </record>
+        <record id="daira_23_el_bouni" model="commercial.daira">
+            <field name="name">El Bouni</field>
+            <field name="wilaya_id" ref="wilaya_23"/>
+        </record>
+        <record id="daira_23_chetaibi" model="commercial.daira">
+            <field name="name">Chetaibi</field>
+            <field name="wilaya_id" ref="wilaya_23"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 24 - Guelma                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_24" model="commercial.wilaya">
+            <field name="name">Guelma</field>
+            <field name="code">24</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_24_guelma" model="commercial.daira">
+            <field name="name">Guelma</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+        <record id="daira_24_bouchegouf" model="commercial.daira">
+            <field name="name">Bouchegouf</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+        <record id="daira_24_oued_zenati" model="commercial.daira">
+            <field name="name">Oued Zenati</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+        <record id="daira_24_heliopolis" model="commercial.daira">
+            <field name="name">Héliopolis</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+        <record id="daira_24_hammam_debagh" model="commercial.daira">
+            <field name="name">Hammam Debagh</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+        <record id="daira_24_khezaras" model="commercial.daira">
+            <field name="name">Khezaras</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+        <record id="daira_24_ain_makhlouf" model="commercial.daira">
+            <field name="name">Ain Makhlouf</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+        <record id="daira_24_hammam_nbail" model="commercial.daira">
+            <field name="name">Hammam N'Bail</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+        <record id="daira_24_guelaat_bou_sbaa" model="commercial.daira">
+            <field name="name">Guelaat Bou Sbaa</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+        <record id="daira_24_ain_larbi" model="commercial.daira">
+            <field name="name">Ain Larbi</field>
+            <field name="wilaya_id" ref="wilaya_24"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 25 - Constantine                                             -->
+        <!-- ============================================================ -->
+        <record id="wilaya_25" model="commercial.wilaya">
+            <field name="name">Constantine</field>
+            <field name="code">25</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_25_constantine" model="commercial.daira">
+            <field name="name">Constantine</field>
+            <field name="wilaya_id" ref="wilaya_25"/>
+        </record>
+        <record id="daira_25_el_khroub" model="commercial.daira">
+            <field name="name">El Khroub</field>
+            <field name="wilaya_id" ref="wilaya_25"/>
+        </record>
+        <record id="daira_25_ain_smara" model="commercial.daira">
+            <field name="name">Ain Smara</field>
+            <field name="wilaya_id" ref="wilaya_25"/>
+        </record>
+        <record id="daira_25_hamma_bouziane" model="commercial.daira">
+            <field name="name">Hamma Bouziane</field>
+            <field name="wilaya_id" ref="wilaya_25"/>
+        </record>
+        <record id="daira_25_zighoud_youcef" model="commercial.daira">
+            <field name="name">Zighoud Youcef</field>
+            <field name="wilaya_id" ref="wilaya_25"/>
+        </record>
+        <record id="daira_25_ibn_ziad" model="commercial.daira">
+            <field name="name">Ibn Ziad</field>
+            <field name="wilaya_id" ref="wilaya_25"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 26 - Medea                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_26" model="commercial.wilaya">
+            <field name="name">Médéa</field>
+            <field name="code">26</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_26_medea" model="commercial.daira">
+            <field name="name">Médéa</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_berrouaghia" model="commercial.daira">
+            <field name="name">Berrouaghia</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_ksar_el_boukhari" model="commercial.daira">
+            <field name="name">Ksar El Boukhari</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_tablat" model="commercial.daira">
+            <field name="name">Tablat</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_beni_slimane" model="commercial.daira">
+            <field name="name">Beni Slimane</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_ain_boucif" model="commercial.daira">
+            <field name="name">Ain Boucif</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_ouamri" model="commercial.daira">
+            <field name="name">Ouamri</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_ouzera" model="commercial.daira">
+            <field name="name">Ouzera</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_si_mahdjoub" model="commercial.daira">
+            <field name="name">Si Mahdjoub</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_chahbounia" model="commercial.daira">
+            <field name="name">Chahbounia</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_aziz" model="commercial.daira">
+            <field name="name">Aziz</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_el_omaria" model="commercial.daira">
+            <field name="name">El Omaria</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_mihoub" model="commercial.daira">
+            <field name="name">Mihoub</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+        <record id="daira_26_seghouane" model="commercial.daira">
+            <field name="name">Seghouane</field>
+            <field name="wilaya_id" ref="wilaya_26"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 27 - Mostaganem                                              -->
+        <!-- ============================================================ -->
+        <record id="wilaya_27" model="commercial.wilaya">
+            <field name="name">Mostaganem</field>
+            <field name="code">27</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_27_mostaganem" model="commercial.daira">
+            <field name="name">Mostaganem</field>
+            <field name="wilaya_id" ref="wilaya_27"/>
+        </record>
+        <record id="daira_27_ain_nouissy" model="commercial.daira">
+            <field name="name">Ain Nouissy</field>
+            <field name="wilaya_id" ref="wilaya_27"/>
+        </record>
+        <record id="daira_27_ain_tedeles" model="commercial.daira">
+            <field name="name">Ain Tedeles</field>
+            <field name="wilaya_id" ref="wilaya_27"/>
+        </record>
+        <record id="daira_27_achaacha" model="commercial.daira">
+            <field name="name">Achaacha</field>
+            <field name="wilaya_id" ref="wilaya_27"/>
+        </record>
+        <record id="daira_27_hassi_mameche" model="commercial.daira">
+            <field name="name">Hassi Mameche</field>
+            <field name="wilaya_id" ref="wilaya_27"/>
+        </record>
+        <record id="daira_27_sidi_ali" model="commercial.daira">
+            <field name="name">Sidi Ali</field>
+            <field name="wilaya_id" ref="wilaya_27"/>
+        </record>
+        <record id="daira_27_sidi_lakhdar" model="commercial.daira">
+            <field name="name">Sidi Lakhdar</field>
+            <field name="wilaya_id" ref="wilaya_27"/>
+        </record>
+        <record id="daira_27_bouguirat" model="commercial.daira">
+            <field name="name">Bouguirat</field>
+            <field name="wilaya_id" ref="wilaya_27"/>
+        </record>
+        <record id="daira_27_mesra" model="commercial.daira">
+            <field name="name">Mesra</field>
+            <field name="wilaya_id" ref="wilaya_27"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 28 - M'Sila                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_28" model="commercial.wilaya">
+            <field name="name">M'Sila</field>
+            <field name="code">28</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_28_msila" model="commercial.daira">
+            <field name="name">M'Sila</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_bou_saada" model="commercial.daira">
+            <field name="name">Bou Saâda</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_ain_el_hadjel" model="commercial.daira">
+            <field name="name">Ain El Hadjel</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_sidi_aissa" model="commercial.daira">
+            <field name="name">Sidi Aissa</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_hammam_dalaa" model="commercial.daira">
+            <field name="name">Hammam Dalaa</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_magra" model="commercial.daira">
+            <field name="name">Magra</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_ain_el_melh" model="commercial.daira">
+            <field name="name">Ain El Melh</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_khoubana" model="commercial.daira">
+            <field name="name">Khoubana</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_ouled_sidi_brahim" model="commercial.daira">
+            <field name="name">Ouled Sidi Brahim</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_ben_srour" model="commercial.daira">
+            <field name="name">Ben Srour</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_djebel_messaad" model="commercial.daira">
+            <field name="name">Djebel Messaad</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_medjedel" model="commercial.daira">
+            <field name="name">Medjedel</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_ouled_derradj" model="commercial.daira">
+            <field name="name">Ouled Derradj</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_bir_foda" model="commercial.daira">
+            <field name="name">Bir Foda</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+        <record id="daira_28_mcif" model="commercial.daira">
+            <field name="name">M'Cif</field>
+            <field name="wilaya_id" ref="wilaya_28"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 29 - Mascara                                                 -->
+        <!-- ============================================================ -->
+        <record id="wilaya_29" model="commercial.wilaya">
+            <field name="name">Mascara</field>
+            <field name="code">29</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_29_mascara" model="commercial.daira">
+            <field name="name">Mascara</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_sig" model="commercial.daira">
+            <field name="name">Sig</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_tighennif" model="commercial.daira">
+            <field name="name">Tighennif</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_ain_fares" model="commercial.daira">
+            <field name="name">Ain Fares</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_hachem" model="commercial.daira">
+            <field name="name">Hachem</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_oued_el_abtal" model="commercial.daira">
+            <field name="name">Oued El Abtal</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_mohammadia" model="commercial.daira">
+            <field name="name">Mohammadia</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_bou_hanifia" model="commercial.daira">
+            <field name="name">Bou Hanifia</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_ain_fakan" model="commercial.daira">
+            <field name="name">Ain Fakan</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_ghriss" model="commercial.daira">
+            <field name="name">Ghriss</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_oggaz" model="commercial.daira">
+            <field name="name">Oggaz</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_hacine" model="commercial.daira">
+            <field name="name">Hacine</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+        <record id="daira_29_oued_taria" model="commercial.daira">
+            <field name="name">Oued Taria</field>
+            <field name="wilaya_id" ref="wilaya_29"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 30 - Ouargla                                                 -->
+        <!-- ============================================================ -->
+        <record id="wilaya_30" model="commercial.wilaya">
+            <field name="name">Ouargla</field>
+            <field name="code">30</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_30_ouargla" model="commercial.daira">
+            <field name="name">Ouargla</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_touggourt" model="commercial.daira">
+            <field name="name">Touggourt</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_hassi_messaoud" model="commercial.daira">
+            <field name="name">Hassi Messaoud</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_temacine" model="commercial.daira">
+            <field name="name">Temacine</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_el_hadjira" model="commercial.daira">
+            <field name="name">El Hadjira</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_megarine" model="commercial.daira">
+            <field name="name">Megarine</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_taibet" model="commercial.daira">
+            <field name="name">Taibet</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_ngoussa" model="commercial.daira">
+            <field name="name">N'Goussa</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_sidi_khouiled" model="commercial.daira">
+            <field name="name">Sidi Khouiled</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_el_borma" model="commercial.daira">
+            <field name="name">El Borma</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+        <record id="daira_30_rouissat" model="commercial.daira">
+            <field name="name">Rouissat</field>
+            <field name="wilaya_id" ref="wilaya_30"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 31 - Oran                                                    -->
+        <!-- ============================================================ -->
+        <record id="wilaya_31" model="commercial.wilaya">
+            <field name="name">Oran</field>
+            <field name="code">31</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_31_oran" model="commercial.daira">
+            <field name="name">Oran</field>
+            <field name="wilaya_id" ref="wilaya_31"/>
+        </record>
+        <record id="daira_31_bir_el_djir" model="commercial.daira">
+            <field name="name">Bir El Djir</field>
+            <field name="wilaya_id" ref="wilaya_31"/>
+        </record>
+        <record id="daira_31_ain_turk" model="commercial.daira">
+            <field name="name">Ain Turk</field>
+            <field name="wilaya_id" ref="wilaya_31"/>
+        </record>
+        <record id="daira_31_es_senia" model="commercial.daira">
+            <field name="name">Es Sénia</field>
+            <field name="wilaya_id" ref="wilaya_31"/>
+        </record>
+        <record id="daira_31_arzew" model="commercial.daira">
+            <field name="name">Arzew</field>
+            <field name="wilaya_id" ref="wilaya_31"/>
+        </record>
+        <record id="daira_31_bethioua" model="commercial.daira">
+            <field name="name">Bethioua</field>
+            <field name="wilaya_id" ref="wilaya_31"/>
+        </record>
+        <record id="daira_31_oued_tlelat" model="commercial.daira">
+            <field name="name">Oued Tlelat</field>
+            <field name="wilaya_id" ref="wilaya_31"/>
+        </record>
+        <record id="daira_31_gdyel" model="commercial.daira">
+            <field name="name">Gdyel</field>
+            <field name="wilaya_id" ref="wilaya_31"/>
+        </record>
+        <record id="daira_31_boutlelis" model="commercial.daira">
+            <field name="name">Boutlelis</field>
+            <field name="wilaya_id" ref="wilaya_31"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 32 - El Bayadh                                               -->
+        <!-- ============================================================ -->
+        <record id="wilaya_32" model="commercial.wilaya">
+            <field name="name">El Bayadh</field>
+            <field name="code">32</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_32_el_bayadh" model="commercial.daira">
+            <field name="name">El Bayadh</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_bougtob" model="commercial.daira">
+            <field name="name">Bougtob</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_el_abiodh_sidi_cheikh" model="commercial.daira">
+            <field name="name">El Abiodh Sidi Cheikh</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_brezina" model="commercial.daira">
+            <field name="name">Brezina</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_labiod_sidi_cheikh" model="commercial.daira">
+            <field name="name">Labiod Sidi Cheikh</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_ain_el_orak" model="commercial.daira">
+            <field name="name">Ain El Orak</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_chellala" model="commercial.daira">
+            <field name="name">Chellala</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_boualem" model="commercial.daira">
+            <field name="name">Boualem</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_rogassa" model="commercial.daira">
+            <field name="name">Rogassa</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_ghassoul" model="commercial.daira">
+            <field name="name">Ghassoul</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+        <record id="daira_32_arbaouat" model="commercial.daira">
+            <field name="name">Arbaouat</field>
+            <field name="wilaya_id" ref="wilaya_32"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 33 - Illizi                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_33" model="commercial.wilaya">
+            <field name="name">Illizi</field>
+            <field name="code">33</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_33_illizi" model="commercial.daira">
+            <field name="name">Illizi</field>
+            <field name="wilaya_id" ref="wilaya_33"/>
+        </record>
+        <record id="daira_33_djanet" model="commercial.daira">
+            <field name="name">Djanet</field>
+            <field name="wilaya_id" ref="wilaya_33"/>
+        </record>
+        <record id="daira_33_in_amenas" model="commercial.daira">
+            <field name="name">In Amenas</field>
+            <field name="wilaya_id" ref="wilaya_33"/>
+        </record>
+        <record id="daira_33_bordj_omar_driss" model="commercial.daira">
+            <field name="name">Bordj Omar Driss</field>
+            <field name="wilaya_id" ref="wilaya_33"/>
+        </record>
+        <record id="daira_33_debdeb" model="commercial.daira">
+            <field name="name">Debdeb</field>
+            <field name="wilaya_id" ref="wilaya_33"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 34 - Bordj Bou Arreridj                                      -->
+        <!-- ============================================================ -->
+        <record id="wilaya_34" model="commercial.wilaya">
+            <field name="name">Bordj Bou Arréridj</field>
+            <field name="code">34</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_34_bordj_bou_arreridj" model="commercial.daira">
+            <field name="name">Bordj Bou Arréridj</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+        <record id="daira_34_ras_el_oued" model="commercial.daira">
+            <field name="name">Ras El Oued</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+        <record id="daira_34_medjana" model="commercial.daira">
+            <field name="name">Medjana</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+        <record id="daira_34_bordj_zemoura" model="commercial.daira">
+            <field name="name">Bordj Zemoura</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+        <record id="daira_34_mansourah" model="commercial.daira">
+            <field name="name">Mansourah</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+        <record id="daira_34_bir_kasdali" model="commercial.daira">
+            <field name="name">Bir Kasdali</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+        <record id="daira_34_el_hamadia" model="commercial.daira">
+            <field name="name">El Hamadia</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+        <record id="daira_34_djaafra" model="commercial.daira">
+            <field name="name">Djaafra</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+        <record id="daira_34_bordj_ghedir" model="commercial.daira">
+            <field name="name">Bordj Ghedir</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+        <record id="daira_34_ain_taghrout" model="commercial.daira">
+            <field name="name">Ain Taghrout</field>
+            <field name="wilaya_id" ref="wilaya_34"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 35 - Boumerdes                                               -->
+        <!-- ============================================================ -->
+        <record id="wilaya_35" model="commercial.wilaya">
+            <field name="name">Boumerdès</field>
+            <field name="code">35</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_35_boumerdes" model="commercial.daira">
+            <field name="name">Boumerdès</field>
+            <field name="wilaya_id" ref="wilaya_35"/>
+        </record>
+        <record id="daira_35_bordj_menaiel" model="commercial.daira">
+            <field name="name">Bordj Menaïel</field>
+            <field name="wilaya_id" ref="wilaya_35"/>
+        </record>
+        <record id="daira_35_dellys" model="commercial.daira">
+            <field name="name">Dellys</field>
+            <field name="wilaya_id" ref="wilaya_35"/>
+        </record>
+        <record id="daira_35_isser" model="commercial.daira">
+            <field name="name">Isser</field>
+            <field name="wilaya_id" ref="wilaya_35"/>
+        </record>
+        <record id="daira_35_khemis_el_khechna" model="commercial.daira">
+            <field name="name">Khemis El Khechna</field>
+            <field name="wilaya_id" ref="wilaya_35"/>
+        </record>
+        <record id="daira_35_naciria" model="commercial.daira">
+            <field name="name">Naciria</field>
+            <field name="wilaya_id" ref="wilaya_35"/>
+        </record>
+        <record id="daira_35_baghlia" model="commercial.daira">
+            <field name="name">Baghlia</field>
+            <field name="wilaya_id" ref="wilaya_35"/>
+        </record>
+        <record id="daira_35_boudouaou" model="commercial.daira">
+            <field name="name">Boudouaou</field>
+            <field name="wilaya_id" ref="wilaya_35"/>
+        </record>
+        <record id="daira_35_thenia" model="commercial.daira">
+            <field name="name">Thenia</field>
+            <field name="wilaya_id" ref="wilaya_35"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 36 - El Tarf                                                 -->
+        <!-- ============================================================ -->
+        <record id="wilaya_36" model="commercial.wilaya">
+            <field name="name">El Tarf</field>
+            <field name="code">36</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_36_el_tarf" model="commercial.daira">
+            <field name="name">El Tarf</field>
+            <field name="wilaya_id" ref="wilaya_36"/>
+        </record>
+        <record id="daira_36_ben_mhidi" model="commercial.daira">
+            <field name="name">Ben M'Hidi</field>
+            <field name="wilaya_id" ref="wilaya_36"/>
+        </record>
+        <record id="daira_36_bouhadjar" model="commercial.daira">
+            <field name="name">Bouhadjar</field>
+            <field name="wilaya_id" ref="wilaya_36"/>
+        </record>
+        <record id="daira_36_drean" model="commercial.daira">
+            <field name="name">Dréan</field>
+            <field name="wilaya_id" ref="wilaya_36"/>
+        </record>
+        <record id="daira_36_el_kala" model="commercial.daira">
+            <field name="name">El Kala</field>
+            <field name="wilaya_id" ref="wilaya_36"/>
+        </record>
+        <record id="daira_36_besbes" model="commercial.daira">
+            <field name="name">Besbes</field>
+            <field name="wilaya_id" ref="wilaya_36"/>
+        </record>
+        <record id="daira_36_bouteldja" model="commercial.daira">
+            <field name="name">Bouteldja</field>
+            <field name="wilaya_id" ref="wilaya_36"/>
+        </record>
+        <record id="daira_36_ain_el_assel" model="commercial.daira">
+            <field name="name">Ain El Assel</field>
+            <field name="wilaya_id" ref="wilaya_36"/>
+        </record>
+        <record id="daira_36_lac_des_oiseaux" model="commercial.daira">
+            <field name="name">Lac des Oiseaux</field>
+            <field name="wilaya_id" ref="wilaya_36"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 37 - Tindouf                                                 -->
+        <!-- ============================================================ -->
+        <record id="wilaya_37" model="commercial.wilaya">
+            <field name="name">Tindouf</field>
+            <field name="code">37</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_37_tindouf" model="commercial.daira">
+            <field name="name">Tindouf</field>
+            <field name="wilaya_id" ref="wilaya_37"/>
+        </record>
+        <record id="daira_37_oum_el_assel" model="commercial.daira">
+            <field name="name">Oum El Assel</field>
+            <field name="wilaya_id" ref="wilaya_37"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 38 - Tissemsilt                                              -->
+        <!-- ============================================================ -->
+        <record id="wilaya_38" model="commercial.wilaya">
+            <field name="name">Tissemsilt</field>
+            <field name="code">38</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_38_tissemsilt" model="commercial.daira">
+            <field name="name">Tissemsilt</field>
+            <field name="wilaya_id" ref="wilaya_38"/>
+        </record>
+        <record id="daira_38_bordj_bounaama" model="commercial.daira">
+            <field name="name">Bordj Bounaama</field>
+            <field name="wilaya_id" ref="wilaya_38"/>
+        </record>
+        <record id="daira_38_theniet_el_had" model="commercial.daira">
+            <field name="name">Theniet El Had</field>
+            <field name="wilaya_id" ref="wilaya_38"/>
+        </record>
+        <record id="daira_38_lardjem" model="commercial.daira">
+            <field name="name">Lardjem</field>
+            <field name="wilaya_id" ref="wilaya_38"/>
+        </record>
+        <record id="daira_38_lazharia" model="commercial.daira">
+            <field name="name">Lazharia</field>
+            <field name="wilaya_id" ref="wilaya_38"/>
+        </record>
+        <record id="daira_38_ammari" model="commercial.daira">
+            <field name="name">Ammari</field>
+            <field name="wilaya_id" ref="wilaya_38"/>
+        </record>
+        <record id="daira_38_ouled_bessam" model="commercial.daira">
+            <field name="name">Ouled Bessam</field>
+            <field name="wilaya_id" ref="wilaya_38"/>
+        </record>
+        <record id="daira_38_khemisti" model="commercial.daira">
+            <field name="name">Khemisti</field>
+            <field name="wilaya_id" ref="wilaya_38"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 39 - El Oued                                                 -->
+        <!-- ============================================================ -->
+        <record id="wilaya_39" model="commercial.wilaya">
+            <field name="name">El Oued</field>
+            <field name="code">39</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_39_el_oued" model="commercial.daira">
+            <field name="name">El Oued</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_guemar" model="commercial.daira">
+            <field name="name">Guemar</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_robbah" model="commercial.daira">
+            <field name="name">Robbah</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_bayadha" model="commercial.daira">
+            <field name="name">Bayadha</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_debila" model="commercial.daira">
+            <field name="name">Debila</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_hassani_abdelkrim" model="commercial.daira">
+            <field name="name">Hassani Abdelkrim</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_hassi_khalifa" model="commercial.daira">
+            <field name="name">Hassi Khalifa</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_djamaa" model="commercial.daira">
+            <field name="name">Djamaa</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_reguiba" model="commercial.daira">
+            <field name="name">Reguiba</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_magrane" model="commercial.daira">
+            <field name="name">Magrane</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_oued_el_alenda" model="commercial.daira">
+            <field name="name">Oued El Alenda</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_taleb_larbi" model="commercial.daira">
+            <field name="name">Taleb Larbi</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_mghaier" model="commercial.daira">
+            <field name="name">M'Ghaier</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_still" model="commercial.daira">
+            <field name="name">Still</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_oum_touyour" model="commercial.daira">
+            <field name="name">Oum Touyour</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_ben_guecha" model="commercial.daira">
+            <field name="name">Ben Guecha</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_hamraia" model="commercial.daira">
+            <field name="name">Hamraia</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+        <record id="daira_39_el_ogla" model="commercial.daira">
+            <field name="name">El Ogla</field>
+            <field name="wilaya_id" ref="wilaya_39"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 40 - Khenchela                                               -->
+        <!-- ============================================================ -->
+        <record id="wilaya_40" model="commercial.wilaya">
+            <field name="name">Khenchela</field>
+            <field name="code">40</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_40_khenchela" model="commercial.daira">
+            <field name="name">Khenchela</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_kais" model="commercial.daira">
+            <field name="name">Kais</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_ain_touila" model="commercial.daira">
+            <field name="name">Ain Touila</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_babar" model="commercial.daira">
+            <field name="name">Babar</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_chechar" model="commercial.daira">
+            <field name="name">Chechar</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_bouhmama" model="commercial.daira">
+            <field name="name">Bouhmama</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_el_hamma" model="commercial.daira">
+            <field name="name">El Hamma</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_ouled_rechache" model="commercial.daira">
+            <field name="name">Ouled Rechache</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_tamza" model="commercial.daira">
+            <field name="name">Tamza</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_ensigha" model="commercial.daira">
+            <field name="name">Ensigha</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+        <record id="daira_40_yabous" model="commercial.daira">
+            <field name="name">Yabous</field>
+            <field name="wilaya_id" ref="wilaya_40"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 41 - Souk Ahras                                              -->
+        <!-- ============================================================ -->
+        <record id="wilaya_41" model="commercial.wilaya">
+            <field name="name">Souk Ahras</field>
+            <field name="code">41</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_41_souk_ahras" model="commercial.daira">
+            <field name="name">Souk Ahras</field>
+            <field name="wilaya_id" ref="wilaya_41"/>
+        </record>
+        <record id="daira_41_sedrata" model="commercial.daira">
+            <field name="name">Sedrata</field>
+            <field name="wilaya_id" ref="wilaya_41"/>
+        </record>
+        <record id="daira_41_bir_bouhouche" model="commercial.daira">
+            <field name="name">Bir Bouhouche</field>
+            <field name="wilaya_id" ref="wilaya_41"/>
+        </record>
+        <record id="daira_41_merahna" model="commercial.daira">
+            <field name="name">Merahna</field>
+            <field name="wilaya_id" ref="wilaya_41"/>
+        </record>
+        <record id="daira_41_ouled_driss" model="commercial.daira">
+            <field name="name">Ouled Driss</field>
+            <field name="wilaya_id" ref="wilaya_41"/>
+        </record>
+        <record id="daira_41_haddada" model="commercial.daira">
+            <field name="name">Haddada</field>
+            <field name="wilaya_id" ref="wilaya_41"/>
+        </record>
+        <record id="daira_41_taoura" model="commercial.daira">
+            <field name="name">Taoura</field>
+            <field name="wilaya_id" ref="wilaya_41"/>
+        </record>
+        <record id="daira_41_mdaourouch" model="commercial.daira">
+            <field name="name">M'Daourouch</field>
+            <field name="wilaya_id" ref="wilaya_41"/>
+        </record>
+        <record id="daira_41_oum_el_adhaim" model="commercial.daira">
+            <field name="name">Oum El Adhaim</field>
+            <field name="wilaya_id" ref="wilaya_41"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 42 - Tipaza                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_42" model="commercial.wilaya">
+            <field name="name">Tipaza</field>
+            <field name="code">42</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_42_tipaza" model="commercial.daira">
+            <field name="name">Tipaza</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+        <record id="daira_42_hadjout" model="commercial.daira">
+            <field name="name">Hadjout</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+        <record id="daira_42_kolea" model="commercial.daira">
+            <field name="name">Koléa</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+        <record id="daira_42_cherchell" model="commercial.daira">
+            <field name="name">Cherchell</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+        <record id="daira_42_bou_ismail" model="commercial.daira">
+            <field name="name">Bou Ismaïl</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+        <record id="daira_42_gouraya" model="commercial.daira">
+            <field name="name">Gouraya</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+        <record id="daira_42_damous" model="commercial.daira">
+            <field name="name">Damous</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+        <record id="daira_42_fouka" model="commercial.daira">
+            <field name="name">Fouka</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+        <record id="daira_42_ahmer_el_ain" model="commercial.daira">
+            <field name="name">Ahmer El Ain</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+        <record id="daira_42_sidi_amar" model="commercial.daira">
+            <field name="name">Sidi Amar</field>
+            <field name="wilaya_id" ref="wilaya_42"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 43 - Mila                                                    -->
+        <!-- ============================================================ -->
+        <record id="wilaya_43" model="commercial.wilaya">
+            <field name="name">Mila</field>
+            <field name="code">43</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_43_mila" model="commercial.daira">
+            <field name="name">Mila</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_ferdjioua" model="commercial.daira">
+            <field name="name">Ferdjioua</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_chelghoum_laid" model="commercial.daira">
+            <field name="name">Chelghoum Laïd</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_ain_beida_harriche" model="commercial.daira">
+            <field name="name">Ain Beida Harriche</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_grarem_gouga" model="commercial.daira">
+            <field name="name">Grarem Gouga</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_oued_endja" model="commercial.daira">
+            <field name="name">Oued Endja</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_rouached" model="commercial.daira">
+            <field name="name">Rouached</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_sidi_merouane" model="commercial.daira">
+            <field name="name">Sidi Merouane</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_tassadane_haddada" model="commercial.daira">
+            <field name="name">Tassadane Haddada</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_terrai_bainen" model="commercial.daira">
+            <field name="name">Terrai Bainen</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_teleghma" model="commercial.daira">
+            <field name="name">Teleghma</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_ain_tine" model="commercial.daira">
+            <field name="name">Ain Tine</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+        <record id="daira_43_oued_athmania" model="commercial.daira">
+            <field name="name">Oued Athmania</field>
+            <field name="wilaya_id" ref="wilaya_43"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 44 - Ain Defla                                               -->
+        <!-- ============================================================ -->
+        <record id="wilaya_44" model="commercial.wilaya">
+            <field name="name">Ain Defla</field>
+            <field name="code">44</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_44_ain_defla" model="commercial.daira">
+            <field name="name">Ain Defla</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_miliana" model="commercial.daira">
+            <field name="name">Miliana</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_khemis_miliana" model="commercial.daira">
+            <field name="name">Khemis Miliana</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_djendel" model="commercial.daira">
+            <field name="name">Djendel</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_el_attaf" model="commercial.daira">
+            <field name="name">El Attaf</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_hammam_righa" model="commercial.daira">
+            <field name="name">Hammam Righa</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_el_abadia" model="commercial.daira">
+            <field name="name">El Abadia</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_bathia" model="commercial.daira">
+            <field name="name">Bathia</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_ain_lechiakh" model="commercial.daira">
+            <field name="name">Ain Lechiakh</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_boumedfaa" model="commercial.daira">
+            <field name="name">Boumedfaa</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_djelida" model="commercial.daira">
+            <field name="name">Djelida</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_bordj_emir_khaled" model="commercial.daira">
+            <field name="name">Bordj Emir Khaled</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+        <record id="daira_44_rouina" model="commercial.daira">
+            <field name="name">Rouina</field>
+            <field name="wilaya_id" ref="wilaya_44"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 45 - Naama                                                   -->
+        <!-- ============================================================ -->
+        <record id="wilaya_45" model="commercial.wilaya">
+            <field name="name">Naâma</field>
+            <field name="code">45</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_45_naama" model="commercial.daira">
+            <field name="name">Naâma</field>
+            <field name="wilaya_id" ref="wilaya_45"/>
+        </record>
+        <record id="daira_45_ain_sefra" model="commercial.daira">
+            <field name="name">Ain Sefra</field>
+            <field name="wilaya_id" ref="wilaya_45"/>
+        </record>
+        <record id="daira_45_mecheria" model="commercial.daira">
+            <field name="name">Mecheria</field>
+            <field name="wilaya_id" ref="wilaya_45"/>
+        </record>
+        <record id="daira_45_tiout" model="commercial.daira">
+            <field name="name">Tiout</field>
+            <field name="wilaya_id" ref="wilaya_45"/>
+        </record>
+        <record id="daira_45_sfissifa" model="commercial.daira">
+            <field name="name">Sfissifa</field>
+            <field name="wilaya_id" ref="wilaya_45"/>
+        </record>
+        <record id="daira_45_moghrar" model="commercial.daira">
+            <field name="name">Moghrar</field>
+            <field name="wilaya_id" ref="wilaya_45"/>
+        </record>
+        <record id="daira_45_asla" model="commercial.daira">
+            <field name="name">Asla</field>
+            <field name="wilaya_id" ref="wilaya_45"/>
+        </record>
+        <record id="daira_45_djenien_bourezg" model="commercial.daira">
+            <field name="name">Djenien Bourezg</field>
+            <field name="wilaya_id" ref="wilaya_45"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 46 - Ain Temouchent                                          -->
+        <!-- ============================================================ -->
+        <record id="wilaya_46" model="commercial.wilaya">
+            <field name="name">Ain Témouchent</field>
+            <field name="code">46</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_46_ain_temouchent" model="commercial.daira">
+            <field name="name">Ain Témouchent</field>
+            <field name="wilaya_id" ref="wilaya_46"/>
+        </record>
+        <record id="daira_46_hammam_bou_hadjar" model="commercial.daira">
+            <field name="name">Hammam Bou Hadjar</field>
+            <field name="wilaya_id" ref="wilaya_46"/>
+        </record>
+        <record id="daira_46_el_malah" model="commercial.daira">
+            <field name="name">El Malah</field>
+            <field name="wilaya_id" ref="wilaya_46"/>
+        </record>
+        <record id="daira_46_el_amria" model="commercial.daira">
+            <field name="name">El Amria</field>
+            <field name="wilaya_id" ref="wilaya_46"/>
+        </record>
+        <record id="daira_46_ain_el_arbaa" model="commercial.daira">
+            <field name="name">Ain El Arbaa</field>
+            <field name="wilaya_id" ref="wilaya_46"/>
+        </record>
+        <record id="daira_46_beni_saf" model="commercial.daira">
+            <field name="name">Beni Saf</field>
+            <field name="wilaya_id" ref="wilaya_46"/>
+        </record>
+        <record id="daira_46_oulhaca_el_gheraba" model="commercial.daira">
+            <field name="name">Oulhaca El Gheraba</field>
+            <field name="wilaya_id" ref="wilaya_46"/>
+        </record>
+        <record id="daira_46_ain_kihal" model="commercial.daira">
+            <field name="name">Ain Kihal</field>
+            <field name="wilaya_id" ref="wilaya_46"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 47 - Ghardaia                                                -->
+        <!-- ============================================================ -->
+        <record id="wilaya_47" model="commercial.wilaya">
+            <field name="name">Ghardaïa</field>
+            <field name="code">47</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_47_ghardaia" model="commercial.daira">
+            <field name="name">Ghardaïa</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+        <record id="daira_47_metlili" model="commercial.daira">
+            <field name="name">Metlili</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+        <record id="daira_47_el_meniaa" model="commercial.daira">
+            <field name="name">El Meniaa</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+        <record id="daira_47_berriane" model="commercial.daira">
+            <field name="name">Berriane</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+        <record id="daira_47_daya_ben_dahoua" model="commercial.daira">
+            <field name="name">Daya Ben Dahoua</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+        <record id="daira_47_guerrara" model="commercial.daira">
+            <field name="name">Guerrara</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+        <record id="daira_47_bounoura" model="commercial.daira">
+            <field name="name">Bounoura</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+        <record id="daira_47_el_atteuf" model="commercial.daira">
+            <field name="name">El Atteuf</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+        <record id="daira_47_zelfana" model="commercial.daira">
+            <field name="name">Zelfana</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+        <record id="daira_47_mansourah" model="commercial.daira">
+            <field name="name">Mansourah</field>
+            <field name="wilaya_id" ref="wilaya_47"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 48 - Relizane                                                -->
+        <!-- ============================================================ -->
+        <record id="wilaya_48" model="commercial.wilaya">
+            <field name="name">Relizane</field>
+            <field name="code">48</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_48_relizane" model="commercial.daira">
+            <field name="name">Relizane</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_oued_rhiou" model="commercial.daira">
+            <field name="name">Oued Rhiou</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_mazouna" model="commercial.daira">
+            <field name="name">Mazouna</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_mendes" model="commercial.daira">
+            <field name="name">Mendes</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_zammoura" model="commercial.daira">
+            <field name="name">Zammoura</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_ain_tarek" model="commercial.daira">
+            <field name="name">Ain Tarek</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_sidi_mhamed_ben_ali" model="commercial.daira">
+            <field name="name">Sidi M'Hamed Ben Ali</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_yellel" model="commercial.daira">
+            <field name="name">Yellel</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_el_matmar" model="commercial.daira">
+            <field name="name">El Matmar</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_el_hamadna" model="commercial.daira">
+            <field name="name">El Hamadna</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_ouarizane" model="commercial.daira">
+            <field name="name">Ouarizane</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_ammi_moussa" model="commercial.daira">
+            <field name="name">Ammi Moussa</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+        <record id="daira_48_djidioua" model="commercial.daira">
+            <field name="name">Djidioua</field>
+            <field name="wilaya_id" ref="wilaya_48"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- NEW WILAYAS (2019)                                           -->
+        <!-- ============================================================ -->
+
+        <!-- ============================================================ -->
+        <!-- 49 - El M'Ghair                                              -->
+        <!-- ============================================================ -->
+        <record id="wilaya_49" model="commercial.wilaya">
+            <field name="name">El M'Ghair</field>
+            <field name="code">49</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_49_el_mghair" model="commercial.daira">
+            <field name="name">El M'Ghair</field>
+            <field name="wilaya_id" ref="wilaya_49"/>
+        </record>
+        <record id="daira_49_djamaa" model="commercial.daira">
+            <field name="name">Djamaa</field>
+            <field name="wilaya_id" ref="wilaya_49"/>
+        </record>
+        <record id="daira_49_oum_touyour" model="commercial.daira">
+            <field name="name">Oum Touyour</field>
+            <field name="wilaya_id" ref="wilaya_49"/>
+        </record>
+        <record id="daira_49_still" model="commercial.daira">
+            <field name="name">Still</field>
+            <field name="wilaya_id" ref="wilaya_49"/>
+        </record>
+        <record id="daira_49_mrara" model="commercial.daira">
+            <field name="name">M'Rara</field>
+            <field name="wilaya_id" ref="wilaya_49"/>
+        </record>
+        <record id="daira_49_sidi_khellil" model="commercial.daira">
+            <field name="name">Sidi Khellil</field>
+            <field name="wilaya_id" ref="wilaya_49"/>
+        </record>
+        <record id="daira_49_sidi_amrane" model="commercial.daira">
+            <field name="name">Sidi Amrane</field>
+            <field name="wilaya_id" ref="wilaya_49"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 50 - El Meniaa                                               -->
+        <!-- ============================================================ -->
+        <record id="wilaya_50" model="commercial.wilaya">
+            <field name="name">El Meniaa</field>
+            <field name="code">50</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_50_el_meniaa" model="commercial.daira">
+            <field name="name">El Meniaa</field>
+            <field name="wilaya_id" ref="wilaya_50"/>
+        </record>
+        <record id="daira_50_hassi_gara" model="commercial.daira">
+            <field name="name">Hassi Gara</field>
+            <field name="wilaya_id" ref="wilaya_50"/>
+        </record>
+        <record id="daira_50_hassi_el_gara" model="commercial.daira">
+            <field name="name">Hassi El Gara</field>
+            <field name="wilaya_id" ref="wilaya_50"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 51 - Ouled Djellal                                           -->
+        <!-- ============================================================ -->
+        <record id="wilaya_51" model="commercial.wilaya">
+            <field name="name">Ouled Djellal</field>
+            <field name="code">51</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_51_ouled_djellal" model="commercial.daira">
+            <field name="name">Ouled Djellal</field>
+            <field name="wilaya_id" ref="wilaya_51"/>
+        </record>
+        <record id="daira_51_sidi_khaled" model="commercial.daira">
+            <field name="name">Sidi Khaled</field>
+            <field name="wilaya_id" ref="wilaya_51"/>
+        </record>
+        <record id="daira_51_ech_chaiba" model="commercial.daira">
+            <field name="name">Ech Chaïba</field>
+            <field name="wilaya_id" ref="wilaya_51"/>
+        </record>
+        <record id="daira_51_doucen" model="commercial.daira">
+            <field name="name">Doucen</field>
+            <field name="wilaya_id" ref="wilaya_51"/>
+        </record>
+        <record id="daira_51_besbes" model="commercial.daira">
+            <field name="name">Besbes</field>
+            <field name="wilaya_id" ref="wilaya_51"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 52 - Bordj Badji Mokhtar                                     -->
+        <!-- ============================================================ -->
+        <record id="wilaya_52" model="commercial.wilaya">
+            <field name="name">Bordj Badji Mokhtar</field>
+            <field name="code">52</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_52_bordj_badji_mokhtar" model="commercial.daira">
+            <field name="name">Bordj Badji Mokhtar</field>
+            <field name="wilaya_id" ref="wilaya_52"/>
+        </record>
+        <record id="daira_52_timiaouine" model="commercial.daira">
+            <field name="name">Timiaouine</field>
+            <field name="wilaya_id" ref="wilaya_52"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 53 - Beni Abbes                                              -->
+        <!-- ============================================================ -->
+        <record id="wilaya_53" model="commercial.wilaya">
+            <field name="name">Béni Abbès</field>
+            <field name="code">53</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_53_beni_abbes" model="commercial.daira">
+            <field name="name">Béni Abbès</field>
+            <field name="wilaya_id" ref="wilaya_53"/>
+        </record>
+        <record id="daira_53_igli" model="commercial.daira">
+            <field name="name">Igli</field>
+            <field name="wilaya_id" ref="wilaya_53"/>
+        </record>
+        <record id="daira_53_tabelbala" model="commercial.daira">
+            <field name="name">Tabelbala</field>
+            <field name="wilaya_id" ref="wilaya_53"/>
+        </record>
+        <record id="daira_53_tamtert" model="commercial.daira">
+            <field name="name">Tamtert</field>
+            <field name="wilaya_id" ref="wilaya_53"/>
+        </record>
+        <record id="daira_53_el_ouata" model="commercial.daira">
+            <field name="name">El Ouata</field>
+            <field name="wilaya_id" ref="wilaya_53"/>
+        </record>
+        <record id="daira_53_kerzaz" model="commercial.daira">
+            <field name="name">Kerzaz</field>
+            <field name="wilaya_id" ref="wilaya_53"/>
+        </record>
+        <record id="daira_53_ouled_khoudir" model="commercial.daira">
+            <field name="name">Ouled Khoudir</field>
+            <field name="wilaya_id" ref="wilaya_53"/>
+        </record>
+        <record id="daira_53_beni_ikhlef" model="commercial.daira">
+            <field name="name">Beni Ikhlef</field>
+            <field name="wilaya_id" ref="wilaya_53"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 54 - In Salah                                                -->
+        <!-- ============================================================ -->
+        <record id="wilaya_54" model="commercial.wilaya">
+            <field name="name">In Salah</field>
+            <field name="code">54</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_54_in_salah" model="commercial.daira">
+            <field name="name">In Salah</field>
+            <field name="wilaya_id" ref="wilaya_54"/>
+        </record>
+        <record id="daira_54_in_ghar" model="commercial.daira">
+            <field name="name">In Ghar</field>
+            <field name="wilaya_id" ref="wilaya_54"/>
+        </record>
+        <record id="daira_54_foggaret_ezzoubia" model="commercial.daira">
+            <field name="name">Foggaret Ezzoubia</field>
+            <field name="wilaya_id" ref="wilaya_54"/>
+        </record>
+        <record id="daira_54_ain_el_hadjel" model="commercial.daira">
+            <field name="name">Ain El Hadjel</field>
+            <field name="wilaya_id" ref="wilaya_54"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 55 - In Guezzam                                              -->
+        <!-- ============================================================ -->
+        <record id="wilaya_55" model="commercial.wilaya">
+            <field name="name">In Guezzam</field>
+            <field name="code">55</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_55_in_guezzam" model="commercial.daira">
+            <field name="name">In Guezzam</field>
+            <field name="wilaya_id" ref="wilaya_55"/>
+        </record>
+        <record id="daira_55_tin_zaouatine" model="commercial.daira">
+            <field name="name">Tin Zaouatine</field>
+            <field name="wilaya_id" ref="wilaya_55"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 56 - Touggourt                                               -->
+        <!-- ============================================================ -->
+        <record id="wilaya_56" model="commercial.wilaya">
+            <field name="name">Touggourt</field>
+            <field name="code">56</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_56_touggourt" model="commercial.daira">
+            <field name="name">Touggourt</field>
+            <field name="wilaya_id" ref="wilaya_56"/>
+        </record>
+        <record id="daira_56_temacine" model="commercial.daira">
+            <field name="name">Temacine</field>
+            <field name="wilaya_id" ref="wilaya_56"/>
+        </record>
+        <record id="daira_56_taibet" model="commercial.daira">
+            <field name="name">Taibet</field>
+            <field name="wilaya_id" ref="wilaya_56"/>
+        </record>
+        <record id="daira_56_megarine" model="commercial.daira">
+            <field name="name">Megarine</field>
+            <field name="wilaya_id" ref="wilaya_56"/>
+        </record>
+        <record id="daira_56_mnaguer" model="commercial.daira">
+            <field name="name">M'Naguer</field>
+            <field name="wilaya_id" ref="wilaya_56"/>
+        </record>
+        <record id="daira_56_benaceur" model="commercial.daira">
+            <field name="name">Benaceur</field>
+            <field name="wilaya_id" ref="wilaya_56"/>
+        </record>
+        <record id="daira_56_el_hadjira" model="commercial.daira">
+            <field name="name">El Hadjira</field>
+            <field name="wilaya_id" ref="wilaya_56"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 57 - Djanet                                                  -->
+        <!-- ============================================================ -->
+        <record id="wilaya_57" model="commercial.wilaya">
+            <field name="name">Djanet</field>
+            <field name="code">57</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_57_djanet" model="commercial.daira">
+            <field name="name">Djanet</field>
+            <field name="wilaya_id" ref="wilaya_57"/>
+        </record>
+        <record id="daira_57_bordj_el_haouas" model="commercial.daira">
+            <field name="name">Bordj El Haouas</field>
+            <field name="wilaya_id" ref="wilaya_57"/>
+        </record>
+        <record id="daira_57_tarat" model="commercial.daira">
+            <field name="name">Tarat</field>
+            <field name="wilaya_id" ref="wilaya_57"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- 58 - In Amenas                                               -->
+        <!-- ============================================================ -->
+        <record id="wilaya_58" model="commercial.wilaya">
+            <field name="name">In Amenas</field>
+            <field name="code">58</field>
+            <field name="country_id" ref="base.dz"/>
+        </record>
+        <record id="daira_58_in_amenas" model="commercial.daira">
+            <field name="name">In Amenas</field>
+            <field name="wilaya_id" ref="wilaya_58"/>
+        </record>
+        <record id="daira_58_debdeb" model="commercial.daira">
+            <field name="name">Debdeb</field>
+            <field name="wilaya_id" ref="wilaya_58"/>
+        </record>
+        <record id="daira_58_bordj_omar_driss" model="commercial.daira">
+            <field name="name">Bordj Omar Driss</field>
+            <field name="wilaya_id" ref="wilaya_58"/>
+        </record>
+
+    </data>
+</odoo>

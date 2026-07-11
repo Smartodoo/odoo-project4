@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ================= TEMPLATE PDF - PAIEMENTS PAR PROJET ================= -->
+    <template id="report_project_payments_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="company" t-value="docs.company_id"/>
+                <div class="page">
+
+                <!-- ============ EN-TÊTE ============ -->
+                <table style="width: 100%; margin-bottom: 10px;">
+                    <tr>
+                        <!-- Logo à gauche -->
+                        <td style="width: 120px; vertical-align: top; text-align: center;">
+                            <img t-if="company.logo" t-att-src="image_data_uri(company.logo)"
+                                 style="max-height: 90px; max-width: 100px;" alt="Logo"/>
+                        </td>
+                        <!-- Nom et données entreprise -->
+                        <td style="vertical-align: middle; text-align: center; padding-left: 20px;">
+                            <div style="font-size: 26px; font-weight: bold; color: #1a5ba8; letter-spacing: 2px; margin-bottom: 10px;">
+                                <t t-esc="company.name"/>
+                            </div>
+                            <div style="font-size: 11px; color: #333; line-height: 1.8;">
+                                <div t-if="company.street">
+                                    <t t-esc="company.street"/>
+                                    <t t-if="company.street2">, <t t-esc="company.street2"/></t>
+                                    <t t-if="company.city">, <t t-esc="company.city"/></t>
+                                    <t t-if="company.zip"> <t t-esc="company.zip"/></t>
+                                </div>
+                                <div t-if="company.email" style="margin-top: 3px;">
+                                    <t t-esc="company.email"/>
+                                </div>
+                                <div t-if="company.phone" style="margin-top: 3px;">
+                                    Tel: <t t-esc="company.phone"/>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Ligne de séparation bleue -->
+                <div style="border-bottom: 2px solid #1a5ba8; margin-top: 10px;"></div>
+
+                <!-- ============ TITRE DU RAPPORT ============ -->
+                <div style="text-align: center; margin: 25px 0;">
+                    <div style="display: inline-block; background-color: #667eea; border: 3px solid #667eea; padding: 12px 50px; border-radius: 3px;">
+                        <span style="font-size: 18px; font-weight: bold; color: #ffffff; letter-spacing: 1px;">
+                            RAPPORT DES PAIEMENTS PAR PROJET
+                        </span>
+                    </div>
+                    <h3 style="color: #667eea; margin-top: 15px;">
+                        <t t-esc="docs.project_id.name"/>
+                    </h3>
+                </div>
+
+                    <!-- Informations générales -->
+                    <div style="margin-bottom: 25px;">
+                        <table style="width: 100%; border: none;">
+                            <tr>
+                                <td style="width: 50%; border: none; padding: 5px;">
+                                    <strong>Date d'impression:</strong>
+                                    <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')" style="margin-left: 10px;"/>
+                                </td>
+                                <td style="width: 50%; border: none; padding: 5px;">
+                                    <strong>Période:</strong>
+                                    <span t-esc="docs.date_from.strftime('%d/%m/%Y')" style="margin-left: 10px;"/>
+                                    au
+                                    <span t-esc="docs.date_to.strftime('%d/%m/%Y')"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: none; padding: 5px;">
+                                    <strong>Société:</strong>
+                                    <span t-esc="docs.company_id.name" style="margin-left: 10px;"/>
+                                </td>
+                                <td style="border: none; padding: 5px;">
+                                    <strong>Type de paiement:</strong>
+                                    <span style="margin-left: 10px;">
+                                        <t t-if="docs.payment_type == 'all'">Tous les paiements</t>
+                                        <t t-elif="docs.payment_type == 'supplier'">Fournisseurs uniquement</t>
+                                        <t t-elif="docs.payment_type == 'situation'">Situations uniquement</t>
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Récupération des paiements -->
+                    <t t-set="supplier_payments" t-value="docs.supplier_payment_ids"/>
+                    <t t-set="situation_payments" t-value="docs.situation_payment_ids"/>
+
+                    <!-- Calcul des totaux -->
+                    <t t-set="total_supplier" t-value="0"/>
+                    <t t-set="total_situation" t-value="0"/>
+                    <t t-set="total_supplier_paid" t-value="0"/>
+                    <t t-set="total_situation_paid" t-value="0"/>
+                    <t t-set="total_supplier_residual" t-value="0"/>
+                    <t t-set="total_situation_residual" t-value="0"/>
+
+                    <t t-foreach="supplier_payments" t-as="payment">
+                        <t t-set="total_supplier" t-value="total_supplier + payment.amount"/>
+                        <t t-set="total_supplier_paid" t-value="total_supplier_paid + payment.amount_paid"/>
+                        <t t-set="total_supplier_residual" t-value="total_supplier_residual + payment.amount_residual"/>
+                    </t>
+
+                    <t t-foreach="situation_payments" t-as="payment">
+                        <t t-set="total_situation" t-value="total_situation + payment.amount"/>
+                        <t t-set="total_situation_paid" t-value="total_situation_paid + payment.amount_paid"/>
+                        <t t-set="total_situation_residual" t-value="total_situation_residual + payment.amount_residual"/>
+                    </t>
+
+                    <t t-set="total_general" t-value="total_supplier + total_situation"/>
+                    <t t-set="total_paid" t-value="total_supplier_paid + total_situation_paid"/>
+                    <t t-set="total_residual" t-value="total_supplier_residual + total_situation_residual"/>
+
+                    <!-- Résumé financier -->
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="background-color: #667eea; color: white; padding: 8px; margin-bottom: 0;">RÉSUMÉ FINANCIER</h4>
+                        <table class="table table-bordered" style="margin-bottom: 0;">
+                            <thead style="background-color: #ecf0f1;">
+                                <tr>
+                                    <th style="width: 33%; text-align: center; padding: 10px;">Montant Total</th>
+                                    <th style="width: 33%; text-align: center; padding: 10px;">Montant Versé</th>
+                                    <th style="width: 34%; text-align: center; padding: 10px;">Reste à Payer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center; font-size: 16px; font-weight: bold; padding: 10px;">
+                                        <span t-esc="'%.2f' % total_general"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                    <td style="text-align: center; font-size: 16px; font-weight: bold; color: #27ae60; padding: 10px;">
+                                        <span t-esc="'%.2f' % total_paid"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                    <td style="text-align: center; font-size: 16px; font-weight: bold; color: #e74c3c; padding: 10px;">
+                                        <span t-esc="'%.2f' % total_residual"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paiements Fournisseurs -->
+                    <t t-if="supplier_payments and docs.payment_type in ['all', 'supplier']">
+                        <h4 style="background-color: #fd7e14; color: white; padding: 8px; margin-bottom: 0; margin-top: 20px;">PAIEMENTS FOURNISSEURS</h4>
+                        <table class="table table-bordered table-sm" style="font-size: 9px;">
+                            <thead style="background-color: #ecf0f1;">
+                                <tr>
+                                    <th style="width: 10%;">Référence</th>
+                                    <th style="width: 8%;">Date</th>
+                                    <th style="width: 15%;">Fournisseur</th>
+                                    <th style="width: 12%;">Bon Commande</th>
+                                    <th style="width: 10%;">Caisse</th>
+                                    <th style="width: 20%;">Description</th>
+                                    <th style="width: 8%; text-align: right;">Montant</th>
+                                    <th style="width: 8%; text-align: right;">Versé</th>
+                                    <th style="width: 9%; text-align: right;">Reste</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="supplier_payments" t-as="doc">
+                                    <tr>
+                                        <td><span t-field="doc.name"/></td>
+                                        <td><span t-field="doc.date" t-options='{"format": "dd/MM/yyyy"}'/></td>
+                                        <td><span t-field="doc.fournisseur.name"/></td>
+                                        <td><span t-field="doc.purchase_id.name"/></td>
+                                        <td><span t-field="doc.cashbox_id.name"/></td>
+                                        <td><span t-field="doc.description"/></td>
+                                        <td style="text-align: right;">
+                                            <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.company_currency_id}'/>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span t-field="doc.amount_verse" t-options='{"widget": "monetary", "display_currency": doc.company_currency_id}'/>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span t-field="doc.amount_residual" t-options='{"widget": "monetary", "display_currency": doc.company_currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot style="background-color: #fd7e14; color: white; font-weight: bold;">
+                                <tr>
+                                    <td colspan="6" style="text-align: right; padding: 8px;">SOUS-TOTAL FOURNISSEURS:</td>
+                                    <td style="text-align: right; padding: 8px;">
+                                        <span t-esc="'%.2f' % total_supplier"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                    <td style="text-align: right; padding: 8px;">
+                                        <span t-esc="'%.2f' % total_supplier_paid"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                    <td style="text-align: right; padding: 8px;">
+                                        <span t-esc="'%.2f' % total_supplier_residual"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </t>
+
+                    <!-- Paiements Situations -->
+                    <t t-if="situation_payments and docs.payment_type in ['all', 'situation']">
+                        <h4 style="background-color: #17a2b8; color: white; padding: 8px; margin-bottom: 0; margin-top: 20px;">PAIEMENTS SITUATIONS</h4>
+                        <table class="table table-bordered table-sm" style="font-size: 9px;">
+                            <thead style="background-color: #ecf0f1;">
+                                <tr>
+                                    <th style="width: 12%;">Référence</th>
+                                    <th style="width: 8%;">Date</th>
+                                    <th style="width: 15%;">Situation</th>
+                                    <th style="width: 12%;">Caisse</th>
+                                    <th style="width: 28%;">Description</th>
+                                    <th style="width: 8%; text-align: right;">Montant</th>
+                                    <th style="width: 8%; text-align: right;">Versé</th>
+                                    <th style="width: 9%; text-align: right;">Reste</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="situation_payments" t-as="doc">
+                                    <tr>
+                                        <td><span t-field="doc.name"/></td>
+                                        <td><span t-field="doc.date" t-options='{"format": "dd/MM/yyyy"}'/></td>
+                                        <td><span t-field="doc.situation_id.name"/></td>
+                                        <td><span t-field="doc.cashbox_id.name"/></td>
+                                        <td><span t-field="doc.description"/></td>
+                                        <td style="text-align: right;">
+                                            <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.company_currency_id}'/>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span t-field="doc.amount_verse" t-options='{"widget": "monetary", "display_currency": doc.company_currency_id}'/>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <span t-field="doc.amount_residual" t-options='{"widget": "monetary", "display_currency": doc.company_currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot style="background-color: #17a2b8; color: white; font-weight: bold;">
+                                <tr>
+                                    <td colspan="5" style="text-align: right; padding: 8px;">SOUS-TOTAL SITUATIONS:</td>
+                                    <td style="text-align: right; padding: 8px;">
+                                        <span t-esc="'%.2f' % total_situation"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                    <td style="text-align: right; padding: 8px;">
+                                        <span t-esc="'%.2f' % total_situation_paid"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                    <td style="text-align: right; padding: 8px;">
+                                        <span t-esc="'%.2f' % total_situation_residual"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </t>
+
+                    <!-- Total Général (si les deux types de paiements sont affichés) -->
+                    <t t-if="docs.payment_type == 'all' and supplier_payments and situation_payments">
+                        <div style="margin-top: 20px; background-color: #667eea; color: white; padding: 12px; border-radius: 5px;">
+                            <table style="width: 100%; border: none;">
+                                <tr>
+                                    <td style="border: none; text-align: right; font-weight: bold; font-size: 14px;">
+                                        TOTAL GÉNÉRAL:
+                                    </td>
+                                    <td style="border: none; text-align: right; font-weight: bold; font-size: 14px; width: 8%;">
+                                        <span t-esc="'%.2f' % total_general"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                    <td style="border: none; text-align: right; font-weight: bold; font-size: 14px; width: 8%;">
+                                        <span t-esc="'%.2f' % total_paid"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                    <td style="border: none; text-align: right; font-weight: bold; font-size: 14px; width: 9%;">
+                                        <span t-esc="'%.2f' % total_residual"/>
+                                        <span t-esc="docs.company_currency_id.symbol"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </t>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================= ACTION REPORT ================= -->
+    <record id="action_report_project_payments" model="ir.actions.report">
+        <field name="name">Paiements par Projet</field>
+        <field name="model">project.payment.print.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">caisse2.report_project_payments_template</field>
+        <field name="report_file">caisse2.report_project_payments_template</field>
+        <field name="print_report_name">
+            'Paiements_Projet_%s_%s' % (object.project_id.name.replace('/', '_'), time.strftime('%Y%m%d'))
+        </field>
+    </record>
+
+</odoo>

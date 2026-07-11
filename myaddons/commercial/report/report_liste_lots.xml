@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action : Liste des Lots -->
+    <record id="action_report_liste_lots" model="ir.actions.report">
+        <field name="name">Liste des Lots</field>
+        <field name="model">commercial.lot</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.liste_lots_template</field>
+        <field name="report_file">commercial.liste_lots_template</field>
+        <field name="print_report_name">'Liste Lots'</field>
+        <field name="paperformat_id" ref="paperformat_liste_clients"/>
+        <field name="binding_model_id" ref="commercial.model_commercial_lot"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- QWeb Template : Liste des Lots -->
+    <template id="liste_lots_template">
+        <t t-call="web.html_container">
+            <t t-call="commercial.external_layout_commercial">
+                <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 12px;">
+
+                    <!-- Titre -->
+                    <h3 style="text-align: center; font-weight: bold; margin-bottom: 5px; text-decoration: underline; font-size: 20px; color: #003366;">
+                        LISTE DES LOTS
+                    </h3>
+
+                    <!-- Sous-titre : Projet -->
+                    <t t-set="projet" t-value="docs[0].projet_id if docs else False"/>
+                    <div t-if="projet" style="text-align: center; margin-bottom: 20px; font-size: 14px;">
+                        <strong><t t-esc="projet.name"/></strong>
+                    </div>
+
+                    <!-- Date d'impression -->
+                    <div style="text-align: right; margin-bottom: 15px; font-size: 11px;">
+                        Imprimé le : <t t-esc="time.strftime('%d/%m/%Y')"/>
+                    </div>
+
+                    <!-- Tableau des lots -->
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead>
+                            <tr style="background: #003366; color: #fff;">
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center; width: 4%;">N°</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">N° Lot</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Bloc</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Étage</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">Catégorie</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: right;">Surface (m²)</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: right;">Montant</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: center;">État</th>
+                                <th style="padding: 8px 6px; border: 1px solid #003366; text-align: left;">Client</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="counter" t-value="0"/>
+                            <t t-foreach="docs" t-as="lot">
+                                <t t-set="counter" t-value="counter + 1"/>
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="counter"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="lot.numero_lot or ''"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="lot.bloc_id.code or ''"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="lot.etage_id.etiquette or ''"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="lot.categorie_id.categorie or ''"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">
+                                        <t t-esc="'%.2f' % lot.surface_globale"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: right;">
+                                        <t t-esc="'{:,.2f}'.format(lot.montant_global)"/>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-if="lot.state == 'disponible'">Disponible</t>
+                                        <t t-if="lot.state == 'en_option'">En option</t>
+                                        <t t-if="lot.state == 'reserve'">Réservé</t>
+                                        <t t-if="lot.state == 'loue'">Loué</t>
+                                        <t t-if="lot.state == 'vendu'">Vendu</t>
+                                    </td>
+                                    <td style="padding: 6px; border: 1px solid #ccc;">
+                                        <t t-esc="lot.client_id.name or ''"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Total -->
+                    <div style="margin-top: 20px; text-align: right; font-size: 13px;">
+                        <strong>Nombre total de lots : <t t-esc="len(docs)"/></strong>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

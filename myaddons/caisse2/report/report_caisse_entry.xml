@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_caisse_entry" model="ir.actions.report">
+        <field name="name">Imprimer Encaissements</field>
+        <field name="model">caisse.entry</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">caisse2.report_caisse_entry_template</field>
+        <field name="report_file">caisse2.report_caisse_entry_template</field>
+        <field name="print_report_name">'Encaissements'</field>
+        <field name="binding_model_id" ref="caisse2.model_caisse_entry"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="report_caisse_entry_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 14px;">
+
+                    <h3 style="text-align: center; font-weight: bold; margin-bottom: 20px;">
+                        Liste des Encaissements —
+                        <t t-esc="docs[0].cashbox_id.name if docs else ''"/>
+                    </h3>
+
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #d9d9d9;">
+                                <th style="padding: 8px; border: 1px solid #ccc; text-align: center;">Référence</th>
+                                <th style="padding: 8px; border: 1px solid #ccc; text-align: center;">Date</th>
+                                <th style="padding: 8px; border: 1px solid #ccc; text-align: center;">Description</th>
+                                <th style="padding: 8px; border: 1px solid #ccc; text-align: center;">Banque</th>
+                                <th style="padding: 8px; border: 1px solid #ccc; text-align: center;">Montant</th>
+                                <th style="padding: 8px; border: 1px solid #ccc; text-align: center;">État</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="total" t-value="0"/>
+                            <t t-foreach="docs" t-as="entry">
+                                <t t-set="total" t-value="total + entry.amount"/>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="entry.name"/>
+                                    </td>
+                                    <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="entry.date" t-options="{'widget': 'date'}"/>
+                                    </td>
+                                    <td style="padding: 8px; border: 1px solid #ccc;">
+                                        <t t-esc="entry.description"/>
+                                    </td>
+                                    <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-esc="entry.banque_id.bank_id.name or ''"/>
+                                    </td>
+                                    <td style="padding: 8px; border: 1px solid #ccc; text-align: right;">
+                                        <t t-esc="'{:,.2f}'.format(entry.amount)"/>
+                                        DA
+                                    </td>
+                                    <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">
+                                        <t t-if="entry.state == 'approuve'">Approuvé</t>
+                                        <t t-else="">Brouillon</t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: #f5f5f5; font-weight: bold;">
+                                <td colspan="4" style="padding: 8px; border: 1px solid #ccc; text-align: right;">
+                                    Total :
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #ccc; text-align: right;">
+                                    <t t-esc="'{:,.2f}'.format(total)"/>
+                                    DA
+                                </td>
+                                <td style="padding: 8px; border: 1px solid #ccc;"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

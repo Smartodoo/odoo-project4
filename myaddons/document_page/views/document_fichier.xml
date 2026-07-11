@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_fichier_form" model="ir.ui.view">
+        <field name="name">document.fichier.form</field>
+        <field name="model">document.fichier</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <sheet>
+                    <group>
+                        <group col="4">
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <field name="partner_id" domain="[('contact_type', 'in', ['SUBCONTRACTOR'])]"
+                                   options="{'no_create': True, 'no_create_edit': True ,'no_open':True}"/>
+                            <field name="fournisseurs_ids" domain="[('contact_type', 'in', ['SUPPLIER'])]"
+                                   options="{'no_create': True, 'no_create_edit': True ,'no_open':True}"/>
+                            <!--
+                            field name="project_id"  options="{'no_create': True, 'no_create_edit': True,'no_open':True,'no_open':True}"/
+                            -->
+                        </group>
+                    </group>
+                    <separator string="Fichiers"/>
+                    <field name="attachment_ids" context="{'active_model': 'document.fichier', 'active_id': active_id}">
+                        <kanban class="o_kanban_small_column" sample="1">
+                            <field name="id"/>
+                            <field name="mimetype"/>
+                            <field name="type"/>
+                            <field name="create_uid"/>
+                            <field name="url"/>
+                            <field name="create_date"/>
+                            <field name="name"/>
+                            <templates>
+                                <t t-name="kanban-menu">
+                                    <a t-attf-href="/web/content/ir.attachment/#{record.id.raw_value}/datas?download=true"
+                                       download="" class="dropdown-item">Download
+                                    </a>
+                                    <a t-if="widget.deletable" role="menuitem" type="delete" class="dropdown-item">
+                                        Delete
+                                    </a>
+                                </t>
+                                <t t-name="kanban-box">
+                                    <div class="oe_kanban_global_area oe_kanban_global_click o_kanban_attachment">
+                                        <div class="o_kanban_image">
+                                            <div class="o_kanban_image_wrapper">
+                                                <t t-set="webimage"
+                                                   t-value="new RegExp('image.*(gif|jpeg|jpg|png|webp)').test(record.mimetype.value)"/>
+                                                <div t-if="record.type.raw_value == 'url'"
+                                                     class="o_url_image fa fa-link fa-3x text-muted"
+                                                     aria-label="Image is a link"/>
+                                                <img t-elif="webimage" t-attf-src="/web/image/#{record.id.raw_value}"
+                                                     width="100" height="100" alt="Document"
+                                                     class="o_attachment_image"/>
+                                                <div t-else="!webimage" class="o_image o_image_thumbnail"
+                                                     t-att-data-mimetype="record.mimetype.value"/>
+                                            </div>
+                                        </div>
+                                        <div class="o_kanban_details">
+                                            <div class="o_kanban_details_wrapper">
+                                                <div t-att-title="record.name.raw_value" class="o_kanban_record_title">
+                                                    <field name="name" class="o_text_overflow"/>
+                                                </div>
+                                                <div class="o_kanban_record_body">
+                                                    <t t-if="record.type.raw_value == 'url'">
+                                                        <span class="o_document_url">
+                                                            <i class="fa fa-globe" aria-label="Document url"/>
+                                                            <field name="url" widget="url"/>
+                                                        </span>
+                                                    </t>
+                                                    <samp t-else="" class="text-muted"/>
+                                                </div>
+                                                <div class="o_kanban_record_bottom">
+                                                    <time class="oe_kanban_bottom_left">
+                                                        <field name="create_date" widget="date"/>
+                                                    </time>
+                                                    <div class="oe_kanban_bottom_right">
+                                                        <field name="create_uid" widget="many2one_avatar_user"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_fichier_tree" model="ir.ui.view">
+        <field name="name">document.fichier.tree</field>
+        <field name="model">document.fichier</field>
+        <field name="arch" type="xml">
+            <tree string="Documents">
+                <field name="name"/>
+                <field name="files_id"/>
+                <field name="detenteur_id"/>
+                <field name="mise_a_jour"/>
+                <field name="taille_de_fichier"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_fichier_kanban" model="ir.ui.view">
+        <field name="name">document.fichier.kanban</field>
+        <field name="model">document.fichier</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column" sample="1">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="files_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click oe_kanban_record_link o_document_kanban_card">
+                            <!-- Optional folder icon on left -->
+                            <i class="fa fa-folder-o me-2 d-none d-md-block">
+                                <field name="name"/>
+                            </i>
+                            <!-- Ribbon if archived -->
+                            <div class="ribbon ribbon-top-right" t-if="record.active == false">
+                                <span class="text-bg-danger">Archived</span>
+                            </div>
+                            <!-- Details section -->
+                            <div class="oe_kanban_details d-flex flex-column justify-content-between">
+                                <div>
+                                    <ul>
+                                        <li>
+                                            Dans:
+                                            <field name="files_id"/>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left"/>
+                                    <div class="oe_kanban_bottom_right"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Search view pour document.fichier -->
+    <record id="view_document_fichier_search" model="ir.ui.view">
+        <field name="name">document.fichier.search</field>
+        <field name="model">document.fichier</field>
+        <field name="arch" type="xml">
+            <search string="Fichiers">
+                <!-- Filtrage par nom -->
+                <field name="name" string="Nom du fichier"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_fichier" model="ir.actions.act_window">
+        <field name="name">Sous dossiers</field>
+        <field name="res_model">document.fichier</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to create a new subfolder.
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_fichier" name="Sous_dossiers" parent="menu_wiki_doc" action="action_fichier" sequence="8"/>
+</odoo>

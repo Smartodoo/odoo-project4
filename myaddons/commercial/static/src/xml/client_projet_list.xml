@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="commercial.ClientProjetListButtons">
+        <div class="o_control_panel_main_buttons d-flex gap-1 flex-wrap">
+            <button class="btn btn-primary" t-on-click="onClickNouveauClient">
+                Nouveau Client
+            </button>
+        </div>
+    </t>
+
+    <t t-name="commercial.LotsParProjetListButtons">
+        <div class="o_control_panel_main_buttons d-flex gap-1 flex-wrap">
+            <button class="btn btn-primary" t-on-click="onClickNouveauLot">
+                Nouveau Lot
+            </button>
+        </div>
+    </t>
+</templates>

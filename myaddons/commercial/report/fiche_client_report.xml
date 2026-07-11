@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action : Fiche Client -->
+    <record id="action_report_fiche_client" model="ir.actions.report">
+        <field name="name">Fiche Client</field>
+        <field name="model">commercial.print.client.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.fiche_client_template</field>
+        <field name="report_file">commercial.fiche_client_template</field>
+        <field name="print_report_name">'Fiche Client - %s' % object.partner_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Fiche Client -->
+    <template id="fiche_client_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="client" t-value="doc.partner_id"/>
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 20px; padding: 40px 50px;">
+
+                        <!-- Titre -->
+                        <h3 style="text-align: center; font-weight: bold; margin-bottom: 30px; text-decoration: underline; font-size: 26px; color: #003366;">
+                            FICHE CLIENT
+                        </h3>
+
+                        <!-- Photo + Nom -->
+                        <div style="display: flex; align-items: flex-start; margin-bottom: 24px;">
+                            <div style="flex-shrink: 0; margin-right: 20px;">
+                                <t t-if="client.image_1920">
+                                    <img t-att-src="image_data_uri(client.image_1920)"
+                                         style="width: 130px; height: 160px; object-fit: cover; border: 1px solid #ccc;"/>
+                                </t>
+                                <t t-if="not client.image_1920">
+                                    <div style="width: 130px; height: 160px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; background: #f5f5f5; color: #999; font-size: 12px;">
+                                        Pas de photo
+                                    </div>
+                                </t>
+                            </div>
+                            <div style="flex-grow: 1;">
+                                <h4 style="margin: 0 0 10px 0; font-weight: bold; font-size: 22px;">
+                                    <t t-if="client.genre == 'femme'">Mme </t><t t-else="">M. </t><t t-esc="client.name or ''"/>
+                                </h4>
+                                <t t-if="client.phone or client.mobile">
+                                    <div style="font-size: 17px; color: #555;">
+                                        <t t-if="client.phone">Tél: <t t-esc="client.phone"/></t>
+                                        <t t-if="client.phone and client.mobile"> &#160;|&#160; </t>
+                                        <t t-if="client.mobile">Mobile: <t t-esc="client.mobile"/></t>
+                                    </div>
+                                </t>
+                                <t t-if="client.email">
+                                    <div style="font-size: 17px; color: #555;">Email: <t t-esc="client.email"/></div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Identité / Coordonnées -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 17px;">
+                            <thead>
+                                <tr>
+                                    <th colspan="4" style="padding: 12px 14px; background: #d9d9d9; color: #000; text-align: left; font-size: 20px; border: 1px solid #ccc;">
+                                        Coordonnées
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold; width: 20%;">Genre</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; width: 30%;">
+                                        <t t-if="client.genre == 'homme'">Homme</t>
+                                        <t t-if="client.genre == 'femme'">Femme</t>
+                                    </td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold; width: 20%;">Situation familiale</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; width: 30%;">
+                                        <t t-if="client.situation_familiale">
+                                            <t t-esc="dict(client._fields['situation_familiale'].selection).get(client.situation_familiale, '')"/>
+                                        </t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold;">Date de naissance</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc;">
+                                        <t t-if="client.date_naissance"><t t-esc="client.date_naissance" t-options="{'widget': 'date'}"/></t>
+                                    </td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold;">Lieu de naissance</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc;"><t t-esc="client.lieu_naissance or ''"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold;">N° Acte de naissance</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc;"><t t-esc="client.acte_naissance or ''"/></td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold;">Pays de naissance</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc;"><t t-esc="client.pays_naissance_id.name or ''"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Adresse -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 17px;">
+                            <thead>
+                                <tr>
+                                    <th colspan="4" style="padding: 12px 14px; background: #d9d9d9; color: #000; text-align: left; font-size: 20px; border: 1px solid #ccc;">
+                                        Adresse
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold; width: 20%;">Rue</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc;" colspan="3"><t t-esc="client.street or ''"/>
+                                        <t t-if="client.street2"> , <t t-esc="client.street2"/></t>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold; width: 20%;">Ville</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; width: 30%;"><t t-esc="client.city or ''"/></td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold; width: 20%;">Code postal</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; width: 30%;"><t t-esc="client.zip or ''"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold;">Région</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc;"><t t-esc="client.state_id.name or ''"/></td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc; font-weight: bold;">Pays</td>
+                                    <td style="padding: 10px 14px; border: 1px solid #ccc;"><t t-esc="client.country_id.name or ''"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Lots -->
+                        <t t-if="client.commercial_lot_ids">
+                            <t t-foreach="client.commercial_lot_ids" t-as="lot">
+                                <t t-set="paiement" t-value="lot.paiement_ids.filtered(lambda p: p.client_id.id == client.id)[:1]"/>
+                                <t t-set="lot_vers" t-value="lot.versement_ids.filtered(lambda v: v.state in ('confirme', 'partiellement_rembourse') and v.client_id.id == client.id)"/>
+                                <t t-set="lot_total_versements" t-value="sum(lot_vers.mapped('montant_restant'))"/>
+                                <t t-set="lot_remboursement" t-value="lot_total_versements - lot.montant_net_client"/>
+                                <table style="width: 100%; border-collapse: collapse; font-size: 17px; margin-bottom: 16px;">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="5" style="padding: 12px 14px; background: #d9d9d9; color: #000; text-align: left; font-size: 20px; border: 1px solid #ccc;">
+                                                Lot <t t-esc="lot.numero_lot or ''"/> — <t t-esc="lot.projet_id.name or ''"/>
+                                            </th>
+                                        </tr>
+                                        <tr style="background: #f5f5f5;">
+                                            <th style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;">Projet</th>
+                                            <th style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;">Bloc</th>
+                                            <th style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;">Étage</th>
+                                            <th style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;">N° Lot</th>
+                                            <th style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;">Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;"><t t-esc="lot.projet_id.name or ''"/></td>
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;"><t t-esc="lot.bloc_id.name or ''"/></td>
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;"><t t-esc="lot.etage_id.etiquette or ''"/></td>
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;"><t t-esc="lot.numero_lot or ''"/></td>
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;"><t t-esc="lot.categorie_id.categorie or ''"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <t t-if="doc.avec_montants">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 17px; margin-top: 0; margin-bottom: 20px;">
+                                        <tr style="background: #f5f5f5; font-weight: bold;">
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: right; width: 70%;">
+                                                Prix de vente :
+                                            </td>
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: center; width: 30%;">
+                                                <t t-esc="'{:,.2f}'.format(paiement.montant_lot if paiement else lot.montant_net_client)"/> DA
+                                            </td>
+                                        </tr>
+                                        <tr style="background: #f5f5f5; font-weight: bold;">
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: right;">
+                                                Montant déclaré :
+                                            </td>
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: center;">
+                                                <t t-esc="'{:,.2f}'.format(paiement.montant_declare if paiement else 0)"/> DA
+                                            </td>
+                                        </tr>
+                                        <tr style="background: #f5f5f5; font-weight: bold;">
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: right; color: #E74C3C;">
+                                                Remboursement :
+                                            </td>
+                                            <td style="padding: 10px 14px; border: 1px solid #ccc; text-align: center; color: #E74C3C;">
+                                                <t t-esc="'{:,.2f}'.format(lot_remboursement)"/> DA
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </t>
+                            </t>
+                        </t>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

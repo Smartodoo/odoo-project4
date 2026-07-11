@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sinistre_manager,access_sinistre_manager,model_sinistre,fleet.fleet_group_manager,1,1,1,1
+access_vehicle_type,access_vehicle_type,model_vehicle_type,,1,1,1,1
+access_sinistre_print_wizard,access_sinistre_print_wizard,model_sinistre_print_wizard,fleet.fleet_group_manager,1,1,1,1
+access_vehicle_availability,access_vehicle_availability,model_vehicle_availability,,1,1,1,1
+access_assurance_type,access_assurance_type,model_assurance_type,,1,1,1,1
+access_maintenance_type,access_maintenance_type,model_maintenance_type,,1,1,1,1
+access_vidange_type,access_vidange_type,model_vidange_type,,1,1,1,1
+access_amande_penalite,access_amande_penalite,model_amande_penalite,,1,1,1,1
+access_type_amande_penalite,access_type_amande_penalite,model_type_amande_penalite,,1,1,1,1
+access_autorite_penalite,access_autorite_penalite,model_autorite_penalite,,1,1,1,1
+

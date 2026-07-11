@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Filtres additionnels sur la liste des factures :
+         - Recherche par numéro de facture personnalisé
+         - Filtres rapides Fournisseur / Client
+         - Group By : Fournisseur, Numéro de facture custom -->
+    <record id="view_account_invoice_filter_inherit_payment_cheque_ref" model="ir.ui.view">
+        <field name="name">account.invoice.select.inherit.payment.cheque.ref</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+
+            <!-- Champ de recherche : Numéro de facture (custom) -->
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="custom_invoice_number" string="Numéro de facture"
+                       filter_domain="[('custom_invoice_number', 'ilike', self)]"/>
+            </xpath>
+
+            <!-- Filtres rapides : Fournisseur / Client -->
+            <xpath expr="//filter[@name='posted']" position="after">
+                <separator/>
+                <filter string="Fournisseur" name="filter_vendor"
+                        domain="[('move_type', 'in', ('in_invoice', 'in_refund', 'in_receipt'))]"/>
+                <filter string="Client" name="filter_customer"
+                        domain="[('move_type', 'in', ('out_invoice', 'out_refund', 'out_receipt'))]"/>
+            </xpath>
+
+            <!-- Group By : Fournisseur (= partner_id avec contexte vendor) -->
+            <xpath expr="//filter[@name='groupy_by_partner']" position="after">
+                <filter string="Numéro de facture (custom)" name="group_by_custom_number"
+                        context="{'group_by': 'custom_invoice_number'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

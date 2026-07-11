@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Vue Form du Wizard -->
+    <record id="project_payment_print_wizard_view_form" model="ir.ui.view">
+        <field name="name">project.payment.print.wizard.form</field>
+        <field name="model">project.payment.print.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Impression des Paiements">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="project_id" readonly="1"/>
+                            <field name="date_from"/>
+                        </group>
+                        <group>
+                            <field name="payment_type"/>
+                            <field name="date_to"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Aperçu" name="action_preview_report" type="object" class="btn-secondary" icon="fa-eye"/>
+                    <button string="Imprimer" name="action_print_report" type="object" class="btn-primary" icon="fa-print"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour ouvrir le wizard -->
+    <record id="action_project_payment_print_wizard" model="ir.actions.act_window">
+        <field name="name">Imprimer les Paiements</field>
+        <field name="res_model">project.payment.print.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

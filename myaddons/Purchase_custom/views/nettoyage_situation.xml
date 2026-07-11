@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Tree View -->
+        <record id="nettoyage_situation_view_tree" model="ir.ui.view">
+            <field name="name">nettoyage.situation.tree</field>
+            <field name="model">nettoyage.situation</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="camion_id"/>
+                    <field name="chauffeur_id"/>
+                    <field name="project_id"/>
+                    <field name="sous_traitant_id"/>
+                    <field name="mode_calcul" optional="show"/>
+                    <field name="nombre_heures" optional="show"/>
+                    <field name="total_journalite" optional="hide"/>
+                    <field name="prix_unitaire_jour" optional="hide"/>
+                    <field name="nombre_voyages" optional="show"/>
+                    <field name="prix_unitaire_voyage" optional="hide"/>
+                    <field name="montant" sum="Total"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="nettoyage_situation_view_form" model="ir.ui.view">
+            <field name="name">nettoyage.situation.form</field>
+            <field name="model">nettoyage.situation</field>
+            <field name="arch" type="xml">
+                <form string="Situation Nettoyage">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="name" readonly="1"/></h1>
+                        </div>
+                        <group>
+                            <group string="Informations">
+                                <field name="date"/>
+                                <field name="camion_id"
+                                       options="{'no_quick_create': false, 'no_create_edit': false}"/>
+                                <field name="chauffeur_id"
+                                       options="{'no_quick_create': false, 'no_create_edit': false}"/>
+                                <field name="project_id"/>
+                                <field name="sous_traitant_id"/>
+                                <field name="observation" placeholder="Ex: vers la centrale"/>
+                                <field name="titre" placeholder="Ex: EVACUATION DES TERRES VERS LA CENTRALE A BETON"/>
+                            </group>
+                            <group string="Calcul">
+                                <field name="mode_calcul" widget="radio" options="{'horizontal': true}"/>
+                                <!-- Mode HEURES -->
+                                <field name="nombre_heures"
+                                       invisible="mode_calcul != 'heures'"
+                                       required="mode_calcul == 'heures'"/>
+                                <field name="total_journalite" readonly="1"
+                                       invisible="mode_calcul != 'heures'"/>
+                                <field name="prix_unitaire_jour"
+                                       invisible="mode_calcul != 'heures'"
+                                       required="mode_calcul == 'heures'"/>
+                                <!-- Mode VOYAGES -->
+                                <field name="nombre_voyages"
+                                       invisible="mode_calcul != 'voyages'"
+                                       required="mode_calcul == 'voyages'"/>
+                                <field name="prix_unitaire_voyage"
+                                       invisible="mode_calcul != 'voyages'"
+                                       required="mode_calcul == 'voyages'"/>
+                                <!-- Montant : commun -->
+                                <field name="montant" readonly="1"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="nettoyage_situation_view_search" model="ir.ui.view">
+            <field name="name">nettoyage.situation.search</field>
+            <field name="model">nettoyage.situation</field>
+            <field name="arch" type="xml">
+                <search string="Recherche Nettoyage">
+                    <field name="date"/>
+                    <field name="camion_id" string="Camion"/>
+                    <field name="chauffeur_id" string="Chauffeur"/>
+                    <field name="project_id"/>
+                    <field name="sous_traitant_id"/>
+                    <separator/>
+                    <filter name="filter_mode_heures" string="Mode Heures" domain="[('mode_calcul','=','heures')]"/>
+                    <filter name="filter_mode_voyages" string="Mode Voyages" domain="[('mode_calcul','=','voyages')]"/>
+                    <separator/>
+                    <filter name="filter_today" string="Aujourd'hui" domain="[('date','=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter name="filter_this_month" string="Ce mois" domain="[('date','&gt;=', (context_today() - datetime.timedelta(days=context_today().day - 1)).strftime('%Y-%m-%d'))]"/>
+                    <separator/>
+                    <group expand="0" string="Grouper par">
+                        <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
+                        <filter name="group_camion" string="Camion" context="{'group_by': 'camion_id'}"/>
+                        <filter name="group_chauffeur" string="Chauffeur" context="{'group_by': 'chauffeur_id'}"/>
+                        <filter name="group_project" string="Projet" context="{'group_by': 'project_id'}"/>
+                        <filter name="group_sous_traitant" string="Sous Traitant" context="{'group_by': 'sous_traitant_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Kanban View -->
+        <record id="nettoyage_situation_view_kanban" model="ir.ui.view">
+            <field name="name">nettoyage.situation.kanban</field>
+            <field name="model">nettoyage.situation</field>
+            <field name="arch" type="xml">
+                <kanban>
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="camion_id"/>
+                    <field name="chauffeur_id"/>
+                    <field name="project_id"/>
+                    <field name="sous_traitant_id"/>
+                    <field name="mode_calcul"/>
+                    <field name="nombre_heures"/>
+                    <field name="total_journalite"/>
+                    <field name="nombre_voyages"/>
+                    <field name="montant"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                                <div class="oe_kanban_content">
+                                    <div class="o_kanban_record_top">
+                                        <strong><field name="name"/></strong>
+                                    </div>
+                                    <div><strong>Date:</strong> <field name="date"/></div>
+                                    <div><strong>Camion:</strong> <field name="camion_id"/></div>
+                                    <div><strong>Chauffeur:</strong> <field name="chauffeur_id"/></div>
+                                    <div><strong>Projet:</strong> <field name="project_id"/></div>
+                                    <div><strong>Sous Traitant:</strong> <field name="sous_traitant_id"/></div>
+                                    <div t-if="record.mode_calcul.raw_value === 'heures'">
+                                        <strong>Heures:</strong> <field name="nombre_heures"/> | <strong>Journalité:</strong> <field name="total_journalite"/>
+                                    </div>
+                                    <div t-if="record.mode_calcul.raw_value === 'voyages'">
+                                        <strong>Voyages:</strong> <field name="nombre_voyages"/>
+                                    </div>
+                                    <div class="text-primary fw-bold mt-1">
+                                        <strong>Montant:</strong> <field name="montant"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="nettoyage_situation_action" model="ir.actions.act_window">
+            <field name="name">Situation Nettoyage</field>
+            <field name="res_model">nettoyage.situation</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="domain">[('company_id', '=', allowed_company_ids[0])]</field>
+            <field name="search_view_id" ref="nettoyage_situation_view_search"/>
+        </record>
+
+<!--        &lt;!&ndash; Parent Situation Menu (module Achats) &ndash;&gt;-->
+<!--        <menuitem id="menu_situation_parent"-->
+<!--                  name="Situation"-->
+<!--                  parent="purchase.menu_purchase_root"-->
+<!--                  sequence="20"/>-->
+
+<!--        <menuitem id="nettoyage_situation_menu"-->
+<!--                  name="Situation Nettoyage"-->
+<!--                  parent="menu_situation_parent"-->
+<!--                  action="nettoyage_situation_action"-->
+<!--                  sequence="1"/>-->
+
+        <!-- Mêmes entrées dans le module Projets S-T -->
+        <menuitem id="menu_situation_parent_project"
+                  name="Situation Transport"
+                  parent="custom_project.custom_project_root_menu"
+                  sequence="20"/>
+
+        <menuitem id="nettoyage_situation_menu_project"
+                  name="Situation Nettoyage"
+                  parent="menu_situation_parent_project"
+                  action="nettoyage_situation_action"
+                  sequence="1"/>
+    </data>
+</odoo>

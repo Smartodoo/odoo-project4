@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_recap_location_template">
+        <t t-call="web.html_container">
+            <t t-call="commercial.external_layout_commercial">
+                <div class="page">
+
+                    <!-- Date d'impression en haut à droite -->
+                    <div style="text-align: right; margin-bottom: 10px;">
+                        <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                    </div>
+
+                    <!-- Titre -->
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #003366; margin-bottom: 5px;">
+                            RÉCAP LOCATION
+                        </h2>
+                    </div>
+
+                    <!-- Calcul des totaux -->
+                    <t t-set="total_annuel" t-value="0"/>
+                    <t t-set="total_versements" t-value="0"/>
+                    <t t-set="total_reste" t-value="0"/>
+                    <t t-foreach="docs" t-as="doc">
+                        <t t-set="total_annuel" t-value="total_annuel + (doc.montant_annuel or 0)"/>
+                        <t t-set="total_versements" t-value="total_versements + (doc.total_versements or 0)"/>
+                        <t t-set="total_reste" t-value="total_reste + (doc.reste_a_payer or 0)"/>
+                    </t>
+
+                    <!-- Tableau détaillé -->
+                    <h4 style="background-color: #003366; color: white; padding: 8px; margin-bottom: 0;">DÉTAIL DES LOCATIONS</h4>
+                    <table class="table table-sm table-bordered">
+                        <thead style="background-color: #f8f9fa;">
+                            <tr>
+                                <th>Année</th>
+                                <th>Lot</th>
+                                <th>Client</th>
+                                <th>Type contrat</th>
+                                <th style="text-align: right;">Montant mensuel</th>
+                                <th style="text-align: right;">Montant annuel</th>
+                                <th style="text-align: center;">Nb versements</th>
+                                <th style="text-align: right;">Total versements</th>
+                                <th style="text-align: right;">Reste à payer</th>
+                                <th style="text-align: center;">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="docs" t-as="doc">
+                                <tr>
+                                    <td><span t-esc="doc.annee"/></td>
+                                    <td><span t-field="doc.lot_id"/></td>
+                                    <td><span t-field="doc.client_location_id"/></td>
+                                    <td>
+                                        <t t-if="doc.type_contrat == 'mensuel'">Mensuel</t>
+                                        <t t-if="doc.type_contrat == 'annuel'">Annuel</t>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span t-esc="'{:,.2f}'.format(doc.montant_mensuel or 0)"/>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span t-esc="'{:,.2f}'.format(doc.montant_annuel or 0)"/>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span t-esc="doc.nombre_versements"/>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span t-esc="'{:,.2f}'.format(doc.total_versements or 0)"/>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <span t-esc="'{:,.2f}'.format(doc.reste_a_payer or 0)"/>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <t t-if="doc.state == 'brouillon'"><span style="color: #003366;">Brouillon</span></t>
+                                        <t t-if="doc.state == 'en_cours'"><span style="color: #28a745;">En cours</span></t>
+                                        <t t-if="doc.state == 'termine'"><span style="color: #6c757d;">Terminé</span></t>
+                                        <t t-if="doc.state == 'annule'"><span style="color: #6c757d;">Annulé</span></t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot style="background-color: #003366; color: white;">
+                            <tr>
+                                <td colspan="5" style="text-align: right;"><strong>TOTAL:</strong></td>
+                                <td style="text-align: right;">
+                                    <strong><span t-esc="'{:,.2f}'.format(total_annuel)"/> DA</strong>
+                                </td>
+                                <td></td>
+                                <td style="text-align: right;">
+                                    <strong><span t-esc="'{:,.2f}'.format(total_versements)"/> DA</strong>
+                                </td>
+                                <td style="text-align: right;">
+                                    <strong><span t-esc="'{:,.2f}'.format(total_reste)"/> DA</strong>
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ================= ACTION REPORT ================= -->
+    <record id="action_report_recap_location" model="ir.actions.report">
+        <field name="name">Récap Location</field>
+        <field name="model">commercial.location</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.report_recap_location_template</field>
+        <field name="report_file">commercial.report_recap_location_template</field>
+        <field name="print_report_name">
+            'Recap_Location_%s' % (time.strftime('%Y%m%d_%H%M%S'))
+        </field>
+        <field name="binding_model_id" ref="model_commercial_location"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+</odoo>

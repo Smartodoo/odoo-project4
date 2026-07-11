@@ -1,0 +1,10 @@
+.odoo/
+.claude/
+*.log
+.env
+__pycache__/
+*.py[cod]
+.bash_logout
+.bashrc
+.profile
+*.service

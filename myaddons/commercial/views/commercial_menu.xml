@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Menu racine -->
+    <menuitem id="commercial_menu_root"
+              name="Commercial"
+              web_icon="commercial,static/description/img.png"
+              groups="commercial.group_commercial_user"
+              sequence="50"/>
+
+    <!-- Menu parent Projets -->
+    <menuitem id="commercial_menu_projets_parent"
+              name="Projets"
+              parent="commercial_menu_root"
+              sequence="10"/>
+
+    <!-- Sous-menu Projets Promotionnels -->
+    <menuitem id="commercial_menu_projet"
+              name="Projets Promotionnels"
+              parent="commercial_menu_projets_parent"
+              action="commercial_projet_action"
+              sequence="10"/>
+
+    <!-- Sous-menu Projets Locations -->
+    <menuitem id="commercial_menu_projet_location"
+              name="Projets Locations"
+              parent="commercial_menu_projets_parent"
+              action="commercial_projet_location_action"
+              sequence="20"/>
+
+
+    <!--menuitem id="commercial_menu_lot"
+              name="Lots"
+              parent="commercial_menu_projets_parent"
+              action="commercial_lot_action"
+              sequence="20"/-->
+
+    <!-- Menu parent EDD -->
+    <menuitem id="commercial_menu_edd_parent"
+              name="EDD"
+              parent="commercial_menu_root"
+              sequence="15"/>
+
+    <!-- Sous-menu EDD Promotionnel -->
+    <menuitem id="commercial_menu_lots_par_projet"
+              name="EDD Promotionnel"
+              parent="commercial_menu_edd_parent"
+              action="commercial_lots_par_projet_action"
+              sequence="10"/>
+
+    <!-- Sous-menu EDD Location -->
+    <menuitem id="commercial_menu_edd_location"
+              name="EDD Location"
+              parent="commercial_menu_edd_parent"
+              action="commercial_lots_par_projet_location_action"
+              sequence="20"/>
+
+    <!--menuitem id="commercial_menu_etage"
+              name="Etages"
+              parent="commercial_menu_projets_parent"
+              action="commercial_etage_action"
+              sequence="30"/-->
+
+    <!-- Menu parent : Statistique (dernier menu) -->
+    <menuitem id="commercial_menu_statistique_parent"
+              name="Statistique"
+              parent="commercial_menu_root"
+              groups="commercial.group_commercial_admin"
+              sequence="100"/>
+
+    <menuitem id="commercial_menu_statistique"
+              name="Statistique des ventes"
+              parent="commercial_menu_statistique_parent"
+              action="commercial_statistique_action"
+              sequence="10"/>
+
+    <menuitem id="commercial_menu_statistique_commercial"
+              name="Statistique par commercial"
+              parent="commercial_menu_statistique_parent"
+              action="commercial_statistique_commercial_action"
+              sequence="30"/>
+
+    <!--menuitem id="commercial_menu_recap_location"
+              name="Récap Location"
+              parent="commercial_menu_statistique_parent"
+              action="commercial_recap_location_action"
+              sequence="25"/-->
+
+    <!-- Menu parent : Clients -->
+    <menuitem id="commercial_menu_clients_parent"
+              name="Clients"
+              parent="commercial_menu_root"
+              sequence="20"/>
+
+    <!-- Sous-menu : Clients Promotionnels -->
+    <menuitem id="commercial_menu_client_projet"
+              name="Clients Promotionnels"
+              parent="commercial_menu_clients_parent"
+              sequence="10"/>
+
+    <!-- Menu parent : Clients Location -->
+    <menuitem id="commercial_menu_client_location_parent"
+              name="Clients Location"
+              parent="commercial_menu_clients_parent"
+              sequence="20"/>
+
+    <!-- Sous-menu : Réservations -->
+    <menuitem id="commercial_menu_client_location"
+              name="Réservations"
+              parent="commercial_menu_client_location_parent"
+              action="commercial_client_location_action"
+              sequence="10"/>
+
+    <!-- Sous-menu : Liste d'attente Location -->
+    <menuitem id="commercial_menu_liste_attente_location"
+              name="Liste d'attente Location"
+              parent="commercial_menu_client_location_parent"
+              action="commercial_liste_attente_location_action"
+              sequence="20"/>
+
+    <!-- Sous-menu : Visiteurs → creation contact externe -->
+    <menuitem id="commercial_menu_client_projet_visiteurs"
+              name="Pré-réservation"
+              parent="commercial_menu_client_projet"
+              action="action_contact_externe"
+              sequence="10"/>
+
+    <!-- Sous-menu : Clients → vue client par projet -->
+    <menuitem id="commercial_menu_client_projet_clients"
+              name="Mes dossiers"
+              parent="commercial_menu_client_projet"
+              action="commercial_client_projet_action"
+              sequence="20"/>
+
+
+
+    <!-- Sous-menu : Liste d'attente -->
+    <menuitem id="commercial_menu_liste_attente"
+              name="Liste d'attente"
+              parent="commercial_menu_client_projet"
+              action="commercial_liste_attente_action"
+              sequence="25"/>
+
+    <!-- Sous-menu : Intéressés par d'autres projets (sous Mes dossiers) -->
+    <menuitem id="commercial_menu_autre_projet"
+              name="Intéressés par d'autres projets"
+              parent="commercial_menu_client_projet"
+              action="commercial_client_interesse_action"
+              sequence="30"/>
+
+    <!-- Menu Proposition terrain -->
+    <menuitem id="commercial_menu_proposition_terrain"
+              name="Proposition terrain"
+              parent="commercial_menu_root"
+              action="commercial_proposition_terrain_action"
+              sequence="50"/>
+
+    <!-- Menu Fiches Paiement -->
+    <!--menuitem id="commercial_menu_paiement"
+              name="Fiches Paiement"
+              parent="commercial_menu_root"
+              action="commercial_paiement_action"
+              sequence="55"/-->
+
+
+    <!-- Sous-menu Récap paiement sous Statistique -->
+    <menuitem id="commercial_menu_recap_paiement"
+              name="Paiements"
+              parent="commercial_menu_statistique_parent"
+              action="commercial_recap_echeance_action"
+              sequence="50"/>
+
+    <!-- Menu Location (sous Statistique) -->
+    <menuitem id="commercial_menu_location"
+              name="Locations"
+              parent="commercial_menu_statistique_parent"
+              action="commercial_location_action"
+              sequence="40"/>
+
+    <!-- Menu Configuration -->
+    <menuitem id="commercial_menu_configuration"
+              name="Configuration"
+              parent="commercial_menu_root"
+              sequence="200"/>
+
+    <menuitem id="commercial_menu_type_projet"
+              name="Types de projet"
+              parent="commercial_menu_configuration"
+              action="commercial_type_projet_action"
+              sequence="10"/>
+
+    <menuitem id="commercial_menu_type_lot"
+              name="Types de lot"
+              parent="commercial_menu_configuration"
+              action="commercial_type_lot_action"
+              sequence="40"/>
+
+    <menuitem id="commercial_menu_nature_categorie"
+              name="Natures de catégorie"
+              parent="commercial_menu_configuration"
+              action="commercial_nature_categorie_action"
+              sequence="50"/>
+
+    <menuitem id="commercial_menu_associe"
+              name="Associés"
+              parent="commercial_menu_configuration"
+              action="commercial_associe_action"
+              sequence="60"/>
+
+
+</odoo>

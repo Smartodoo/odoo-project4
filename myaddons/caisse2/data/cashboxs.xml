@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Caisse Verte -->
+        <record id="caisse_verte" model="cashbox">
+            <field name="name">Caisse Verte</field>
+            <field name="responsible_ids"
+                   eval="[(6,0,[ref('base.user_admin')])]"/>
+            <field name="access_users" eval="[(6,0,[ref('base.user_admin')])]"/>
+        </record>
+
+        <!-- Caisse Espèce -->
+        <record id="caisse_espece" model="cashbox">
+            <field name="name">Caisse Espèce</field>
+            <field name="responsible_ids"
+                   eval="[(6,0,[ref('base.user_admin')])]"/>
+            <field name="access_users" eval="[(6,0,[ref('base.user_admin')])]"/>
+        </record>
+
+        <!-- Caisse Principale -->
+        <record id="caisse_principale" model="cashbox">
+            <field name="name">Caisse Principale</field>
+            <field name="responsible_ids" eval="[(6,0,[ref('base.user_admin')])]"/>
+            <field name="access_users" eval="[(6,0,[ref('base.user_admin')])]"/>
+        </record>
+
+        <!-- Caisse Espèce Commerciale -->
+        <record id="caisse_espece_commerciale" model="cashbox">
+            <field name="name">Caisse Espèce Commerciale</field>
+            <field name="responsible_ids" eval="[(6,0,[ref('base.user_admin')])]"/>
+            <field name="access_users" eval="[(6,0,[ref('base.user_admin')])]"/>
+        </record>
+    </data>
+</odoo>

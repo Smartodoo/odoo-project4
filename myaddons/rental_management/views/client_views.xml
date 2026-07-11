@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Héritage FORM res.partner -->
+    <record id="view_partner_form_inherit_rental" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.rental</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='internal_notes']" position="after">
+                <page string="🏠 Profil Locataire" invisible="is_tenant == False and company_type == 'company'">
+                    <group>
+                        <group string="🆔 Identité">
+                            <field name="is_tenant" widget="boolean_toggle"/>
+                            <field name="tenant_since"/>
+                            <field name="id_card_number"/>
+                            <field name="id_card_expiry"/>
+                            <field name="id_card_file" widget="binary"/>
+                        </group>
+                        <group string="🚨 Urgence">
+                            <field name="emergency_contact"/>
+                            <field name="emergency_phone"/>
+                        </group>
+                    </group>
+                    <group string="📊 Statistiques Location">
+                        <group>
+                            <field name="rental_count"/>
+                            <field name="active_rentals"/>
+                            <field name="total_spent" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="loyalty_points"/>
+                            <field name="loyalty_level" widget="badge"/>
+                        </group>
+                    </group>
+                    <group string="⭐ Préférences">
+                        <field name="preferred_type"/>
+                        <field name="preferred_block"/>
+                        <field name="has_pets" widget="boolean_toggle"/>
+                    </group>
+                    <field name="internal_notes" placeholder="Notes confidentielles internes..."/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action locataires -->
+    <record id="action_tenants" model="ir.actions.act_window">
+        <field name="name">👥 Locataires</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('is_tenant', '=', True)]</field>
+        <field name="context">{'default_is_tenant': True}</field>
+    </record>
+
+    <menuitem id="menu_tenants" name="👥 Locataires" parent="menu_rental_root"
+              action="action_tenants" sequence="25"/>
+</odoo>

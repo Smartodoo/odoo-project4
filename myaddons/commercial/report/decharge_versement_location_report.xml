@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action : Décharge Versement Location -->
+    <record id="action_report_decharge_versement_location" model="ir.actions.report">
+        <field name="name">Décharge Versement Location</field>
+        <field name="model">commercial.versement.location</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.decharge_versement_location_template</field>
+        <field name="report_file">commercial.decharge_versement_location_template</field>
+        <field name="print_report_name">'Décharge Versement Location - %s' % object.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template : Décharge Versement Location -->
+    <template id="decharge_versement_location_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="user" t-value="doc.env.user"/>
+                    <t t-set="user_civilite" t-value="'Mme' if user.genre == 'femme' else 'M.'"/>
+                    <t t-set="client_civilite" t-value="'Mme' if doc.client_location_id.genre == 'femme' else 'M.'"/>
+                    <div class="page" style="font-family: 'Times New Roman', Times, serif; font-size: 24px; padding: 70px 80px; position: relative; min-height: 900px;">
+
+                        <!-- Date en haut à droite -->
+                        <p style="text-align: right; margin-bottom: 40px; font-size: 24px;">
+                            Tizi Ouzou le
+                            <t t-if="doc.date">
+                                <t t-esc="doc.date" t-options='{"widget": "date"}'/>
+                            </t>
+                        </p>
+
+                        <!-- Titre -->
+                        <h2 style="text-align: center; margin-bottom: 40px; font-weight: bold; color: #003366; font-size: 32px;">
+                            DECHARGE
+                        </h2>
+
+                        <!-- Corps -->
+                        <p style="text-align: justify; line-height: 2.4; font-size: 24px;">
+                            Je soussigné<t t-if="user.genre == 'femme'">e</t>
+                            <strong> <t t-esc="user_civilite"/> <t t-esc="user.name"/></strong>
+                            agissant en qualité
+                            <t t-if="user.qualite == 'assistante_commerciale'"><strong>d'assistante commerciale</strong></t>
+                            <t t-elif="user.qualite == 'directrice_commerciale'"><strong>de directrice commerciale</strong></t>
+                            <t t-else="">de ........................................</t>
+                            avoir reçu le
+                            <t t-if="doc.date">
+                                <strong><t t-esc="doc.date" t-options='{"widget": "date"}'/></strong>
+                            </t>
+                            de la part de
+                            <strong><t t-esc="client_civilite"/> <t t-esc="doc.client_location_id.nom or '...'"/></strong>
+                            la somme de <strong style="font-size: 26px;"><t t-esc="'{:,.2f}'.format(doc.montant).replace(',', ' ')"/> DA</strong>
+                        </p>
+
+                        <p style="text-align: justify; line-height: 2.4; font-size: 24px;">
+                            Contrat : <strong><t t-esc="doc.location_id.name or '...'"/></strong>
+                            — Lot : <strong><t t-esc="doc.lot_id.numero_lot or '...'"/></strong>
+                            — Projet : <strong><t t-esc="doc.location_id.projet_id.name or '...'"/></strong>
+                        </p>
+
+                        <!-- Signatures -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0 60px; font-size: 24px;">
+                            <div style="float: left; width: 50%; text-align: center;">
+                                <p style="margin-bottom: 0;"><strong>D'une part</strong></p>
+                                <p style="margin-top: 0;"><t t-esc="user_civilite"/> <t t-esc="user.name"/></p>
+                            </div>
+                            <div style="float: right; width: 50%; text-align: center;">
+                                <p style="margin-bottom: 0;"><strong>D'autre part</strong></p>
+                                <p style="margin-top: 0;"><t t-esc="client_civilite"/> <t t-esc="doc.client_location_id.nom or '...'"/></p>
+                            </div>
+                            <div style="clear: both;"></div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

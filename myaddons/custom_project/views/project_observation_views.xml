@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Observation Form View -->
+    <record id="view_custom_project_observation_form" model="ir.ui.view">
+        <field name="name">custom.project.observation.form</field>
+        <field name="model">custom.project.observation</field>
+        <field name="arch" type="xml">
+            <form string="Prevision">
+                <header>
+                    <button name="action_confirm"
+                            type="object"
+                            string="Confirm"
+                            class="btn-primary"
+                           invisible="state == 'confirmed'"/>
+
+                    <button name="action_reset_to_draft"
+                            type="object"
+                            string="Reset to Draft"
+                            class="btn-secondary"
+                            invisible="state == 'draft'"/>
+
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" class="oe_inline"/>
+                        </h1>
+                        <div class="oe_edit_only">
+                            <label for="project_id"/>
+                            <field name="project_id" widget="many2one" options="{'no_create': True}" readonly="state == 'confirmed'"/>
+                        </div>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="assigned_to_id" widget="many2one_avatar" options="{'no_create': True}" readonly="state == 'confirmed'"/>
+                        </group>
+                        <group>
+                            <field name="date_observation" readonly="state == 'confirmed'"/>
+                            <field name="created_by_id" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Previsions">
+                            <!-- Premium Product List Design -->
+                            <div class="prevision-container" style="background: linear-gradient(145deg, #f8f9fe 0%, #ffffff 100%); border-radius: 20px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); margin: 15px 0; border: 1px solid rgba(102, 126, 234, 0.1);">
+
+                                <!-- Header Section -->
+                                <div class="prevision-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid rgba(102, 126, 234, 0.1);">
+                                    <div style="display: flex; align-items: center; gap: 18px;">
+                                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 16px; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);">
+                                            <i class="fa fa-cubes" style="color: white; font-size: 26px;"/>
+                                        </div>
+                                        <div>
+                                            <h3 style="margin: 0; font-size: 22px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px;">Produits Prévus</h3>
+                                            <p style="margin: 5px 0 0; color: #6c757d; font-size: 14px; font-weight: 500;">Gestion intelligente des stocks et prévisions</p>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 12px;">
+                                        <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 10px 18px; border-radius: 25px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);">
+                                            <i class="fa fa-check-circle" style="margin-right: 6px;"/>Stock OK
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Table Container -->
+                                <div class="task-table-container" style="border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+                                    <field name="observation_line_ids" nolabel="1" readonly="state == 'confirmed'" class="task-list-tree o_sticky_task_list">
+                                        <tree editable="bottom" decoration-danger="quantity_observation > quantity_remaining" decoration-warning="quantity_observation > 0 and quantity_observation > quantity_stock * 0.7" decoration-success="quantity_observation > 0 and quantity_observation &lt;= quantity_remaining">
+                                            <field name="product_id" string="Produit"/>
+                                            <field name="quantity_observation" string="Qté Prévision"/>
+                                            <field name="quantity_stock" string="Qté Stock" readonly="1"/>
+                                            <field name="quantity_consumed" string="Qté Consommée" readonly="1"/>
+                                            <field name="quantity_remaining" string="Qté Restante" readonly="1"/>
+                                        </tree>
+                                    </field>
+                                </div>
+
+                                <!-- Legend Section -->
+                                <div style="display: flex; gap: 30px; margin-top: 20px; padding: 18px 22px; background: linear-gradient(135deg, #f8f9fe 0%, #eef1f8 100%); border-radius: 14px; border: 1px solid rgba(102, 126, 234, 0.08);">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 18px; height: 18px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 6px; box-shadow: 0 3px 10px rgba(17, 153, 142, 0.35);"></div>
+                                        <span style="font-size: 13px; color: #2d3436; font-weight: 600;">Stock suffisant</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 18px; height: 18px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 6px; box-shadow: 0 3px 10px rgba(240, 147, 251, 0.35);"></div>
+                                        <span style="font-size: 13px; color: #2d3436; font-weight: 600;">Stock limité (&gt;70%)</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 18px; height: 18px; background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); border-radius: 6px; box-shadow: 0 3px 10px rgba(235, 51, 73, 0.35);"></div>
+                                        <span style="font-size: 13px; color: #2d3436; font-weight: 600;">Stock insuffisant</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <style>
+                                /* =========================================================
+                                   PREMIUM STICKY HEADER TABLE - ODOO 17
+                                   Professional Design with Animations
+                                ========================================================= */
+
+                                /* Container Styling */
+                                .prevision-container {
+                                    transition: all 0.3s ease;
+                                }
+                                .prevision-container:hover {
+                                    box-shadow: 0 15px 50px rgba(0,0,0,0.12);
+                                }
+
+                                /* Scroll Container */
+                                .task-list-tree .o_list_view {
+                                    max-height: 450px;
+                                    overflow-y: auto;
+                                    scroll-behavior: smooth;
+                                }
+                                .task-list-tree .o_list_view::-webkit-scrollbar {
+                                    width: 8px;
+                                }
+                                .task-list-tree .o_list_view::-webkit-scrollbar-track {
+                                    background: #f1f3f4;
+                                    border-radius: 10px;
+                                }
+                                .task-list-tree .o_list_view::-webkit-scrollbar-thumb {
+                                    background: linear-gradient(135deg, #667eea, #764ba2);
+                                    border-radius: 10px;
+                                }
+
+                                /* Table Base */
+                                .task-list-tree .o_list_table {
+                                    border-collapse: separate !important;
+                                    border-spacing: 0 !important;
+                                    width: 100%;
+                                }
+
+                                /* ========== STICKY HEADER ========== */
+                                .task-list-tree .o_list_table thead th {
+                                    position: sticky;
+                                    top: 0;
+                                    z-index: 20;
+                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                    color: #ffffff;
+                                    font-weight: 700;
+                                    font-size: 11px;
+                                    text-transform: uppercase;
+                                    letter-spacing: 1px;
+                                    padding: 16px 14px;
+                                    border: none;
+                                    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                                    white-space: nowrap;
+                                }
+                                .task-list-tree .o_list_table thead th:first-child {
+                                    border-radius: 12px 0 0 0;
+                                }
+                                .task-list-tree .o_list_table thead th:last-child {
+                                    border-radius: 0 12px 0 0;
+                                }
+
+                                /* ========== TABLE BODY ========== */
+                                .task-list-tree .o_data_row {
+                                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                                }
+                                .task-list-tree .o_data_row td {
+                                    padding: 14px 14px;
+                                    border-bottom: 1px solid #eef2f7;
+                                    font-size: 14px;
+                                    color: #2d3436;
+                                    vertical-align: middle;
+                                }
+
+                                /* Zebra Striping */
+                                .task-list-tree .o_data_row:nth-child(even) {
+                                    background-color: #f8fafc;
+                                }
+                                .task-list-tree .o_data_row:nth-child(odd) {
+                                    background-color: #ffffff;
+                                }
+
+                                /* Hover Effect */
+                                .task-list-tree .o_data_row:hover {
+                                    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.05) 100%) !important;
+                                    transform: scale(1.005);
+                                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.12);
+                                }
+                                .task-list-tree .o_data_row:hover td {
+                                    border-color: rgba(102, 126, 234, 0.2);
+                                }
+
+                                /* Selected Row */
+                                .task-list-tree .o_selected_row {
+                                    background: linear-gradient(90deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+                                    box-shadow: inset 4px 0 0 #667eea;
+                                }
+
+                                /* ========== DECORATION COLORS ========== */
+                                .task-list-tree .text-success td {
+                                    background: linear-gradient(90deg, rgba(17, 153, 142, 0.08) 0%, transparent 100%);
+                                    border-left: 4px solid #11998e !important;
+                                }
+                                .task-list-tree .text-warning td {
+                                    background: linear-gradient(90deg, rgba(240, 147, 251, 0.08) 0%, transparent 100%);
+                                    border-left: 4px solid #f093fb !important;
+                                }
+                                .task-list-tree .text-danger td {
+                                    background: linear-gradient(90deg, rgba(235, 51, 73, 0.08) 0%, transparent 100%);
+                                    border-left: 4px solid #eb3349 !important;
+                                }
+
+                                /* ========== INPUT FIELDS ========== */
+                                .task-list-tree .o_data_row input,
+                                .task-list-tree .o_data_row .o_input {
+                                    border: 2px solid #e2e8f0;
+                                    border-radius: 8px;
+                                    padding: 8px 12px;
+                                    transition: all 0.2s ease;
+                                    font-weight: 500;
+                                }
+                                .task-list-tree .o_data_row input:focus,
+                                .task-list-tree .o_data_row .o_input:focus {
+                                    border-color: #667eea;
+                                    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+                                    outline: none;
+                                }
+
+                                /* ========== ADD ROW BUTTON ========== */
+                                .task-list-tree .o_field_x2many_list_row_add a {
+                                    color: #667eea !important;
+                                    font-weight: 600;
+                                    padding: 12px 20px;
+                                    display: inline-flex;
+                                    align-items: center;
+                                    gap: 8px;
+                                    border-radius: 10px;
+                                    transition: all 0.25s ease;
+                                    background: rgba(102, 126, 234, 0.08);
+                                }
+                                .task-list-tree .o_field_x2many_list_row_add a:hover {
+                                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                    color: white !important;
+                                    transform: translateY(-2px);
+                                    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+                                }
+
+                                /* ========== QUANTITY COLUMNS ========== */
+                                .task-list-tree .o_data_row td:nth-child(2),
+                                .task-list-tree .o_data_row td:nth-child(3),
+                                .task-list-tree .o_data_row td:nth-child(4),
+                                .task-list-tree .o_data_row td:nth-child(5),
+                                .task-list-tree .o_data_row td:nth-child(6) {
+                                    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+                                    font-weight: 600;
+                                    text-align: center;
+                                }
+
+                                /* ========== EMPTY STATE ========== */
+                                .task-list-tree .o_list_view .o_view_nocontent {
+                                    padding: 50px;
+                                    background: linear-gradient(135deg, #f8f9fe 0%, #eef1f8 100%);
+                                    border-radius: 12px;
+                                }
+                            </style>
+                        </page>
+                        <page string="Description">
+                            <field name="description" nolabel="1" readonly="state == 'confirmed'"/>
+                        </page>
+
+
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Observation Tree View -->
+    <record id="view_custom_project_observation_tree" model="ir.ui.view">
+        <field name="name">custom.project.observation.tree</field>
+        <field name="model">custom.project.observation</field>
+        <field name="arch" type="xml">
+            <tree string="Observations">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="assigned_to_id" widget="many2one_avatar"/>
+                <field name="date_observation"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Observation Kanban View -->
+    <record id="view_custom_project_observation_kanban" model="ir.ui.view">
+        <field name="name">custom.project.observation.kanban</field>
+        <field name="model">custom.project.observation</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="assigned_to_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click" t-attf-style="border-left: 3px">
+                            <div class="oe_kanban_details">
+                                <strong>
+                                    <field name="name"/>
+                                </strong>
+                                <div class="oe_kanban_text">
+                                    <field name="project_id"/>
+                                </div>
+                                <div>
+                                    <field name="assigned_to_id" widget="many2one_avatar"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_custom_project_observation" model="ir.actions.act_window">
+        <field name="name">Observations</field>
+        <field name="res_model">custom.project.observation</field>
+        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+    </record>
+</odoo>

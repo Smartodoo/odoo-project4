@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_rental" inherit_id="portal.portal_my_home" priority="30">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <field name="title">Mes Locations</field>
+                <field name="url" eval="'/my/rentals'"/>
+                <field name="placeholder_count" t-esc="rental_count"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_rentals" name="Mes Locations">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Mes Contrats de Location</t>
+            </t>
+            <t t-if="not rentals">
+                <div class="alert alert-info">Vous n'avez pas encore de réservations.</div>
+            </t>
+            <t t-if="rentals" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Référence</th>
+                        <th>Appartement</th>
+                        <th>Début</th>
+                        <th>Fin</th>
+                        <th class="text-end">Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="rentals" t-as="rental">
+                        <tr>
+                            <td><span t-field="rental.display_name"/></td>
+                            <td><span t-field="rental.property_id.name"/></td>
+                            <td><span t-field="rental.date_start"/></td>
+                            <td><span t-field="rental.date_end"/></td>
+                            <td class="text-end">
+                                <span t-attf-class="badge rounded-pill #{'bg-success' if rental.state == 'ongoing' else 'bg-info'}">
+                                    <t t-esc="rental.state"/>
+                                </span>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </t>
+        </t>
+    </template>
+</odoo>

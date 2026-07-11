@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_purchase_order_custom,access_purchase_order_custom,model_purchase_order,custom_groups.group_financiere,1,0,0,0
+access_versement_versement,access_versement_versement,model_versement_versement,,1,1,1,1
+access_distribution_montant,access_distribution_montant,model_distribution_montant,,1,1,1,1
+access_nettoyage_situation,access_nettoyage_situation,model_nettoyage_situation,,1,1,1,1
+access_nettoyage_camion,access_nettoyage_camion,model_nettoyage_camion,,1,1,1,1
+access_nettoyage_chauffeur,access_nettoyage_chauffeur,model_nettoyage_chauffeur,,1,1,1,1
+access_situation_brise_roche,access_situation_brise_roche,model_situation_brise_roche,,1,1,1,1

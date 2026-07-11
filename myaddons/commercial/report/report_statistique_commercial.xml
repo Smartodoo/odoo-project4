@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_statistique_commercial" model="ir.actions.report">
+        <field name="name">Statistique par Commercial</field>
+        <field name="model">commercial.statistique.commercial</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.report_statistique_commercial_template</field>
+        <field name="report_file">commercial.report_statistique_commercial_template</field>
+        <field name="print_report_name">'Statistique - %s' % object.commercial_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <template id="report_statistique_commercial_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="data" t-value="doc._get_commercial_data()"/>
+                    <t t-set="ca_total" t-value="data.get('ca_total', 0)"/>
+                    <t t-set="ca_encaisse" t-value="data.get('ca_encaisse', 0)"/>
+                    <t t-set="reste" t-value="data.get('reste_a_payer', 0)"/>
+                    <t t-set="pct_global" t-value="(ca_encaisse / ca_total * 100) if ca_total else 0"/>
+
+                    <div class="page" style="font-family:'Times New Roman', Times, serif;font-size:14px;padding:30px 40px;">
+
+                        <!-- EN-TETE -->
+                        <div style="background:#003366;color:#fff;padding:16px 20px;border-radius:8px;margin-bottom:16px;">
+                            <h2 style="margin:0 0 10px 0;font-size:24px;color:#fff;">
+                                Statistique par le commercial - <span style="font-weight:800;"><t t-esc="doc.commercial_id.name"/></span>
+                            </h2>
+                            <div style="display:flex;gap:30px;font-size:13px;color:#333;">
+                                <span style="color:#ddd;">Clients : <strong style="color:#fff;" t-esc="data.get('total_clients', 0)"/></span>
+                                <span style="color:#ddd;">Lots : <strong style="color:#fff;" t-esc="data.get('total_lots', 0)"/></span>
+                                <span style="color:#ddd;">Encaissement : <strong style="color:#fff;"><t t-esc="'{:.1f}'.format(pct_global)"/>%</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- CARTES RESUME -->
+                        <table style="width:100%;margin-bottom:16px;border-collapse:collapse;">
+                            <tr>
+                                <td style="width:25%;padding:8px;border:1px solid #dee2e6;text-align:center;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">Clients</div>
+                                    <div style="font-size:22px;font-weight:800;color:#17a2b8;" t-esc="data.get('total_clients', 0)"/>
+                                </td>
+                                <td style="width:25%;padding:8px;border:1px solid #dee2e6;text-align:center;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">Lots</div>
+                                    <div style="font-size:22px;font-weight:800;color:#6f42c1;" t-esc="data.get('total_lots', 0)"/>
+                                </td>
+                                <td style="width:25%;padding:8px;border:1px solid #dee2e6;text-align:center;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">CA Encaissé</div>
+                                    <div style="font-size:14px;font-weight:800;color:#28a745;" t-esc="doc._format_amount(ca_encaisse)"/>
+                                </td>
+                                <td style="width:25%;padding:8px;border:1px solid #dee2e6;text-align:center;">
+                                    <div style="font-size:12px;color:#888;text-transform:uppercase;">Reste à payer</div>
+                                    <div style="font-size:14px;font-weight:800;color:#dc3545;" t-esc="doc._format_amount(reste)"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- DETAIL PAR PROJET -->
+                        <t t-foreach="data.get('by_projet', {}).items()" t-as="projet_item">
+                            <t t-set="pname" t-value="projet_item[0]"/>
+                            <t t-set="pdata" t-value="projet_item[1]"/>
+                            <t t-set="p_ca" t-value="pdata['ca']"/>
+                            <t t-set="p_paid" t-value="pdata['paid']"/>
+                            <t t-set="p_reste" t-value="p_ca - p_paid"/>
+                            <t t-set="p_pct" t-value="(p_paid / p_ca * 100) if p_ca else 0"/>
+                            <t t-set="p_nb_clients" t-value="len(pdata['clients'])"/>
+
+                            <!-- Projet header -->
+                            <div style="background:#1a4d80;color:#fff;padding:8px 16px;border-radius:6px 6px 0 0;margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
+                                <strong style="font-size:14px;color:#fff;" t-esc="pname"/>
+                                <span style="font-size:12px;color:#ddd;">
+                                    <t t-esc="pdata['lots']"/> lots —
+                                    <t t-esc="p_nb_clients"/> client<t t-if="p_nb_clients > 1">s</t> —
+                                    <t t-esc="'{:.1f}'.format(p_pct)"/>%
+                                </span>
+                            </div>
+
+                            <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px;">
+                                <thead>
+                                    <tr style="background:#f0f0f0;">
+                                        <th style="padding:7px 8px;text-align:left;border:1px solid #dee2e6;">Client</th>
+                                        <th style="padding:7px 8px;text-align:left;border:1px solid #dee2e6;">Bloc</th>
+                                        <th style="padding:7px 8px;text-align:left;border:1px solid #dee2e6;">Étage</th>
+                                        <th style="padding:7px 8px;text-align:left;border:1px solid #dee2e6;">Lot</th>
+                                        <th style="padding:7px 8px;text-align:right;border:1px solid #dee2e6;">Montant</th>
+                                        <th style="padding:7px 8px;text-align:right;border:1px solid #dee2e6;">Payé</th>
+                                        <th style="padding:7px 8px;text-align:right;border:1px solid #dee2e6;">Reste</th>
+                                        <th style="padding:7px 8px;text-align:center;border:1px solid #dee2e6;">%</th>
+                                        <th style="padding:7px 8px;text-align:center;border:1px solid #dee2e6;">État</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="pdata['clients'].items()" t-as="client_item">
+                                        <t t-set="cname" t-value="client_item[0]"/>
+                                        <t t-set="rows" t-value="client_item[1]"/>
+                                        <t t-foreach="rows" t-as="row">
+                                            <tr style="border-bottom:1px solid #eee;">
+                                                <t t-if="row_first">
+                                                    <td t-att-rowspan="len(rows)" style="padding:6px 8px;font-weight:600;border:1px solid #dee2e6;vertical-align:top;" t-esc="cname"/>
+                                                </t>
+                                                <td style="padding:6px 8px;border:1px solid #dee2e6;" t-esc="row['bloc']"/>
+                                                <td style="padding:6px 8px;border:1px solid #dee2e6;" t-esc="row['etage']"/>
+                                                <td style="padding:6px 8px;border:1px solid #dee2e6;" t-esc="row['lot']"/>
+                                                <td style="padding:6px 8px;text-align:right;border:1px solid #dee2e6;" t-esc="doc._format_amount(row['montant'])"/>
+                                                <td style="padding:6px 8px;text-align:right;color:#28a745;font-weight:600;border:1px solid #dee2e6;" t-esc="doc._format_amount(row['paid'])"/>
+                                                <td style="padding:6px 8px;text-align:right;color:#dc3545;border:1px solid #dee2e6;" t-esc="doc._format_amount(row['reste'])"/>
+                                                <td style="padding:6px 8px;text-align:center;font-weight:700;border:1px solid #dee2e6;">
+                                                    <t t-esc="'{:.1f}%'.format(row['pct'])"/>
+                                                </td>
+                                                <td style="padding:6px 8px;text-align:center;border:1px solid #dee2e6;" t-esc="row['state']"/>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                    <!-- Sous-total -->
+                                    <tr style="background:#f0f0f0;font-weight:700;">
+                                        <td colspan="4" style="padding:7px 8px;border:1px solid #dee2e6;font-size:12px;">
+                                            Sous-total — <t t-esc="pdata['lots']"/> lots,
+                                            <t t-esc="p_nb_clients"/> client<t t-if="p_nb_clients > 1">s</t>
+                                        </td>
+                                        <td style="padding:7px 8px;text-align:right;border:1px solid #dee2e6;" t-esc="doc._format_amount(p_ca)"/>
+                                        <td style="padding:7px 8px;text-align:right;color:#28a745;border:1px solid #dee2e6;" t-esc="doc._format_amount(p_paid)"/>
+                                        <td style="padding:7px 8px;text-align:right;color:#dc3545;border:1px solid #dee2e6;" t-esc="doc._format_amount(p_reste)"/>
+                                        <td style="padding:7px 8px;text-align:center;border:1px solid #dee2e6;">
+                                            <t t-esc="'{:.1f}%'.format(p_pct)"/>
+                                        </td>
+                                        <td style="border:1px solid #dee2e6;"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                        <!-- TOTAL GLOBAL -->
+                        <div style="background:#003366;color:#fff;padding:12px 20px;border-radius:8px;margin-top:16px;display:flex;justify-content:space-between;align-items:center;">
+                            <strong style="font-size:15px;color:#fff;">TOTAL GLOBAL</strong>
+                            <div style="display:flex;gap:24px;font-size:13px;color:#ddd;">
+                                <span>CA Total : <strong t-esc="doc._format_amount(ca_total)"/></span>
+                                <span>Encaissé : <strong t-esc="doc._format_amount(ca_encaisse)"/></span>
+                                <span>Reste : <strong t-esc="doc._format_amount(reste)"/></span>
+                                <span style="font-weight:800;"><t t-esc="'{:.1f}'.format(pct_global)"/>%</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

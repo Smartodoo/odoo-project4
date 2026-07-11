@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="module_category_vente_immobiliere" model="ir.module.category">
+            <field name="name">Vente Immobiliere</field>
+            <field name="description">Gestion de vente et location immobiliere</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="group_vente_immo_user" model="res.groups">
+            <field name="name">Agent Commercial</field>
+            <field name="category_id" ref="module_category_vente_immobiliere"/>
+            <field name="comment">Peut créer des réservations et consulter les projets.</field>
+        </record>
+
+        <record id="group_vente_immo_manager" model="res.groups">
+            <field name="name">Responsable</field>
+            <field name="category_id" ref="module_category_vente_immobiliere"/>
+            <field name="implied_ids" eval="[(4, ref('group_vente_immo_user'))]"/>
+            <field name="comment">Accès complet à tous les modèles du module.</field>
+        </record>
+    </data>
+</odoo>

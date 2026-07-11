@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_coprop" model="ir.actions.report">
+        <field name="name">Reçu Copropriété</field>
+        <field name="model">commercial.print.coprop.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">commercial.coprop_template</field>
+        <field name="report_file">commercial.coprop_template</field>
+        <field name="print_report_name">'Reçu Copropriété - %s' % object.paiement_id.client_id.name</field>
+        <field name="paperformat_id" ref="paperformat_commercial_portrait"/>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="coprop_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="commercial.external_layout_commercial">
+                    <t t-set="paiement" t-value="doc.paiement_id"/>
+                    <t t-set="client" t-value="paiement.client_id"/>
+                    <t t-set="echeance" t-value="doc.echeance_coprop_id"/>
+                    <t t-set="user" t-value="doc.env.user"/>
+                    <t t-set="client_civilite" t-value="'Mme' if client.genre == 'femme' else 'M.'"/>
+                    <t t-set="user_civilite" t-value="'Mme' if user.genre == 'femme' else 'M.'"/>
+                    <style>
+                        .page.coprop-page, .page.coprop-page * {
+                            font-family: 'Times New Roman', Times, serif !important;
+                        }
+                    </style>
+                    <div class="page coprop-page" style="font-size: 18px; padding: 50px 60px; position: relative; min-height: 900px;">
+
+                        <!-- Titre -->
+                        <h2 style="text-align: center; font-weight: bold; margin-bottom: 50px; color: #003366; font-size: 26px;">
+                            Attestation de paiement - Copropriété
+                        </h2>
+
+                        <!-- Corps -->
+                        <p style="line-height: 2.2; text-align: justify;">
+                            Je soussigné(e) <strong><t t-esc="user_civilite"/> <t t-esc="user.name"/></strong>,
+                            agissant en qualité <strong><t t-esc="doc.get_qualite_label()"/></strong>,
+                            certifie que
+                        </p>
+                        <p style="line-height: 2.2; text-align: justify;">
+                            <strong><t t-esc="client_civilite"/> <t t-esc="client.name"/></strong>,
+                            propriétaire du lot n° <strong><t t-esc="paiement.lot_id.numero_lot or ''"/></strong>
+                            dans le projet <strong><t t-esc="paiement.lot_id.projet_id.name or ''"/></strong>,
+                            a effectué un paiement d'un montant de
+                        </p>
+                        <p style="line-height: 2.2; text-align: justify;">
+                            <strong><t t-esc="'{:,.2f}'.format(echeance.montant).replace(',', ' ')"/> DA</strong>
+                            en date du
+                            <strong><t t-if="echeance.date"><t t-esc="echeance.date" t-options='{"widget": "date"}'/></t><t t-else="">..../.../......</t></strong>,
+                            au titre des charges de copropriété.
+                        </p>
+
+                        <p style="line-height: 2.2; text-align: justify;">
+                            Le montant total dû s'élève à
+                            <strong><t t-esc="'{:,.2f}'.format(paiement.montant_coprop).replace(',', ' ')"/> DA</strong>.
+                            Après déduction du paiement effectué, le solde restant à payer est de
+                            <strong><t t-esc="'{:,.2f}'.format(paiement.reste_coprop).replace(',', ' ')"/> DA</strong>.
+                        </p>
+
+                        <!-- Signatures -->
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0 60px; font-size: 18px; overflow: hidden;">
+                            <div style="float: left; width: 45%; text-align: center;">
+                                <p style="font-weight: bold;">Le Client</p>
+                                <p><t t-esc="client_civilite"/> <t t-esc="client.name"/></p>
+                                <br/><br/><br/>
+                            </div>
+                            <div style="float: right; width: 45%; text-align: center;">
+                                <p style="font-weight: bold;">Le Commercial</p>
+                                <p><t t-esc="user_civilite"/> <t t-esc="user.name"/></p>
+                                <br/><br/><br/>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
