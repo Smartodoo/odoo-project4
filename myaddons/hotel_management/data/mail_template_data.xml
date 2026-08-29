@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="mail_template_reservation_confirmation" model="mail.template">
+        <field name="name">Réservation Hôtel : confirmation</field>
+        <field name="model_id" ref="hotel_management.model_hotel_reservation"/>
+        <field name="subject">Confirmation de votre réservation {{ object.name }}</field>
+        <field name="email_from">{{ (object.company_id.email or user.email_formatted) }}</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="lang">{{ object.partner_id.lang }}</field>
+        <field name="auto_delete" eval="False"/>
+        <field name="body_html" type="html">
+            <div style="margin:0;padding:0;background:#f4f5f8;">
+                <div style="max-width:600px;margin:0 auto;background:#ffffff;font-family:Arial,sans-serif;color:#33354a;">
+                    <div style="background:linear-gradient(135deg,#4b6cb7,#182848);color:#ffffff;padding:24px 28px;">
+                        <h2 style="margin:0;">Réservation confirmée</h2>
+                    </div>
+                    <div style="padding:24px 28px;">
+                        <p>Bonjour <t t-out="object.partner_id.name or ''">Client</t>,</p>
+                        <p>Nous avons le plaisir de confirmer votre réservation
+                            <strong t-out="object.name or ''">RES/0001</strong>.</p>
+                        <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+                            <tr>
+                                <td style="padding:8px;border-bottom:1px solid #eee;color:#7a7f96;">Arrivée</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">
+                                    <t t-out="object.checkin or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px;border-bottom:1px solid #eee;color:#7a7f96;">Départ</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">
+                                    <t t-out="object.checkout or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px;border-bottom:1px solid #eee;color:#7a7f96;">Nuits</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">
+                                    <t t-out="object.nights or 0"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px;border-bottom:1px solid #eee;color:#7a7f96;">Chambre(s)</td>
+                                <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">
+                                    <t t-out="', '.join(object.line_ids.mapped('room_id.name')) or '—'"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px;color:#7a7f96;">Total séjour</td>
+                                <td style="padding:8px;text-align:right;font-weight:bold;">
+                                    <t t-out="format_amount(object.amount_total, object.currency_id) if object.amount_total else ''"/></td>
+                            </tr>
+                        </table>
+                        <p>Notre équipe reste à votre disposition et vous contactera pour finaliser votre séjour.</p>
+                        <p style="color:#7a7f96;font-size:13px;">À très bientôt,<br/>
+                            <t t-out="object.company_id.name or ''">L'hôtel</t></p>
+                    </div>
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>

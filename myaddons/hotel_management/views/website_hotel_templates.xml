@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ================= LISTE / RECHERCHE ================= -->
+    <template id="rooms_page" name="Hôtel - Chambres">
+        <t t-call="website.layout">
+            <div class="o_hotel_web">
+                <section class="o_hotel_hero">
+                    <div class="container">
+                        <h1>Réservez votre séjour</h1>
+                        <p class="lead">Découvrez nos chambres et réservez en quelques clics.</p>
+                        <form class="o_hotel_search" method="get" action="/hotel/rooms">
+                            <div class="o_hotel_search_field">
+                                <label>Arrivée</label>
+                                <input type="date" name="checkin" t-att-value="checkin"
+                                       t-att-min="today" required="required"/>
+                            </div>
+                            <div class="o_hotel_search_field">
+                                <label>Départ</label>
+                                <input type="date" name="checkout" t-att-value="checkout"
+                                       t-att-min="today" required="required"/>
+                            </div>
+                            <div class="o_hotel_search_field">
+                                <label>Personnes</label>
+                                <input type="number" name="guests" min="1" t-att-value="guests"/>
+                            </div>
+                            <div class="o_hotel_search_field o_hotel_search_btn">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-search me-1"/>Rechercher
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <div class="container my-4">
+                    <t t-if="error">
+                        <div class="alert alert-warning" t-esc="error"/>
+                    </t>
+
+                    <t t-if="dates_selected">
+                        <h2 class="mb-3">Chambres disponibles
+                            <small class="text-muted">du <t t-esc="checkin"/> au <t t-esc="checkout"/></small>
+                        </h2>
+                        <t t-if="available_rooms">
+                            <div class="row">
+                                <t t-foreach="available_rooms" t-as="room">
+                                    <t t-call="hotel_management.room_card"/>
+                                </t>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="alert alert-info">
+                                Aucune chambre disponible pour ces dates. Essayez d'autres dates.
+                            </div>
+                        </t>
+
+                        <t t-if="occupied_rooms">
+                            <h3 class="mt-4 text-muted">Non disponibles sur cette période</h3>
+                            <div class="row o_hotel_occupied">
+                                <t t-foreach="occupied_rooms" t-as="room">
+                                    <t t-call="hotel_management.room_card"/>
+                                </t>
+                            </div>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <h2 class="mb-3">Nos chambres</h2>
+                        <div class="row">
+                            <t t-foreach="rooms" t-as="room">
+                                <t t-call="hotel_management.room_card"/>
+                            </t>
+                        </div>
+                        <t t-if="not rooms">
+                            <div class="alert alert-info">Aucune chambre publiée pour le moment.</div>
+                        </t>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================= CARTE CHAMBRE (réutilisable) ================= -->
+    <template id="room_card" name="Carte chambre">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="o_hotel_room_web_card">
+                <a t-attf-href="/hotel/room/#{room.id}?checkin=#{checkin}&amp;checkout=#{checkout}&amp;guests=#{guests}"
+                   class="o_hotel_room_img">
+                    <t t-if="room.image">
+                        <img t-attf-src="/web/image/hotel.room/#{room.id}/image"
+                             t-att-alt="room.name"/>
+                    </t>
+                    <t t-else="">
+                        <div class="o_hotel_room_noimg"><i class="fa fa-bed"/></div>
+                    </t>
+                </a>
+                <div class="o_hotel_room_web_body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h4 class="mb-0">Chambre <t t-esc="room.name"/></h4>
+                        <span class="o_hotel_price">
+                            <span t-field="room.price"
+                                  t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                            <small>/ nuit</small>
+                        </span>
+                    </div>
+                    <div class="text-muted mb-2">
+                        <t t-esc="room.room_type_id.name"/> ·
+                        <i class="fa fa-user me-1"/><t t-esc="room.capacity"/> pers.
+                    </div>
+                    <div class="o_hotel_amenities mb-2">
+                        <t t-foreach="room.amenity_ids" t-as="am">
+                            <span class="o_hotel_amenity" t-att-title="am.name">
+                                <i t-attf-class="fa #{am.icon or 'fa-check'} me-1"/><t t-esc="am.name"/>
+                            </span>
+                        </t>
+                    </div>
+                    <a t-attf-href="/hotel/room/#{room.id}?checkin=#{checkin}&amp;checkout=#{checkout}&amp;guests=#{guests}"
+                       class="btn btn-primary btn-sm w-100">
+                        Voir &amp; réserver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- ================= DÉTAIL + RÉSERVATION ================= -->
+    <template id="room_detail_page" name="Hôtel - Détail chambre">
+        <t t-call="website.layout">
+            <div class="o_hotel_web">
+                <div class="container my-4">
+                    <a href="/hotel/rooms" class="btn btn-link px-0 mb-2">
+                        <i class="fa fa-chevron-left me-1"/>Retour aux chambres
+                    </a>
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <div class="o_hotel_detail_img mb-3">
+                                <t t-if="room.image">
+                                    <img t-attf-src="/web/image/hotel.room/#{room.id}/image"
+                                         t-att-alt="room.name" class="img-fluid rounded"/>
+                                </t>
+                                <t t-else="">
+                                    <div class="o_hotel_room_noimg o_hotel_room_noimg_lg"><i class="fa fa-bed"/></div>
+                                </t>
+                            </div>
+                            <h1>Chambre <t t-esc="room.name"/></h1>
+                            <p class="text-muted">
+                                <t t-esc="room.room_type_id.name"/> ·
+                                <i class="fa fa-user me-1"/><t t-esc="room.capacity"/> personnes ·
+                                Étage <t t-esc="room.floor or '—'"/>
+                            </p>
+                            <p t-if="room.description" t-esc="room.description"/>
+                            <h4 class="mt-3">Équipements</h4>
+                            <div class="o_hotel_amenities">
+                                <t t-foreach="room.amenity_ids" t-as="am">
+                                    <span class="o_hotel_amenity">
+                                        <i t-attf-class="fa #{am.icon or 'fa-check'} me-1"/><t t-esc="am.name"/>
+                                    </span>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="o_hotel_booking_box">
+                                <div class="o_hotel_booking_price mb-2">
+                                    <span t-field="room.price"
+                                          t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                                    <small class="text-muted">/ nuit</small>
+                                </div>
+                                <t t-if="available == False">
+                                    <div class="alert alert-warning py-2">
+                                        Indisponible pour les dates sélectionnées.
+                                    </div>
+                                </t>
+                                <t t-if="errors">
+                                    <div class="alert alert-danger">
+                                        <ul class="mb-0">
+                                            <li t-foreach="errors" t-as="err" t-esc="err"/>
+                                        </ul>
+                                    </div>
+                                </t>
+                                <form method="post" action="/hotel/booking/submit">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="room_id" t-att-value="room.id"/>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label">Arrivée</label>
+                                            <input type="date" class="form-control" name="checkin"
+                                                   t-att-value="checkin" t-att-min="today" required="required"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">Départ</label>
+                                            <input type="date" class="form-control" name="checkout"
+                                                   t-att-value="checkout" t-att-min="today" required="required"/>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label">Personnes</label>
+                                        <input type="number" class="form-control" name="guests"
+                                               min="1" t-att-max="room.capacity" t-att-value="guests"/>
+                                    </div>
+                                    <hr/>
+                                    <div class="mt-2">
+                                        <label class="form-label">Nom complet</label>
+                                        <input type="text" class="form-control" name="name"
+                                               t-att-value="name" required="required"/>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label">E-mail</label>
+                                        <input type="email" class="form-control" name="email"
+                                               t-att-value="email" required="required"/>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label">Téléphone</label>
+                                        <input type="text" class="form-control" name="phone"
+                                               t-att-value="phone"/>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label">Demandes particulières</label>
+                                        <textarea class="form-control" name="note" rows="2"/>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                                        <i class="fa fa-check me-1"/>Confirmer la réservation
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================= CONFIRMATION ================= -->
+    <template id="booking_confirmation_page" name="Hôtel - Confirmation">
+        <t t-call="website.layout">
+            <div class="o_hotel_web">
+                <div class="container my-5">
+                    <div class="o_hotel_confirm text-center">
+                        <div class="o_hotel_confirm_icon"><i class="fa fa-check-circle"/></div>
+                        <h1>Réservation enregistrée !</h1>
+                        <p class="lead">
+                            Merci <t t-esc="reservation.partner_id.name"/>,
+                            votre demande <strong t-esc="reservation.name"/> a bien été prise en compte.
+                        </p>
+                        <div class="o_hotel_confirm_card mx-auto">
+                            <table class="table mb-0">
+                                <tr><th>Référence</th><td t-esc="reservation.name"/></tr>
+                                <tr><th>Chambre(s)</th>
+                                    <td t-esc="', '.join(reservation.line_ids.mapped('room_id.name')) or '—'"/></tr>
+                                <tr><th>Arrivée</th><td t-esc="reservation.checkin"/></tr>
+                                <tr><th>Départ</th><td t-esc="reservation.checkout"/></tr>
+                                <tr><th>Nuits</th><td t-esc="reservation.nights"/></tr>
+                                <tr><th>Total</th>
+                                    <td><span t-field="reservation.amount_total"
+                                        t-options='{"widget": "monetary", "display_currency": reservation.currency_id}'/></td></tr>
+                            </table>
+                        </div>
+                        <p class="text-muted mt-3">
+                            Notre équipe vous contactera pour finaliser votre séjour.
+                        </p>
+                        <a href="/hotel/rooms" class="btn btn-primary">Retour aux chambres</a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

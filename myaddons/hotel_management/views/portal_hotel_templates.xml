@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Entrée sur la page d'accueil du portail -->
+    <template id="portal_my_home_hotel" inherit_id="portal.portal_my_home"
+              name="Portail : Réservations Hôtel" priority="40">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/hotel_management/static/description/icon.png'"/>
+                <t t-set="title">Réservations</t>
+                <t t-set="text">Suivez vos réservations d'hôtel</t>
+                <t t-set="url" t-value="'/my/reservations'"/>
+                <t t-set="placeholder_count" t-value="'reservation_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Liste des réservations -->
+    <template id="portal_my_reservations" name="Mes réservations">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <div class="o_portal_my_doc_table">
+                <h3 class="mb-3">Mes réservations</h3>
+                <t t-if="not reservations">
+                    <div class="alert alert-info">Vous n'avez aucune réservation pour le moment.</div>
+                </t>
+                <t t-else="">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Référence</th>
+                                <th>Arrivée</th>
+                                <th>Départ</th>
+                                <th class="text-center">Chambres</th>
+                                <th class="text-end">Total</th>
+                                <th>État</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="reservations" t-as="res">
+                                <td>
+                                    <a t-attf-href="/my/reservation/#{res.id}">
+                                        <strong t-esc="res.name"/>
+                                    </a>
+                                </td>
+                                <td t-esc="res.checkin"/>
+                                <td t-esc="res.checkout"/>
+                                <td class="text-center" t-esc="res.room_count"/>
+                                <td class="text-end">
+                                    <span t-field="res.amount_total"
+                                          t-options='{"widget": "monetary", "display_currency": res.currency_id}'/>
+                                </td>
+                                <td><span class="badge bg-secondary" t-esc="res.state"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="o_portal_pager text-center">
+                        <t t-call="portal.pager"/>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- Détail d'une réservation -->
+    <template id="portal_reservation_detail" name="Détail réservation">
+        <t t-call="portal.portal_layout">
+            <div class="o_portal_my_doc">
+                <a href="/my/reservations" class="btn btn-link px-0 mb-2">
+                    <i class="fa fa-chevron-left me-1"/>Mes réservations
+                </a>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0" t-esc="reservation.name"/>
+                        <span class="badge bg-info" t-esc="reservation.state"/>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Client :</strong> <span t-esc="reservation.partner_id.name"/></div>
+                            <div class="col-md-4"><strong>Arrivée :</strong> <span t-esc="reservation.checkin"/></div>
+                            <div class="col-md-4"><strong>Départ :</strong> <span t-esc="reservation.checkout"/></div>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Chambre</th>
+                                    <th>Type</th>
+                                    <th class="text-center">Nuits</th>
+                                    <th class="text-end">Prix / nuit</th>
+                                    <th class="text-end">Sous-total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="reservation.line_ids" t-as="line">
+                                    <td t-esc="line.room_id.name"/>
+                                    <td t-esc="line.room_type_id.name"/>
+                                    <td class="text-center" t-esc="line.nights"/>
+                                    <td class="text-end">
+                                        <span t-field="line.price_unit"
+                                              t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-field="line.price_subtotal"
+                                              t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4" class="text-end">Total</th>
+                                    <th class="text-end">
+                                        <span t-field="reservation.amount_total"
+                                              t-options='{"widget": "monetary", "display_currency": reservation.currency_id}'/>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <t t-if="reservation.note">
+                            <h5>Notes</h5>
+                            <p t-esc="reservation.note"/>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

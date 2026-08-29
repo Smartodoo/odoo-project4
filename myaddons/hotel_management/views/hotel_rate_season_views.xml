@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_hotel_rate_season_tree" model="ir.ui.view">
+        <field name="name">hotel.rate.season.tree</field>
+        <field name="model">hotel.rate.season</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="room_type_id" placeholder="Tous les types"/>
+                <field name="price" widget="monetary"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_hotel_rate_season_search" model="ir.ui.view">
+        <field name="name">hotel.rate.season.search</field>
+        <field name="model">hotel.rate.season</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="room_type_id"/>
+                <filter name="current" string="En cours"
+                        domain="[('date_start', '&lt;=', context_today().strftime('%Y-%m-%d')), ('date_end', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_type" string="Type" context="{'group_by': 'room_type_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hotel_rate_season" model="ir.actions.act_window">
+        <field name="name">Tarifs saisonniers</field>
+        <field name="res_model">hotel.rate.season</field>
+        <field name="view_mode">tree</field>
+        <field name="search_view_id" ref="view_hotel_rate_season_search"/>
+    </record>
+</odoo>

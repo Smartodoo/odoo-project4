@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ================= PERSONNEL ================= -->
+    <record id="view_hotel_staff_tree" model="ir.ui.view">
+        <field name="name">hotel.staff.tree</field>
+        <field name="model">hotel.staff</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="role"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="user_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_hotel_staff_form" model="ir.ui.view">
+        <field name="name">hotel.staff.form</field>
+        <field name="model">hotel.staff</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Nom de l'employé"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="role"/>
+                            <field name="user_id"/>
+                        </group>
+                        <group>
+                            <field name="phone"/>
+                            <field name="email"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="note" nolabel="1"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_staff_search" model="ir.ui.view">
+        <field name="name">hotel.staff.search</field>
+        <field name="model">hotel.staff</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="role"/>
+                <filter name="reception" string="Réception" domain="[('role', '=', 'reception')]"/>
+                <filter name="housekeeping" string="Ménage" domain="[('role', '=', 'housekeeping')]"/>
+                <filter name="maintenance" string="Maintenance" domain="[('role', '=', 'maintenance')]"/>
+                <filter name="restaurant" string="Restauration" domain="[('role', '=', 'restaurant')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_role" string="Fonction" context="{'group_by': 'role'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hotel_staff" model="ir.actions.act_window">
+        <field name="name">Personnel</field>
+        <field name="res_model">hotel.staff</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_hotel_staff_search"/>
+    </record>
+
+    <!-- ================= MÉNAGE ================= -->
+    <record id="view_hotel_housekeeping_tree" model="ir.ui.view">
+        <field name="name">hotel.housekeeping.tree</field>
+        <field name="model">hotel.housekeeping</field>
+        <field name="arch" type="xml">
+            <tree decoration-warning="state == 'todo'" decoration-info="state == 'inprogress'"
+                  decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="room_id"/>
+                <field name="cleaning_type"/>
+                <field name="staff_id"/>
+                <field name="scheduled_date"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'todo'"
+                       decoration-info="state == 'inprogress'"
+                       decoration-success="state == 'done'"
+                       decoration-muted="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_hotel_housekeeping_form" model="ir.ui.view">
+        <field name="name">hotel.housekeeping.form</field>
+        <field name="model">hotel.housekeeping</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_start" string="Démarrer" type="object"
+                            class="btn-primary" invisible="state != 'todo'"/>
+                    <button name="action_done" string="Terminer" type="object"
+                            class="btn-primary" invisible="state != 'inprogress'"/>
+                    <button name="action_cancel" string="Annuler" type="object"
+                            invisible="state in ('done', 'cancel')"/>
+                    <button name="action_reset" string="Réinitialiser" type="object"
+                            invisible="state != 'cancel'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="todo,inprogress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="room_id"/>
+                            <field name="cleaning_type"/>
+                            <field name="scheduled_date"/>
+                        </group>
+                        <group>
+                            <field name="staff_id"/>
+                            <field name="reservation_id"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="note" nolabel="1"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_housekeeping_search" model="ir.ui.view">
+        <field name="name">hotel.housekeeping.search</field>
+        <field name="model">hotel.housekeeping</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="room_id"/>
+                <field name="staff_id"/>
+                <filter name="todo" string="À faire" domain="[('state', '=', 'todo')]"/>
+                <filter name="inprogress" string="En cours" domain="[('state', '=', 'inprogress')]"/>
+                <filter name="done" string="Terminées" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter name="checkout" string="Après départ" domain="[('cleaning_type', '=', 'checkout')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
+                    <filter name="group_room" string="Chambre" context="{'group_by': 'room_id'}"/>
+                    <filter name="group_staff" string="Agent" context="{'group_by': 'staff_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hotel_housekeeping" model="ir.actions.act_window">
+        <field name="name">Ménage</field>
+        <field name="res_model">hotel.housekeeping</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_hotel_housekeeping_search"/>
+        <field name="context">{'search_default_todo': 1}</field>
+    </record>
+
+    <!-- ================= MAINTENANCE / TRAVAUX ================= -->
+    <record id="view_hotel_maintenance_tree" model="ir.ui.view">
+        <field name="name">hotel.maintenance.request.tree</field>
+        <field name="model">hotel.maintenance.request</field>
+        <field name="arch" type="xml">
+            <tree decoration-danger="priority == '3'" decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="room_id"/>
+                <field name="category"/>
+                <field name="staff_id"/>
+                <field name="priority" widget="priority"/>
+                <field name="request_date"/>
+                <field name="cost" widget="monetary" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'inprogress'"
+                       decoration-success="state == 'done'"
+                       decoration-muted="state == 'cancel'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_hotel_maintenance_form" model="ir.ui.view">
+        <field name="name">hotel.maintenance.request.form</field>
+        <field name="model">hotel.maintenance.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_start" string="Démarrer" type="object"
+                            class="btn-primary" invisible="state != 'new'"/>
+                    <button name="action_done" string="Terminer" type="object"
+                            class="btn-primary" invisible="state != 'inprogress'"/>
+                    <button name="action_cancel" string="Annuler" type="object"
+                            invisible="state in ('done', 'cancel')"/>
+                    <button name="action_reset" string="Rouvrir" type="object"
+                            invisible="state not in ('done', 'cancel')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="new,inprogress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="ex : Fuite robinet salle de bain"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="room_id"/>
+                            <field name="category"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                        <group>
+                            <field name="staff_id"/>
+                            <field name="request_date"/>
+                            <field name="done_date"/>
+                            <field name="cost" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_maintenance_search" model="ir.ui.view">
+        <field name="name">hotel.maintenance.request.search</field>
+        <field name="model">hotel.maintenance.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="room_id"/>
+                <field name="staff_id"/>
+                <filter name="new" string="Nouvelles" domain="[('state', '=', 'new')]"/>
+                <filter name="inprogress" string="En cours" domain="[('state', '=', 'inprogress')]"/>
+                <filter name="open" string="Ouvertes" domain="[('state', 'in', ('new', 'inprogress'))]"/>
+                <separator/>
+                <filter name="urgent" string="Urgentes" domain="[('priority', '=', '3')]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
+                    <filter name="group_category" string="Catégorie" context="{'group_by': 'category'}"/>
+                    <filter name="group_room" string="Chambre" context="{'group_by': 'room_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hotel_maintenance" model="ir.actions.act_window">
+        <field name="name">Travaux &amp; Maintenance</field>
+        <field name="res_model">hotel.maintenance.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_hotel_maintenance_search"/>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+</odoo>

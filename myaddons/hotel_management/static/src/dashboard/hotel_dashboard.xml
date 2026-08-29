@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hotel_management.Dashboard">
+        <div class="o_hotel_dashboard">
+            <t t-if="state.loading">
+                <div class="o_hotel_loading">
+                    <i class="fa fa-spinner fa-spin fa-2x"/>
+                    <div>Chargement du tableau de bord…</div>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="o_hotel_header">
+                    <h1><i class="fa fa-hotel me-2"/>Tableau de bord — Hôtel</h1>
+                    <button class="btn btn-light" t-on-click="() => this.loadData()">
+                        <i class="fa fa-refresh me-1"/>Actualiser
+                    </button>
+                </div>
+
+                <!-- KPI principaux -->
+                <div class="o_hotel_kpis">
+                    <div class="o_kpi o_kpi_occupied"
+                         t-on-click="() => this.openReservations([['state','=','checkin']], 'En séjour')">
+                        <div class="o_kpi_icon"><i class="fa fa-bed"/></div>
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.occupied"/></div>
+                            <div class="o_kpi_label">Chambres occupées</div>
+                        </div>
+                    </div>
+                    <div class="o_kpi o_kpi_available"
+                         t-on-click="() => this.openRooms([], 'Chambres')">
+                        <div class="o_kpi_icon"><i class="fa fa-check-circle"/></div>
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.available"/></div>
+                            <div class="o_kpi_label">Chambres disponibles</div>
+                        </div>
+                    </div>
+                    <div class="o_kpi o_kpi_guests"
+                         t-on-click="() => this.openReservations([], 'Réservations')">
+                        <div class="o_kpi_icon"><i class="fa fa-users"/></div>
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.total_guests"/></div>
+                            <div class="o_kpi_label">Clients au total</div>
+                        </div>
+                    </div>
+                    <div class="o_kpi o_kpi_present"
+                         t-on-click="() => this.openReservations([['state','=','checkin']], 'Clients présents')">
+                        <div class="o_kpi_icon"><i class="fa fa-user-circle"/></div>
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.present_guests"/></div>
+                            <div class="o_kpi_label">Clients présents</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ligne secondaire -->
+                <div class="o_hotel_kpis o_hotel_kpis_small">
+                    <div class="o_kpi o_kpi_soft">
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.arrivals_today"/></div>
+                            <div class="o_kpi_label"><i class="fa fa-sign-in me-1"/>Arrivées aujourd'hui</div>
+                        </div>
+                    </div>
+                    <div class="o_kpi o_kpi_soft">
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.departures_today"/></div>
+                            <div class="o_kpi_label"><i class="fa fa-sign-out me-1"/>Départs aujourd'hui</div>
+                        </div>
+                    </div>
+                    <div class="o_kpi o_kpi_soft"
+                         t-on-click="() => this.openRooms([['maintenance','=',true]], 'Maintenance')">
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.maintenance"/></div>
+                            <div class="o_kpi_label"><i class="fa fa-wrench me-1"/>En maintenance</div>
+                        </div>
+                    </div>
+                    <div class="o_kpi o_kpi_soft"
+                         t-on-click="() => this.openRooms([['housekeeping_status','=','dirty']], 'À nettoyer')">
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.to_clean"/></div>
+                            <div class="o_kpi_label"><i class="fa fa-magic me-1"/>Chambres à nettoyer</div>
+                        </div>
+                    </div>
+                    <div class="o_kpi o_kpi_soft"
+                         t-on-click="() => this.openModel('hotel.housekeeping', [['state','in',['todo','inprogress']]], 'Ménage à faire')">
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.housekeeping_todo"/></div>
+                            <div class="o_kpi_label"><i class="fa fa-tasks me-1"/>Tâches ménage</div>
+                        </div>
+                    </div>
+                    <div class="o_kpi o_kpi_soft"
+                         t-on-click="() => this.openModel('hotel.maintenance.request', [['state','in',['new','inprogress']]], 'Interventions ouvertes')">
+                        <div class="o_kpi_body">
+                            <div class="o_kpi_value"><t t-esc="state.data.maintenance_open"/></div>
+                            <div class="o_kpi_label"><i class="fa fa-wrench me-1"/>Interventions</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="o_hotel_grid">
+                    <!-- Taux d'occupation -->
+                    <div class="o_hotel_card">
+                        <h3>Taux d'occupation</h3>
+                        <div class="o_hotel_gauge">
+                            <div class="o_hotel_gauge_value"><t t-esc="state.data.occupancy_rate"/>%</div>
+                            <div class="o_hotel_gauge_bar">
+                                <div class="o_hotel_gauge_fill"
+                                     t-attf-style="width: {{state.data.occupancy_rate}}%;"/>
+                            </div>
+                            <div class="o_hotel_gauge_legend">
+                                <span><t t-esc="state.data.occupied"/> occupées</span>
+                                <span><t t-esc="state.data.total_rooms"/> chambres</span>
+                            </div>
+                        </div>
+                        <h3 class="mt-3">Chambres par type</h3>
+                        <table class="o_hotel_mini_table">
+                            <tbody>
+                                <tr t-foreach="state.data.rooms_by_type" t-as="rt" t-key="rt_index">
+                                    <td><t t-esc="rt.name"/></td>
+                                    <td class="text-end"><strong><t t-esc="rt.count"/></strong></td>
+                                </tr>
+                                <tr t-if="!state.data.rooms_by_type.length">
+                                    <td class="text-muted">Aucune chambre configurée</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Statistiques du mois -->
+                    <div class="o_hotel_card">
+                        <h3>Ce mois-ci</h3>
+                        <div class="o_hotel_stat_row">
+                            <div class="o_hotel_stat">
+                                <div class="o_hotel_stat_value"><t t-esc="state.data.month_reservations"/></div>
+                                <div class="o_hotel_stat_label">Réservations</div>
+                            </div>
+                            <div class="o_hotel_stat">
+                                <div class="o_hotel_stat_value"><t t-esc="formatAmount(state.data.month_revenue)"/></div>
+                                <div class="o_hotel_stat_label">CA hébergement</div>
+                            </div>
+                        </div>
+                        <div class="o_hotel_stat_row mt-2">
+                            <div class="o_hotel_stat">
+                                <div class="o_hotel_stat_value"><t t-esc="formatAmount(state.data.resto_revenue_month)"/></div>
+                                <div class="o_hotel_stat_label"><i class="fa fa-cutlery me-1"/>CA restauration</div>
+                            </div>
+                            <div class="o_hotel_stat">
+                                <div class="o_hotel_stat_value"><t t-esc="state.data.resto_orders_today"/></div>
+                                <div class="o_hotel_stat_label">Commandes du jour</div>
+                            </div>
+                        </div>
+                        <h3 class="mt-3">Arrivées du jour</h3>
+                        <table class="o_hotel_mini_table">
+                            <tbody>
+                                <tr t-foreach="state.data.arrivals_list" t-as="arr" t-key="arr.id"
+                                    class="o_clickable" t-on-click="() => this.openReservation(arr.id)">
+                                    <td><i class="fa fa-user-o me-1"/><t t-esc="arr.partner"/></td>
+                                    <td class="text-muted small"><t t-esc="arr.rooms"/></td>
+                                </tr>
+                                <tr t-if="!state.data.arrivals_list.length">
+                                    <td class="text-muted">Aucune arrivée prévue aujourd'hui</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Réservations récentes -->
+                <div class="o_hotel_card">
+                    <div class="o_hotel_card_head">
+                        <h3>Réservations récentes</h3>
+                        <button class="btn btn-sm btn-link"
+                                t-on-click="() => this.openReservations([], 'Réservations')">
+                            Tout voir
+                        </button>
+                    </div>
+                    <table class="o_hotel_table">
+                        <thead>
+                            <tr>
+                                <th>Référence</th>
+                                <th>Client</th>
+                                <th>Arrivée</th>
+                                <th>Départ</th>
+                                <th class="text-center">Chambres</th>
+                                <th class="text-end">Total</th>
+                                <th>État</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="state.data.recent_reservations" t-as="r" t-key="r.id"
+                                class="o_clickable" t-on-click="() => this.openReservation(r.id)">
+                                <td><strong><t t-esc="r.name"/></strong></td>
+                                <td><t t-esc="r.partner"/></td>
+                                <td><t t-esc="r.checkin"/></td>
+                                <td><t t-esc="r.checkout"/></td>
+                                <td class="text-center"><t t-esc="r.rooms"/></td>
+                                <td class="text-end"><t t-esc="formatAmount(r.amount)"/></td>
+                                <td>
+                                    <span t-attf-class="badge o_hotel_state_{{r.state}}">
+                                        <t t-esc="r.state_label"/>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr t-if="!state.data.recent_reservations.length">
+                                <td colspan="7" class="text-muted text-center">
+                                    Aucune réservation pour le moment
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

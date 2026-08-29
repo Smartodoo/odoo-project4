@@ -1,0 +1,202 @@
+.o_hotel_dashboard {
+    padding: 16px 20px 40px;
+    background: #f4f5f8;
+    min-height: 100%;
+
+    .o_hotel_loading {
+        text-align: center;
+        padding: 80px 0;
+        color: #7a7f96;
+    }
+
+    .o_hotel_header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0;
+            color: #2c2f45;
+        }
+    }
+
+    .o_hotel_kpis {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 14px;
+
+        &.o_hotel_kpis_small {
+            .o_kpi_value { font-size: 22px; }
+        }
+    }
+
+    .o_kpi {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px 18px;
+        box-shadow: 0 1px 3px rgba(20, 20, 50, 0.08);
+        cursor: pointer;
+        transition: transform .12s ease, box-shadow .12s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(20, 20, 50, 0.12);
+        }
+
+        .o_kpi_icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #fff;
+        }
+        .o_kpi_value { font-size: 28px; font-weight: 700; line-height: 1.1; color: #2c2f45; }
+        .o_kpi_label { font-size: 13px; color: #7a7f96; }
+    }
+
+    .o_kpi_occupied  .o_kpi_icon { background: #e4572e; }
+    .o_kpi_available .o_kpi_icon { background: #17a673; }
+    .o_kpi_guests    .o_kpi_icon { background: #4b6cb7; }
+    .o_kpi_present   .o_kpi_icon { background: #8e44ad; }
+    .o_kpi_soft { background: #fff; }
+
+    .o_hotel_grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin: 14px 0;
+    }
+
+    .o_hotel_card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 1px 3px rgba(20, 20, 50, 0.08);
+
+        h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0 0 12px;
+            color: #2c2f45;
+        }
+
+        .o_hotel_card_head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    .o_hotel_gauge {
+        .o_hotel_gauge_value { font-size: 30px; font-weight: 700; color: #4b6cb7; }
+        .o_hotel_gauge_bar {
+            height: 12px;
+            background: #eceef4;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 8px 0 6px;
+        }
+        .o_hotel_gauge_fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4b6cb7, #8e44ad);
+            border-radius: 6px;
+            transition: width .4s ease;
+        }
+        .o_hotel_gauge_legend {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7a7f96;
+        }
+    }
+
+    .o_hotel_stat_row {
+        display: flex;
+        gap: 20px;
+    }
+    .o_hotel_stat {
+        flex: 1;
+        background: #f7f8fc;
+        border-radius: 10px;
+        padding: 14px;
+        text-align: center;
+
+        .o_hotel_stat_value { font-size: 22px; font-weight: 700; color: #2c2f45; }
+        .o_hotel_stat_label { font-size: 12px; color: #7a7f96; }
+    }
+
+    .o_hotel_mini_table {
+        width: 100%;
+        border-collapse: collapse;
+
+        td {
+            padding: 6px 4px;
+            border-bottom: 1px solid #f0f1f5;
+            font-size: 13px;
+        }
+    }
+
+    .o_hotel_table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+
+        th {
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #9a9fb5;
+            padding: 8px 6px;
+            border-bottom: 2px solid #eceef4;
+        }
+        td {
+            padding: 9px 6px;
+            border-bottom: 1px solid #f0f1f5;
+            font-size: 13px;
+        }
+    }
+
+    .o_clickable { cursor: pointer; }
+    .o_clickable:hover { background: #f7f8fc; }
+
+    .badge {
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .o_hotel_state_draft    { background: #eceef4; color: #6b7089; }
+    .o_hotel_state_confirmed{ background: #dbe6ff; color: #2f5bd0; }
+    .o_hotel_state_checkin  { background: #d3f2e3; color: #128a5a; }
+    .o_hotel_state_checkout { background: #eceef4; color: #6b7089; }
+    .o_hotel_state_cancel   { background: #fbe0dc; color: #c0392b; }
+
+    @media (max-width: 1100px) {
+        .o_hotel_kpis { grid-template-columns: repeat(2, 1fr); }
+        .o_hotel_grid { grid-template-columns: 1fr; }
+    }
+}
+
+// Cartes chambres (kanban)
+.o_hotel_room_card {
+    .o_hotel_room_top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+    .o_hotel_room_no { font-size: 15px; }
+    .o_hotel_room_badge_available   { background: #d3f2e3; color: #128a5a; }
+    .o_hotel_room_badge_occupied    { background: #fbe0dc; color: #c0392b; }
+    .o_hotel_room_badge_maintenance { background: #fdf0d5; color: #b8860b; }
+}
