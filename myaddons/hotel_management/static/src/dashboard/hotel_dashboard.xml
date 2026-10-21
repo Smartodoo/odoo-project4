@@ -138,16 +138,6 @@
                                 <div class="o_hotel_stat_label">CA hébergement</div>
                             </div>
                         </div>
-                        <div class="o_hotel_stat_row mt-2">
-                            <div class="o_hotel_stat">
-                                <div class="o_hotel_stat_value"><t t-esc="formatAmount(state.data.resto_revenue_month)"/></div>
-                                <div class="o_hotel_stat_label"><i class="fa fa-cutlery me-1"/>CA restauration</div>
-                            </div>
-                            <div class="o_hotel_stat">
-                                <div class="o_hotel_stat_value"><t t-esc="state.data.resto_orders_today"/></div>
-                                <div class="o_hotel_stat_label">Commandes du jour</div>
-                            </div>
-                        </div>
                         <h3 class="mt-3">Arrivées du jour</h3>
                         <table class="o_hotel_mini_table">
                             <tbody>

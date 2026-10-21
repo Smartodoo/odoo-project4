@@ -59,7 +59,6 @@
                 <filter name="reception" string="Réception" domain="[('role', '=', 'reception')]"/>
                 <filter name="housekeeping" string="Ménage" domain="[('role', '=', 'housekeeping')]"/>
                 <filter name="maintenance" string="Maintenance" domain="[('role', '=', 'maintenance')]"/>
-                <filter name="restaurant" string="Restauration" domain="[('role', '=', 'restaurant')]"/>
                 <group expand="0" string="Regrouper par">
                     <filter name="group_role" string="Fonction" context="{'group_by': 'role'}"/>
                 </group>

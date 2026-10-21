@@ -5,6 +5,10 @@ access_hotel_room_type_user,hotel.room.type.user,model_hotel_room_type,group_hot
 access_hotel_room_type_manager,hotel.room.type.manager,model_hotel_room_type,group_hotel_manager,1,1,1,1
 access_hotel_room_user,hotel.room.user,model_hotel_room,group_hotel_user,1,1,1,0
 access_hotel_room_manager,hotel.room.manager,model_hotel_room,group_hotel_manager,1,1,1,1
+access_hotel_bed_user,hotel.bed.user,model_hotel_bed,group_hotel_user,1,1,1,0
+access_hotel_bed_manager,hotel.bed.manager,model_hotel_bed,group_hotel_manager,1,1,1,1
+access_hotel_bed_public,hotel.bed.public,model_hotel_bed,base.group_public,1,0,0,0
+access_hotel_bed_portal,hotel.bed.portal,model_hotel_bed,base.group_portal,1,0,0,0
 access_hotel_reservation_user,hotel.reservation.user,model_hotel_reservation,group_hotel_user,1,1,1,0
 access_hotel_reservation_manager,hotel.reservation.manager,model_hotel_reservation,group_hotel_manager,1,1,1,1
 access_hotel_reservation_line_user,hotel.reservation.line.user,model_hotel_reservation_line,group_hotel_user,1,1,1,1
@@ -17,14 +21,6 @@ access_hotel_room_public,hotel.room.public,model_hotel_room,base.group_public,1,
 access_hotel_room_portal,hotel.room.portal,model_hotel_room,base.group_portal,1,0,0,0
 access_hotel_reservation_portal,hotel.reservation.portal,model_hotel_reservation,base.group_portal,1,0,0,0
 access_hotel_reservation_line_portal,hotel.reservation.line.portal,model_hotel_reservation_line,base.group_portal,1,0,0,0
-access_hotel_rest_category_user,hotel.restaurant.category.user,model_hotel_restaurant_category,group_hotel_user,1,1,1,0
-access_hotel_rest_category_manager,hotel.restaurant.category.manager,model_hotel_restaurant_category,group_hotel_manager,1,1,1,1
-access_hotel_rest_item_user,hotel.restaurant.item.user,model_hotel_restaurant_item,group_hotel_user,1,1,1,0
-access_hotel_rest_item_manager,hotel.restaurant.item.manager,model_hotel_restaurant_item,group_hotel_manager,1,1,1,1
-access_hotel_rest_order_user,hotel.restaurant.order.user,model_hotel_restaurant_order,group_hotel_user,1,1,1,0
-access_hotel_rest_order_manager,hotel.restaurant.order.manager,model_hotel_restaurant_order,group_hotel_manager,1,1,1,1
-access_hotel_rest_order_line_user,hotel.restaurant.order.line.user,model_hotel_restaurant_order_line,group_hotel_user,1,1,1,1
-access_hotel_rest_order_line_manager,hotel.restaurant.order.line.manager,model_hotel_restaurant_order_line,group_hotel_manager,1,1,1,1
 access_hotel_staff_user,hotel.staff.user,model_hotel_staff,group_hotel_user,1,1,1,0
 access_hotel_staff_manager,hotel.staff.manager,model_hotel_staff,group_hotel_manager,1,1,1,1
 access_hotel_housekeeping_user,hotel.housekeeping.user,model_hotel_housekeeping,group_hotel_user,1,1,1,0

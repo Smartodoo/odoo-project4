@@ -11,7 +11,7 @@
         - Gestion des étages
     """,
     'author': 'Custom',
-    'depends': ['base', 'contacts', 'mail', 'calendar', 'crm', 'account', 'hr', 'HR_customization', 'caisse2', 'document_page'],
+    'depends': ['base', 'contacts', 'mail', 'calendar', 'crm', 'account', 'sale', 'purchase_stock', 'base_vat', 'hr', 'HR_customization', 'caisse2', 'document_page'],
     'data': [
         'security/commercial_security.xml',
         'security/ir.model.access.csv',
@@ -28,6 +28,7 @@
         'report/decharge_remboursement_report.xml',
         'report/report_reservation_parking.xml',
         'report/report_reglement_interieur.xml',
+        'report/report_liste_clients.xml',
         'report/report_liste_reservations.xml',
         'report/ordre_virement_report.xml',
         'report/coprop_report.xml',
@@ -41,7 +42,6 @@
         'report/decharge_versement_location_report.xml',
         'report/report_recap_paiement.xml',
         'report/report_recap_location.xml',
-        'report/report_liste_clients.xml',
         'report/report_liste_lots.xml',
         'views/projet_views.xml',
         'views/bloc_views.xml',

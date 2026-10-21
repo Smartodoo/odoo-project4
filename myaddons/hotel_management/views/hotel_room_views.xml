@@ -9,6 +9,7 @@
                 <field name="room_type_id"/>
                 <field name="floor"/>
                 <field name="capacity"/>
+                <field name="bed_count" optional="show"/>
                 <field name="price" widget="monetary"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="housekeeping_status"/>
@@ -80,6 +81,7 @@
                             <field name="room_type_id"/>
                             <field name="floor"/>
                             <field name="capacity"/>
+                            <field name="bed_capacity"/>
                         </group>
                         <group>
                             <field name="price" widget="monetary"/>
@@ -97,6 +99,17 @@
                     <group string="Description">
                         <field name="description" nolabel="1"/>
                     </group>
+                    <notebook>
+                        <page string="Lits" name="beds">
+                            <field name="bed_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="price" widget="monetary"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids"/>

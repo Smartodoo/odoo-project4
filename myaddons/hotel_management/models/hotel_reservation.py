@@ -1,4 +1,3 @@
-from datetime import datetime, time
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 
@@ -29,14 +28,6 @@ class HotelReservation(models.Model):
         string="Nb chambres", compute='_compute_amounts', store=True)
     amount_total = fields.Monetary(
         string="Total séjour", compute='_compute_amounts', store=True, tracking=True)
-    restaurant_order_ids = fields.One2many(
-        'hotel.restaurant.order', 'reservation_id', string="Commandes restaurant")
-    restaurant_order_count = fields.Integer(
-        string="Nb commandes resto", compute='_compute_restaurant')
-    restaurant_amount = fields.Monetary(
-        string="Total restauration", compute='_compute_restaurant', store=True)
-    amount_grand_total = fields.Monetary(
-        string="Total général", compute='_compute_restaurant', store=True)
     invoice_ids = fields.One2many(
         'account.move', 'hotel_reservation_id', string="Factures")
     invoice_count = fields.Integer(
@@ -79,32 +70,6 @@ class HotelReservation(models.Model):
             rec.amount_total = sum(rec.line_ids.mapped('price_subtotal'))
             rec.room_count = len(rec.line_ids)
 
-    @api.depends('restaurant_order_ids.amount_total',
-                 'restaurant_order_ids.charge_to_room',
-                 'restaurant_order_ids.state', 'amount_total')
-    def _compute_restaurant(self):
-        for rec in self:
-            charged = rec.restaurant_order_ids.filtered(
-                lambda o: o.charge_to_room and o.state != 'cancel')
-            rec.restaurant_amount = sum(charged.mapped('amount_total'))
-            rec.restaurant_order_count = len(rec.restaurant_order_ids)
-            rec.amount_grand_total = rec.amount_total + rec.restaurant_amount
-
-    def action_view_restaurant_orders(self):
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _("Commandes restaurant"),
-            'res_model': 'hotel.restaurant.order',
-            'view_mode': 'tree,form',
-            'domain': [('reservation_id', '=', self.id)],
-            'context': {
-                'default_reservation_id': self.id,
-                'default_partner_id': self.partner_id.id,
-                'default_charge_to_room': True,
-            },
-        }
-
     def _compute_invoice_count(self):
         for rec in self:
             rec.invoice_count = len(rec.invoice_ids)
@@ -123,28 +88,26 @@ class HotelReservation(models.Model):
         self.ensure_one()
         if not self.partner_id:
             raise UserError(_("Renseignez le client avant de facturer."))
-        if not self.line_ids and not self.restaurant_amount:
+        if not self.line_ids:
             raise UserError(_("Rien à facturer sur ce séjour."))
         income = self._get_income_account()
         if not income:
             raise UserError(_("Aucun compte de produits configuré dans la comptabilité."))
         move_lines = []
         for line in self.line_ids:
+            if line.booking_type == 'bed' and line.bed_ids:
+                label = _("Chambre %s — lit(s) %s — %s nuit(s)") % (
+                    line.room_id.name,
+                    ', '.join(line.bed_ids.mapped('name')), line.nights)
+            else:
+                label = _("Chambre %s — %s nuit(s)") % (
+                    line.room_id.name, line.nights)
             move_lines.append((0, 0, {
-                'name': _("Chambre %s — %s nuit(s)") % (line.room_id.name, line.nights),
+                'name': label,
                 'quantity': line.nights or 1,
                 'price_unit': line.price_unit,
                 'account_id': income.id,
             }))
-        for order in self.restaurant_order_ids.filtered(
-                lambda o: o.charge_to_room and o.state != 'cancel'):
-            for oline in order.line_ids:
-                move_lines.append((0, 0, {
-                    'name': _("Restauration : %s") % (oline.name or oline.item_id.name),
-                    'quantity': oline.qty,
-                    'price_unit': oline.price_unit,
-                    'account_id': income.id,
-                }))
         move = self.env['account.move'].sudo().create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_id.id,
@@ -192,7 +155,16 @@ class HotelReservation(models.Model):
             for line in rec.line_ids:
                 if not line.room_id:
                     continue
-                if not line.room_id.is_available(
+                if line.booking_type == 'bed' and line.bed_ids:
+                    unavailable = line.bed_ids.filtered(
+                        lambda b: not b.is_available(
+                            rec.checkin, rec.checkout, ignore_reservation=rec))
+                    if unavailable:
+                        raise UserError(_(
+                            "Lit(s) %s de la chambre %s indisponible(s) du %s au %s.",
+                            ', '.join(unavailable.mapped('name')),
+                            line.room_id.name, rec.checkin, rec.checkout))
+                elif not line.room_id.is_available(
                         rec.checkin, rec.checkout, ignore_reservation=rec):
                     raise UserError(_(
                         "La chambre %s n'est pas disponible du %s au %s "
@@ -304,15 +276,6 @@ class HotelReservation(models.Model):
             'count': g['room_type_id_count'],
         } for g in by_type_groups]
 
-        RestOrder = self.env['hotel.restaurant.order']
-        month_start_dt = datetime.combine(month_start, time.min)
-        resto_orders_today = RestOrder.search_count([
-            ('order_date', '>=', datetime.combine(today, time.min)),
-            ('state', '!=', 'cancel')])
-        month_resto = RestOrder.search([
-            ('order_date', '>=', month_start_dt), ('state', '!=', 'cancel')])
-        resto_revenue_month = sum(month_resto.mapped('amount_total'))
-
         housekeeping_todo = self.env['hotel.housekeeping'].search_count([
             ('state', 'in', ('todo', 'inprogress'))])
         maintenance_open = self.env['hotel.maintenance.request'].search_count([
@@ -320,8 +283,6 @@ class HotelReservation(models.Model):
 
         symbol = self.env.company.currency_id.symbol or ''
         return {
-            'resto_orders_today': resto_orders_today,
-            'resto_revenue_month': resto_revenue_month,
             'housekeeping_todo': housekeeping_todo,
             'maintenance_open': maintenance_open,
             'total_rooms': total_rooms,
@@ -350,6 +311,11 @@ class HotelReservationLine(models.Model):
     reservation_id = fields.Many2one(
         'hotel.reservation', string="Réservation", required=True, ondelete='cascade')
     room_id = fields.Many2one('hotel.room', string="Chambre", required=True)
+    booking_type = fields.Selection([
+        ('room', 'Chambre entière'),
+        ('bed', 'Lit(s)'),
+    ], string="Réserver", default='room', required=True)
+    bed_ids = fields.Many2many('hotel.bed', string="Lits")
     room_type_id = fields.Many2one(
         related='room_id.room_type_id', string="Type", store=True)
     checkin = fields.Date(related='reservation_id.checkin', store=True)
@@ -367,8 +333,50 @@ class HotelReservationLine(models.Model):
         for line in self:
             line.price_subtotal = line.price_unit * (line.nights or 0)
 
+    def _apply_price(self):
+        day = self.reservation_id.checkin or self.checkin
+        if self.booking_type == 'bed' and self.bed_ids:
+            self.price_unit = sum(self.bed_ids.mapped('price'))
+        elif self.room_id:
+            self.price_unit = self.room_id._get_price_for_date(day)
+
     @api.onchange('room_id')
     def _onchange_room_id(self):
-        if self.room_id:
-            day = self.reservation_id.checkin or self.checkin
-            self.price_unit = self.room_id._get_price_for_date(day)
+        if self.room_id and self.bed_ids:
+            self.bed_ids = self.bed_ids.filtered(
+                lambda b: b.room_id == self.room_id)
+        self._apply_price()
+        return {'domain': {'bed_ids': [('room_id', '=', self.room_id.id)]}}
+
+    @api.onchange('bed_ids')
+    def _onchange_bed_ids(self):
+        if self.bed_ids:
+            rooms = self.bed_ids.mapped('room_id')
+            room = rooms[0]
+            if len(rooms) > 1:
+                self.bed_ids = self.bed_ids.filtered(lambda b: b.room_id == room)
+            self.room_id = room
+            # Tous les lits de la chambre = chambre entière
+            if room.bed_ids and set(self.bed_ids.ids) >= set(room.bed_ids.ids):
+                self.booking_type = 'room'
+                self.bed_ids = [(5, 0, 0)]
+            else:
+                self.booking_type = 'bed'
+        self._apply_price()
+
+    @api.onchange('booking_type')
+    def _onchange_booking_type(self):
+        if self.booking_type == 'room':
+            self.bed_ids = [(5, 0, 0)]
+        self._apply_price()
+
+    @api.constrains('booking_type', 'bed_ids', 'room_id')
+    def _check_beds(self):
+        for line in self:
+            if line.booking_type == 'bed':
+                if not line.bed_ids:
+                    raise ValidationError(_(
+                        "Sélectionnez au moins un lit pour une réservation par lit."))
+                if any(b.room_id != line.room_id for b in line.bed_ids):
+                    raise ValidationError(_(
+                        "Tous les lits doivent appartenir à la chambre sélectionnée."))

@@ -16,6 +16,9 @@ class HotelRoom(models.Model):
     currency_id = fields.Many2one(
         'res.currency', default=lambda self: self.env.company.currency_id)
     amenity_ids = fields.Many2many('hotel.amenity', string="Équipements")
+    bed_capacity = fields.Integer(string="Nombre de lits max", default=3)
+    bed_ids = fields.One2many('hotel.bed', 'room_id', string="Lits")
+    bed_count = fields.Integer(string="Nb lits", compute='_compute_bed_count')
     image = fields.Image(string="Photo")
     description = fields.Text(string="Description")
     active = fields.Boolean(default=True)
@@ -54,6 +57,18 @@ class HotelRoom(models.Model):
                 self.capacity = self.room_type_id.default_capacity
             if self.room_type_id.amenity_ids:
                 self.amenity_ids = [(6, 0, self.room_type_id.amenity_ids.ids)]
+
+    @api.depends('bed_ids')
+    def _compute_bed_count(self):
+        for room in self:
+            room.bed_count = len(room.bed_ids)
+
+    def available_beds(self, checkin, checkout, ignore_reservation=False):
+        """Lits actifs et libres de la chambre sur [checkin, checkout[."""
+        self.ensure_one()
+        return self.bed_ids.filtered(
+            lambda b: b.active and b.is_available(
+                checkin, checkout, ignore_reservation))
 
     def _compute_status(self):
         today = fields.Date.context_today(self)

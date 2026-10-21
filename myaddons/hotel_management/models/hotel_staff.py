@@ -12,7 +12,6 @@ class HotelStaff(models.Model):
         ('reception', 'Réception'),
         ('housekeeping', 'Ménage'),
         ('maintenance', 'Maintenance / Technicien'),
-        ('restaurant', 'Restauration'),
         ('manager', 'Encadrement'),
         ('other', 'Autre'),
     ], string="Fonction", default='other', required=True, tracking=True)

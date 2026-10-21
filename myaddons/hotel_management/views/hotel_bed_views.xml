@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_hotel_bed_tree" model="ir.ui.view">
+        <field name="name">hotel.bed.tree</field>
+        <field name="model">hotel.bed</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="room_id"/>
+                <field name="room_type_id" readonly="1"/>
+                <field name="price" widget="monetary"/>
+                <field name="currency_id" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_hotel_bed_form" model="ir.ui.view">
+        <field name="name">hotel.bed.form</field>
+        <field name="model">hotel.bed</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="ex : 101-L1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="room_id"/>
+                            <field name="room_type_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="price" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hotel_bed_search" model="ir.ui.view">
+        <field name="name">hotel.bed.search</field>
+        <field name="model">hotel.bed</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="room_id"/>
+                <filter name="archived" string="Archivés" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_room" string="Chambre" context="{'group_by': 'room_id'}"/>
+                    <filter name="group_type" string="Type" context="{'group_by': 'room_type_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hotel_bed" model="ir.actions.act_window">
+        <field name="name">Lits</field>
+        <field name="res_model">hotel.bed</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_hotel_bed_search"/>
+    </record>
+</odoo>

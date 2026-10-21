@@ -196,6 +196,46 @@
                                         <input type="number" class="form-control" name="guests"
                                                min="1" t-att-max="room.capacity" t-att-value="guests"/>
                                     </div>
+                                    <t t-if="beds_info">
+                                        <hr/>
+                                        <label class="form-label fw-bold">Que souhaitez-vous réserver ?</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="booking_type"
+                                                   value="room" id="bt_room" checked="checked"/>
+                                            <label class="form-check-label" for="bt_room">
+                                                Toute la chambre —
+                                                <span t-field="room.price"
+                                                      t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                                                / nuit
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="booking_type"
+                                                   value="bed" id="bt_bed"/>
+                                            <label class="form-check-label" for="bt_bed">
+                                                Un ou plusieurs lits
+                                            </label>
+                                        </div>
+                                        <div class="ms-4 mt-1">
+                                            <t t-foreach="beds_info" t-as="bi">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="bed_ids"
+                                                           t-att-value="bi['bed'].id"
+                                                           t-att-id="'bed_%s' % bi['bed'].id"
+                                                           t-att-disabled="'disabled' if bi['available'] == False else None"/>
+                                                    <label class="form-check-label" t-att-for="'bed_%s' % bi['bed'].id">
+                                                        <t t-esc="bi['bed'].name"/> —
+                                                        <span t-field="bi['bed'].price"
+                                                              t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                                                        / nuit
+                                                        <t t-if="bi['available'] == False">
+                                                            <span class="text-danger">(indisponible)</span>
+                                                        </t>
+                                                    </label>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
                                     <hr/>
                                     <div class="mt-2">
                                         <label class="form-label">Nom complet</label>
@@ -245,6 +285,8 @@
                                 <tr><th>Référence</th><td t-esc="reservation.name"/></tr>
                                 <tr><th>Chambre(s)</th>
                                     <td t-esc="', '.join(reservation.line_ids.mapped('room_id.name')) or '—'"/></tr>
+                                <tr t-if="reservation.line_ids.mapped('bed_ids')"><th>Lit(s)</th>
+                                    <td t-esc="', '.join(reservation.line_ids.mapped('bed_ids.name'))"/></tr>
                                 <tr><th>Arrivée</th><td t-esc="reservation.checkin"/></tr>
                                 <tr><th>Départ</th><td t-esc="reservation.checkout"/></tr>
                                 <tr><th>Nuits</th><td t-esc="reservation.nights"/></tr>

@@ -26,11 +26,6 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_restaurant_orders" type="object"
-                                class="oe_stat_button" icon="fa-cutlery">
-                            <field name="restaurant_order_count" widget="statinfo"
-                                   string="Resto"/>
-                        </button>
                         <button name="action_view_invoices" type="object"
                                 class="oe_stat_button" icon="fa-file-text-o"
                                 invisible="invoice_count == 0">
@@ -62,6 +57,11 @@
                             <field name="line_ids">
                                 <tree editable="bottom">
                                     <field name="room_id"/>
+                                    <field name="booking_type"/>
+                                    <field name="bed_ids" widget="many2many_tags"
+                                           domain="[('room_id', '=', room_id)]"
+                                           options="{'no_create': True, 'no_open': True}"
+                                           invisible="booking_type != 'bed'"/>
                                     <field name="room_type_id" readonly="1"/>
                                     <field name="nights" readonly="1"/>
                                     <field name="price_unit" widget="monetary"/>
@@ -71,9 +71,7 @@
                             </field>
                             <group class="oe_subtotal_footer">
                                 <field name="room_count"/>
-                                <field name="amount_total" widget="monetary"/>
-                                <field name="restaurant_amount" widget="monetary"/>
-                                <field name="amount_grand_total" widget="monetary"
+                                <field name="amount_total" widget="monetary"
                                        class="oe_subtotal_footer_separator"/>
                                 <field name="currency_id" invisible="1"/>
                             </group>

@@ -1,5 +1,5 @@
 {
-    'name': "Gestion Hôtelière",
+    'name': "Auberge",
     'summary': "Gestion complète d'un hôtel : chambres, réservations, tableau de bord",
     'description': """
 Gestion Hôtelière (PMS)
@@ -23,14 +23,13 @@ travaux, personnel hôtelier.
         'security/hotel_website_security.xml',
         'data/hotel_sequence.xml',
         'data/hotel_data.xml',
-        'data/restaurant_data.xml',
         'data/mail_template_data.xml',
         'views/hotel_amenity_views.xml',
         'views/hotel_room_type_views.xml',
         'views/hotel_room_views.xml',
+        'views/hotel_bed_views.xml',
         'views/hotel_rate_season_views.xml',
         'views/hotel_reservation_views.xml',
-        'views/hotel_restaurant_views.xml',
         'views/hotel_operations_views.xml',
         'views/hotel_dashboard_views.xml',
         'views/hotel_menus.xml',
