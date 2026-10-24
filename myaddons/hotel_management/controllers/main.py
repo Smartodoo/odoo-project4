@@ -34,13 +34,16 @@ class HotelWebsite(http.Controller):
         available_rooms = Room.browse()
         occupied_rooms = Room.browse()
         rooms = Room.search([('website_published', '=', True)])
+        offers = {}
 
         if checkin or checkout:
             if ci and co and co > ci:
                 dates_selected = True
                 avail_ids, occ_ids = [], []
                 for r in rooms:
-                    if r.capacity >= guests and r.is_available(ci, co):
+                    offer = r.get_offer(ci, co, guests)
+                    offers[r.id] = offer
+                    if offer['bookable']:
                         avail_ids.append(r.id)
                     else:
                         occ_ids.append(r.id)
@@ -53,6 +56,7 @@ class HotelWebsite(http.Controller):
             'rooms': rooms,
             'available_rooms': available_rooms,
             'occupied_rooms': occupied_rooms,
+            'offers': offers,
             'dates_selected': dates_selected,
             'checkin': checkin,
             'checkout': checkout,
@@ -66,20 +70,29 @@ class HotelWebsite(http.Controller):
         """Valeurs du template détail : dispo chambre entière + par lit."""
         ci = self._parse_date(checkin)
         co = self._parse_date(checkout)
-        beds = room.bed_ids.filtered('active') if room else request.env['hotel.bed']
+        Bed = request.env['hotel.bed']
+        beds = room.bed_ids.filtered('active') \
+            if room and room.rental_mode != 'room' else Bed
         available = None
-        bed_av = {}
+        whole_available = None
+        free_beds = beds
         if room and ci and co and co > ci:
-            available = room.is_available(ci, co)
-            for b in beds:
-                bed_av[b.id] = b.is_available(ci, co)
-        beds_info = [{'bed': b, 'available': bed_av.get(b.id)} for b in beds]
+            whole_available = room.can_book_whole_room(ci, co)
+            free_beds = room.bookable_beds(ci, co)
+            available = bool(whole_available or free_beds)
+        beds_info = [{
+            'bed': b,
+            'available': None if available is None else b in free_beds,
+        } for b in beds]
         values = {
             'room': room,
             'checkin': checkin,
             'checkout': checkout,
             'guests': guests,
             'available': available,
+            'whole_available': whole_available,
+            'whole_price': room._get_whole_room_price(ci) if room else 0.0,
+            'free_bed_count': len(free_beds),
             'beds_info': beds_info,
             'errors': [],
             'name': '',
@@ -131,9 +144,14 @@ class HotelWebsite(http.Controller):
         beds = request.env['hotel.bed'].sudo().browse(bed_ids).exists()
         if room:
             beds = beds.filtered(lambda b: b.room_id == room)
-        # Tous les lits de la chambre = chambre entière
-        if booking_type == 'bed' and room and room.bed_ids \
-                and set(beds.ids) >= set(room.bed_ids.ids):
+        # Le mode de location de la chambre prime sur le choix du formulaire
+        if room.rental_mode == 'bed':
+            booking_type = 'bed'
+        elif room.rental_mode == 'room':
+            booking_type = 'room'
+        # Tous les lits de la chambre = chambre entière (sauf dortoir)
+        if booking_type == 'bed' and room and room.rental_mode == 'both' \
+                and room.bed_ids and set(beds.ids) >= set(room.bed_ids.ids):
             booking_type = 'room'
             beds = request.env['hotel.bed'].sudo().browse()
 
@@ -156,8 +174,25 @@ class HotelWebsite(http.Controller):
                         errors.append(
                             "Lit(s) indisponible(s) sur la période : %s."
                             % ', '.join(unavailable.mapped('name')))
-            elif not room.is_available(ci, co):
-                errors.append("Cette chambre n'est plus disponible sur la période choisie.")
+                    if guests > len(beds):
+                        errors.append(
+                            "Vous êtes %s personne(s) : sélectionnez au moins %s lit(s)."
+                            % (guests, guests))
+            else:
+                room_places = room.capacity or len(room.bed_ids.filtered('active'))
+                if guests > room_places:
+                    errors.append(
+                        "Cette chambre accueille au maximum %s personne(s)." % room_places)
+                if not room.can_book_whole_room(ci, co):
+                    free = room.bookable_beds(ci, co)
+                    if free:
+                        errors.append(
+                            "La chambre entière n'est plus disponible (des lits sont déjà "
+                            "loués), mais %s lit(s) restent libres : réservez-les au lit."
+                            % len(free))
+                    else:
+                        errors.append(
+                            "Cette chambre n'est plus disponible sur la période choisie.")
 
         if errors:
             values = self._room_detail_values(
@@ -188,7 +223,7 @@ class HotelWebsite(http.Controller):
             line_vals = {
                 'room_id': room.id,
                 'booking_type': 'room',
-                'price_unit': room._get_price_for_date(ci),
+                'price_unit': room._get_whole_room_price(ci),
             }
 
         reservation = request.env['hotel.reservation'].sudo().create({

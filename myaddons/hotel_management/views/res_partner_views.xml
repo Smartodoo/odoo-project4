@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_partner_form_hotel" model="ir.ui.view">
+        <field name="name">res.partner.form.hotel</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_hotel_reservations" type="object"
+                        class="oe_stat_button" icon="fa-bed"
+                        invisible="hotel_reservation_count == 0">
+                    <field name="hotel_reservation_count" widget="statinfo"
+                           string="Séjours"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Auberge" name="hotel">
+                    <group>
+                        <group string="Identité">
+                            <field name="hotel_last_name"/>
+                            <field name="hotel_first_name"/>
+                        </group>
+                        <group string="Pièce d'identité">
+                            <field name="hotel_id_type"/>
+                            <field name="hotel_id_number"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

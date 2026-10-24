@@ -97,14 +97,48 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <h4 class="mb-0">Chambre <t t-esc="room.name"/></h4>
                         <span class="o_hotel_price">
-                            <span t-field="room.price"
-                                  t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                            <small>/ nuit</small>
+                            <t t-if="room.rental_mode == 'bed'">
+                                <small>dès</small>
+                                <span t-field="room.bed_price_min"
+                                      t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                                <small>/ lit</small>
+                            </t>
+                            <t t-else="">
+                                <span t-field="room.whole_room_price"
+                                      t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                                <small>/ nuit</small>
+                            </t>
                         </span>
                     </div>
                     <div class="text-muted mb-2">
                         <t t-esc="room.room_type_id.name"/> ·
                         <i class="fa fa-user me-1"/><t t-esc="room.capacity"/> pers.
+                        <t t-if="room.bed_count"> ·
+                            <i class="fa fa-bed me-1"/><t t-esc="room.bed_count"/> lit(s)
+                        </t>
+                    </div>
+                    <t t-set="offer" t-value="offers and offers.get(room.id)"/>
+                    <div class="o_hotel_offer mb-2">
+                        <t t-if="offer">
+                            <span t-if="offer['whole']" class="o_hotel_offer_tag o_hotel_offer_ok">
+                                <i class="fa fa-check me-1"/>Chambre entière
+                            </span>
+                            <span t-if="offer['beds']" class="o_hotel_offer_tag o_hotel_offer_beds">
+                                <i class="fa fa-bed me-1"/><t t-esc="len(offer['beds'])"/> lit(s) libre(s)
+                                dès <span t-esc="offer['bed_price_min']"
+                                          t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                            </span>
+                            <span t-if="not offer['bookable']" class="o_hotel_offer_tag o_hotel_offer_full">
+                                <i class="fa fa-times me-1"/>Complet
+                            </span>
+                        </t>
+                        <t t-else="">
+                            <span t-if="room.rental_mode != 'bed'" class="o_hotel_offer_tag o_hotel_offer_ok">Chambre entière</span>
+                            <span t-if="room.rental_mode != 'room' and room.bed_count" class="o_hotel_offer_tag o_hotel_offer_beds">
+                                Au lit dès <span t-field="room.bed_price_min"
+                                                 t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                            </span>
+                        </t>
                     </div>
                     <div class="o_hotel_amenities mb-2">
                         <t t-foreach="room.amenity_ids" t-as="am">
@@ -160,13 +194,28 @@
                         <div class="col-lg-5">
                             <div class="o_hotel_booking_box">
                                 <div class="o_hotel_booking_price mb-2">
-                                    <span t-field="room.price"
-                                          t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                                    <small class="text-muted">/ nuit</small>
+                                    <t t-if="room.rental_mode == 'bed'">
+                                        <small class="text-muted">dès</small>
+                                        <span t-field="room.bed_price_min"
+                                              t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                                        <small class="text-muted">/ lit / nuit</small>
+                                    </t>
+                                    <t t-else="">
+                                        <span t-esc="whole_price"
+                                              t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                                        <small class="text-muted">/ nuit (chambre entière)</small>
+                                    </t>
                                 </div>
                                 <t t-if="available == False">
                                     <div class="alert alert-warning py-2">
-                                        Indisponible pour les dates sélectionnées.
+                                        <i class="fa fa-times-circle me-1"/>Complet pour les dates sélectionnées.
+                                    </div>
+                                </t>
+                                <t t-elif="available and whole_available == False and room.rental_mode == 'both'">
+                                    <div class="alert alert-info py-2">
+                                        <i class="fa fa-info-circle me-1"/>
+                                        Des lits sont déjà loués : la chambre entière n'est plus disponible,
+                                        mais il reste <b><t t-esc="free_bed_count"/> lit(s)</b> à réserver.
                                     </div>
                                 </t>
                                 <t t-if="errors">
@@ -196,46 +245,65 @@
                                         <input type="number" class="form-control" name="guests"
                                                min="1" t-att-max="room.capacity" t-att-value="guests"/>
                                     </div>
-                                    <t t-if="beds_info">
+                                    <t t-set="show_room" t-value="room.rental_mode != 'bed'"/>
+                                    <t t-set="show_beds" t-value="room.rental_mode != 'room' and beds_info"/>
+                                    <t t-set="room_ok" t-value="show_room and whole_available != False"/>
+                                    <t t-if="show_room and show_beds">
                                         <hr/>
                                         <label class="form-label fw-bold">Que souhaitez-vous réserver ?</label>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="booking_type"
-                                                   value="room" id="bt_room" checked="checked"/>
-                                            <label class="form-check-label" for="bt_room">
-                                                Toute la chambre —
-                                                <span t-field="room.price"
-                                                      t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                                                / nuit
+                                        <div class="o_hotel_choice">
+                                            <input class="btn-check" type="radio" name="booking_type"
+                                                   value="room" id="bt_room"
+                                                   t-att-checked="'checked' if room_ok else None"
+                                                   t-att-disabled="None if room_ok else 'disabled'"/>
+                                            <label class="o_hotel_choice_card" for="bt_room">
+                                                <i class="fa fa-home"/>
+                                                <span class="o_hotel_choice_title">Toute la chambre</span>
+                                                <span class="o_hotel_choice_price">
+                                                    <span t-esc="whole_price"
+                                                          t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                                                    / nuit
+                                                </span>
+                                                <small t-if="not room_ok" class="text-danger">Indisponible</small>
                                             </label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="booking_type"
-                                                   value="bed" id="bt_bed"/>
-                                            <label class="form-check-label" for="bt_bed">
-                                                Un ou plusieurs lits
-                                            </label>
-                                        </div>
-                                        <div class="ms-4 mt-1">
-                                            <t t-foreach="beds_info" t-as="bi">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="bed_ids"
-                                                           t-att-value="bi['bed'].id"
-                                                           t-att-id="'bed_%s' % bi['bed'].id"
-                                                           t-att-disabled="'disabled' if bi['available'] == False else None"/>
-                                                    <label class="form-check-label" t-att-for="'bed_%s' % bi['bed'].id">
-                                                        <t t-esc="bi['bed'].name"/> —
-                                                        <span t-field="bi['bed'].price"
+                                            <input class="btn-check" type="radio" name="booking_type"
+                                                   value="bed" id="bt_bed"
+                                                   t-att-checked="None if room_ok else 'checked'"/>
+                                            <label class="o_hotel_choice_card" for="bt_bed">
+                                                <i class="fa fa-bed"/>
+                                                <span class="o_hotel_choice_title">Un ou plusieurs lits</span>
+                                                <span class="o_hotel_choice_price">
+                                                    dès <span t-field="room.bed_price_min"
                                                               t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                                                        / nuit
-                                                        <t t-if="bi['available'] == False">
-                                                            <span class="text-danger">(indisponible)</span>
-                                                        </t>
-                                                    </label>
-                                                </div>
-                                            </t>
+                                                    / lit
+                                                </span>
+                                            </label>
                                         </div>
                                     </t>
+                                    <t t-elif="show_room">
+                                        <input type="hidden" name="booking_type" value="room"/>
+                                    </t>
+                                    <t t-elif="show_beds">
+                                        <input type="hidden" name="booking_type" value="bed"/>
+                                        <hr/>
+                                        <label class="form-label fw-bold">Choisissez vos lits</label>
+                                    </t>
+                                    <div t-if="show_beds" class="o_hotel_bed_pick mt-2">
+                                        <t t-foreach="beds_info" t-as="bi">
+                                            <input class="btn-check" type="checkbox" name="bed_ids"
+                                                   t-att-value="bi['bed'].id"
+                                                   t-att-id="'bed_%s' % bi['bed'].id"
+                                                   t-att-disabled="'disabled' if bi['available'] == False else None"/>
+                                            <label t-attf-class="o_hotel_bed_option #{'o_hotel_bed_taken' if bi['available'] == False else ''}"
+                                                   t-att-for="'bed_%s' % bi['bed'].id">
+                                                <i class="fa fa-bed"/>
+                                                <span class="fw-bold" t-esc="bi['bed'].name"/>
+                                                <span t-field="bi['bed'].price"
+                                                      t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
+                                                <small t-if="bi['available'] == False">Occupé</small>
+                                            </label>
+                                        </t>
+                                    </div>
                                     <hr/>
                                     <div class="mt-2">
                                         <label class="form-label">Nom complet</label>
