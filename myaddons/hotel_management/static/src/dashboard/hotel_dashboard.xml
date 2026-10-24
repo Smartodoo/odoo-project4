@@ -23,7 +23,9 @@
                         <div class="o_kpi_icon"><i class="fa fa-bed"/></div>
                         <div class="o_kpi_body">
                             <div class="o_kpi_value"><t t-esc="state.data.occupied"/></div>
-                            <div class="o_kpi_label">Chambres occupées</div>
+                            <div class="o_kpi_label">Chambres complètes
+                                <t t-if="state.data.partial"> · <t t-esc="state.data.partial"/> partielle(s)</t>
+                            </div>
                         </div>
                     </div>
                     <div class="o_kpi o_kpi_available"
@@ -31,7 +33,9 @@
                         <div class="o_kpi_icon"><i class="fa fa-check-circle"/></div>
                         <div class="o_kpi_body">
                             <div class="o_kpi_value"><t t-esc="state.data.available"/></div>
-                            <div class="o_kpi_label">Chambres disponibles</div>
+                            <div class="o_kpi_label">Chambres libres
+                                <t t-if="state.data.reserved"> · <t t-esc="state.data.reserved"/> réservée(s)</t>
+                            </div>
                         </div>
                     </div>
                     <div class="o_kpi o_kpi_guests"
@@ -70,14 +74,16 @@
                          t-on-click="() => this.openRooms([['maintenance','=',true]], 'Maintenance')">
                         <div class="o_kpi_body">
                             <div class="o_kpi_value"><t t-esc="state.data.maintenance"/></div>
-                            <div class="o_kpi_label"><i class="fa fa-wrench me-1"/>En maintenance</div>
+                            <div class="o_kpi_label"><i class="fa fa-wrench me-1"/>Maintenance / hors service</div>
                         </div>
                     </div>
                     <div class="o_kpi o_kpi_soft"
                          t-on-click="() => this.openRooms([['housekeeping_status','=','dirty']], 'À nettoyer')">
                         <div class="o_kpi_body">
                             <div class="o_kpi_value"><t t-esc="state.data.to_clean"/></div>
-                            <div class="o_kpi_label"><i class="fa fa-magic me-1"/>Chambres à nettoyer</div>
+                            <div class="o_kpi_label"><i class="fa fa-magic me-1"/>Chambres à nettoyer
+                                <t t-if="state.data.cleaning"> · <t t-esc="state.data.cleaning"/> libre(s)</t>
+                            </div>
                         </div>
                     </div>
                     <div class="o_kpi o_kpi_soft"
@@ -107,10 +113,24 @@
                                      t-attf-style="width: {{state.data.occupancy_rate}}%;"/>
                             </div>
                             <div class="o_hotel_gauge_legend">
-                                <span><t t-esc="state.data.occupied"/> occupées</span>
+                                <span><t t-esc="state.data.occupied + state.data.partial"/> occupées (dont <t t-esc="state.data.partial"/> partielles)</span>
                                 <span><t t-esc="state.data.total_rooms"/> chambres</span>
                             </div>
                         </div>
+                        <t t-if="state.data.total_beds">
+                            <h3 class="mt-3">Occupation des lits</h3>
+                            <div class="o_hotel_gauge">
+                                <div class="o_hotel_gauge_value"><t t-esc="state.data.bed_occupancy_rate"/>%</div>
+                                <div class="o_hotel_gauge_bar">
+                                    <div class="o_hotel_gauge_fill o_hotel_gauge_fill_beds"
+                                         t-attf-style="width: {{state.data.bed_occupancy_rate}}%;"/>
+                                </div>
+                                <div class="o_hotel_gauge_legend">
+                                    <span><t t-esc="state.data.free_beds"/> lits libres</span>
+                                    <span><t t-esc="state.data.total_beds"/> lits</span>
+                                </div>
+                            </div>
+                        </t>
                         <h3 class="mt-3">Chambres par type</h3>
                         <table class="o_hotel_mini_table">
                             <tbody>

@@ -9,14 +9,19 @@
                 <field name="room_type_id"/>
                 <field name="floor"/>
                 <field name="capacity"/>
-                <field name="bed_count" optional="show"/>
-                <field name="price" widget="monetary"/>
+                <field name="rental_mode" optional="show"/>
+                <field name="bed_count" optional="hide"/>
+                <field name="bed_availability" optional="show"/>
+                <field name="whole_room_price" widget="monetary" optional="show"/>
                 <field name="currency_id" column_invisible="1"/>
-                <field name="housekeeping_status"/>
+                <field name="housekeeping_status" optional="show"/>
                 <field name="status" widget="badge"
                        decoration-success="status == 'available'"
+                       decoration-warning="status == 'partial'"
+                       decoration-info="status == 'reserved'"
                        decoration-danger="status == 'occupied'"
-                       decoration-warning="status == 'maintenance'"/>
+                       decoration-primary="status == 'cleaning'"
+                       decoration-muted="status in ('maintenance', 'out_of_service')"/>
                 <field name="current_guest_id" optional="show"/>
             </tree>
         </field>
@@ -31,32 +36,44 @@
                 <field name="status"/>
                 <field name="housekeeping_status"/>
                 <field name="room_type_id"/>
+                <field name="rental_mode"/>
                 <field name="capacity"/>
-                <field name="price"/>
+                <field name="whole_room_price"/>
                 <field name="currency_id"/>
                 <field name="current_guest_id"/>
+                <field name="bed_count"/>
+                <field name="beds_free_count"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click o_hotel_room_card">
+                        <div t-attf-class="oe_kanban_global_click o_hotel_room_card o_hotel_room_card_#{record.status.raw_value}">
                             <div class="o_hotel_room_top">
                                 <strong class="o_hotel_room_no">
-                                    <i class="fa fa-bed me-1"/><field name="name"/>
+                                    <i class="fa fa-key me-1" title="Chambre"/><field name="name"/>
                                 </strong>
-                                <span t-attf-class="badge o_hotel_room_badge_#{record.status.raw_value}">
+                                <span t-attf-class="badge rounded-pill o_hotel_room_badge_#{record.status.raw_value}">
                                     <field name="status"/>
                                 </span>
                             </div>
-                            <div class="text-muted">
-                                <field name="room_type_id"/> · <field name="capacity"/> pers.
+                            <div class="text-muted small mb-1">
+                                <field name="room_type_id"/> · <field name="capacity"/> pers. ·
+                                <field name="rental_mode"/>
                             </div>
-                            <div>
-                                <field name="price" widget="monetary"/> / nuit
+                            <field name="bed_map"/>
+                            <div class="o_hotel_room_meta">
+                                <span t-if="record.bed_count.raw_value" class="o_hotel_room_free">
+                                    <b><t t-esc="record.beds_free_count.raw_value"/></b>
+                                    / <t t-esc="record.bed_count.raw_value"/> lits libres
+                                </span>
+                                <span t-if="record.rental_mode.raw_value != 'bed'" class="o_hotel_room_price">
+                                    <field name="whole_room_price" widget="monetary"/>
+                                    <small class="text-muted">/ nuit</small>
+                                </span>
                             </div>
-                            <div t-if="record.current_guest_id.raw_value" class="text-danger small">
-                                <i class="fa fa-user me-1"/><field name="current_guest_id"/>
+                            <div t-if="record.current_guest_id.raw_value" class="small o_hotel_room_guest">
+                                <i class="fa fa-user me-1" title="Client"/><field name="current_guest_id"/>
                             </div>
-                            <div class="small">
-                                <i class="fa fa-magic me-1"/><field name="housekeeping_status"/>
+                            <div class="small text-muted">
+                                <i class="fa fa-magic me-1" title="Ménage"/><field name="housekeeping_status"/>
                             </div>
                         </div>
                     </t>
@@ -84,30 +101,134 @@
                             <field name="bed_capacity"/>
                         </group>
                         <group>
-                            <field name="price" widget="monetary"/>
-                            <field name="currency_id" invisible="1"/>
-                            <field name="housekeeping_status" widget="badge"/>
-                            <field name="maintenance" widget="boolean_toggle"/>
-                            <field name="status" readonly="1"/>
+                            <field name="technical_state" widget="selection_badge"/>
+                            <field name="housekeeping_status" widget="selection_badge"/>
+                            <field name="status" widget="badge" readonly="1"
+                                   decoration-success="status == 'available'"
+                                   decoration-warning="status == 'partial'"
+                                   decoration-info="status == 'reserved'"
+                                   decoration-danger="status == 'occupied'"
+                                   decoration-primary="status == 'cleaning'"
+                                   decoration-muted="status in ('maintenance', 'out_of_service')"/>
+                            <field name="bed_availability" readonly="1"
+                                   invisible="not bed_count"/>
                             <field name="current_guest_id" readonly="1"
-                                   invisible="status != 'occupied'"/>
+                                   invisible="not current_guest_id"/>
+                            <field name="current_reservation_id" readonly="1"
+                                   invisible="not current_reservation_id"/>
+                            <field name="bed_count" invisible="1"/>
                         </group>
                     </group>
-                    <group string="Équipements">
-                        <field name="amenity_ids" widget="many2many_tags" nolabel="1"/>
-                    </group>
-                    <group string="Description">
-                        <field name="description" nolabel="1"/>
-                    </group>
+                    <div class="o_hotel_occupation mb-3" invisible="not bed_count">
+                        <div class="o_hotel_occupation_title">Occupation des lits aujourd'hui</div>
+                        <field name="bed_map" nolabel="1"/>
+                        <div class="o_hotel_bed_legend">
+                            <span class="o_hotel_bed_chip o_hotel_bed_chip_free">Libre</span>
+                            <span class="o_hotel_bed_chip o_hotel_bed_chip_reserved">Réservé</span>
+                            <span class="o_hotel_bed_chip o_hotel_bed_chip_occupied">Occupé</span>
+                        </div>
+                    </div>
+                    <div class="o_hotel_rental" name="rental">
+                        <div class="o_hotel_rental_head">
+                            <span class="o_hotel_rental_icon"><i class="fa fa-tags" title="Tarifs"/></span>
+                            <div>
+                                <div class="o_hotel_rental_title">Location &amp; tarifs</div>
+                                <div class="o_hotel_rental_sub">Comment cette chambre se loue, et à quel prix</div>
+                            </div>
+                        </div>
+                        <div class="o_hotel_rental_body">
+                            <div class="o_hotel_rental_settings">
+                                <div class="o_hotel_rental_label">Mode de location</div>
+                                <field name="rental_mode" widget="radio"
+                                       class="o_hotel_option_cards o_hotel_option_mode"/>
+
+                                <div invisible="rental_mode == 'bed'">
+                                    <div class="o_hotel_rental_label mt-3">Prix de la chambre entière</div>
+                                    <field name="whole_room_pricing" widget="radio"
+                                           options="{'horizontal': true}"
+                                           class="o_hotel_option_cards o_hotel_option_pricing"/>
+                                    <div class="o_hotel_fixed_price"
+                                         invisible="whole_room_pricing != 'fixed'">
+                                        <label for="price" string="Prix fixe / nuit"/>
+                                        <field name="price" widget="monetary"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="o_hotel_rental_summary">
+                                <div class="o_hotel_price_card o_hotel_price_card_room"
+                                     invisible="rental_mode == 'bed'">
+                                    <div class="o_hotel_price_card_label">
+                                        <i class="fa fa-home me-1" title="Chambre"/>Chambre entière
+                                    </div>
+                                    <div class="o_hotel_price_card_value">
+                                        <field name="whole_room_price" widget="monetary"/>
+                                    </div>
+                                    <div class="o_hotel_price_card_hint">
+                                        par nuit ·
+                                        <span invisible="whole_room_pricing != 'sum_beds'">
+                                            somme de <field name="bed_count" class="oe_inline"/> lit(s)
+                                        </span>
+                                        <span invisible="whole_room_pricing != 'fixed'">prix fixe</span>
+                                    </div>
+                                </div>
+                                <div class="o_hotel_price_card o_hotel_price_card_bed"
+                                     invisible="rental_mode == 'room'">
+                                    <div class="o_hotel_price_card_label">
+                                        <i class="fa fa-bed me-1" title="Lit"/>Au lit
+                                    </div>
+                                    <div class="o_hotel_price_card_value" invisible="not bed_count">
+                                        <small>dès</small>
+                                        <field name="bed_price_min" widget="monetary"/>
+                                    </div>
+                                    <div class="o_hotel_price_card_hint" invisible="not bed_count">
+                                        par lit et par nuit
+                                    </div>
+                                    <div class="o_hotel_price_card_empty" invisible="bed_count">
+                                        <i class="fa fa-exclamation-circle me-1" title="Attention"/>
+                                        Aucun lit : ajoutez-en dans l'onglet « Lits ».
+                                    </div>
+                                </div>
+                                <div class="o_hotel_price_card_note"
+                                     invisible="rental_mode == 'bed' or whole_room_pricing != 'sum_beds'">
+                                    <i class="fa fa-info-circle me-1" title="Info"/>
+                                    Le prix de chaque lit se modifie dans l'onglet « Lits ».
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <notebook>
                         <page string="Lits" name="beds">
-                            <field name="bed_ids">
-                                <tree editable="bottom">
-                                    <field name="name"/>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted">
+                                    Lits : <field name="bed_summary" class="oe_inline"/>
+                                </span>
+                                <button name="action_manage_beds" type="object"
+                                        string="Gérer les lits" icon="fa-bed"
+                                        class="btn-secondary"
+                                        groups="hotel_management.group_hotel_manager"/>
+                            </div>
+                            <field name="bed_ids" readonly="1">
+                                <tree create="0" delete="0">
+                                    <field name="name" string="Référence"/>
                                     <field name="price" widget="monetary"/>
                                     <field name="currency_id" column_invisible="1"/>
+                                    <field name="status" widget="badge"
+                                           decoration-success="status == 'free'"
+                                           decoration-info="status == 'reserved'"
+                                           decoration-danger="status == 'occupied'"
+                                           decoration-muted="status in ('maintenance', 'out_of_service')"/>
+                                    <field name="current_guest_id"/>
                                 </tree>
                             </field>
+                        </page>
+                        <page string="Équipements" name="amenities">
+                            <field name="amenity_ids" widget="many2many_tags"
+                                   placeholder="Ajouter des équipements (Wifi, Climatisation, TV…)"/>
+                        </page>
+                        <page string="Description" name="description">
+                            <field name="description"
+                                   placeholder="Description de la chambre (affichée sur le site web)…"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -127,14 +248,21 @@
                 <field name="name"/>
                 <field name="room_type_id"/>
                 <field name="floor"/>
+                <filter name="mode_room" string="Chambres privées" domain="[('rental_mode', '=', 'room')]"/>
+                <filter name="mode_bed" string="Dortoirs (au lit)" domain="[('rental_mode', '=', 'bed')]"/>
+                <filter name="mode_both" string="Mixtes" domain="[('rental_mode', '=', 'both')]"/>
+                <separator/>
                 <filter name="clean" string="Propres" domain="[('housekeeping_status', '=', 'clean')]"/>
                 <filter name="dirty" string="À nettoyer" domain="[('housekeeping_status', '=', 'dirty')]"/>
-                <filter name="maintenance" string="En maintenance" domain="[('maintenance', '=', True)]"/>
+                <filter name="maintenance" string="En maintenance" domain="[('technical_state', '=', 'maintenance')]"/>
+                <filter name="out_of_service" string="Hors service" domain="[('technical_state', '=', 'out_of_service')]"/>
                 <separator/>
                 <filter name="archived" string="Archivées" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Regrouper par">
                     <filter name="group_type" string="Type" context="{'group_by': 'room_type_id'}"/>
+                    <filter name="group_mode" string="Mode de location" context="{'group_by': 'rental_mode'}"/>
                     <filter name="group_floor" string="Étage" context="{'group_by': 'floor'}"/>
+                    <filter name="group_technical" string="État technique" context="{'group_by': 'technical_state'}"/>
                     <filter name="group_housekeeping" string="État ménage" context="{'group_by': 'housekeeping_status'}"/>
                 </group>
             </search>

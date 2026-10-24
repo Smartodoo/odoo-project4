@@ -38,6 +38,9 @@
     <menuitem id="menu_hotel_amenity" name="Équipements"
               parent="menu_hotel_config" action="action_hotel_amenity"
               sequence="20"/>
+    <menuitem id="menu_hotel_room_beds" name="Nombre de lits"
+              parent="menu_hotel_config" action="action_hotel_room_beds"
+              sequence="30"/>
     <menuitem id="menu_hotel_rate_season" name="Tarifs saisonniers"
               parent="menu_hotel_config" action="action_hotel_rate_season"
               sequence="40"/>

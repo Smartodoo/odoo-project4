@@ -111,6 +111,7 @@
             background: linear-gradient(90deg, #4b6cb7, #8e44ad);
             border-radius: 6px;
             transition: width .4s ease;
+            &.o_hotel_gauge_fill_beds { background: linear-gradient(90deg, #f0a500, #e4572e); }
         }
         .o_hotel_gauge_legend {
             display: flex;
@@ -197,6 +198,259 @@
     }
     .o_hotel_room_no { font-size: 15px; }
     .o_hotel_room_badge_available   { background: #d3f2e3; color: #128a5a; }
+    .o_hotel_room_badge_partial     { background: #fff1cc; color: #a86b00; }
+    .o_hotel_room_badge_reserved    { background: #dbe7ff; color: #2f5bb7; }
     .o_hotel_room_badge_occupied    { background: #fbe0dc; color: #c0392b; }
-    .o_hotel_room_badge_maintenance { background: #fdf0d5; color: #b8860b; }
+    .o_hotel_room_badge_maintenance { background: #e7e8ec; color: #5b6070; }
+    .o_hotel_room_badge_cleaning    { background: #efe4fb; color: #7b3fb8; }
+    .o_hotel_room_badge_out_of_service { background: #3a3e4f; color: #fff; }
+
+    border-left: 4px solid #17a673;
+    &.o_hotel_room_card_partial     { border-left-color: #f0a500; }
+    &.o_hotel_room_card_reserved    { border-left-color: #4b7bec; }
+    &.o_hotel_room_card_occupied    { border-left-color: #e4572e; }
+    &.o_hotel_room_card_maintenance { border-left-color: #9aa0ad; }
+    &.o_hotel_room_card_cleaning    { border-left-color: #9b59d0; }
+    &.o_hotel_room_card_out_of_service { border-left-color: #3a3e4f; }
+
+    .o_hotel_room_meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin: 4px 0 2px;
+    }
+    .o_hotel_room_free { font-size: 13px; color: #4a4f63; }
+    .o_hotel_room_price { font-weight: 600; }
+    .o_hotel_room_guest { color: #c0392b; }
+}
+
+// Pastilles de lits (kanban + fiche chambre)
+.o_hotel_bed_map {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 4px 0;
+}
+.o_hotel_bed_chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+.o_hotel_bed_chip_free        { background: #e3f6ec; color: #128a5a; border-color: #b6e6cd; }
+.o_hotel_bed_chip_reserved    { background: #e3ecff; color: #2f5bb7; border-color: #bccff7; }
+.o_hotel_bed_chip_occupied    { background: #fde6e2; color: #c0392b; border-color: #f5c0b7; }
+.o_hotel_bed_chip_maintenance { background: #eeeff2; color: #5b6070; border-color: #d6d8de; }
+
+.o_hotel_occupation {
+    background: #f8f9fb;
+    border: 1px solid #e6e8ee;
+    border-radius: 10px;
+    padding: 10px 14px;
+    .o_hotel_occupation_title {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #7a7f96;
+        margin-bottom: 4px;
+    }
+    .o_hotel_bed_map .o_hotel_bed_chip { font-size: 13px; padding: 4px 10px; }
+    .o_hotel_bed_legend {
+        margin-top: 6px;
+        display: flex;
+        gap: 6px;
+        .o_hotel_bed_chip { font-size: 11px; padding: 0 8px; }
+    }
+}
+
+// Fiche chambre : section « Location & tarifs »
+.o_hotel_rental {
+    margin: 8px 0 20px;
+    border: 1px solid #e3e6ee;
+    border-radius: 14px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(20, 20, 50, .05);
+
+    .o_hotel_rental_head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        background: linear-gradient(90deg, #f5f7fd, #fbfbfe);
+        border-bottom: 1px solid #eceef4;
+    }
+    .o_hotel_rental_icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #4b6cb7;
+        color: #fff;
+        font-size: 17px;
+    }
+    .o_hotel_rental_title { font-size: 15px; font-weight: 600; color: #2c2f45; }
+    .o_hotel_rental_sub { font-size: 12px; color: #7a7f96; }
+
+    .o_hotel_rental_body {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        gap: 24px;
+        padding: 18px;
+        @media (max-width: 991px) { grid-template-columns: 1fr; }
+    }
+    .o_hotel_rental_label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #7a7f96;
+        margin-bottom: 8px;
+    }
+
+    // Boutons radio affichés en cartes
+    .o_hotel_option_cards {
+        display: block !important;
+        width: 100%;
+        > div {
+            display: grid !important;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        > div.o_horizontal { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+        .o_radio_item.form-check {
+            display: block;
+            position: relative;
+            margin: 0 !important;
+            padding: 0 !important;
+            min-height: 0;
+        }
+        .o_radio_input {
+            display: none !important;
+        }
+        .o_radio_item .form-check-label {
+            position: relative;
+            display: flex !important;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            margin: 0 !important;
+            padding: 9px 40px 9px 10px !important;
+            height: auto !important;
+            min-height: 52px !important;
+            border: 1.5px solid #e3e6ee;
+            border-radius: 10px;
+            background: #fff;
+            color: #3a3e55;
+            font-weight: 500;
+            line-height: 1.3;
+            cursor: pointer;
+            transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+
+            // Icône de l'option
+            &::before {
+                content: "";
+                position: static !important;
+                flex: 0 0 32px;
+                width: 32px;
+                height: 32px;
+                margin: 0 !important;
+                border: 0 !important;
+                border-radius: 8px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-family: FontAwesome;
+                font-size: 15px;
+                font-weight: normal;
+                background: #f0f2f8;
+                color: #6b7086;
+                transform: none !important;
+            }
+            // Pastille de sélection à droite
+            &::after {
+                content: "";
+                position: absolute !important;
+                top: 50% !important;
+                right: 14px !important;
+                left: auto !important;
+                width: 16px;
+                height: 16px;
+                margin: -8px 0 0 0 !important;
+                border-radius: 50%;
+                border: 1.5px solid #c9cedb;
+                background: #fff;
+                transform: none !important;
+            }
+            &:hover { border-color: #b9c6ea; }
+        }
+        .o_radio_item:has(.o_radio_input:checked) .form-check-label {
+            border-color: #4b6cb7;
+            background: #f3f6fd;
+            box-shadow: 0 0 0 3px rgba(75, 108, 183, .12);
+            &::before { background: #4b6cb7; color: #fff; }
+            &::after { border: 5px solid #4b6cb7; }
+        }
+    }
+    // Icônes de chaque option
+    .o_radio_item:has([data-value="room"]) .form-check-label::before     { content: "\f015"; } // fa-home
+    .o_radio_item:has([data-value="bed"]) .form-check-label::before      { content: "\f236"; } // fa-bed
+    .o_radio_item:has([data-value="both"]) .form-check-label::before     { content: "\f0ec"; } // fa-exchange
+    .o_radio_item:has([data-value="sum_beds"]) .form-check-label::before { content: "\f1ec"; } // fa-calculator
+    .o_radio_item:has([data-value="fixed"]) .form-check-label::before    { content: "\f02b"; } // fa-tag
+
+    .o_hotel_fixed_price {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 10px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: #f8f9fb;
+        border: 1px dashed #d6dae5;
+        label { margin: 0; font-weight: 500; color: #3a3e55; white-space: nowrap; }
+        .o_field_monetary { max-width: 200px; }
+    }
+
+    // Récapitulatif des prix
+    .o_hotel_rental_summary { display: flex; flex-direction: column; gap: 10px; }
+    .o_hotel_price_card {
+        border-radius: 12px;
+        padding: 14px 16px;
+        border: 1px solid transparent;
+
+        &.o_hotel_price_card_room { background: #f1f4fc; border-color: #dbe3f6; }
+        &.o_hotel_price_card_bed  { background: #fff8e8; border-color: #f6e3b4; }
+
+        .o_hotel_price_card_label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: #6b7086;
+        }
+        .o_hotel_price_card_value {
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.25;
+            color: #2c2f45;
+            small { font-size: 13px; font-weight: 500; color: #7a7f96; }
+            .o_field_widget, span { font-size: inherit; font-weight: inherit; }
+        }
+        &.o_hotel_price_card_room .o_hotel_price_card_value { color: #2f4f99; }
+        &.o_hotel_price_card_bed .o_hotel_price_card_value  { color: #a86b00; }
+        .o_hotel_price_card_hint { font-size: 12px; color: #7a7f96; }
+        .o_hotel_price_card_empty { font-size: 13px; color: #b25e00; margin-top: 4px; }
+    }
+    .o_hotel_price_card_note { font-size: 12px; color: #7a7f96; padding: 0 4px; }
 }

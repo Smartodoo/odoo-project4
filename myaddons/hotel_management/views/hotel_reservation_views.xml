@@ -37,27 +37,51 @@
                         <h1><field name="name" readonly="1"/></h1>
                     </div>
                     <group>
-                        <group>
+                        <group string="Client" name="client">
                             <field name="partner_id"/>
-                            <field name="source"/>
+                            <field name="partner_last_name" invisible="not partner_id"/>
+                            <field name="partner_first_name" invisible="not partner_id"/>
+                            <field name="partner_phone" widget="phone" invisible="not partner_id"/>
+                            <label for="partner_street" string="Adresse" invisible="not partner_id"/>
+                            <div class="o_row" invisible="not partner_id">
+                                <field name="partner_street" placeholder="Rue…"/>
+                                <field name="partner_city" placeholder="Ville"/>
+                            </div>
+                            <field name="partner_id_type" invisible="not partner_id"/>
+                            <field name="partner_id_number" invisible="not partner_id"/>
                         </group>
-                        <group>
+                        <group string="Séjour" name="stay">
                             <field name="checkin"/>
                             <field name="checkout"/>
                             <field name="nights"/>
-                        </group>
-                        <group>
-                            <field name="adults"/>
-                            <field name="children"/>
-                            <field name="guest_count"/>
+                            <field name="source"/>
+                            <label for="adults" string="Personnes"/>
+                            <div class="o_row">
+                                <field name="adults"/> <span>adulte(s)</span>
+                                <field name="children"/> <span>enfant(s)</span>
+                            </div>
+                            <field name="guest_count" string="Total personnes"/>
+                            <field name="places"/>
                         </group>
                     </group>
+                    <div class="alert alert-warning d-flex align-items-center mb-3" role="alert"
+                         invisible="not line_ids or guest_count &lt;= places">
+                        <i class="fa fa-exclamation-triangle me-2" title="Attention"/>
+                        <span>
+                            <field name="guest_count" class="oe_inline fw-bold"/> personne(s) pour
+                            <field name="places" class="oe_inline fw-bold"/> place(s) réservée(s) :
+                            ajoutez des lits ou une chambre, sinon la confirmation sera refusée.
+                        </span>
+                    </div>
                     <notebook>
                         <page string="Chambres" name="rooms">
                             <field name="line_ids">
                                 <tree editable="bottom">
                                     <field name="room_id"/>
-                                    <field name="booking_type"/>
+                                    <field name="rental_mode" column_invisible="1"/>
+                                    <field name="booking_type"
+                                           readonly="rental_mode in ('room', 'bed')"
+                                           force_save="1"/>
                                     <field name="bed_ids" widget="many2many_tags"
                                            domain="[('room_id', '=', room_id)]"
                                            options="{'no_create': True, 'no_open': True}"
@@ -71,7 +95,10 @@
                             </field>
                             <group class="oe_subtotal_footer">
                                 <field name="room_count"/>
-                                <field name="amount_total" widget="monetary"
+                                <field name="amount_total" widget="monetary"/>
+                                <field name="deposit_amount" widget="monetary"
+                                       readonly="state in ('checkout', 'cancel')"/>
+                                <field name="amount_due" widget="monetary"
                                        class="oe_subtotal_footer_separator"/>
                                 <field name="currency_id" invisible="1"/>
                             </group>
@@ -104,7 +131,11 @@
                 <field name="nights"/>
                 <field name="room_count"/>
                 <field name="guest_count"/>
+                <field name="source" optional="hide"/>
                 <field name="amount_total" widget="monetary" sum="Total"/>
+                <field name="deposit_amount" widget="monetary" sum="Acomptes" optional="show"/>
+                <field name="amount_due" widget="monetary" sum="Reste à payer" optional="show"
+                       decoration-danger="amount_due &gt; 0 and state in ('checkin', 'checkout')"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="state" widget="badge"
                        decoration-info="state == 'confirmed'"
@@ -133,6 +164,8 @@
             <search>
                 <field name="name"/>
                 <field name="partner_id"/>
+                <field name="partner_phone"/>
+                <field name="partner_id_number"/>
                 <filter name="draft" string="Brouillon" domain="[('state', '=', 'draft')]"/>
                 <filter name="confirmed" string="Confirmées" domain="[('state', '=', 'confirmed')]"/>
                 <filter name="checkin" string="En séjour" domain="[('state', '=', 'checkin')]"/>

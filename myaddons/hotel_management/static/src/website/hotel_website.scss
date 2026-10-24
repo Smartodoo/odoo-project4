@@ -126,4 +126,85 @@
             th { width: 40%; background: #f7f8fc; }
         }
     }
+
+    // Disponibilité sur la carte chambre
+    .o_hotel_offer { display: flex; flex-wrap: wrap; gap: 6px; }
+    .o_hotel_offer_tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .o_hotel_offer_ok   { background: #e3f6ec; color: #128a5a; }
+    .o_hotel_offer_beds { background: #fff1cc; color: #a86b00; }
+    .o_hotel_offer_full { background: #fde6e2; color: #c0392b; }
+
+    // Choix chambre entière / lits
+    .o_hotel_choice {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .o_hotel_choice_card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 2px;
+        padding: 12px 8px;
+        border: 2px solid #e9ebf2;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: border-color .15s ease, background .15s ease;
+        > .fa { font-size: 22px; color: #4b6cb7; }
+        .o_hotel_choice_title { font-weight: 600; }
+        .o_hotel_choice_price { font-size: 13px; color: #6b7086; }
+        &:hover { border-color: #b9c6ea; }
+    }
+    .btn-check:checked + .o_hotel_choice_card {
+        border-color: #4b6cb7;
+        background: #f1f4fc;
+    }
+    .btn-check:disabled + .o_hotel_choice_card {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+    // Sélection des lits
+    .o_hotel_bed_pick {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        gap: 8px;
+    }
+    .o_hotel_bed_option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+        padding: 10px 6px;
+        border: 2px solid #b6e6cd;
+        background: #f3fbf7;
+        border-radius: 10px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all .15s ease;
+        > .fa { font-size: 18px; color: #17a673; }
+        &.o_hotel_bed_taken {
+            border-color: #f5c0b7;
+            background: #fdf1ef;
+            color: #c0392b;
+            cursor: not-allowed;
+            > .fa { color: #c0392b; }
+        }
+    }
+    .btn-check:checked + .o_hotel_bed_option {
+        border-color: #17a673;
+        background: #17a673;
+        color: #fff;
+        > .fa { color: #fff; }
+    }
+    // Lits masqués quand le client choisit la chambre entière
+    form:has(#bt_room:checked) .o_hotel_bed_pick { display: none; }
 }

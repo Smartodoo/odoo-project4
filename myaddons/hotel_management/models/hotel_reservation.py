@@ -13,6 +13,21 @@ class HotelReservation(models.Model):
         default=lambda self: _('Nouveau'))
     partner_id = fields.Many2one(
         'res.partner', string="Client", required=True, tracking=True)
+    # Coordonnées et pièce d'identité du client, modifiables depuis la réservation
+    partner_last_name = fields.Char(
+        related='partner_id.hotel_last_name', readonly=False, string="Nom")
+    partner_first_name = fields.Char(
+        related='partner_id.hotel_first_name', readonly=False, string="Prénom")
+    partner_phone = fields.Char(
+        related='partner_id.phone', readonly=False, string="Téléphone")
+    partner_street = fields.Char(
+        related='partner_id.street', readonly=False, string="Adresse")
+    partner_city = fields.Char(
+        related='partner_id.city', readonly=False, string="Ville")
+    partner_id_type = fields.Selection(
+        related='partner_id.hotel_id_type', readonly=False)
+    partner_id_number = fields.Char(
+        related='partner_id.hotel_id_number', readonly=False)
     checkin = fields.Date(
         string="Arrivée", required=True, tracking=True,
         default=fields.Date.context_today)
@@ -26,8 +41,14 @@ class HotelReservation(models.Model):
         'hotel.reservation.line', 'reservation_id', string="Chambres", copy=True)
     room_count = fields.Integer(
         string="Nb chambres", compute='_compute_amounts', store=True)
+    places = fields.Integer(
+        string="Places réservées", compute='_compute_places',
+        help="Lits réservés, ou capacité des chambres louées entières.")
     amount_total = fields.Monetary(
         string="Total séjour", compute='_compute_amounts', store=True, tracking=True)
+    deposit_amount = fields.Monetary(string="Acompte", tracking=True)
+    amount_due = fields.Monetary(
+        string="Reste à payer", compute='_compute_amount_due', store=True)
     invoice_ids = fields.One2many(
         'account.move', 'hotel_reservation_id', string="Factures")
     invoice_count = fields.Integer(
@@ -40,8 +61,11 @@ class HotelReservation(models.Model):
         ('direct', 'Direct'),
         ('phone', 'Téléphone'),
         ('website', 'Site web'),
+        ('booking', 'Booking / plateforme en ligne'),
+        ('agency', 'Agence'),
         ('walkin', 'Sans réservation'),
-    ], string="Origine", default='direct')
+        ('other', 'Autre'),
+    ], string="Source", default='direct')
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Confirmée'),
@@ -69,6 +93,34 @@ class HotelReservation(models.Model):
         for rec in self:
             rec.amount_total = sum(rec.line_ids.mapped('price_subtotal'))
             rec.room_count = len(rec.line_ids)
+
+    @api.depends('line_ids.booking_type', 'line_ids.bed_ids',
+                 'line_ids.room_id.capacity')
+    def _compute_places(self):
+        for rec in self:
+            rec.places = sum(line._get_places() for line in rec.line_ids)
+
+    def _check_guest_places(self):
+        """Il faut au moins un lit (ou une place) par personne."""
+        for rec in self:
+            if rec.guest_count > rec.places:
+                raise UserError(_(
+                    "La réservation %(name)s compte %(guests)s personne(s) mais "
+                    "seulement %(places)s place(s) réservée(s).\n\n"
+                    "Ajoutez des lits ou une chambre, ou corrigez le nombre "
+                    "d'adultes / d'enfants.",
+                    name=rec.name, guests=rec.guest_count, places=rec.places))
+
+    @api.depends('amount_total', 'deposit_amount')
+    def _compute_amount_due(self):
+        for rec in self:
+            rec.amount_due = rec.amount_total - rec.deposit_amount
+
+    @api.constrains('deposit_amount')
+    def _check_deposit_amount(self):
+        for rec in self:
+            if rec.deposit_amount < 0:
+                raise ValidationError(_("L'acompte ne peut pas être négatif."))
 
     def _compute_invoice_count(self):
         for rec in self:
@@ -100,7 +152,7 @@ class HotelReservation(models.Model):
                     line.room_id.name,
                     ', '.join(line.bed_ids.mapped('name')), line.nights)
             else:
-                label = _("Chambre %s — %s nuit(s)") % (
+                label = _("Chambre %s — chambre entière — %s nuit(s)") % (
                     line.room_id.name, line.nights)
             move_lines.append((0, 0, {
                 'name': label,
@@ -166,6 +218,14 @@ class HotelReservation(models.Model):
                             line.room_id.name, rec.checkin, rec.checkout))
                 elif not line.room_id.is_available(
                         rec.checkin, rec.checkout, ignore_reservation=rec):
+                    free = line.room_id.bookable_beds(
+                        rec.checkin, rec.checkout, ignore_reservation=rec)
+                    if free:
+                        raise UserError(_(
+                            "La chambre %s ne peut pas être louée entière du %s au %s : "
+                            "des lits y sont déjà loués. Lits encore libres : %s.",
+                            line.room_id.name, rec.checkin, rec.checkout,
+                            ', '.join(free.mapped('name'))))
                     raise UserError(_(
                         "La chambre %s n'est pas disponible du %s au %s "
                         "(maintenance ou déjà réservée).",
@@ -183,11 +243,13 @@ class HotelReservation(models.Model):
         for rec in self:
             if not rec.line_ids:
                 raise UserError(_("Ajoutez au moins une chambre avant de confirmer."))
+            rec._check_guest_places()
             rec._check_availability()
             rec.state = 'confirmed'
 
     def action_checkin(self):
         for rec in self:
+            rec._check_guest_places()
             rec._check_availability()
             rec.state = 'checkin'
 
@@ -220,19 +282,30 @@ class HotelReservation(models.Model):
 
         rooms = Room.search([])
         total_rooms = len(rooms)
-        maintenance_rooms = rooms.filtered('maintenance')
-        maintenance = len(maintenance_rooms)
+        maintenance = len(rooms.filtered('maintenance'))
+        out_of_service = len(rooms.filtered(lambda r: r.status == 'out_of_service'))
+        cleaning = len(rooms.filtered(lambda r: r.status == 'cleaning'))
+        occupied = len(rooms.filtered(lambda r: r.status == 'occupied'))
+        reserved = len(rooms.filtered(lambda r: r.status == 'reserved'))
+        partial = len(rooms.filtered(lambda r: r.status == 'partial'))
+        # Une chambre en attente de ménage reste vendable
+        available = len(rooms.filtered(lambda r: r.status in ('available', 'cleaning')))
+        to_clean = len(rooms.filtered(lambda r: r.housekeeping_status == 'dirty'))
+        occupancy_rate = round(
+            ((occupied + partial) / total_rooms) * 100, 1) if total_rooms else 0.0
+
+        # Occupation au lit (auberge / dortoirs)
+        sellable = rooms.filtered(lambda r: not r.maintenance)
+        total_beds = sum(len(r.bed_ids.filtered('active')) for r in sellable)
+        free_beds = sum(r.beds_free_count for r in sellable)
+        bed_occupancy_rate = round(
+            ((total_beds - free_beds) / total_beds) * 100, 1) if total_beds else 0.0
 
         occ_lines = Line.search([
             ('state', '=', 'checkin'),
             ('checkin', '<=', today),
             ('checkout', '>=', today),
         ])
-        occupied_rooms = occ_lines.mapped('room_id')
-        occupied = len(occupied_rooms)
-        available = max(total_rooms - occupied - maintenance, 0)
-        to_clean = len(rooms.filtered(lambda r: r.housekeeping_status == 'dirty'))
-        occupancy_rate = round((occupied / total_rooms) * 100, 1) if total_rooms else 0.0
 
         present_guests = len(occ_lines.mapped('reservation_id.partner_id'))
         all_res = self.search([('state', '!=', 'cancel')])
@@ -287,8 +360,15 @@ class HotelReservation(models.Model):
             'maintenance_open': maintenance_open,
             'total_rooms': total_rooms,
             'occupied': occupied,
+            'reserved': reserved,
+            'partial': partial,
             'available': available,
+            'total_beds': total_beds,
+            'free_beds': free_beds,
+            'bed_occupancy_rate': bed_occupancy_rate,
             'maintenance': maintenance,
+            'out_of_service': out_of_service,
+            'cleaning': cleaning,
             'to_clean': to_clean,
             'occupancy_rate': occupancy_rate,
             'present_guests': present_guests,
@@ -316,6 +396,7 @@ class HotelReservationLine(models.Model):
         ('bed', 'Lit(s)'),
     ], string="Réserver", default='room', required=True)
     bed_ids = fields.Many2many('hotel.bed', string="Lits")
+    rental_mode = fields.Selection(related='room_id.rental_mode')
     room_type_id = fields.Many2one(
         related='room_id.room_type_id', string="Type", store=True)
     checkin = fields.Date(related='reservation_id.checkin', store=True)
@@ -328,6 +409,13 @@ class HotelReservationLine(models.Model):
     partner_id = fields.Many2one(related='reservation_id.partner_id', store=True)
     state = fields.Selection(related='reservation_id.state', store=True)
 
+    def _get_places(self):
+        """Nombre de personnes que la ligne permet d'accueillir."""
+        self.ensure_one()
+        if self.booking_type == 'bed':
+            return len(self.bed_ids)
+        return self.room_id.capacity or len(self.room_id.bed_ids.filtered('active'))
+
     @api.depends('price_unit', 'nights')
     def _compute_subtotal(self):
         for line in self:
@@ -335,16 +423,21 @@ class HotelReservationLine(models.Model):
 
     def _apply_price(self):
         day = self.reservation_id.checkin or self.checkin
-        if self.booking_type == 'bed' and self.bed_ids:
+        if self.booking_type == 'bed':
             self.price_unit = sum(self.bed_ids.mapped('price'))
         elif self.room_id:
-            self.price_unit = self.room_id._get_price_for_date(day)
+            self.price_unit = self.room_id._get_whole_room_price(day)
 
     @api.onchange('room_id')
     def _onchange_room_id(self):
         if self.room_id and self.bed_ids:
             self.bed_ids = self.bed_ids.filtered(
                 lambda b: b.room_id == self.room_id)
+        if self.room_id.rental_mode == 'bed':
+            self.booking_type = 'bed'
+        elif self.room_id.rental_mode == 'room':
+            self.booking_type = 'room'
+            self.bed_ids = [(5, 0, 0)]
         self._apply_price()
         return {'domain': {'bed_ids': [('room_id', '=', self.room_id.id)]}}
 
@@ -356,8 +449,9 @@ class HotelReservationLine(models.Model):
             if len(rooms) > 1:
                 self.bed_ids = self.bed_ids.filtered(lambda b: b.room_id == room)
             self.room_id = room
-            # Tous les lits de la chambre = chambre entière
-            if room.bed_ids and set(self.bed_ids.ids) >= set(room.bed_ids.ids):
+            # Tous les lits de la chambre = chambre entière (sauf dortoir)
+            if room.rental_mode != 'bed' and room.bed_ids \
+                    and set(self.bed_ids.ids) >= set(room.bed_ids.ids):
                 self.booking_type = 'room'
                 self.bed_ids = [(5, 0, 0)]
             else:
@@ -373,6 +467,15 @@ class HotelReservationLine(models.Model):
     @api.constrains('booking_type', 'bed_ids', 'room_id')
     def _check_beds(self):
         for line in self:
+            mode = line.room_id.rental_mode
+            if line.booking_type == 'room' and mode == 'bed':
+                raise ValidationError(_(
+                    "La chambre %s se loue uniquement au lit (dortoir).",
+                    line.room_id.name))
+            if line.booking_type == 'bed' and mode == 'room':
+                raise ValidationError(_(
+                    "La chambre %s se loue uniquement en chambre entière.",
+                    line.room_id.name))
             if line.booking_type == 'bed':
                 if not line.bed_ids:
                     raise ValidationError(_(
