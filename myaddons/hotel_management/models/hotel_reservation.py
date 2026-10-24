@@ -394,8 +394,13 @@ class HotelReservationLine(models.Model):
     booking_type = fields.Selection([
         ('room', 'Chambre entière'),
         ('bed', 'Lit(s)'),
-    ], string="Réserver", default='room', required=True)
+    ], string="Mode de location", default='room', required=True)
     bed_ids = fields.Many2many('hotel.bed', string="Lits")
+    available_bed_ids = fields.Many2many(
+        'hotel.bed', 'hotel_resline_avail_bed_rel', 'line_id', 'bed_id',
+        string="Lits disponibles", compute='_compute_available_bed_ids',
+        help="Lits libres de la chambre sur la période : seuls ceux-ci sont "
+             "proposés à la sélection.")
     rental_mode = fields.Selection(related='room_id.rental_mode')
     room_type_id = fields.Many2one(
         related='room_id.room_type_id', string="Type", store=True)
@@ -421,62 +426,73 @@ class HotelReservationLine(models.Model):
         for line in self:
             line.price_subtotal = line.price_unit * (line.nights or 0)
 
+    @api.depends('room_id', 'checkin', 'checkout', 'reservation_id.state', 'bed_ids')
+    def _compute_available_bed_ids(self):
+        for line in self:
+            room = line.room_id
+            if room and line.checkin and line.checkout:
+                avail = room.available_beds(
+                    line.checkin, line.checkout,
+                    ignore_reservation=line.reservation_id._origin)
+            elif room:
+                avail = room.bed_ids.filtered('active')
+            else:
+                avail = self.env['hotel.bed']
+            # Les lits déjà sélectionnés restent visibles même s'ils ne sont
+            # plus « libres » (c'est cette ligne qui les occupe).
+            line.available_bed_ids = avail | line.bed_ids
+
     def _apply_price(self):
-        day = self.reservation_id.checkin or self.checkin
         if self.booking_type == 'bed':
-            self.price_unit = sum(self.bed_ids.mapped('price'))
+            self.price_unit = len(self.bed_ids) * self.room_id.bed_price
         elif self.room_id:
-            self.price_unit = self.room_id._get_whole_room_price(day)
+            self.price_unit = self.room_id.room_price
 
     @api.onchange('room_id')
     def _onchange_room_id(self):
-        if self.room_id and self.bed_ids:
-            self.bed_ids = self.bed_ids.filtered(
-                lambda b: b.room_id == self.room_id)
-        if self.room_id.rental_mode == 'bed':
-            self.booking_type = 'bed'
-        elif self.room_id.rental_mode == 'room':
+        if not self.room_id:
+            return
+        active_beds = self.room_id.bed_ids.filtered('active')
+        # Sans lit, seule la chambre entière est possible.
+        if self.booking_type == 'bed' and not active_beds:
             self.booking_type = 'room'
-            self.bed_ids = [(5, 0, 0)]
+        if self.booking_type == 'room':
+            # Chambre entière : la ligne reprend tous les lits de la chambre.
+            self.bed_ids = [(6, 0, active_beds.ids)]
+        else:
+            # Par lit : ne garder que les lits de cette chambre.
+            self.bed_ids = self.bed_ids.filtered(lambda b: b.room_id == self.room_id)
         self._apply_price()
-        return {'domain': {'bed_ids': [('room_id', '=', self.room_id.id)]}}
 
     @api.onchange('bed_ids')
     def _onchange_bed_ids(self):
         if self.bed_ids:
             rooms = self.bed_ids.mapped('room_id')
-            room = rooms[0]
             if len(rooms) > 1:
-                self.bed_ids = self.bed_ids.filtered(lambda b: b.room_id == room)
-            self.room_id = room
-            # Tous les lits de la chambre = chambre entière (sauf dortoir)
-            if room.rental_mode != 'bed' and room.bed_ids \
-                    and set(self.bed_ids.ids) >= set(room.bed_ids.ids):
-                self.booking_type = 'room'
-                self.bed_ids = [(5, 0, 0)]
-            else:
-                self.booking_type = 'bed'
+                self.bed_ids = self.bed_ids.filtered(lambda b: b.room_id == rooms[0])
+            if not self.room_id:
+                self.room_id = rooms[0]
         self._apply_price()
 
     @api.onchange('booking_type')
     def _onchange_booking_type(self):
         if self.booking_type == 'room':
+            # Chambre entière : récupère automatiquement tous les lits.
+            self.bed_ids = [(6, 0, self.room_id.bed_ids.filtered('active').ids)]
+        else:
+            # Par lit : l'utilisateur sélectionne les lits disponibles.
             self.bed_ids = [(5, 0, 0)]
         self._apply_price()
 
     @api.constrains('booking_type', 'bed_ids', 'room_id')
     def _check_beds(self):
         for line in self:
-            mode = line.room_id.rental_mode
-            if line.booking_type == 'room' and mode == 'bed':
-                raise ValidationError(_(
-                    "La chambre %s se loue uniquement au lit (dortoir).",
-                    line.room_id.name))
-            if line.booking_type == 'bed' and mode == 'room':
-                raise ValidationError(_(
-                    "La chambre %s se loue uniquement en chambre entière.",
-                    line.room_id.name))
             if line.booking_type == 'bed':
+                if not line.room_id.bed_ids.filtered('active'):
+                    raise ValidationError(_(
+                        "La chambre %s n'a aucun lit : réservez-la en chambre "
+                        "entière, ou ajoutez-lui des lits (Configuration).",
+                        line.room_id.name))
                 if not line.bed_ids:
                     raise ValidationError(_(
                         "Sélectionnez au moins un lit pour une réservation par lit."))

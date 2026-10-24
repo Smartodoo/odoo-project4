@@ -8,23 +8,12 @@
               parent="menu_hotel_root" action="action_hotel_dashboard"
               sequence="1"/>
 
-    <menuitem id="menu_hotel_reservation" name="Réservations"
-              parent="menu_hotel_root" action="action_hotel_reservation"
-              sequence="10"/>
-
+    <!-- Menu du haut « Chambres » : tableau d'occupation. Réservations, ménage
+         et travaux se gèrent DEPUIS la fiche d'une chambre (boutons en haut). -->
     <menuitem id="menu_hotel_room" name="Chambres"
               parent="menu_hotel_root" action="action_hotel_room"
               sequence="20"/>
-    <menuitem id="menu_hotel_bed" name="Lits"
-              parent="menu_hotel_root" action="action_hotel_bed"
-              sequence="25"/>
 
-    <menuitem id="menu_hotel_housekeeping" name="Ménage"
-              parent="menu_hotel_root" action="action_hotel_housekeeping"
-              sequence="40"/>
-    <menuitem id="menu_hotel_maintenance" name="Travaux &amp; Maintenance"
-              parent="menu_hotel_root" action="action_hotel_maintenance"
-              sequence="50"/>
     <menuitem id="menu_hotel_staff" name="Personnel"
               parent="menu_hotel_root" action="action_hotel_staff"
               sequence="60"/>
@@ -32,15 +21,15 @@
     <menuitem id="menu_hotel_config" name="Configuration"
               parent="menu_hotel_root" sequence="90"
               groups="hotel_management.group_hotel_manager"/>
+    <menuitem id="menu_hotel_room_config" name="Ajouter chambres"
+              parent="menu_hotel_config" action="action_hotel_room_config"
+              sequence="5"/>
     <menuitem id="menu_hotel_room_type" name="Types de chambres"
               parent="menu_hotel_config" action="action_hotel_room_type"
               sequence="10"/>
     <menuitem id="menu_hotel_amenity" name="Équipements"
               parent="menu_hotel_config" action="action_hotel_amenity"
               sequence="20"/>
-    <menuitem id="menu_hotel_room_beds" name="Nombre de lits"
-              parent="menu_hotel_config" action="action_hotel_room_beds"
-              sequence="30"/>
     <menuitem id="menu_hotel_rate_season" name="Tarifs saisonniers"
               parent="menu_hotel_config" action="action_hotel_rate_season"
               sequence="40"/>

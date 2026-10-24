@@ -75,7 +75,11 @@ class HotelBed(models.Model):
             line = occupation.get(bed)
             bed.current_guest_id = line.partner_id if line else False
             if bed.room_id.maintenance:
-                bed.status = bed.room_id.technical_state
+                # cf. hotel.room._compute_status : maintenance forcée sans
+                # changer technical_state (qui peut rester 'in_service').
+                bed.status = (bed.room_id.technical_state
+                              if bed.room_id.technical_state != 'in_service'
+                              else 'maintenance')
             elif not line:
                 bed.status = 'free'
             else:
@@ -85,14 +89,14 @@ class HotelBed(models.Model):
     def _check_bed_capacity(self):
         for bed in self:
             room = bed.room_id
-            if room and room.bed_capacity and len(room.bed_ids) > room.bed_capacity:
+            if room and room.capacity and len(room.bed_ids) > room.capacity:
                 raise ValidationError(_(
-                    "La chambre %(room)s est limitée à %(limit)s lit(s), mais vous "
+                    "La chambre %(room)s a une capacité de %(limit)s lit(s), mais vous "
                     "essayez d'en avoir %(total)s.\n\n"
                     "Lits déjà enregistrés : %(existing)s.\n\n"
                     "Solutions : supprimez ou désactivez des lits, ou augmentez la "
-                    "« Limite de lits » de la chambre.",
-                    room=room.name, limit=room.bed_capacity,
+                    "« Capacité » de la chambre.",
+                    room=room.name, limit=room.capacity,
                     total=len(room.bed_ids),
                     existing=', '.join(
                         (room.bed_ids - self).mapped('name')) or '-'))

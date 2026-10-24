@@ -204,6 +204,10 @@
                             invisible="state in ('done', 'cancel')"/>
                     <button name="action_reset" string="Rouvrir" type="object"
                             invisible="state not in ('done', 'cancel')"/>
+                    <button name="action_set_out_of_service" type="object"
+                            string="Déclarer hors service" class="btn-secondary"
+                            invisible="state != 'done'"
+                            confirm="Fermer durablement cette chambre (statut « Hors service ») ? Elle ne sera plus vendable tant qu'elle n'est pas remise en service."/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="new,inprogress,done"/>
                 </header>

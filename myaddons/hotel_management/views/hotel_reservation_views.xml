@@ -8,10 +8,12 @@
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object"
                             class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="action_checkin" string="Check-in" type="object"
-                            class="btn-primary" invisible="state != 'confirmed'"/>
-                    <button name="action_checkout" string="Check-out" type="object"
-                            class="btn-primary" invisible="state != 'checkin'"/>
+                    <button name="action_checkin" string="Entrer" type="object"
+                            class="btn-primary" invisible="state != 'confirmed'"
+                            help="Le client entre : la/les chambre(s) passent en « Occupée »."/>
+                    <button name="action_checkout" string="Sortir" type="object"
+                            class="btn-primary" invisible="state != 'checkin'"
+                            help="Le client sort : la/les chambre(s) passent en « À nettoyer »."/>
                     <button name="action_cancel" string="Annuler" type="object"
                             invisible="state in ('checkout', 'cancel')"/>
                     <button name="action_draft" string="Remettre en brouillon" type="object"
@@ -78,14 +80,13 @@
                             <field name="line_ids">
                                 <tree editable="bottom">
                                     <field name="room_id"/>
-                                    <field name="rental_mode" column_invisible="1"/>
-                                    <field name="booking_type"
-                                           readonly="rental_mode in ('room', 'bed')"
-                                           force_save="1"/>
+                                    <field name="booking_type"/>
+                                    <field name="available_bed_ids" column_invisible="1"/>
                                     <field name="bed_ids" widget="many2many_tags"
-                                           domain="[('room_id', '=', room_id)]"
+                                           domain="[('id', 'in', available_bed_ids)]"
                                            options="{'no_create': True, 'no_open': True}"
-                                           invisible="booking_type != 'bed'"/>
+                                           readonly="booking_type == 'room'"
+                                           required="booking_type == 'bed'"/>
                                     <field name="room_type_id" readonly="1"/>
                                     <field name="nights" readonly="1"/>
                                     <field name="price_unit" widget="monetary"/>
@@ -141,6 +142,12 @@
                        decoration-info="state == 'confirmed'"
                        decoration-success="state == 'checkin'"
                        decoration-muted="state in ('checkout', 'cancel')"/>
+                <button name="action_confirm" type="object" string="Confirmer"
+                        icon="fa-check" invisible="state != 'draft'"/>
+                <button name="action_checkin" type="object" string="Entrer"
+                        icon="fa-sign-in" invisible="state != 'confirmed'"/>
+                <button name="action_checkout" type="object" string="Sortir"
+                        icon="fa-sign-out" invisible="state != 'checkin'"/>
             </tree>
         </field>
     </record>

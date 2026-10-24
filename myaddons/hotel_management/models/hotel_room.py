@@ -18,9 +18,6 @@ class HotelRoom(models.Model):
     currency_id = fields.Many2one(
         'res.currency', default=lambda self: self.env.company.currency_id)
     amenity_ids = fields.Many2many('hotel.amenity', string="Équipements")
-    bed_capacity = fields.Integer(
-        string="Limite de lits", default=0,
-        help="Nombre maximum de lits dans la chambre. 0 = pas de limite.")
     bed_ids = fields.One2many('hotel.bed', 'room_id', string="Lits")
     bed_count = fields.Integer(string="Nb lits", compute='_compute_bed_count')
     bed_summary = fields.Char(string="Lits créés", compute='_compute_bed_count')
@@ -50,13 +47,11 @@ class HotelRoom(models.Model):
 
     # Mode de location : chambre privée, dortoir (au lit) ou mixte
     rental_mode = fields.Selection([
-        ('room', 'Chambre entière uniquement'),
-        ('bed', 'Au lit uniquement (dortoir)'),
-        ('both', 'Chambre entière ou au lit'),
-    ], string="Mode de location", default='both', required=True, tracking=True,
+        ('room', 'Chambre entière'),
+        ('bed', 'Au lit (dortoir)'),
+    ], string="Mode de location", default='room', required=True, tracking=True,
         help="Chambre entière : la chambre se loue à un seul client.\n"
-             "Au lit : chaque lit se loue séparément (dortoir).\n"
-             "Les deux : le client choisit la chambre entière ou un/des lit(s).")
+             "Au lit : chaque lit se loue séparément (dortoir).")
     whole_room_pricing = fields.Selection([
         ('sum_beds', 'Somme des prix des lits'),
         ('fixed', 'Prix fixe de la chambre'),
@@ -70,14 +65,20 @@ class HotelRoom(models.Model):
     bed_price_min = fields.Monetary(
         string="Prix lit à partir de", currency_field='currency_id',
         compute='_compute_whole_room_price')
+    room_price = fields.Monetary(
+        string="Prix chambre", currency_field='currency_id',
+        help="Prix / nuit de la chambre entière (réservation « chambre entière »).")
+    bed_price = fields.Monetary(
+        string="Prix lit", currency_field='currency_id',
+        help="Prix / nuit d'un lit. Même prix pour tous les lits de la chambre.")
 
     status = fields.Selection([
-        ('available', 'Libre'),
-        ('partial', 'Partiellement occupée'),
-        ('reserved', 'Réservée'),
-        ('occupied', 'Complète'),
-        ('cleaning', 'Nettoyage'),
-        ('maintenance', 'Maintenance'),
+        ('available', 'Disponible'),
+        ('reserved', 'Réservé'),
+        ('partial', 'Occupé partiellement'),
+        ('occupied', 'Occupé complètement'),
+        ('cleaning', 'En nettoyage'),
+        ('maintenance', 'En maintenance'),
         ('out_of_service', 'Hors service'),
     ], string="Statut", compute='_compute_status')
     beds_free_count = fields.Integer(string="Lits libres", compute='_compute_status')
@@ -87,6 +88,28 @@ class HotelRoom(models.Model):
         'hotel.reservation', string="Réservation en cours", compute='_compute_status')
     current_guest_id = fields.Many2one(
         'res.partner', string="Client présent", compute='_compute_status')
+    current_guest_ids = fields.Many2many(
+        'res.partner', string="Clients présents", compute='_compute_status',
+        help="Tous les clients des réservations en cours sur cette chambre.")
+
+    # Mode de location et montant de la RÉSERVATION EN COURS (lecture seule) :
+    # le mode n'est plus réglé sur la chambre mais choisi dans la réservation.
+    current_booking_type = fields.Selection([
+        ('room', 'Chambre entière'),
+        ('bed', 'Au lit'),
+    ], string="Mode (réservation en cours)", compute='_compute_status')
+    current_rental_amount = fields.Monetary(
+        string="Montant (réservation en cours)", currency_field='currency_id',
+        compute='_compute_status',
+        help="Prix / nuit de la réservation en cours sur cette chambre.")
+
+    # Compteurs pour les boutons de la fiche chambre
+    reservation_count = fields.Integer(
+        string="Nb réservations", compute='_compute_operation_counts')
+    housekeeping_count = fields.Integer(
+        string="Nb tâches ménage", compute='_compute_operation_counts')
+    maintenance_count = fields.Integer(
+        string="Nb demandes travaux", compute='_compute_operation_counts')
 
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id)',
@@ -98,6 +121,10 @@ class HotelRoom(models.Model):
         if self.room_type_id:
             if not self.price:
                 self.price = self.room_type_id.list_price
+            if not self.room_price:
+                self.room_price = self.room_type_id.list_price
+            if not self.bed_price:
+                self.bed_price = self.room_type_id.list_price
             if not self.capacity:
                 self.capacity = self.room_type_id.default_capacity
             self.rental_mode = self.room_type_id.rental_mode
@@ -112,12 +139,20 @@ class HotelRoom(models.Model):
                     vals['room_type_id']).rental_mode
         return super().create(vals_list)
 
-    @api.depends('bed_ids', 'bed_capacity')
+    def action_set_out_of_service(self):
+        """Fermer durablement la chambre (statut « Hors service »)."""
+        self.write({'technical_state': 'out_of_service'})
+
+    def action_set_in_service(self):
+        """Rouvrir une chambre hors service / en maintenance."""
+        self.write({'technical_state': 'in_service'})
+
+    @api.depends('bed_ids', 'capacity')
     def _compute_bed_count(self):
         for room in self:
             room.bed_count = len(room.bed_ids)
-            if room.bed_capacity:
-                room.bed_summary = "%s / %s" % (room.bed_count, room.bed_capacity)
+            if room.capacity:
+                room.bed_summary = "%s / %s" % (room.bed_count, room.capacity)
             else:
                 room.bed_summary = str(room.bed_count)
 
@@ -131,7 +166,7 @@ class HotelRoom(models.Model):
 
     def _default_bed_price(self):
         self.ensure_one()
-        return self.price or self.room_type_id.list_price
+        return self.bed_price or self.room_type_id.list_price
 
     def _number_new_beds(self, beds):
         """Numérote les nouveaux lits d'un formulaire : plusieurs lignes ajoutées
@@ -150,14 +185,14 @@ class HotelRoom(models.Model):
     @api.onchange('bed_ids')
     def _onchange_bed_ids_reference(self):
         self._number_new_beds(self.bed_ids)
-        if self.bed_capacity and len(self.bed_ids) > self.bed_capacity:
+        if self.capacity and len(self.bed_ids) > self.capacity:
             return {'warning': {
-                'title': _("Limite de lits dépassée"),
+                'title': _("Capacité dépassée"),
                 'message': _(
-                    "Cette chambre est limitée à %(limit)s lit(s) et la liste en "
+                    "Cette chambre a une capacité de %(limit)s lit(s) et la liste en "
                     "contient %(count)s. Supprimez des lignes ou augmentez la "
-                    "« Limite de lits », sinon l'enregistrement sera refusé.",
-                    limit=self.bed_capacity, count=len(self.bed_ids)),
+                    "« Capacité », sinon l'enregistrement sera refusé.",
+                    limit=self.capacity, count=len(self.bed_ids)),
             }}
 
     def action_manage_beds(self):
@@ -179,26 +214,66 @@ class HotelRoom(models.Model):
             lambda b: b.active and b.is_available(
                 checkin, checkout, ignore_reservation))
 
+    def _compute_operation_counts(self):
+        Reservation = self.env['hotel.reservation']
+        Housekeeping = self.env['hotel.housekeeping']
+        Maintenance = self.env['hotel.maintenance.request']
+        for room in self:
+            room.reservation_count = Reservation.search_count(
+                [('line_ids.room_id', '=', room.id)])
+            room.housekeeping_count = Housekeeping.search_count(
+                [('room_id', '=', room.id)])
+            room.maintenance_count = Maintenance.search_count(
+                [('room_id', '=', room.id)])
+
+    def action_view_reservations(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Réservations — %s") % self.name,
+            'res_model': 'hotel.reservation',
+            'view_mode': 'tree,form',
+            'domain': [('line_ids.room_id', '=', self.id)],
+            'context': {'default_line_ids': [(0, 0, {'room_id': self.id})]},
+        }
+
+    def action_view_housekeeping(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Ménage — %s") % self.name,
+            'res_model': 'hotel.housekeeping',
+            'view_mode': 'tree,form',
+            'domain': [('room_id', '=', self.id)],
+            'context': {'default_room_id': self.id},
+        }
+
+    def action_view_maintenance(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Travaux & Maintenance — %s") % self.name,
+            'res_model': 'hotel.maintenance.request',
+            'view_mode': 'tree,form',
+            'domain': [('room_id', '=', self.id)],
+            'context': {'default_room_id': self.id},
+        }
+
     @api.depends('technical_state')
     def _compute_maintenance(self):
         for room in self:
             room.maintenance = room.technical_state != 'in_service'
 
-    @api.depends('rental_mode', 'whole_room_pricing', 'price',
-                 'bed_ids.price', 'bed_ids.active', 'room_type_id.list_price')
+    @api.depends('room_price', 'bed_price')
     def _compute_whole_room_price(self):
         for room in self:
-            room.whole_room_price = room._get_whole_room_price(False)
-            prices = room.bed_ids.filtered('active').mapped('price')
-            room.bed_price_min = min(prices) if prices else 0.0
+            room.whole_room_price = room.room_price
+            room.bed_price_min = room.bed_price
 
     def _get_whole_room_price(self, day):
-        """Prix/nuit de la chambre entière selon la politique choisie."""
+        """Prix/nuit de la chambre entière (saisi sur la chambre)."""
         self.ensure_one()
-        beds = self.bed_ids.filtered('active')
-        if self.whole_room_pricing == 'sum_beds' and beds:
-            return sum(beds.mapped('price'))
-        return self._get_price_for_date(day)
+        return self.room_price
 
     def _get_active_lines(self, day):
         """Lignes de réservation qui mobilisent la chambre le jour donné.
@@ -236,6 +311,9 @@ class HotelRoom(models.Model):
 
             room.current_reservation_id = current.reservation_id
             room.current_guest_id = current.partner_id
+            room.current_guest_ids = lines.mapped('partner_id')
+            room.current_booking_type = current.booking_type if current else False
+            room.current_rental_amount = current.price_unit if current else 0.0
             room.beds_free_count = len(beds) - len(taken)
             room.bed_availability = (
                 "%s / %s lits libres" % (room.beds_free_count, len(beds))
@@ -243,7 +321,12 @@ class HotelRoom(models.Model):
             room.bed_map = room._render_bed_map(beds, taken)
 
             if room.maintenance:
-                room.status = room.technical_state
+                # Une demande de maintenance force maintenance=True sans toucher
+                # à technical_state (qui peut rester 'in_service', absent de
+                # `status`) : on retombe alors sur 'maintenance'.
+                room.status = (room.technical_state
+                               if room.technical_state != 'in_service'
+                               else 'maintenance')
             elif not lines:
                 # Le ménage est signalé mais ne bloque pas la vente
                 room.status = ('cleaning' if room.housekeeping_status != 'clean'
@@ -325,10 +408,10 @@ class HotelRoom(models.Model):
         beds_ok = len(beds) >= guests
         return {
             'whole': whole,
-            'whole_price': self._get_whole_room_price(checkin),
+            'whole_price': self.room_price,
             'beds': beds,
             'beds_ok': beds_ok,
-            'bed_price_min': min(beds.mapped('price')) if beds else 0.0,
+            'bed_price_min': self.bed_price,
             'bookable': whole or beds_ok,
         }
 

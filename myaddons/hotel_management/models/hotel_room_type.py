@@ -14,10 +14,9 @@ class HotelRoomType(models.Model):
         'res.currency', default=lambda self: self.env.company.currency_id)
     default_capacity = fields.Integer(string="Capacité (personnes)", default=2)
     rental_mode = fields.Selection([
-        ('room', 'Chambre entière uniquement'),
-        ('bed', 'Au lit uniquement (dortoir)'),
-        ('both', 'Chambre entière ou au lit'),
-    ], string="Mode de location", default='both', required=True,
+        ('room', 'Chambre entière'),
+        ('bed', 'Au lit (dortoir)'),
+    ], string="Mode de location", default='room', required=True,
         help="Mode appliqué par défaut aux chambres de ce type.")
     amenity_ids = fields.Many2many('hotel.amenity', string="Équipements")
     description = fields.Text(string="Description")

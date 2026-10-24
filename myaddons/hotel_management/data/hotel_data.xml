@@ -78,10 +78,10 @@
             <field name="name">Chambre familiale</field>
             <field name="code">FAM</field>
             <field name="sequence">4</field>
-            <field name="rental_mode">both</field>
+            <field name="rental_mode">bed</field>
             <field name="list_price">10000</field>
             <field name="default_capacity">4</field>
-            <field name="description">Chambre familiale, louable entière ou au lit.</field>
+            <field name="description">Chambre familiale, louable au lit.</field>
             <field name="amenity_ids" eval="[(6, 0, [ref('amenity_wifi'), ref('amenity_ac'), ref('amenity_tv'), ref('amenity_balcony')])]"/>
         </record>
 

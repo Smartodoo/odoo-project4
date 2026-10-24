@@ -40,20 +40,41 @@ class HotelMaintenanceRequest(models.Model):
         'res.company', default=lambda self: self.env.company)
 
     def _sync_room_maintenance(self, room):
-        """La chambre est en maintenance s'il reste au moins une demande ouverte."""
+        """Aligne l'état technique de la chambre sur ses travaux : au moins une
+        demande ouverte -> « Maintenance » ; plus aucune -> « En service ».
+        On ne touche pas à « Hors service » (fermeture décidée à la main)."""
         if not room:
             return
         open_count = self.search_count([
             ('room_id', '=', room.id),
             ('state', 'in', ('new', 'inprogress')),
         ])
-        room.maintenance = bool(open_count)
+        if open_count:
+            if room.technical_state == 'in_service':
+                room.technical_state = 'maintenance'
+        elif room.technical_state == 'maintenance':
+            room.technical_state = 'in_service'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        requests = super().create(vals_list)
+        for rec in requests:
+            rec._sync_room_maintenance(rec.room_id)
+        return requests
+
+    def write(self, vals):
+        rooms = self.mapped('room_id')
+        res = super().write(vals)
+        if 'room_id' in vals or 'state' in vals:
+            rooms |= self.mapped('room_id')
+            for room in rooms:
+                self._sync_room_maintenance(room)
+        return res
 
     def action_start(self):
         for rec in self:
             rec.state = 'inprogress'
-            if rec.room_id:
-                rec.room_id.maintenance = True
+            rec._sync_room_maintenance(rec.room_id)
 
     def action_done(self):
         for rec in self:
@@ -66,8 +87,14 @@ class HotelMaintenanceRequest(models.Model):
             rec.state = 'cancel'
             rec._sync_room_maintenance(rec.room_id)
 
+    def action_set_out_of_service(self):
+        """Après la fin des travaux : fermer durablement la chambre
+        (statut « Hors service ») au lieu de la remettre disponible."""
+        for rec in self:
+            if rec.room_id:
+                rec.room_id.technical_state = 'out_of_service'
+
     def action_reset(self):
         for rec in self:
             rec.state = 'new'
-            if rec.room_id:
-                rec.room_id.maintenance = True
+            rec._sync_room_maintenance(rec.room_id)
