@@ -215,15 +215,13 @@ class HotelWebsite(http.Controller):
         if booking_type == 'bed' and beds:
             line_vals = {
                 'room_id': room.id,
-                'booking_type': 'bed',
                 'bed_ids': [(6, 0, beds.ids)],
-                'price_unit': sum(beds.mapped('price')),
+                'price_unit': len(beds) * room.bed_price,
             }
         else:
             line_vals = {
                 'room_id': room.id,
-                'booking_type': 'room',
-                'price_unit': room._get_whole_room_price(ci),
+                'price_unit': room.room_price,
             }
 
         reservation = request.env['hotel.reservation'].sudo().create({
@@ -232,6 +230,7 @@ class HotelWebsite(http.Controller):
             'checkout': co,
             'adults': guests,
             'source': 'website',
+            'booking_type': booking_type,
             'note': note,
             'line_ids': [(0, 0, line_vals)],
         })

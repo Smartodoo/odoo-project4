@@ -57,6 +57,7 @@
                             <field name="checkout"/>
                             <field name="nights"/>
                             <field name="source"/>
+                            <field name="booking_type" widget="radio" options="{'horizontal': true}"/>
                             <label for="adults" string="Personnes"/>
                             <div class="o_row">
                                 <field name="adults"/> <span>adulte(s)</span>
@@ -80,7 +81,7 @@
                             <field name="line_ids">
                                 <tree editable="bottom">
                                     <field name="room_id"/>
-                                    <field name="booking_type"/>
+                                    <field name="booking_type" column_invisible="1"/>
                                     <field name="available_bed_ids" column_invisible="1"/>
                                     <field name="bed_ids" widget="many2many_tags"
                                            domain="[('id', 'in', available_bed_ids)]"

@@ -66,6 +66,12 @@ class HotelReservation(models.Model):
         ('walkin', 'Sans réservation'),
         ('other', 'Autre'),
     ], string="Source", default='direct')
+    booking_type = fields.Selection([
+        ('room', 'Par chambre'),
+        ('bed', 'Par lit'),
+    ], string="Type de location", default='room', required=True, tracking=True,
+        help="Par chambre : chaque chambre réservée est prise en entier.\n"
+             "Par lit : on sélectionne les lits disponibles de chaque chambre.")
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Confirmée'),
@@ -121,6 +127,13 @@ class HotelReservation(models.Model):
         for rec in self:
             if rec.deposit_amount < 0:
                 raise ValidationError(_("L'acompte ne peut pas être négatif."))
+
+    @api.onchange('booking_type')
+    def _onchange_booking_type(self):
+        """Le type de location est choisi sur la réservation : on l'applique à
+        chaque ligne (chambre entière = tous les lits ; par lit = sélection)."""
+        for line in self.line_ids:
+            line._apply_booking_type()
 
     def _compute_invoice_count(self):
         for rec in self:
@@ -391,10 +404,9 @@ class HotelReservationLine(models.Model):
     reservation_id = fields.Many2one(
         'hotel.reservation', string="Réservation", required=True, ondelete='cascade')
     room_id = fields.Many2one('hotel.room', string="Chambre", required=True)
-    booking_type = fields.Selection([
-        ('room', 'Chambre entière'),
-        ('bed', 'Lit(s)'),
-    ], string="Mode de location", default='room', required=True)
+    booking_type = fields.Selection(
+        related='reservation_id.booking_type', string="Type de location",
+        store=True, readonly=True)
     bed_ids = fields.Many2many('hotel.bed', string="Lits")
     available_bed_ids = fields.Many2many(
         'hotel.bed', 'hotel_resline_avail_bed_rel', 'line_id', 'bed_id',
@@ -448,21 +460,20 @@ class HotelReservationLine(models.Model):
         elif self.room_id:
             self.price_unit = self.room_id.room_price
 
+    def _apply_booking_type(self):
+        """Aligne les lits de la ligne sur le « Type de location » de la
+        réservation : chambre entière -> tous les lits ; par lit -> sélection
+        vidée pour que l'utilisateur choisisse les lits disponibles."""
+        if self.booking_type == 'room':
+            self.bed_ids = [(6, 0, self.room_id.bed_ids.filtered('active').ids)]
+        else:
+            self.bed_ids = [(5, 0, 0)]
+        self._apply_price()
+
     @api.onchange('room_id')
     def _onchange_room_id(self):
-        if not self.room_id:
-            return
-        active_beds = self.room_id.bed_ids.filtered('active')
-        # Sans lit, seule la chambre entière est possible.
-        if self.booking_type == 'bed' and not active_beds:
-            self.booking_type = 'room'
-        if self.booking_type == 'room':
-            # Chambre entière : la ligne reprend tous les lits de la chambre.
-            self.bed_ids = [(6, 0, active_beds.ids)]
-        else:
-            # Par lit : ne garder que les lits de cette chambre.
-            self.bed_ids = self.bed_ids.filtered(lambda b: b.room_id == self.room_id)
-        self._apply_price()
+        if self.room_id:
+            self._apply_booking_type()
 
     @api.onchange('bed_ids')
     def _onchange_bed_ids(self):
