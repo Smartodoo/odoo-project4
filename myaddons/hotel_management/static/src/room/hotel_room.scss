@@ -1,0 +1,10 @@
+// Statut de la chambre (form chambre) : l'étape COURANTE garde son apparence
+// native (mise en évidence par défaut d'Odoo, aucune couleur changée) ; seules
+// les étapes qui l'entourent sont estompées, pour que la courante ressorte.
+.o_hotel_status.o_field_statusbar > .o_statusbar_status {
+    > .o_arrow_button:disabled:not(.o_arrow_button_current) {
+        &, &:hover, &:focus {
+            opacity: 0.45;
+        }
+    }
+}

@@ -45,6 +45,7 @@ travaux, personnel hôtelier.
     ],
     'assets': {
         'web.assets_backend': [
+            'hotel_management/static/src/room/hotel_room.scss',
             'hotel_management/static/src/dashboard/hotel_dashboard.scss',
             'hotel_management/static/src/dashboard/hotel_dashboard.js',
             'hotel_management/static/src/dashboard/hotel_dashboard.xml',
