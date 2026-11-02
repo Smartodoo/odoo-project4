@@ -25,6 +25,13 @@ class HotelRoomType(models.Model):
     room_ids = fields.One2many('hotel.room', 'room_type_id', string="Chambres")
     room_count = fields.Integer(string="Nb chambres", compute='_compute_room_count')
 
+    _sql_constraints = [
+        ('default_capacity_positive', 'CHECK(default_capacity > 0)',
+         "La capacité par défaut d'un type de chambre doit être d'au moins 1 personne."),
+        ('list_price_non_negative', 'CHECK(list_price >= 0)',
+         "Le prix d'un type de chambre ne peut pas être négatif."),
+    ]
+
     def _compute_room_count(self):
         groups = self.env['hotel.room'].read_group(
             [('room_type_id', 'in', self.ids)], ['room_type_id'], ['room_type_id'])
