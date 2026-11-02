@@ -1,4 +1,7 @@
-from odoo import api, fields, models
+from dateutil.relativedelta import relativedelta
+
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class ResPartner(models.Model):
@@ -14,6 +17,7 @@ class ResPartner(models.Model):
         ('other', "Autre"),
     ], string="Type de pièce d'identité")
     hotel_id_number = fields.Char(string="N° de pièce d'identité")
+    hotel_birthdate = fields.Date(string="Date de naissance")
 
     hotel_reservation_ids = fields.One2many(
         'hotel.reservation', 'partner_id', string="Réservations")
@@ -23,6 +27,19 @@ class ResPartner(models.Model):
     @api.model
     def _hotel_full_name(self, last_name, first_name):
         return ' '.join(p.strip() for p in (last_name, first_name) if p and p.strip())
+
+    @api.constrains('hotel_birthdate')
+    def _check_hotel_birthdate(self):
+        """Le client qui réserve doit être majeur (18 ans révolus)."""
+        today = fields.Date.context_today(self)
+        for partner in self.filtered('hotel_birthdate'):
+            if partner.hotel_birthdate > today:
+                raise ValidationError(
+                    _("La date de naissance ne peut pas être dans le futur."))
+            if relativedelta(today, partner.hotel_birthdate).years < 18:
+                raise ValidationError(_(
+                    "%s doit avoir au moins 18 ans pour réserver.",
+                    partner.display_name))
 
     @api.onchange('hotel_last_name', 'hotel_first_name')
     def _onchange_hotel_names(self):

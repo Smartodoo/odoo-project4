@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ================= POLICES DU SITE ================= -->
+    <template id="hotel_layout_fonts" inherit_id="website.layout" name="Auberge - Polices">
+        <xpath expr="//head" position="inside">
+            <link rel="preconnect" href="https://fonts.googleapis.com"/>
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+            <link rel="stylesheet"
+                  href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&amp;family=Inter:wght@400;500;600;700&amp;display=swap"/>
+        </xpath>
+    </template>
+
+    <!-- ================= LOGO CLAIR (en-tête transparent sur fond sombre) ================= -->
+    <template id="hotel_header_logo_light" inherit_id="website.option_header_brand_logo"
+              name="Auberge - Logo clair">
+        <xpath expr="//a[@data-name='Navbar Logo']" position="inside">
+            <img class="ah_logo_light" src="/hotel_management/static/src/img/auberge_logo_light.png"
+                 t-att-alt="website.name" width="141" height="46"/>
+        </xpath>
+    </template>
+
+    <!-- ================= PIED DE PAGE ================= -->
+    <template id="hotel_footer" inherit_id="website.footer_custom" name="Auberge - Pied de page">
+        <xpath expr="//div[@id='footer']" position="replace">
+            <div id="footer" class="ah_footer" t-if="not no_footer">
+                <t t-set="ft_company" t-value="website.company_id"/>
+                <div class="container">
+                    <div class="row g-5">
+                        <div class="col-lg-4">
+                            <a href="/" class="ah_footer_brand">
+                                <img t-attf-src="/web/image/website/#{website.id}/logo" t-att-alt="website.name"
+                                     width="141" height="46" loading="eager"/>
+                            </a>
+                            <p class="ah_footer_about">
+                                Une auberge chaleureuse où chacun trouve sa place : chambres privées pour le calme
+                                et le confort, lits en dortoir pour voyager malin. Réservation en ligne simple,
+                                rapide et confirmée par e-mail.
+                            </p>
+                            <a href="/hotel/rooms" class="ah_footer_cta">
+                                <i class="fa fa-calendar"/> Réserver un séjour
+                            </a>
+                        </div>
+                        <div class="col-lg-2 col-6">
+                            <h5>Navigation</h5>
+                            <ul class="list-unstyled">
+                                <li><a href="/">Accueil</a></li>
+                                <li><a href="/hotel/rooms">Chambres &amp; dortoirs</a></li>
+                                <li><a href="/hotel/rooms">Réservation</a></li>
+                                <li><a href="/contactus">Contact</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-2 col-6">
+                            <h5>Votre séjour</h5>
+                            <ul class="list-unstyled">
+                                <li><a href="/hotel/rooms">Chambre privée</a></li>
+                                <li><a href="/hotel/rooms">Lit en dortoir</a></li>
+                                <li><a href="/my">Mon espace client</a></li>
+                                <li><a href="/my/reservations">Mes réservations</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-lg-4">
+                            <h5>Nous contacter</h5>
+                            <ul class="list-unstyled ah_footer_contact">
+                                <li t-if="ft_company.street or ft_company.city">
+                                    <i class="fa fa-map-marker"/>
+                                    <span>
+                                        <t t-esc="ft_company.street"/><t t-if="ft_company.street and ft_company.city">, </t>
+                                        <t t-esc="ft_company.zip"/> <t t-esc="ft_company.city"/>
+                                    </span>
+                                </li>
+                                <li t-if="ft_company.phone">
+                                    <i class="fa fa-phone"/>
+                                    <a t-attf-href="tel:#{ft_company.phone}" t-esc="ft_company.phone"/>
+                                </li>
+                                <li t-if="ft_company.email">
+                                    <i class="fa fa-envelope-o"/>
+                                    <a t-attf-href="mailto:#{ft_company.email}" t-esc="ft_company.email"/>
+                                </li>
+                                <li>
+                                    <i class="fa fa-comments-o"/>
+                                    <a href="/contactus">Formulaire de contact</a>
+                                </li>
+                                <li>
+                                    <i class="fa fa-clock-o"/>
+                                    <span>Réservation en ligne 24h/24, 7j/7</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="hotel_footer_copyright" inherit_id="website.footer_copyright_company_name"
+              name="Auberge - Copyright">
+        <xpath expr="//span[hasclass('o_footer_copyright_name')]" position="replace">
+            <span class="o_footer_copyright_name me-2">
+                © <t t-esc="datetime.date.today().year"/> <t t-esc="website.company_id.name"/> · Tous droits réservés
+            </span>
+        </xpath>
+    </template>
+</odoo>

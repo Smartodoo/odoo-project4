@@ -16,6 +16,9 @@
                             help="Le client sort : la/les chambre(s) passent en « À nettoyer »."/>
                     <button name="action_cancel" string="Annuler" type="object"
                             invisible="state in ('checkout', 'cancel')"/>
+                    <button name="%(hotel_management.action_hotel_reservation_mail_wizard)d"
+                            string="Envoyer mail" type="action"
+                            context="{'default_reservation_id': id}"/>
                     <button name="action_draft" string="Remettre en brouillon" type="object"
                             invisible="state != 'cancel'"/>
                     <button name="action_send_confirmation" string="Envoyer confirmation"
@@ -43,6 +46,8 @@
                             <field name="partner_id"/>
                             <field name="partner_last_name" invisible="not partner_id"/>
                             <field name="partner_first_name" invisible="not partner_id"/>
+                            <field name="partner_birthdate" invisible="not partner_id"
+                                   required="partner_id"/>
                             <field name="partner_phone" widget="phone" invisible="not partner_id"/>
                             <label for="partner_street" string="Adresse" invisible="not partner_id"/>
                             <div class="o_row" invisible="not partner_id">

@@ -8,6 +8,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="icon"/>
+                <field name="website_home" widget="boolean_toggle"/>
                 <field name="active" widget="boolean_toggle"/>
             </tree>
         </field>

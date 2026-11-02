@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a1322"/>
+      <stop offset=".45" stop-color="#1d3256"/>
+      <stop offset=".72" stop-color="#5a4a63"/>
+      <stop offset=".86" stop-color="#d08a45"/>
+      <stop offset="1" stop-color="#f0c46c"/>
+    </linearGradient>
+    <radialGradient id="moonGlow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff6dc" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#fff6dc" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="warm" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#ffb347" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe3cc"/>
+      <stop offset="1" stop-color="#c9b493"/>
+    </linearGradient>
+    <linearGradient id="wallShade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d9c8a8"/>
+      <stop offset="1" stop-color="#ab9675"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a3b5c"/>
+      <stop offset="1" stop-color="#141f33"/>
+    </linearGradient>
+    <linearGradient id="win" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe3a0"/>
+      <stop offset="1" stop-color="#f2a93b"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a2a43"/>
+      <stop offset="1" stop-color="#0a1220"/>
+    </linearGradient>
+    <linearGradient id="path" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0c46c" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#f0c46c" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+
+  <!-- Ciel -->
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <g fill="#fff">
+    <circle cx="120" cy="90" r="1.6" opacity=".8"/><circle cx="260" cy="160" r="1.2" opacity=".6"/>
+    <circle cx="410" cy="70" r="1.8" opacity=".9"/><circle cx="530" cy="190" r="1.1" opacity=".5"/>
+    <circle cx="660" cy="110" r="1.4" opacity=".7"/><circle cx="880" cy="60" r="1.2" opacity=".6"/>
+    <circle cx="990" cy="170" r="1.7" opacity=".8"/><circle cx="1120" cy="90" r="1.1" opacity=".5"/>
+    <circle cx="1380" cy="140" r="1.5" opacity=".7"/><circle cx="1500" cy="60" r="1.9" opacity=".9"/>
+    <circle cx="1460" cy="230" r="1.1" opacity=".5"/><circle cx="330" cy="260" r="1.3" opacity=".5"/>
+    <circle cx="760" cy="230" r="1" opacity=".4"/><circle cx="60" cy="250" r="1.2" opacity=".5"/>
+  </g>
+  <!-- Lune -->
+  <circle cx="1270" cy="190" r="140" fill="url(#moonGlow)"/>
+  <circle cx="1270" cy="190" r="46" fill="#fbf0d2"/>
+  <circle cx="1252" cy="178" r="7" fill="#efe0b6" opacity=".7"/>
+  <circle cx="1285" cy="205" r="5" fill="#efe0b6" opacity=".7"/>
+
+  <!-- Montagnes -->
+  <path d="M0 640 L180 520 L330 600 L520 470 L700 590 L860 500 L1020 600 L1210 480 L1400 590 L1600 510 L1600 1000 L0 1000Z" fill="#2c3f60" opacity=".75"/>
+  <path d="M0 720 L220 620 L420 700 L640 640 L900 720 L1150 640 L1380 710 L1600 650 L1600 1000 L0 1000Z" fill="#1c2c47"/>
+
+  <!-- Sol -->
+  <path d="M0 790 Q800 740 1600 790 L1600 1000 L0 1000Z" fill="url(#ground)"/>
+
+  <!-- Halo chaleureux derrière la maison -->
+  <ellipse cx="800" cy="640" rx="430" ry="190" fill="url(#warm)" opacity=".35" filter="url(#blur)"/>
+
+  <!-- Aile gauche -->
+  <rect x="380" y="595" width="190" height="210" fill="url(#wallShade)"/>
+  <polygon points="362,605 475,515 588,605" fill="url(#roof)"/>
+  <rect x="362" y="600" width="226" height="10" fill="#0f1a2c"/>
+  <rect x="425" y="655" width="72" height="88" rx="6" fill="#ffd27a" opacity=".55" filter="url(#soft)"/>
+  <rect x="425" y="655" width="72" height="88" rx="6" fill="url(#win)"/>
+  <path d="M461 655 V743 M425 699 H497" stroke="#6b4423" stroke-width="5"/>
+  <rect x="418" y="743" width="86" height="9" rx="2" fill="#6b4423"/>
+
+  <!-- Aile droite -->
+  <rect x="1030" y="575" width="210" height="230" fill="url(#wallShade)"/>
+  <polygon points="1012,585 1135,490 1258,585" fill="url(#roof)"/>
+  <rect x="1012" y="580" width="246" height="10" fill="#0f1a2c"/>
+  <rect x="1095" y="640" width="80" height="94" rx="6" fill="#ffd27a" opacity=".55" filter="url(#soft)"/>
+  <rect x="1095" y="640" width="80" height="94" rx="6" fill="url(#win)"/>
+  <path d="M1135 640 V734 M1095 687 H1175" stroke="#6b4423" stroke-width="5"/>
+  <rect x="1088" y="734" width="94" height="9" rx="2" fill="#6b4423"/>
+
+  <!-- Cheminée + fumée -->
+  <rect x="925" y="250" width="44" height="120" fill="#1a2740"/>
+  <rect x="918" y="244" width="58" height="12" rx="2" fill="#0f1a2c"/>
+  <path d="M950 236 C930 206 975 190 952 160 C932 132 972 118 955 88" stroke="#d7dbe4" stroke-width="10" fill="none" opacity=".18" stroke-linecap="round"/>
+
+  <!-- Corps principal -->
+  <rect x="560" y="430" width="480" height="375" fill="url(#wall)"/>
+  <polygon points="526,445 800,236 1074,445" fill="url(#roof)"/>
+  <polyline points="526,445 800,236 1074,445" fill="none" stroke="#d9a441" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="526" y="440" width="548" height="12" fill="#0f1a2c"/>
+  <!-- Colombages -->
+  <g stroke="#7a5230" stroke-width="8">
+    <line x1="560" y1="590" x2="1040" y2="590"/>
+    <line x1="566" y1="452" x2="566" y2="805"/>
+    <line x1="1034" y1="452" x2="1034" y2="805"/>
+  </g>
+  <!-- Oculus -->
+  <circle cx="800" cy="360" r="38" fill="#ffd27a" opacity=".6" filter="url(#soft)"/>
+  <circle cx="800" cy="360" r="34" fill="url(#win)" stroke="#6b4423" stroke-width="6"/>
+  <path d="M800 326 V394 M766 360 H834" stroke="#6b4423" stroke-width="4"/>
+  <!-- Fenêtres de l'étage -->
+  <g>
+    <rect x="608" y="478" width="74" height="92" rx="8" fill="#ffd27a" opacity=".55" filter="url(#soft)"/>
+    <rect x="763" y="478" width="74" height="92" rx="8" fill="#ffd27a" opacity=".55" filter="url(#soft)"/>
+    <rect x="918" y="478" width="74" height="92" rx="8" fill="#ffd27a" opacity=".55" filter="url(#soft)"/>
+    <rect x="608" y="478" width="74" height="92" rx="8" fill="url(#win)"/>
+    <rect x="763" y="478" width="74" height="92" rx="8" fill="url(#win)"/>
+    <rect x="918" y="478" width="74" height="92" rx="8" fill="url(#win)"/>
+    <path d="M645 478 V570 M608 522 H682 M800 478 V570 M763 522 H837 M955 478 V570 M918 522 H992" stroke="#6b4423" stroke-width="5"/>
+    <rect x="600" y="568" width="90" height="9" rx="2" fill="#6b4423"/>
+    <rect x="755" y="568" width="90" height="9" rx="2" fill="#6b4423"/>
+    <rect x="910" y="568" width="90" height="9" rx="2" fill="#6b4423"/>
+    <!-- Jardinières -->
+    <g fill="#3f7d4e"><circle cx="612" cy="566" r="7"/><circle cx="626" cy="562" r="8"/><circle cx="664" cy="562" r="8"/><circle cx="678" cy="566" r="7"/>
+      <circle cx="922" cy="566" r="7"/><circle cx="936" cy="562" r="8"/><circle cx="974" cy="562" r="8"/><circle cx="988" cy="566" r="7"/></g>
+    <g fill="#e2703a"><circle cx="626" cy="558" r="3.5"/><circle cx="664" cy="558" r="3.5"/><circle cx="936" cy="558" r="3.5"/><circle cx="974" cy="558" r="3.5"/></g>
+  </g>
+  <!-- Enseigne -->
+  <rect x="680" y="604" width="240" height="44" rx="6" fill="#0f1b2d" stroke="#d9a441" stroke-width="3"/>
+  <text x="800" y="634" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="24" font-weight="700" letter-spacing="7" fill="#f0c46c">L'AUBERGE</text>
+  <!-- Fenêtres du rez-de-chaussée -->
+  <rect x="598" y="665" width="96" height="112" rx="8" fill="#ffd27a" opacity=".6" filter="url(#soft)"/>
+  <rect x="906" y="665" width="96" height="112" rx="8" fill="#ffd27a" opacity=".6" filter="url(#soft)"/>
+  <rect x="598" y="665" width="96" height="112" rx="8" fill="url(#win)"/>
+  <rect x="906" y="665" width="96" height="112" rx="8" fill="url(#win)"/>
+  <path d="M646 665 V777 M598 718 H694 M954 665 V777 M906 718 H1002" stroke="#6b4423" stroke-width="5"/>
+  <!-- Porte -->
+  <path d="M748 805 V705 A52 52 0 0 1 852 705 V805Z" fill="#6b4423"/>
+  <path d="M760 805 V710 A40 40 0 0 1 840 710 V805Z" fill="#8a5a2b"/>
+  <path d="M770 700 A30 30 0 0 1 830 700Z" fill="url(#win)"/>
+  <circle cx="826" cy="760" r="4" fill="#f0c46c"/>
+  <!-- Lanternes -->
+  <circle cx="728" cy="700" r="34" fill="url(#warm)" opacity=".8"/>
+  <circle cx="872" cy="700" r="34" fill="url(#warm)" opacity=".8"/>
+  <rect x="720" y="688" width="16" height="24" rx="3" fill="#ffd27a" stroke="#1a2740" stroke-width="3"/>
+  <rect x="864" y="688" width="16" height="24" rx="3" fill="#ffd27a" stroke="#1a2740" stroke-width="3"/>
+  <!-- Marches -->
+  <rect x="736" y="805" width="128" height="10" rx="2" fill="#a38c6a"/>
+  <rect x="726" y="815" width="148" height="10" rx="2" fill="#8d7756"/>
+
+  <!-- Chemin éclairé -->
+  <path d="M740 825 L860 825 L1000 1000 L600 1000Z" fill="url(#path)"/>
+
+  <!-- Arbres -->
+  <g fill="#0e1a2d">
+    <polygon points="200,830 255,600 310,830"/><polygon points="215,720 255,540 295,720"/>
+    <polygon points="110,860 160,660 210,860"/>
+    <polygon points="300,850 345,690 390,850"/>
+    <polygon points="1290,840 1345,610 1400,840"/><polygon points="1305,730 1345,550 1385,730"/>
+    <polygon points="1400,860 1455,650 1510,860"/>
+    <polygon points="1220,850 1258,710 1296,850"/>
+  </g>
+  <!-- Buissons -->
+  <g fill="#15263d">
+    <ellipse cx="520" cy="815" rx="70" ry="28"/><ellipse cx="1080" cy="815" rx="80" ry="30"/>
+    <ellipse cx="660" cy="820" rx="48" ry="20"/><ellipse cx="950" cy="820" rx="52" ry="20"/>
+  </g>
+  <!-- Lucioles -->
+  <g fill="#ffd27a">
+    <circle cx="470" cy="770" r="3" opacity=".9"/><circle cx="560" cy="740" r="2.4" opacity=".7"/>
+    <circle cx="1150" cy="780" r="3" opacity=".9"/><circle cx="1060" cy="750" r="2.2" opacity=".7"/>
+    <circle cx="690" cy="880" r="2.5" opacity=".6"/><circle cx="930" cy="900" r="2.8" opacity=".7"/>
+  </g>
+</svg>

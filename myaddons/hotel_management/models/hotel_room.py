@@ -102,6 +102,25 @@ class HotelRoom(models.Model):
         string="Montant (réservation en cours)", currency_field='currency_id',
         compute='_compute_status',
         help="Prix / nuit de la réservation en cours sur cette chambre.")
+    # Montants des réservations actives (confirmées ou enregistrées) de la
+    # chambre, quelle que soit la date : part de la chambre dans chaque séjour.
+    current_reservation_total = fields.Monetary(
+        string="Total réservations en cours", currency_field='currency_id',
+        compute='_compute_reservation_totals',
+        help="Montant prévu pour cette chambre (prix / nuit x nuits), toutes "
+             "réservations confirmées ou enregistrées confondues.")
+    current_reservation_paid = fields.Monetary(
+        string="Encaissé (réservations en cours)", currency_field='currency_id',
+        compute='_compute_reservation_totals',
+        help="Acomptes versés, répartis au prorata quand une réservation "
+             "porte sur plusieurs chambres.")
+    current_reservation_due = fields.Monetary(
+        string="Reste à encaisser", currency_field='currency_id',
+        compute='_compute_reservation_totals')
+    current_reservation_paid_pct = fields.Float(
+        string="% encaissé", compute='_compute_reservation_totals')
+    current_reservation_count = fields.Integer(
+        string="Nb réservations en cours", compute='_compute_reservation_totals')
 
     # Compteurs pour les boutons de la fiche chambre
     reservation_count = fields.Integer(
@@ -336,6 +355,42 @@ class HotelRoom(models.Model):
                 room.status = 'occupied' if checked_in else 'reserved'
             else:
                 room.status = 'partial'
+
+    def _get_open_lines(self):
+        """Lignes des réservations actives (confirmées ou enregistrées)."""
+        return self.env['hotel.reservation.line'].search([
+            ('room_id', 'in', self.ids),
+            ('state', 'in', ('confirmed', 'checkin')),
+        ])
+
+    def _compute_reservation_totals(self):
+        lines_by_room = {}
+        for line in self.filtered('id')._get_open_lines():
+            lines_by_room.setdefault(line.room_id.id, []).append(line)
+        for room in self:
+            lines = lines_by_room.get(room.id, [])
+            total = paid = 0.0
+            for line in lines:
+                total += line.price_subtotal
+                resa = line.reservation_id
+                if resa.deposit_amount and resa.amount_total:
+                    paid += (resa.deposit_amount * line.price_subtotal
+                             / resa.amount_total)
+            room.current_reservation_total = total
+            room.current_reservation_paid = paid
+            room.current_reservation_due = total - paid
+            room.current_reservation_paid_pct = (
+                min(100.0, paid * 100.0 / total) if total else 0.0)
+            room.current_reservation_count = len(
+                {line.reservation_id.id for line in lines})
+
+    def action_view_open_reservations(self):
+        self.ensure_one()
+        action = self.action_view_reservations()
+        action['name'] = _("Réservations en cours — %s") % self.name
+        action['domain'] = [('line_ids.room_id', '=', self.id),
+                            ('state', 'in', ('confirmed', 'checkin'))]
+        return action
 
     def _render_bed_map(self, beds, taken):
         """Pastilles colorées, une par lit (vert libre, bleu réservé, rouge occupé)."""

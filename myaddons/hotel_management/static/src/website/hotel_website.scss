@@ -208,3 +208,1545 @@
     // Lits masqués quand le client choisit la chambre entière
     form:has(#bt_room:checked) .o_hotel_bed_pick { display: none; }
 }
+
+// =====================================================================
+// Charte Auberge : bleu nuit & doré
+// =====================================================================
+$ah-ink: #0f1b2d;
+$ah-ink-2: #1d3256;
+$ah-gold: #d9a441;
+$ah-gold-2: #f0c46c;
+$ah-gold-dark: #a8761c;   // doré lisible sur fond clair
+$ah-cream: #faf6ef;
+$ah-text: #344054;        // texte courant, bien contrasté
+$ah-muted: #556070;       // texte secondaire, toujours lisible
+$ah-line: #e9e2d4;
+$ah-on-dark: #ffffff;     // titres sur fond sombre
+$ah-on-dark-soft: #e2e8f0; // paragraphes sur fond sombre
+$ah-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+$ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+// ---------------------------------------------------------------------
+// Page d'accueil
+// ---------------------------------------------------------------------
+.o_auberge_home {
+    font-family: $ah-sans;
+    color: $ah-text;
+    background: #fff;
+    overflow: hidden;
+    font-variant-numeric: lining-nums;
+
+    h1, h2, h3 { font-family: $ah-serif; color: $ah-ink; letter-spacing: -.01em; }
+    h4, h5 { font-family: $ah-sans; color: $ah-ink; font-weight: 700; }
+
+    // ---------- Boutons ----------
+    .ah_btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 15px;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+        cursor: pointer;
+        &:hover { transform: translateY(-2px); text-decoration: none; }
+        .fa-arrow-right { transition: transform .2s ease; }
+        &:hover .fa-arrow-right { transform: translateX(3px); }
+    }
+    .ah_btn_gold {
+        background: linear-gradient(135deg, $ah-gold-2, $ah-gold);
+        color: $ah-ink;
+        box-shadow: 0 10px 24px rgba($ah-gold, .35);
+        &:hover { color: $ah-ink; box-shadow: 0 14px 32px rgba($ah-gold, .5); }
+    }
+    .ah_btn_dark {
+        background: $ah-ink;
+        color: #fff;
+        &:hover { color: #fff; background: $ah-ink-2; box-shadow: 0 12px 26px rgba($ah-ink, .25); }
+    }
+    .ah_btn_ghost {
+        color: #fff;
+        border-color: rgba(255, 255, 255, .7);
+        &:hover { color: $ah-ink; background: #fff; }
+    }
+    .ah_btn_lg { padding: 15px 30px; font-size: 16px; }
+
+    // ---------- Hero ----------
+    .ah_hero {
+        position: relative;
+        overflow: hidden;
+        padding: 170px 0 230px;   // en-tête transparent au-dessus, vitrine qui chevauche en dessous
+        background:
+            radial-gradient(1100px 560px at 88% -10%, rgba($ah-gold, .26), transparent 60%),
+            radial-gradient(900px 600px at -10% 110%, #24406b 0%, transparent 60%),
+            linear-gradient(160deg, #15263f 0%, $ah-ink 55%, #0a1220 100%);
+        color: $ah-on-dark;
+    }
+    .ah_hero_overlay {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, .08) 1px, transparent 1px);
+        background-size: 22px 22px;
+        mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
+    }
+    .ah_hero_glow {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        pointer-events: none;
+    }
+    .ah_glow_1 { width: 420px; height: 420px; background: $ah-gold; top: -120px; right: -80px; opacity: .28; }
+    .ah_glow_2 { width: 360px; height: 360px; background: #3a6ea5; bottom: -100px; left: -100px; opacity: .35; }
+    .ah_hero_wave {
+        position: absolute;
+        left: 0;
+        bottom: -1px;
+        width: 100%;
+        height: 90px;
+        z-index: 1;
+        path { fill: #fff; }
+    }
+
+    .ah_hero_inner { position: relative; z-index: 2; text-align: center; }
+    .ah_hero .ah_eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .1);
+        border: 1px solid rgba(255, 255, 255, .28);
+        backdrop-filter: blur(6px);
+        color: $ah-on-dark;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        .fa { color: $ah-gold-2; }
+    }
+    .ah_hero .ah_hero_title {
+        color: $ah-on-dark;
+        font-size: clamp(2.5rem, 5.6vw, 4.7rem);
+        line-height: 1.08;
+        font-weight: 700;
+        margin: 24px 0 20px;
+        text-shadow: 0 2px 24px rgba(0, 0, 0, .35);
+        em {
+            font-style: italic;
+            color: $ah-gold-2;
+            background: linear-gradient(90deg, $ah-gold-2, $ah-gold);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    }
+    .ah_hero .ah_hero_lead {
+        font-size: clamp(1rem, 1.5vw, 1.18rem);
+        max-width: 690px;
+        margin: 0 auto;
+        color: $ah-on-dark-soft;
+        line-height: 1.75;
+    }
+
+    // Barre de recherche
+    .ah_search {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 10px 10px 10px 18px;
+        background: #fff;
+        border-radius: 999px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, .35), 0 0 0 7px rgba(255, 255, 255, .1);
+        text-align: left;
+    }
+    .ah_search_field {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        padding: 6px 10px;
+        border-radius: 14px;
+        cursor: pointer;
+        min-width: 0;
+        > .fa { color: $ah-gold; font-size: 18px; }
+        > span { display: flex; flex-direction: column; min-width: 0; width: 100%; }
+        small {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: $ah-muted;
+        }
+        input {
+            border: 0;
+            outline: 0;
+            padding: 0;
+            background: transparent;
+            font-weight: 600;
+            font-size: 15px;
+            color: $ah-ink;
+            width: 100%;
+        }
+    }
+    .ah_search_guests { flex: 0 0 150px; }
+    .ah_search_sep { width: 1px; height: 36px; background: $ah-line; }
+    .ah_search_btn { padding: 16px 26px; white-space: nowrap; }
+
+    .ah_hero_stats {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 14px 52px;
+        margin-top: 48px;
+        > div { display: flex; flex-direction: column; align-items: center; }
+        strong { font-family: $ah-serif; font-size: 32px; color: $ah-on-dark; line-height: 1.1; }
+        strong span { font: inherit; letter-spacing: 0; text-transform: none; color: inherit; }
+        > div > span {
+            font-size: 12.5px;
+            font-weight: 500;
+            color: $ah-on-dark-soft;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            margin-top: 4px;
+        }
+    }
+
+    // ---------- Sections ----------
+    .ah_section { padding: 96px 0; position: relative; }
+    .ah_section_cream { background: $ah-cream; }
+    .ah_head {
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto 56px;
+        p { color: $ah-muted; font-size: 17px; line-height: 1.7; margin: 0; }
+    }
+    .ah_head_row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        text-align: left;
+        max-width: none;
+        .ah_h2 { margin-bottom: 0; }
+    }
+    .ah_h2 { font-size: clamp(2rem, 3.8vw, 2.8rem); font-weight: 700; margin: 12px 0 16px; }
+    .ah_text { font-size: 17px; line-height: 1.8; color: $ah-text; }
+    .ah_kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .16em;
+        color: $ah-gold-dark;
+        &::before { content: ''; width: 28px; height: 2px; background: currentColor; border-radius: 2px; }
+    }
+    .ah_link {
+        color: $ah-ink;
+        font-weight: 600;
+        border-bottom: 2px solid $ah-gold;
+        padding-bottom: 2px;
+        &:hover { color: $ah-gold-dark; text-decoration: none; }
+    }
+
+    // ---------- Bienvenue ----------
+    .ah_values { display: grid; gap: 14px; margin-top: 26px; }
+    .ah_value {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 16px 18px;
+        border-radius: 16px;
+        background: $ah-cream;
+        border: 1px solid $ah-line;
+        transition: transform .25s ease, box-shadow .25s ease;
+        &:hover { transform: translateX(4px); box-shadow: 0 12px 28px rgba($ah-ink, .07); }
+        > .fa {
+            flex: 0 0 44px;
+            height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            background: $ah-ink;
+            color: $ah-gold-2;
+            font-size: 18px;
+        }
+        strong { display: block; color: $ah-ink; font-size: 16px; }
+        span { color: $ah-muted; font-size: 14.5px; }
+    }
+    .ah_gallery {
+        position: relative;
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1.3fr 1fr;
+        grid-template-rows: 220px 220px;
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 22px;
+            box-shadow: 0 20px 45px rgba($ah-ink, .14);
+        }
+        img:first-child { grid-row: span 2; }
+    }
+    .ah_gallery_1 { grid-template-columns: 1fr; grid-template-rows: 440px; img:first-child { grid-row: auto; } }
+    .ah_gallery_2 { grid-template-rows: 440px; img:first-child { grid-row: auto; } }
+    // Étiquette de prix posée à l'intérieur de la grande photo (en bas à gauche)
+    .ah_gallery_badge {
+        position: absolute;
+        left: 18px;
+        bottom: 18px;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 12px 18px 13px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, .94);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 14px 32px rgba($ah-ink, .25);
+        border-left: 4px solid $ah-gold;
+    }
+    .ah_badge_label {
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: $ah-gold-dark;
+        .fa { margin-right: 4px; }
+    }
+    .ah_badge_price {
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+        color: $ah-ink;
+        small { font-size: 13px; color: $ah-muted; font-weight: 500; }
+        strong { font-family: $ah-serif; font-size: 24px; font-weight: 700; line-height: 1.15; color: $ah-ink; }
+        strong span { font: inherit; color: inherit; }
+    }
+    .ah_gallery_empty {
+        height: 440px;
+        border-radius: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 90px;
+        color: $ah-gold-2;
+        background: linear-gradient(135deg, $ah-ink-2, $ah-ink);
+    }
+
+    // ---------- Formules ----------
+    .ah_offer {
+        position: relative;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 42px 40px;
+        border-radius: 26px;
+        background: #fff;
+        border: 1px solid $ah-line;
+        box-shadow: 0 20px 50px rgba($ah-ink, .06);
+        transition: transform .3s ease, box-shadow .3s ease;
+        &:hover { transform: translateY(-6px); box-shadow: 0 30px 70px rgba($ah-ink, .12); }
+        h3 { font-size: 30px; margin: 22px 0 10px; }
+        > p { color: $ah-muted; font-size: 16px; line-height: 1.7; }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 30px;
+            li { padding: 7px 0; font-weight: 500; color: $ah-ink; }
+            .fa {
+                width: 22px; height: 22px;
+                display: inline-flex; align-items: center; justify-content: center;
+                margin-right: 10px;
+                border-radius: 50%;
+                background: rgba($ah-gold, .2);
+                color: $ah-gold-dark;
+                font-size: 11px;
+            }
+        }
+    }
+    .ah_offer_icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        background: $ah-cream;
+        color: $ah-ink;
+    }
+    .ah_offer_foot {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding-top: 26px;
+        border-top: 1px dashed $ah-line;
+    }
+    .ah_offer_price {
+        display: flex;
+        flex-direction: column;
+        small { color: $ah-muted; font-size: 13px; }
+        strong { font-family: $ah-serif; font-size: 30px; color: $ah-ink; line-height: 1.15; }
+        strong span { font: inherit; }
+    }
+    // Carte sombre : tous les textes en clair
+    .ah_offer.ah_offer_featured {
+        background:
+            radial-gradient(420px 260px at 100% 0%, rgba($ah-gold, .25), transparent 60%),
+            linear-gradient(160deg, $ah-ink-2 0%, $ah-ink 100%);
+        border-color: transparent;
+        box-shadow: 0 25px 60px rgba($ah-ink, .3);
+        h3 { color: $ah-on-dark; }
+        > p { color: $ah-on-dark-soft; }
+        ul li { color: $ah-on-dark; }
+        ul .fa { background: rgba($ah-gold-2, .22); color: $ah-gold-2; }
+        .ah_offer_price strong { color: $ah-on-dark; }
+        .ah_offer_price small { color: $ah-on-dark-soft; }
+        .ah_offer_icon { background: rgba($ah-gold-2, .18); color: $ah-gold-2; }
+        .ah_offer_foot { border-top-color: rgba(255, 255, 255, .22); }
+    }
+    .ah_offer_badge {
+        position: absolute;
+        top: 26px;
+        right: 26px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        background: $ah-gold-2;
+        color: $ah-ink;
+    }
+
+    // ---------- Cartes chambres ----------
+    .ah_room {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: #fff;
+        border-radius: 22px;
+        overflow: hidden;
+        color: inherit;
+        text-decoration: none;
+        border: 1px solid $ah-line;
+        box-shadow: 0 12px 34px rgba($ah-ink, .06);
+        transition: transform .3s ease, box-shadow .3s ease;
+        &:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 26px 60px rgba($ah-ink, .14);
+            text-decoration: none;
+            color: inherit;
+            .ah_room_media img { transform: scale(1.07); }
+            .ah_room_go { color: $ah-gold-dark; }
+        }
+    }
+    .ah_room_media {
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+        background: linear-gradient(135deg, $ah-ink-2, $ah-ink);
+        img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 60%, rgba($ah-ink, .35));
+        }
+    }
+    .ah_room_placeholder {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 56px;
+        color: $ah-gold-2;
+    }
+    .ah_room_type, .ah_room_mode {
+        position: absolute;
+        z-index: 1;
+        top: 16px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+    }
+    .ah_room_type { left: 16px; background: rgba(255, 255, 255, .96); color: $ah-ink; }
+    .ah_room_mode { right: 16px; background: $ah-ink; color: $ah-on-dark; .fa { color: $ah-gold-2; } }
+    .ah_room_mode.ah_mode_bed { background: $ah-gold-2; color: $ah-ink; .fa { color: $ah-ink; } }
+    .ah_room_body { padding: 22px 24px 20px; display: flex; flex-direction: column; flex: 1; }
+    .ah_room_top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        h4 { font-size: 19px; margin: 0; }
+    }
+    .ah_room_price {
+        text-align: right;
+        white-space: nowrap;
+        strong { display: block; font-size: 18px; color: $ah-ink; }
+        small { color: $ah-muted; }
+    }
+    .ah_room_meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 16px;
+        margin: 10px 0 18px;
+        font-size: 14px;
+        color: $ah-muted;
+        .fa { color: $ah-gold-dark; margin-right: 3px; }
+    }
+    .ah_room_foot {
+        margin-top: auto;
+        padding-top: 16px;
+        border-top: 1px solid #f1ede5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .ah_room_amen {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        .fa {
+            width: 32px; height: 32px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 10px;
+            background: $ah-cream;
+            color: $ah-ink;
+            font-size: 14px;
+        }
+        small { color: $ah-muted; font-weight: 600; }
+    }
+    .ah_room_go { font-weight: 600; color: $ah-ink; font-size: 14px; transition: color .2s ease; }
+
+    // ---------- Étapes ----------
+    .ah_steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+    }
+    .ah_step {
+        text-align: center;
+        padding: 38px 28px 32px;
+        border-radius: 22px;
+        background: #fff;
+        border: 1px solid $ah-line;
+        box-shadow: 0 14px 36px rgba($ah-ink, .05);
+        transition: transform .3s ease, box-shadow .3s ease;
+        &:hover { transform: translateY(-4px); box-shadow: 0 22px 46px rgba($ah-ink, .1); }
+        h5 { font-size: 19px; margin: 22px 0 10px; }
+        p { color: $ah-muted; line-height: 1.7; margin: 0; }
+    }
+    .ah_step_icon {
+        position: relative;
+        width: 76px;
+        height: 76px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 22px;
+        background: linear-gradient(135deg, $ah-ink-2, $ah-ink);
+        color: $ah-gold-2;
+        font-size: 28px;
+        box-shadow: 0 14px 30px rgba($ah-ink, .25);
+        span {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            background: $ah-gold-2;
+            color: $ah-ink;
+            font-size: 14px;
+            font-weight: 700;
+            border: 3px solid #fff;
+        }
+    }
+
+    // ---------- Équipements (fond sombre) ----------
+    .ah_section_dark {
+        background:
+            radial-gradient(700px 400px at 100% 0%, rgba($ah-gold, .16), transparent 60%),
+            $ah-ink;
+        color: $ah-on-dark-soft;
+        .ah_kicker { color: $ah-gold-2; }
+        .ah_h2 { color: $ah-on-dark; }
+        .ah_text { color: $ah-on-dark-soft; }
+    }
+    .ah_amenities {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 14px;
+    }
+    .ah_section_dark .ah_amenity {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 22px 20px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, .07);
+        border: 1px solid rgba(255, 255, 255, .16);
+        color: $ah-on-dark;
+        font-weight: 600;
+        transition: background .25s ease, border-color .25s ease, transform .25s ease;
+        span { color: $ah-on-dark; }
+        .fa {
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            background: rgba($ah-gold-2, .2);
+            color: $ah-gold-2;
+            font-size: 19px;
+        }
+        &:hover { background: rgba(255, 255, 255, .12); border-color: rgba($ah-gold-2, .6); transform: translateY(-3px); }
+    }
+
+    // ---------- Appel à l'action (fond sombre) ----------
+    .ah_cta_wrap { padding: 96px 0; }
+    .ah_cta {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 30px;
+        padding: 60px 64px;
+        border-radius: 32px;
+        background:
+            radial-gradient(500px 300px at 100% 0%, rgba($ah-gold, .38), transparent 60%),
+            linear-gradient(135deg, $ah-ink-2 0%, $ah-ink 100%);
+        color: $ah-on-dark-soft;
+        box-shadow: 0 40px 80px rgba($ah-ink, .25);
+        h2 { color: $ah-on-dark; font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin: 0 0 10px; }
+        p { color: $ah-on-dark-soft; font-size: 17px; margin: 0; max-width: 560px; }
+    }
+    .ah_cta_contact {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 24px;
+        margin-top: 20px;
+        a { color: $ah-gold-2; font-weight: 600; text-decoration: none; &:hover { color: #fff; } }
+    }
+    .ah_cta_btns { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    // ---------- Responsive ----------
+    @media (max-width: 991px) {
+        .ah_section, .ah_cta_wrap { padding: 72px 0; }
+        .ah_search {
+            flex-direction: column;
+            align-items: stretch;
+            border-radius: 24px;
+            padding: 14px;
+        }
+        .ah_search_guests { flex: 1; }
+        .ah_search_sep { width: auto; height: 1px; }
+        .ah_search_btn { margin-top: 6px; }
+        .ah_steps { grid-template-columns: 1fr; }
+        .ah_cta { padding: 44px 30px; }
+    }
+    @media (max-width: 575px) {
+        .ah_hero { padding: 72px 0 120px; }
+        .ah_hero_stats { gap: 18px 28px; strong { font-size: 24px; } }
+        .ah_offer { padding: 32px 24px; }
+        .ah_gallery { grid-template-rows: 160px 160px; }
+        .ah_gallery_1, .ah_gallery_2 { grid-template-rows: 300px; }
+        // L'étiquette reste dans la grande photo (1re colonne)
+        .ah_gallery_3 .ah_gallery_badge { max-width: calc(56% - 24px); }
+        .ah_gallery_badge { left: 10px; bottom: 10px; padding: 9px 12px 10px; border-radius: 12px; border-left-width: 3px; }
+        .ah_badge_label { font-size: 10px; letter-spacing: .06em; }
+        .ah_badge_price { flex-wrap: wrap; gap: 0 4px; strong { font-size: 18px; } small { font-size: 11.5px; } }
+        .ah_head_row { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .ah_cta_btns { width: 100%; .ah_btn { flex: 1; } }
+    }
+}
+
+// ---------------------------------------------------------------------
+// En-tête : logo et bouton d'appel aux couleurs de l'auberge
+// ---------------------------------------------------------------------
+header .navbar-brand.logo img {
+    height: 52px;
+    width: auto;
+    max-height: none;
+}
+header#top {
+    font-family: $ah-sans;
+    .nav-link { color: $ah-text; font-weight: 500; }
+    .nav-link:hover, .nav-link.active { color: $ah-ink; }
+    .nav-link.active { box-shadow: inset 0 -2px 0 $ah-gold; }
+    // !important : un autre module force .btn-primary en violet sur tout le site
+    .btn-primary {
+        background: linear-gradient(135deg, $ah-gold-2, $ah-gold) !important;
+        border-color: transparent !important;
+        color: $ah-ink !important;
+        font-weight: 600;
+        box-shadow: 0 8px 20px rgba($ah-gold, .3);
+        &:hover, &:focus { background: $ah-gold !important; color: $ah-ink !important; }
+    }
+    .btn-outline-primary, .o_header_sign_in, .o_nav_link_btn {
+        border-color: $ah-ink;
+        color: $ah-ink;
+        &:hover { background: $ah-ink; color: #fff; }
+    }
+}
+
+// ---------------------------------------------------------------------
+// Pied de page
+// ---------------------------------------------------------------------
+footer#bottom.o_footer {
+    background:
+        radial-gradient(700px 360px at 100% 0%, rgba($ah-gold, .12), transparent 60%),
+        $ah-ink;
+    color: $ah-on-dark-soft;
+    font-family: $ah-sans;
+
+    .ah_footer {
+        padding: 70px 0 50px;
+        h5 {
+            color: $ah-on-dark;
+            font-family: $ah-sans;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            margin-bottom: 20px;
+        }
+        ul li { margin-bottom: 10px; }
+        a { color: $ah-on-dark-soft; text-decoration: none; transition: color .2s ease; }
+        a:hover { color: $ah-gold-2; }
+    }
+    .ah_footer_brand {
+        display: inline-block;
+        background: #fff;
+        padding: 10px 16px;
+        border-radius: 14px;
+        margin-bottom: 20px;
+        img { height: 46px; width: auto; display: block; }
+    }
+    .ah_footer_about { color: $ah-on-dark-soft; line-height: 1.75; font-size: 15px; max-width: 380px; }
+    .ah_footer .ah_footer_cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+        padding: 11px 22px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, $ah-gold-2, $ah-gold);
+        color: $ah-ink;
+        font-weight: 600;
+        &:hover { color: $ah-ink; box-shadow: 0 10px 24px rgba($ah-gold, .35); }
+    }
+    .ah_footer_contact li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        .fa { color: $ah-gold-2; width: 18px; margin-top: 4px; text-align: center; }
+    }
+    .o_footer_copyright {
+        background: rgba(0, 0, 0, .25);
+        border-top: 1px solid rgba(255, 255, 255, .08);
+        color: $ah-on-dark-soft;
+        a, .o_footer_copyright_name { color: $ah-on-dark-soft; }
+        a:hover { color: $ah-gold-2; }
+    }
+}
+
+// ---------------------------------------------------------------------
+// Pages de réservation (/hotel/...) : même charte
+// ---------------------------------------------------------------------
+.o_hotel_web {
+    font-family: $ah-sans;
+    color: $ah-text;
+    h1, h2, h3 { font-family: $ah-serif; color: $ah-ink; }
+    .o_hotel_hero {
+        background:
+            radial-gradient(900px 400px at 90% -20%, rgba($ah-gold, .28), transparent 60%),
+            linear-gradient(160deg, #15263f 0%, $ah-ink 60%, #0a1220 100%);
+        color: $ah-on-dark;
+        padding: 64px 0 56px;
+        h1 { color: $ah-on-dark; font-size: clamp(2rem, 4vw, 3rem); }
+        .lead { color: $ah-on-dark-soft; opacity: 1; }
+    }
+    .o_hotel_search {
+        border-radius: 18px;
+        .o_hotel_search_field label { color: $ah-muted; }
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, $ah-gold-2, $ah-gold) !important;
+        border-color: transparent !important;
+        color: $ah-ink !important;
+        font-weight: 600;
+        &:hover, &:focus { background: $ah-gold !important; color: $ah-ink !important; }
+    }
+    .o_hotel_room_web_card {
+        border-color: $ah-line;
+        border-radius: 20px;
+        .o_hotel_price { color: $ah-ink; }
+    }
+    .o_hotel_booking_box {
+        border-color: $ah-line;
+        .o_hotel_booking_price { color: $ah-ink; font-family: $ah-serif; }
+    }
+    .o_hotel_choice_card > .fa { color: $ah-gold-dark; }
+    .btn-check:checked + .o_hotel_choice_card { border-color: $ah-gold; background: #fdf7ea; }
+}
+
+// ---------------------------------------------------------------------
+// Bandeau d'accueil : éléments avant la recherche
+// ---------------------------------------------------------------------
+.o_auberge_home {
+    // Indicateur « disponible ce soir »
+    .ah_hero .ah_live {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 18px 8px 14px;
+        border-radius: 999px;
+        background: rgba(34, 197, 94, .12);
+        border: 1px solid rgba(74, 222, 128, .45);
+        color: $ah-on-dark;
+        font-size: 14px;
+        font-weight: 500;
+        backdrop-filter: blur(6px);
+        strong { color: #86efac; font-weight: 700; }
+    }
+    .ah_live_dot {
+        position: relative;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #22c55e;
+        &::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid #22c55e;
+            animation: ah-pulse 1.8s ease-out infinite;
+        }
+    }
+
+    // Sous-titre : mots clés surlignés en doré
+    .ah_hero .ah_hero_lead {
+        font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+        max-width: 640px;
+        line-height: 1.7;
+        letter-spacing: .005em;
+    }
+    .ah_mark {
+        position: relative;
+        color: $ah-on-dark;
+        font-weight: 600;
+        white-space: nowrap;
+        background: linear-gradient(transparent 62%, rgba($ah-gold, .38) 62%, rgba($ah-gold, .38) 92%, transparent 92%)
+                    no-repeat 0 0 / 0% 100%;
+        animation: ah-mark 1s .9s cubic-bezier(.65, 0, .35, 1) forwards;
+    }
+
+    // Garanties : trois cartes en verre dépoli
+    .ah_trust {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        list-style: none;
+        padding: 0;
+        margin: 34px auto 38px;
+        max-width: 960px;
+        li {
+            flex: 1 1 260px;
+            max-width: 300px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 18px;
+            text-align: left;
+            background: linear-gradient(135deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .03));
+            border: 1px solid rgba(255, 255, 255, .14);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            animation: ah-rise .7s cubic-bezier(.2, .7, .2, 1) forwards;
+            transition: transform .3s ease, border-color .3s ease, background .3s ease, box-shadow .3s ease;
+            &:nth-child(1) { animation-delay: .55s; }
+            &:nth-child(2) { animation-delay: .7s; }
+            &:nth-child(3) { animation-delay: .85s; }
+            &:hover {
+                transform: translateY(-4px);
+                border-color: rgba($ah-gold-2, .55);
+                background: linear-gradient(135deg, rgba($ah-gold-2, .14), rgba(255, 255, 255, .04));
+                box-shadow: 0 16px 34px rgba(0, 0, 0, .3);
+                .ah_trust_icon { background: $ah-gold-2; color: $ah-ink; }
+            }
+        }
+    }
+    .ah_trust_icon {
+        flex: 0 0 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba($ah-gold-2, .16);
+        color: $ah-gold-2;
+        font-size: 17px;
+        transition: background .3s ease, color .3s ease;
+    }
+    // Disponibilités « en direct » : halo qui pulse
+    .ah_trust_live { position: relative; }
+    .ah_trust_live::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        box-shadow: 0 0 0 0 rgba($ah-gold-2, .5);
+        animation: ah-glow 2.4s ease-out infinite;
+    }
+    .ah_trust_text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+        strong { color: $ah-on-dark; font-size: 14.5px; font-weight: 600; }
+        small { color: $ah-on-dark-soft; font-size: 12.5px; margin-top: 3px; opacity: .9; }
+    }
+
+    // Entrée en scène du bandeau
+    .ah_hero_inner > .ah_live,
+    .ah_hero_inner > .ah_eyebrow,
+    .ah_hero_inner > .ah_hero_title,
+    .ah_hero_inner > .ah_hero_lead,
+    .ah_hero_inner > .ah_search_panel,
+    .ah_hero_inner > .ah_hero_stats {
+        opacity: 0;
+        animation: ah-rise .8s cubic-bezier(.2, .7, .2, 1) forwards;
+    }
+    .ah_hero_inner > .ah_live, .ah_hero_inner > .ah_eyebrow { animation-delay: .05s; }
+    .ah_hero_inner > .ah_hero_title { animation-delay: .15s; }
+    .ah_hero_inner > .ah_hero_lead { animation-delay: .35s; }
+    .ah_hero_inner > .ah_search_panel { animation-delay: 1s; }
+    .ah_hero_inner > .ah_hero_stats { animation-delay: 1.15s; }
+
+    @keyframes ah-rise {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: none; }
+    }
+    @keyframes ah-mark { to { background-size: 100% 100%; } }
+    @keyframes ah-glow {
+        0% { box-shadow: 0 0 0 0 rgba($ah-gold-2, .5); }
+        70%, 100% { box-shadow: 0 0 0 12px rgba($ah-gold-2, 0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .ah_trust li, .ah_hero_inner > * { animation: none !important; opacity: 1 !important; }
+        .ah_mark { animation: none; background-size: 100% 100%; }
+        .ah_trust_live::after { animation: none; }
+    }
+
+    // Panneau de recherche en verre dépoli
+    .ah_search_panel {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 14px 14px 14px;
+        border-radius: 32px;
+        background: rgba(255, 255, 255, .08);
+        border: 1px solid rgba(255, 255, 255, .18);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 40px 80px rgba(0, 0, 0, .35);
+        .ah_search { box-shadow: 0 10px 30px rgba(0, 0, 0, .2); }
+    }
+    .ah_search_head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 4px 12px 14px;
+    }
+    .ah_search_title {
+        color: $ah-on-dark;
+        font-weight: 600;
+        font-size: 15px;
+        .fa { color: $ah-gold-2; margin-right: 6px; }
+    }
+    .ah_search_types {
+        display: inline-flex;
+        gap: 8px;
+        > span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .16);
+            color: $ah-on-dark-soft;
+            font-size: 13px;
+            font-weight: 500;
+            .fa { color: $ah-gold-2; }
+        }
+    }
+
+    // Cartes photo flottantes
+    .ah_float {
+        position: absolute;
+        z-index: 2;
+        width: 210px;
+        border-radius: 22px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, .1);
+        border: 1px solid rgba(255, 255, 255, .22);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, .4);
+        text-decoration: none;
+        transition: transform .4s ease;
+        img { display: block; width: 100%; height: 150px; object-fit: cover; }
+        &:hover { text-decoration: none; box-shadow: 0 34px 70px rgba(0, 0, 0, .5); border-color: rgba($ah-gold-2, .6); }
+    }
+    .ah_float_left {
+        left: 3%;
+        top: 34%;
+        transform: rotate(-6deg);
+        animation: ah-float-l 7s ease-in-out infinite;
+    }
+    .ah_float_right {
+        right: 3%;
+        top: 46%;
+        transform: rotate(6deg);
+        animation: ah-float-r 8s ease-in-out infinite;
+    }
+    .ah_float_info {
+        padding: 12px 14px 14px;
+        span { display: block; color: $ah-on-dark-soft; font-size: 12.5px; font-weight: 500; .fa { color: $ah-gold-2; } }
+        strong { display: block; color: $ah-on-dark; font-size: 16px; margin-top: 2px; }
+        strong span { display: inline; font: inherit; color: inherit; }
+        small { color: $ah-on-dark-soft; font-weight: 400; }
+    }
+    @media (max-width: 1599px) {
+        .ah_float { display: none; }
+    }
+    @media (max-width: 575px) {
+        .ah_hero { padding-top: 120px; }
+        .ah_trust { gap: 10px; margin: 24px 0 26px; li { max-width: none; } }
+        .ah_mark { white-space: normal; }
+        .ah_search_panel { padding: 10px; border-radius: 26px; }
+        .ah_search_types { display: none; }
+    }
+
+    @keyframes ah-pulse {
+        0% { transform: scale(.6); opacity: 1; }
+        100% { transform: scale(1.8); opacity: 0; }
+    }
+    @keyframes ah-float-l {
+        0%, 100% { transform: rotate(-6deg) translateY(0); }
+        50% { transform: rotate(-6deg) translateY(-12px); }
+    }
+    @keyframes ah-float-r {
+        0%, 100% { transform: rotate(6deg) translateY(0); }
+        50% { transform: rotate(6deg) translateY(12px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .ah_float, .ah_live_dot::after { animation: none; }
+    }
+}
+
+// ---------------------------------------------------------------------
+// En-tête de la page d'accueil (header_overlay) : toujours en version sombre
+//   - en haut : transparent, posé sur le bandeau
+//   - au défilement (o_header_affixed / o_header_is_scrolled) : bleu nuit translucide
+// Le logo clair n'est affiché que dans cet en-tête ; ailleurs, seul le logo normal.
+// ---------------------------------------------------------------------
+header .navbar-brand.logo .ah_logo_light { display: none !important; }
+
+#wrapwrap.o_header_overlay > header {
+    .navbar-brand.logo {
+        > span { display: none !important; }
+        .ah_logo_light { display: block !important; }
+    }
+    > .navbar {
+        box-shadow: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, .12) !important;
+        transition: background-color .3s ease, box-shadow .3s ease;
+    }
+    .o_main_nav {
+        .top_menu .nav-link, .top_menu .nav-link > * {
+            color: rgba(255, 255, 255, .86) !important;
+        }
+        .top_menu .nav-link {
+            &:hover, &:hover > *, &.active, &.active > * { color: #fff !important; }
+            &.active { box-shadow: inset 0 -2px 0 $ah-gold-2; }
+        }
+        .o_nav-link_secondary, .o_nav-link_secondary * { color: #fff !important; }
+        .js_language_selector .dropdown-toggle,
+        .js_language_selector .dropdown-toggle > * { color: #fff !important; }
+        .o_navlink_background {
+            background: rgba(255, 255, 255, .14) !important;
+            color: #fff !important;
+        }
+        a.btn-outline-secondary {
+            color: #fff !important;
+            border-color: rgba(255, 255, 255, .55) !important;
+            background: transparent !important;
+            &:hover { background: #fff !important; color: $ah-ink !important; }
+        }
+    }
+    .o_header_mobile_buttons_wrap, .o_header_mobile_buttons_wrap .btn,
+    .o_header_mobile_buttons_wrap .fa, .navbar-toggler { color: #fff !important; }
+
+    // Au défilement : bandeau bleu nuit en verre dépoli
+    &.o_header_affixed > .navbar,
+    &.o_header_is_scrolled > .navbar {
+        background-color: rgba($ah-ink, .97) !important;
+        background-image: none !important;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .25) !important;
+        border-bottom-color: rgba($ah-gold-2, .18) !important;
+    }
+    // Icône du menu mobile : Odoo remet l'icône sombre par défaut une fois l'en-tête fixé
+    &.o_header_affixed .navbar-toggler-icon,
+    &.o_header_is_scrolled .navbar-toggler-icon { filter: invert(1) brightness(2); }
+}
+
+// ---------------------------------------------------------------------
+// Vitrine : grande photo personnalisable qui chevauche le bas du bandeau
+// ---------------------------------------------------------------------
+.o_auberge_home {
+    .ah_showcase {
+        position: relative;
+        z-index: 3;
+        margin-top: -170px;
+    }
+    .ah_showcase_frame {
+        position: relative;
+        height: 600px;
+        border-radius: 32px;
+        overflow: hidden;
+        background: $ah-ink;
+        box-shadow: 0 50px 100px rgba($ah-ink, .35), 0 0 0 1px rgba(255, 255, 255, .08);
+    }
+    .ah_showcase_img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scale(1.02);
+        transition: transform 1.2s ease;
+    }
+    .ah_showcase_frame:hover .ah_showcase_img { transform: scale(1.06); }
+    .ah_showcase_shade {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, rgba($ah-ink, .78) 0%, rgba($ah-ink, .35) 45%, rgba($ah-ink, 0) 70%),
+            linear-gradient(0deg, rgba($ah-ink, .55) 0%, rgba($ah-ink, 0) 45%);
+    }
+    .ah_showcase_badge {
+        position: absolute;
+        top: 26px;
+        right: 26px;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .94);
+        color: $ah-ink;
+        font-size: 13.5px;
+        font-weight: 600;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
+        .fa { color: $ah-gold-dark; }
+    }
+    .ah_showcase_edit {
+        position: absolute;
+        top: 26px;
+        left: 26px;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba($ah-ink, .75);
+        border: 1px dashed rgba($ah-gold-2, .8);
+        color: $ah-gold-2;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        backdrop-filter: blur(6px);
+        &:hover { background: $ah-gold-2; color: $ah-ink; text-decoration: none; }
+    }
+    .ah_showcase_card {
+        position: absolute;
+        left: 48px;
+        bottom: 48px;
+        z-index: 2;
+        max-width: 520px;
+        padding: 34px 36px;
+        border-radius: 26px;
+        background: rgba($ah-ink, .62);
+        border: 1px solid rgba(255, 255, 255, .16);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, .35);
+        .ah_kicker { color: $ah-gold-2; }
+        h2 {
+            color: $ah-on-dark;
+            font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+            font-weight: 700;
+            margin: 12px 0 12px;
+        }
+        p { color: $ah-on-dark-soft; font-size: 16.5px; line-height: 1.75; margin: 0; }
+    }
+    .ah_showcase_facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 20px 0 24px;
+        span {
+            padding: 6px 13px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .16);
+            color: $ah-on-dark-soft;
+            font-size: 13px;
+        }
+        strong { color: $ah-gold-2; font-weight: 700; }
+    }
+    .ah_showcase_actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    @media (max-width: 991px) {
+        .ah_showcase_frame { height: 520px; }
+        .ah_showcase_card { left: 24px; right: 24px; bottom: 24px; max-width: none; padding: 26px; }
+    }
+    @media (max-width: 575px) {
+        .ah_hero { padding-bottom: 170px; }
+        .ah_showcase { margin-top: -120px; }
+        // Sur mobile : photo en haut, carte en dessous (texte toujours lisible)
+        .ah_showcase_frame { height: auto; border-radius: 24px; display: flex; flex-direction: column; }
+        .ah_showcase_img { position: relative; height: 260px; }
+        .ah_showcase_shade { display: none; }
+        .ah_showcase_badge { top: 14px; right: 14px; font-size: 12px; }
+        .ah_showcase_edit { top: 14px; left: 14px; }
+        .ah_showcase_card {
+            position: relative;
+            left: 0; right: 0; bottom: 0;
+            border-radius: 0;
+            border: 0;
+            background: $ah-ink;
+            backdrop-filter: none;
+            box-shadow: none;
+        }
+        .ah_showcase_actions { flex-direction: column; .ah_btn { width: 100%; } }
+    }
+}
+
+// ---------------------------------------------------------------------
+// Compléments : badge prix de la galerie, équipements « où les trouver »
+// ---------------------------------------------------------------------
+.o_auberge_home {
+    .ah_hero_stats strong span { font: inherit; }
+    .ah_showcase_facts .fa { color: $ah-gold-2; margin-right: 2px; }
+    .ah_amenities { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    .ah_section_dark .ah_amenity small {
+        margin-top: -6px;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: $ah-on-dark-soft;
+        .fa {
+            width: auto; height: auto;
+            display: inline;
+            background: none;
+            border-radius: 0;
+            font-size: 12.5px;
+            color: #86efac;
+            margin-right: 4px;
+        }
+    }
+    .ah_hero_stats strong small {
+        font-family: $ah-sans;
+        font-size: 14px;
+        font-weight: 500;
+        color: $ah-on-dark-soft;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+}
+
+// ---------------------------------------------------------------------
+// Types de chambre : cartes photo haut de gamme (section bleu nuit)
+// ---------------------------------------------------------------------
+.o_auberge_home {
+    .ah_types {
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(800px 420px at 0% 0%, rgba(#3a6ea5, .28), transparent 60%),
+            radial-gradient(700px 420px at 100% 100%, rgba($ah-gold, .18), transparent 60%),
+            $ah-ink;
+        .ah_head {
+            .ah_kicker { color: $ah-gold-2; }
+            .ah_h2 { color: $ah-on-dark; }
+            p { color: $ah-on-dark-soft; }
+        }
+        .ah_h2 em {
+            font-style: italic;
+            color: $ah-gold-2;
+        }
+    }
+    .ah_types_glow {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px);
+        background-size: 24px 24px;
+        mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+        pointer-events: none;
+    }
+    .ah_types_grid {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 26px;
+    }
+    .ah_types_1 { max-width: 440px; margin: 0 auto; }
+    .ah_types_2 { max-width: 900px; margin: 0 auto; }
+
+    .ah_type_cell { perspective: 1000px; }
+    .ah_type_card {
+        --rx: 0deg;
+        --ry: 0deg;
+        --mx: 50%;
+        --my: 50%;
+        position: relative;
+        display: block;
+        height: 480px;
+        border-radius: 26px;
+        overflow: hidden;
+        color: $ah-on-dark;
+        text-decoration: none;
+        background: $ah-ink-2;
+        border: 1px solid rgba(255, 255, 255, .1);
+        box-shadow: 0 24px 50px rgba(0, 0, 0, .35);
+        transform: rotateX(var(--rx)) rotateY(var(--ry));
+        transform-style: preserve-3d;
+        transition: transform .25s ease-out, box-shadow .4s ease, border-color .4s ease;
+        &:hover {
+            color: $ah-on-dark;
+            text-decoration: none;
+            border-color: rgba($ah-gold-2, .55);
+            box-shadow: 0 36px 70px rgba(0, 0, 0, .5), 0 0 0 1px rgba($ah-gold-2, .25), 0 0 40px rgba($ah-gold, .18);
+        }
+    }
+    .ah_type_media {
+        position: absolute;
+        inset: 0;
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.02);
+            transition: transform 1s cubic-bezier(.2, .7, .2, 1);
+        }
+    }
+    .ah_type_placeholder {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 64px;
+        color: rgba($ah-gold-2, .6);
+        background: linear-gradient(160deg, $ah-ink-2, $ah-ink);
+    }
+    .ah_type_card:hover .ah_type_media img { transform: scale(1.1); }
+    .ah_type_shade {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(180deg, rgba($ah-ink, .6) 0%, rgba($ah-ink, .15) 22%, rgba($ah-ink, 0) 32%),
+            linear-gradient(180deg, rgba($ah-ink, 0) 30%, rgba($ah-ink, .7) 48%, rgba($ah-ink, .92) 64%, rgba($ah-ink, .97) 100%);
+        transition: background .5s ease;
+    }
+    // Reflet lumineux qui suit la souris
+    .ah_type_shine {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(420px circle at var(--mx) var(--my), rgba(255, 255, 255, .16), transparent 45%);
+        opacity: 0;
+        transition: opacity .4s ease;
+        pointer-events: none;
+    }
+    .ah_type_card:hover .ah_type_shine { opacity: 1; }
+
+    .ah_type_num {
+        position: absolute;
+        top: 18px;
+        left: 22px;
+        font-family: $ah-serif;
+        font-size: 56px;
+        font-weight: 700;
+        line-height: 1;
+        color: rgba($ah-ink, .35);
+        -webkit-text-stroke: 1.5px $ah-gold-2;
+        text-shadow: 0 4px 18px rgba(0, 0, 0, .45);
+        transition: color .4s ease;
+    }
+    .ah_type_card:hover .ah_type_num { color: rgba($ah-gold-2, .25); }
+    .ah_type_mode {
+        position: absolute;
+        top: 24px;
+        right: 22px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 13px;
+        border-radius: 999px;
+        font-size: 12.5px;
+        font-weight: 600;
+        background: rgba(255, 255, 255, .94);
+        color: $ah-ink;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .2);
+        .fa { color: $ah-gold-dark; }
+    }
+    .ah_type_mode_bed { background: $ah-gold-2; .fa { color: $ah-ink; } }
+
+    .ah_type_body {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 26px 26px 24px;
+        transform: translateZ(30px);
+        h3 {
+            color: $ah-on-dark;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
+        }
+    }
+    .ah_type_meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 14px;
+        font-size: 14px;
+        color: $ah-on-dark-soft;
+        .fa { color: $ah-gold-2; margin-right: 4px; }
+    }
+    // Description et équipements dévoilés au survol
+    .ah_type_more {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transform: translateY(10px);
+        transition: max-height .55s cubic-bezier(.2, .7, .2, 1), opacity .4s ease, transform .5s ease;
+        p { color: $ah-on-dark-soft; font-size: 14.5px; line-height: 1.6; margin: 14px 0 12px; }
+    }
+    .ah_type_card:hover .ah_type_more,
+    .ah_type_card:focus-visible .ah_type_more {
+        max-height: 220px;
+        opacity: 1;
+        transform: none;
+    }
+    .ah_type_amen {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .1);
+            border: 1px solid rgba(255, 255, 255, .14);
+            color: $ah-on-dark;
+            font-size: 12px;
+        }
+        .fa { color: $ah-gold-2; }
+    }
+    .ah_type_foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, .14);
+    }
+    .ah_type_price {
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+        small { color: $ah-on-dark-soft; font-size: 13px; }
+        strong { font-family: $ah-serif; font-size: 24px; color: $ah-gold-2; }
+        strong span { font: inherit; color: inherit; }
+    }
+    .ah_type_go {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .12);
+        border: 1px solid rgba(255, 255, 255, .25);
+        color: #fff;
+        transform: rotate(-45deg);
+        transition: transform .4s ease, background .3s ease, color .3s ease;
+    }
+    .ah_type_card:hover .ah_type_go {
+        transform: rotate(0);
+        background: $ah-gold-2;
+        border-color: $ah-gold-2;
+        color: $ah-ink;
+    }
+
+    // Écrans tactiles : pas de survol, on affiche tout directement
+    @media (hover: none) {
+        .ah_type_more { max-height: none; opacity: 1; transform: none; }
+    }
+    @media (max-width: 575px) {
+        .ah_type_card { height: 440px; }
+        .ah_type_num { font-size: 44px; }
+        .ah_type_body h3 { font-size: 24px; }
+    }
+
+    // ---------- Apparition progressive au défilement (piloté par hotel_home.js) ----------
+    &.ah_js [data-ah-reveal] {
+        opacity: 0;
+        transform: translateY(28px);
+        transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1);
+        transition-delay: var(--ah-delay, 0s);
+    }
+    &.ah_js [data-ah-reveal].is-in {
+        opacity: 1;
+        transform: none;
+    }
+    // Les petits traits dorés des sur-titres se dessinent
+    &.ah_js .ah_head[data-ah-reveal] .ah_kicker::before { width: 0; transition: width .7s .3s ease; }
+    &.ah_js .ah_head[data-ah-reveal].is-in .ah_kicker::before { width: 28px; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ah_type_card { transform: none !important; }
+        .ah_type_more { max-height: none; opacity: 1; transform: none; }
+    }
+}
