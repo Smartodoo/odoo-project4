@@ -140,41 +140,104 @@
                             </div>
                         </div>
                         <div class="o_hotel_rental_body">
-                            <div class="o_hotel_rental_settings">
-                                <div class="o_hotel_rental_label">Réservation en cours</div>
-                                <field name="current_reservation_id" invisible="1"/>
-                                <div invisible="not current_reservation_id">
-                                    <field name="current_booking_type" readonly="1"/>
-                                    <field name="current_rental_amount" widget="monetary" readonly="1"/>
+                            <field name="current_reservation_id" invisible="1"/>
+                            <field name="current_reservation_count" invisible="1"/>
+                            <field name="bed_count" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+
+                            <!-- Réservation en cours (aujourd'hui) -->
+                            <div class="o_hotel_kpi o_hotel_kpi_current">
+                                <div class="o_hotel_kpi_head">
+                                    <span class="o_hotel_kpi_icon"><i class="fa fa-calendar-check-o" title="Réservation"/></span>
+                                    <div class="o_hotel_kpi_titles">
+                                        <div class="o_hotel_kpi_label">Réservation en cours</div>
+                                        <div class="o_hotel_kpi_sub" invisible="not current_reservation_id">
+                                            <field name="current_booking_type" readonly="1"/>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="text-muted" invisible="current_reservation_id">
-                                    Aucune réservation en cours sur cette chambre.
+                                <div class="o_hotel_kpi_value" invisible="not current_reservation_id">
+                                    <field name="current_rental_amount" widget="monetary" readonly="1"/>
+                                    <span class="o_hotel_kpi_unit">/ nuit</span>
+                                </div>
+                                <div class="o_hotel_kpi_foot" invisible="not current_reservation_id">
+                                    <div class="o_hotel_kpi_row">
+                                        <i class="fa fa-user" title="Client"/>
+                                        <field name="current_guest_id" readonly="1" options="{'no_open': True}"/>
+                                    </div>
+                                    <div class="o_hotel_kpi_row">
+                                        <i class="fa fa-hashtag" title="Référence"/>
+                                        <field name="current_reservation_id" readonly="1"/>
+                                    </div>
+                                </div>
+                                <div class="o_hotel_kpi_empty" invisible="current_reservation_id">
+                                    <i class="fa fa-moon-o" title="Libre"/>
+                                    <span>Aucune réservation aujourd'hui</span>
                                 </div>
                             </div>
 
-                            <div class="o_hotel_rental_summary">
-                                <div class="o_hotel_price_card o_hotel_price_card_room">
-                                    <div class="o_hotel_price_card_label">
-                                        <i class="fa fa-home me-1" title="Chambre"/>Chambre entière
+                            <!-- Total des réservations actives (carte principale) -->
+                            <div class="o_hotel_kpi o_hotel_kpi_total"
+                                 invisible="not current_reservation_count">
+                                <div class="o_hotel_kpi_head">
+                                    <span class="o_hotel_kpi_icon"><i class="fa fa-money" title="Total"/></span>
+                                    <div class="o_hotel_kpi_titles">
+                                        <div class="o_hotel_kpi_label">Total en cours</div>
+                                        <div class="o_hotel_kpi_sub">Confirmées et enregistrées</div>
                                     </div>
-                                    <div class="o_hotel_price_card_value">
-                                        <field name="whole_room_price" widget="monetary" readonly="1"/>
-                                    </div>
-                                    <div class="o_hotel_price_card_hint">par nuit</div>
+                                    <button name="action_view_open_reservations" type="object"
+                                            class="btn o_hotel_kpi_pill"
+                                            title="Voir les réservations en cours">
+                                        <field name="current_reservation_count" readonly="1"/>
+                                        <span>&#160;résa</span>
+                                        <i class="fa fa-angle-right ms-1" title="Voir"/>
+                                    </button>
                                 </div>
-                                <div class="o_hotel_price_card o_hotel_price_card_bed"
-                                     invisible="not bed_count">
-                                    <div class="o_hotel_price_card_label">
-                                        <i class="fa fa-bed me-1" title="Lit"/>Au lit
-                                    </div>
-                                    <div class="o_hotel_price_card_value">
-                                        <small>dès</small>
-                                        <field name="bed_price_min" widget="monetary" readonly="1"/>
-                                    </div>
-                                    <div class="o_hotel_price_card_hint">par lit et par nuit</div>
+                                <div class="o_hotel_kpi_value">
+                                    <field name="current_reservation_total" widget="monetary" readonly="1"/>
                                 </div>
-                                <field name="bed_count" invisible="1"/>
-                                <field name="currency_id" invisible="1"/>
+                                <div class="o_hotel_kpi_progress">
+                                    <field name="current_reservation_paid_pct" widget="progressbar" readonly="1"/>
+                                </div>
+                                <div class="o_hotel_kpi_split">
+                                    <div class="o_hotel_kpi_stat o_hotel_kpi_stat_paid">
+                                        <span class="o_hotel_kpi_stat_label"><i class="fa fa-check-circle" title="Encaissé"/> Encaissé</span>
+                                        <field name="current_reservation_paid" widget="monetary" readonly="1"/>
+                                    </div>
+                                    <div class="o_hotel_kpi_stat o_hotel_kpi_stat_due">
+                                        <span class="o_hotel_kpi_stat_label"><i class="fa fa-clock-o" title="Reste"/> Reste à encaisser</span>
+                                        <field name="current_reservation_due" widget="monetary" readonly="1"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tarifs de base -->
+                            <div class="o_hotel_kpi o_hotel_kpi_room">
+                                <div class="o_hotel_kpi_head">
+                                    <span class="o_hotel_kpi_icon"><i class="fa fa-home" title="Chambre"/></span>
+                                    <div class="o_hotel_kpi_titles">
+                                        <div class="o_hotel_kpi_label">Chambre entière</div>
+                                        <div class="o_hotel_kpi_sub">Tarif de base</div>
+                                    </div>
+                                </div>
+                                <div class="o_hotel_kpi_value">
+                                    <field name="whole_room_price" widget="monetary" readonly="1"/>
+                                    <span class="o_hotel_kpi_unit">/ nuit</span>
+                                </div>
+                            </div>
+
+                            <div class="o_hotel_kpi o_hotel_kpi_bed" invisible="not bed_count">
+                                <div class="o_hotel_kpi_head">
+                                    <span class="o_hotel_kpi_icon"><i class="fa fa-bed" title="Lit"/></span>
+                                    <div class="o_hotel_kpi_titles">
+                                        <div class="o_hotel_kpi_label">Au lit</div>
+                                        <div class="o_hotel_kpi_sub">Tarif de base</div>
+                                    </div>
+                                </div>
+                                <div class="o_hotel_kpi_value">
+                                    <field name="bed_price_min" widget="monetary" readonly="1"/>
+                                    <span class="o_hotel_kpi_unit">/ lit / nuit</span>
+                                </div>
                             </div>
                         </div>
                     </div>

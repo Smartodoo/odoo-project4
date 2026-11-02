@@ -28,6 +28,8 @@ class HotelReservation(models.Model):
         related='partner_id.hotel_id_type', readonly=False)
     partner_id_number = fields.Char(
         related='partner_id.hotel_id_number', readonly=False)
+    partner_birthdate = fields.Date(
+        related='partner_id.hotel_birthdate', readonly=False)
     checkin = fields.Date(
         string="Arrivée", required=True, tracking=True,
         default=fields.Date.context_today)

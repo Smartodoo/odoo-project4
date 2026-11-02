@@ -42,3 +42,35 @@ class HotelRoomType(models.Model):
             'domain': [('room_type_id', '=', self.id)],
             'context': {'default_room_type_id': self.id},
         }
+
+    def _website_cards(self, rooms):
+        """Données des cartes « types de chambre » de la page d'accueil.
+
+        Seuls les types ayant au moins une chambre de `rooms` (chambres publiées)
+        sont retournés ; prix, capacité et équipements sont calculés sur ces chambres.
+        """
+        # Mêmes équipements que la section Confort (« Afficher sur l'accueil »)
+        amenities = self.env['hotel.amenity'].search([('website_home', '=', True)])
+        cards = []
+        for rtype in self:
+            type_rooms = rooms.filtered(lambda room: room.room_type_id == rtype)
+            if not type_rooms:
+                continue
+            prices = [room.bed_price_min if room.rental_mode == 'bed' else room.whole_room_price
+                      for room in type_rooms]
+            prices = [price for price in prices if price]
+            room_with_image = type_rooms.filtered('image')[:1]
+            if rtype.with_context(bin_size=True).image:
+                image_url = '/web/image/hotel.room.type/%s/image' % rtype.id
+            elif room_with_image:
+                image_url = '/web/image/hotel.room/%s/image' % room_with_image.id
+            else:
+                image_url = False
+            cards.append({
+                'type': rtype,
+                'image_url': image_url,
+                'price': min(prices) if prices else 0.0,
+                'capacity': max(type_rooms.mapped('capacity') or [rtype.default_capacity]),
+                'amenities': amenities._website_common_to(type_rooms)[:5],
+            })
+        return cards

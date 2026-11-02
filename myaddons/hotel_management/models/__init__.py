@@ -9,3 +9,4 @@ from . import hotel_housekeeping
 from . import hotel_maintenance
 from . import account_move
 from . import res_partner
+from . import website

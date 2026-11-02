@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Logo de l'auberge dans l'en-tête du site (si le logo Odoo par défaut est encore en place) -->
+    <function model="website" name="_hotel_set_default_logo"/>
+    <!-- En-tête transparent sur la page d'accueil -->
+    <function model="website" name="_hotel_setup_homepage"/>
+</odoo>
