@@ -1,0 +1,94 @@
+// =============================================================================
+// Barres d'état (statusbar) du module Auberge
+// -----------------------------------------------------------------------------
+// On garde le style Odoo (flèches) et on colore UNIQUEMENT l'état actuel,
+// avec une couleur propre à chaque état, pour voir tout de suite où l'on est.
+// La flèche de l'état actuel (:after) prend la même couleur que son bouton.
+// Ne s'applique qu'aux champs portant la classe `o_hotel_statusbar`.
+// =============================================================================
+
+.o_field_statusbar.o_hotel_statusbar > .o_statusbar_status
+    > .o_arrow_button.o_arrow_button_current:not(.d-none) {
+    --sb-accent: #495057;
+
+    // Réservation
+    &[data-value="draft"]          { --sb-accent: #868e96; }
+    &[data-value="confirmed"]      { --sb-accent: #1c7ed6; }
+    &[data-value="checkin"]        { --sb-accent: #2f9e44; }
+    &[data-value="checkout"]       { --sb-accent: #0c8599; }
+    &[data-value="cancel"]         { --sb-accent: #e03131; }
+    // Facture / paiement
+    &[data-value="posted"]         { --sb-accent: #2f9e44; }
+    // Ménage / travaux
+    &[data-value="todo"]           { --sb-accent: #f08c00; }
+    &[data-value="new"]            { --sb-accent: #f08c00; }
+    &[data-value="inprogress"]     { --sb-accent: #1c7ed6; }
+    &[data-value="done"]           { --sb-accent: #2f9e44; }
+    // Chambre
+    &[data-value="available"]      { --sb-accent: #2f9e44; }
+    &[data-value="reserved"]       { --sb-accent: #1c7ed6; }
+    &[data-value="partial"]        { --sb-accent: #f08c00; }
+    &[data-value="occupied"]       { --sb-accent: #e03131; }
+    &[data-value="cleaning"]       { --sb-accent: #7048e8; }
+    &[data-value="maintenance"]    { --sb-accent: #5c636a; }
+    &[data-value="out_of_service"] { --sb-accent: #212529; }
+
+    &, &:disabled, &:hover, &:focus {
+        background-color: var(--sb-accent) !important;
+        border-color: var(--sb-accent) !important;
+        color: #fff !important;
+        font-weight: 700;
+    }
+
+    // Flèche de l'état actuel : même couleur que le bouton
+    &:after {
+        border-left-color: var(--sb-accent) !important;
+    }
+}
+
+// =============================================================================
+// Réservation : bandeau paiement (Total / Payé / Reste à payer)
+// =============================================================================
+.o_form_view .o_hotel_pay_summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 4px 0 16px;
+
+    .o_hotel_pay_item {
+        flex: 1 1 160px;
+        display: flex;
+        flex-direction: column;
+        padding: 10px 14px;
+        border: 1px solid #e3e6ea;
+        border-left: 4px solid #adb5bd;
+        border-radius: 8px;
+        background: #f8f9fa;
+    }
+    .o_hotel_pay_label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #6c757d;
+    }
+    .o_hotel_pay_value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #212529;
+    }
+    .o_hotel_pay_hint {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    .o_hotel_pay_paid { border-left-color: #1c7ed6; }
+    .o_hotel_pay_due  {
+        border-left-color: #e03131;
+        background: #fff5f5;
+        .o_hotel_pay_value { color: #c92a2a; }
+    }
+    .o_hotel_pay_ok {
+        border-left-color: #2f9e44;
+        background: #ebfbee;
+        .o_hotel_pay_value { color: #2b8a3e; }
+    }
+}

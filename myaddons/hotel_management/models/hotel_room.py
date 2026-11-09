@@ -373,8 +373,9 @@ class HotelRoom(models.Model):
             for line in lines:
                 total += line.price_subtotal
                 resa = line.reservation_id
-                if resa.deposit_amount and resa.amount_total:
-                    paid += (resa.deposit_amount * line.price_subtotal
+                # Part de ce qui a été réellement encaissé, au prorata de la ligne
+                if resa.amount_paid and resa.amount_total:
+                    paid += (resa.amount_paid * line.price_subtotal
                              / resa.amount_total)
             room.current_reservation_total = total
             room.current_reservation_paid = paid

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Facture : même style de barre d'état que le reste de l'auberge
+         (état actuel coloré : Brouillon gris, Comptabilisé vert, Annulé rouge) -->
+    <record id="view_move_form_hotel_statusbar" model="ir.ui.view">
+        <field name="name">account.move.form.hotel.statusbar</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state']" position="attributes">
+                <attribute name="class">o_hotel_statusbar</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- PDF facture : retirer la mention « PRO FORMA ».
+         Odoo l'ajoute quand le PDF officiel n'a pas encore été généré (aperçu
+         portail, envoi sans PDF). Inutile ici : un brouillon est déjà titré
+         « Brouillon de facture », une facture validée « Facture ». -->
+    <template id="report_invoice_document_no_proforma"
+              inherit_id="account.report_invoice_document">
+        <xpath expr="//h2/span[@t-else='']" position="replace"/>
+    </template>
+</odoo>

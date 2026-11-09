@@ -30,3 +30,4 @@ access_hotel_maintenance_manager,hotel.maintenance.request.manager,model_hotel_m
 access_hotel_rate_season_user,hotel.rate.season.user,model_hotel_rate_season,group_hotel_user,1,0,0,0
 access_hotel_rate_season_manager,hotel.rate.season.manager,model_hotel_rate_season,group_hotel_manager,1,1,1,1
 access_hotel_reservation_mail_wizard_user,hotel.reservation.mail.wizard.user,model_hotel_reservation_mail_wizard,group_hotel_user,1,1,1,1
+access_hotel_reservation_payment_wizard_user,hotel.reservation.payment.wizard.user,model_hotel_reservation_payment_wizard,group_hotel_user,1,1,1,1

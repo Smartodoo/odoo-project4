@@ -8,5 +8,6 @@ from . import hotel_staff
 from . import hotel_housekeeping
 from . import hotel_maintenance
 from . import account_move
+from . import account_payment
 from . import res_partner
 from . import website

@@ -88,7 +88,7 @@
                     <button name="action_set_in_service" type="object"
                             string="Remettre en service" class="btn-primary"
                             invisible="status != 'out_of_service'"/>
-                    <field name="status" widget="statusbar"
+                    <field name="status" widget="statusbar" class="o_hotel_statusbar"
                            statusbar_visible="available,reserved,partial,occupied,cleaning,maintenance,out_of_service"/>
                 </header>
                 <sheet>

@@ -108,7 +108,7 @@
                             invisible="state in ('done', 'cancel')"/>
                     <button name="action_reset" string="Réinitialiser" type="object"
                             invisible="state != 'cancel'"/>
-                    <field name="state" widget="statusbar"
+                    <field name="state" widget="statusbar" class="o_hotel_statusbar o_hotel_statusbar_flow"
                            statusbar_visible="todo,inprogress,done"/>
                 </header>
                 <sheet>
@@ -208,7 +208,7 @@
                             string="Déclarer hors service" class="btn-secondary"
                             invisible="state != 'done'"
                             confirm="Fermer durablement cette chambre (statut « Hors service ») ? Elle ne sera plus vendable tant qu'elle n'est pas remise en service."/>
-                    <field name="state" widget="statusbar"
+                    <field name="state" widget="statusbar" class="o_hotel_statusbar o_hotel_statusbar_flow"
                            statusbar_visible="new,inprogress,done"/>
                 </header>
                 <sheet>

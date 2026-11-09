@@ -1,7 +1,10 @@
 .o_hotel_dashboard {
     padding: 16px 20px 40px;
     background: #f4f5f8;
-    min-height: 100%;
+    // Le tableau de bord est une action client plein écran : il doit gérer
+    // lui-même son défilement, sinon le bas de la page est coupé.
+    height: 100%;
+    overflow-y: auto;
 
     .o_hotel_loading {
         text-align: center;
@@ -23,52 +26,111 @@
         }
     }
 
-    .o_hotel_kpis {
+    // Indicateurs : 3 blocs séparés (Chambres / Clients / Ménage & travaux)
+    .o_hotel_blocks {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 14px;
+        grid-template-columns: 3fr 4fr 3fr;
+        gap: 16px;
         margin-bottom: 14px;
+    }
 
-        &.o_hotel_kpis_small {
-            .o_kpi_value { font-size: 22px; }
+    .o_hotel_block {
+        --block-color: #4b6cb7;
+        --block-soft: #eef2fb;
+        background: #fff;
+        border-radius: 12px;
+        border-top: 4px solid var(--block-color);
+        box-shadow: 0 1px 3px rgba(20, 20, 50, 0.08);
+        padding: 14px 16px 16px;
+        display: flex;
+        flex-direction: column;
+
+        &.o_hotel_block_rooms  { --block-color: #2f6fd0; --block-soft: #e8f0fc; }
+        &.o_hotel_block_guests { --block-color: #8e44ad; --block-soft: #f4ecf9; }
+        &.o_hotel_block_ops    { --block-color: #e08a00; --block-soft: #fdf3e2; }
+    }
+
+    .o_hotel_block_head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+
+        h2 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c2f45;
         }
     }
 
-    .o_kpi {
+    .o_hotel_block_icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
-        gap: 14px;
-        background: #fff;
-        border-radius: 12px;
-        padding: 16px 18px;
-        box-shadow: 0 1px 3px rgba(20, 20, 50, 0.08);
+        justify-content: center;
+        background: var(--block-color);
+        color: #fff;
+        font-size: 15px;
+    }
+
+    .o_hotel_block_tiles {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 1fr;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .o_hotel_tile {
+        --tile-color: var(--block-color);
+        background: var(--block-soft);
+        border-radius: 10px;
+        padding: 12px;
         cursor: pointer;
         transition: transform .12s ease, box-shadow .12s ease;
 
         &:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(20, 20, 50, 0.12);
+            box-shadow: 0 6px 14px rgba(20, 20, 50, 0.10);
+        }
+        &.o_hotel_tile_static {
+            cursor: default;
+            &:hover { transform: none; box-shadow: none; }
         }
 
-        .o_kpi_icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: #fff;
+        &.o_hotel_tile_danger  { --tile-color: #e4572e; }
+        &.o_hotel_tile_success { --tile-color: #17a673; }
+        &.o_hotel_tile_muted   { --tile-color: #6b7089; }
+
+        .o_hotel_tile_value {
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--tile-color);
         }
-        .o_kpi_value { font-size: 28px; font-weight: 700; line-height: 1.1; color: #2c2f45; }
-        .o_kpi_label { font-size: 13px; color: #7a7f96; }
+        .o_hotel_tile_label {
+            margin-top: 4px;
+            font-size: 12.5px;
+            color: #4a4f63;
+            line-height: 1.3;
+        }
+        .o_hotel_tile_sub {
+            margin-top: 2px;
+            font-size: 11.5px;
+            color: #8a8fa5;
+        }
+        // Sous-indicateur cliquable (ex. « 1 partielle(s) ») : ouvre son propre filtre
+        .o_hotel_tile_link {
+            display: inline-block;
+            cursor: pointer;
+            text-decoration: underline dotted;
+            text-underline-offset: 2px;
+            &:hover { color: var(--tile-color); }
+        }
     }
-
-    .o_kpi_occupied  .o_kpi_icon { background: #e4572e; }
-    .o_kpi_available .o_kpi_icon { background: #17a673; }
-    .o_kpi_guests    .o_kpi_icon { background: #4b6cb7; }
-    .o_kpi_present   .o_kpi_icon { background: #8e44ad; }
-    .o_kpi_soft { background: #fff; }
 
     .o_hotel_grid {
         display: grid;
@@ -134,6 +196,16 @@
 
         .o_hotel_stat_value { font-size: 22px; font-weight: 700; color: #2c2f45; }
         .o_hotel_stat_label { font-size: 12px; color: #7a7f96; }
+
+        // Compteur cliquable (ouvre la liste correspondante)
+        &.o_hotel_stat_link {
+            cursor: pointer;
+            transition: background .12s ease, box-shadow .12s ease;
+            &:hover {
+                background: #eef2fb;
+                box-shadow: 0 4px 12px rgba(20, 20, 50, 0.08);
+            }
+        }
     }
 
     .o_hotel_mini_table {
@@ -182,9 +254,17 @@
     .o_hotel_state_checkout { background: #eceef4; color: #6b7089; }
     .o_hotel_state_cancel   { background: #fbe0dc; color: #c0392b; }
 
+    @media (max-width: 1300px) {
+        .o_hotel_blocks { grid-template-columns: 1fr; }
+    }
     @media (max-width: 1100px) {
-        .o_hotel_kpis { grid-template-columns: repeat(2, 1fr); }
         .o_hotel_grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+        .o_hotel_block_tiles {
+            grid-auto-flow: row;
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 }
 

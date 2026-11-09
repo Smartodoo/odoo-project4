@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Modes de paiement de l'auberge (Espèces, Carte, Virement, Chèque).
+         Rejoué à chaque mise à jour du module : ne crée que ce qui manque. -->
+    <function model="account.journal" name="_hotel_setup_payment_modes"/>
+</odoo>

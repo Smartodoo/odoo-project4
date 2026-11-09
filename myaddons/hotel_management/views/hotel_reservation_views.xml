@@ -26,7 +26,11 @@
                     <button name="action_create_invoice" string="Créer la facture"
                             type="object" class="btn-primary"
                             invisible="state not in ('checkin', 'checkout') or invoice_count &gt; 0"/>
-                    <field name="state" widget="statusbar"
+                    <button name="action_register_hotel_payment" string="Encaisser"
+                            type="object" class="btn-primary" icon="fa-money"
+                            invisible="state == 'cancel' or amount_due &lt;= 0"
+                            help="Encaisser un acompte ou un paiement (espèces, carte, virement, chèque)."/>
+                    <field name="state" widget="statusbar" class="o_hotel_statusbar o_hotel_statusbar_flow"
                            statusbar_visible="draft,confirmed,checkin,checkout"/>
                 </header>
                 <sheet>
@@ -37,9 +41,38 @@
                             <field name="invoice_count" widget="statinfo"
                                    string="Factures"/>
                         </button>
+                        <button name="action_view_payments" type="object"
+                                class="oe_stat_button" icon="fa-money"
+                                invisible="payment_count == 0"
+                                groups="account.group_account_invoice">
+                            <field name="payment_count" widget="statinfo"
+                                   string="Paiements"/>
+                        </button>
                     </div>
                     <div class="oe_title">
                         <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <!-- Bandeau paiement : toujours visible en haut de la réservation -->
+                    <div class="o_hotel_pay_summary" invisible="not amount_total">
+                        <div class="o_hotel_pay_item">
+                            <span class="o_hotel_pay_label">Total séjour</span>
+                            <field name="amount_total" widget="monetary" class="o_hotel_pay_value"/>
+                        </div>
+                        <div class="o_hotel_pay_item o_hotel_pay_paid">
+                            <span class="o_hotel_pay_label">Payé</span>
+                            <field name="amount_paid" widget="monetary" class="o_hotel_pay_value"/>
+                            <span class="o_hotel_pay_hint" invisible="not deposit_amount">
+                                dont acompte <field name="deposit_amount" widget="monetary" class="oe_inline"/>
+                            </span>
+                        </div>
+                        <div class="o_hotel_pay_item o_hotel_pay_due" invisible="amount_due &lt;= 0">
+                            <span class="o_hotel_pay_label">Reste à payer</span>
+                            <field name="amount_due" widget="monetary" class="o_hotel_pay_value"/>
+                        </div>
+                        <div class="o_hotel_pay_item o_hotel_pay_ok" invisible="amount_due &gt; 0">
+                            <span class="o_hotel_pay_label">Reste à payer</span>
+                            <span class="o_hotel_pay_value"><i class="fa fa-check-circle me-1" title="Soldé"/>Soldé</span>
+                        </div>
                     </div>
                     <group>
                         <group string="Client" name="client">
@@ -103,10 +136,13 @@
                             <group class="oe_subtotal_footer">
                                 <field name="room_count"/>
                                 <field name="amount_total" widget="monetary"/>
-                                <field name="deposit_amount" widget="monetary"
-                                       readonly="state in ('checkout', 'cancel')"/>
+                                <field name="deposit_amount" widget="monetary" string="dont acompte versé"
+                                       invisible="not deposit_amount"/>
+                                <field name="amount_paid" widget="monetary"/>
                                 <field name="amount_due" widget="monetary"
-                                       class="oe_subtotal_footer_separator"/>
+                                       class="oe_subtotal_footer_separator"
+                                       decoration-danger="amount_due &gt; 0"
+                                       decoration-success="amount_due &lt;= 0 and amount_total &gt; 0"/>
                                 <field name="currency_id" invisible="1"/>
                             </group>
                         </page>
@@ -140,7 +176,8 @@
                 <field name="guest_count"/>
                 <field name="source" optional="hide"/>
                 <field name="amount_total" widget="monetary" sum="Total"/>
-                <field name="deposit_amount" widget="monetary" sum="Acomptes" optional="show"/>
+                <field name="deposit_amount" widget="monetary" sum="Acomptes" optional="hide"/>
+                <field name="amount_paid" widget="monetary" sum="Payé" optional="show"/>
                 <field name="amount_due" widget="monetary" sum="Reste à payer" optional="show"
                        decoration-danger="amount_due &gt; 0 and state in ('checkin', 'checkout')"/>
                 <field name="currency_id" column_invisible="1"/>

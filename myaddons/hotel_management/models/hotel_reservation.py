@@ -48,11 +48,26 @@ class HotelReservation(models.Model):
         help="Lits réservés, ou capacité des chambres louées entières.")
     amount_total = fields.Monetary(
         string="Total séjour", compute='_compute_amounts', store=True, tracking=True)
-    deposit_amount = fields.Monetary(string="Acompte", tracking=True)
+    # Paiements réels (account.payment) rattachés à la réservation :
+    # acomptes encaissés avant la facture et règlements du séjour.
+    payment_ids = fields.One2many(
+        'account.payment', 'hotel_reservation_id', string="Paiements")
+    payment_count = fields.Integer(
+        string="Nb paiements", compute='_compute_payment_count')
+    deposit_amount = fields.Monetary(
+        string="Acompte versé", compute='_compute_payment_amounts', store=True,
+        tracking=True,
+        help="Somme des acomptes réellement encaissés (paiements validés de "
+             "type « Acompte »). Déduits automatiquement de la facture.")
+    amount_paid = fields.Monetary(
+        string="Payé", compute='_compute_payment_amounts', store=True,
+        help="Total réellement encaissé : acomptes + paiements, "
+             "moins les remboursements.")
     amount_due = fields.Monetary(
-        string="Reste à payer", compute='_compute_amount_due', store=True)
+        string="Reste à payer", compute='_compute_payment_amounts', store=True)
     invoice_ids = fields.One2many(
-        'account.move', 'hotel_reservation_id', string="Factures")
+        'account.move', 'hotel_reservation_id', string="Factures",
+        domain=[('move_type', 'in', ('out_invoice', 'out_refund'))])
     invoice_count = fields.Integer(
         string="Nb factures", compute='_compute_invoice_count')
     currency_id = fields.Many2one(
@@ -119,16 +134,75 @@ class HotelReservation(models.Model):
                     "d'adultes / d'enfants.",
                     name=rec.name, guests=rec.guest_count, places=rec.places))
 
-    @api.depends('amount_total', 'deposit_amount')
-    def _compute_amount_due(self):
+    @api.depends('amount_total', 'payment_ids.state',
+                 'payment_ids.amount_company_currency_signed',
+                 'payment_ids.hotel_payment_kind')
+    def _compute_payment_amounts(self):
+        # sudo : la réception voit les montants sans droits comptables
         for rec in self:
-            rec.amount_due = rec.amount_total - rec.deposit_amount
+            posted = rec.sudo().payment_ids.filtered(lambda p: p.state == 'posted')
+            # Montant signé : + pour un encaissement, - pour un remboursement
+            rec.amount_paid = sum(posted.mapped('amount_company_currency_signed'))
+            rec.deposit_amount = sum(posted.filtered(
+                lambda p: p.hotel_payment_kind == 'deposit'
+                and p.payment_type == 'inbound'
+            ).mapped('amount_company_currency_signed'))
+            rec.amount_due = rec.amount_total - rec.amount_paid
 
-    @api.constrains('deposit_amount')
-    def _check_deposit_amount(self):
+    def _compute_payment_count(self):
         for rec in self:
-            if rec.deposit_amount < 0:
-                raise ValidationError(_("L'acompte ne peut pas être négatif."))
+            rec.payment_count = len(rec.sudo().payment_ids)
+
+    def _hotel_reconcile_payments(self):
+        """Lettre les encaissements de la réservation (acomptes, paiements)
+        encore ouverts avec ses factures validées non soldées : l'acompte est
+        ainsi déduit de la facture, qui n'affiche plus que le reste dû."""
+        for rec in self.sudo():
+            invoices = rec.invoice_ids.filtered(
+                lambda m: m.move_type == 'out_invoice' and m.state == 'posted'
+                and m.payment_state in ('not_paid', 'partial'))
+            if not invoices:
+                continue
+            payments = rec.payment_ids.filtered(
+                lambda p: p.state == 'posted' and p.payment_type == 'inbound')
+            for invoice in invoices.sorted('invoice_date'):
+                receivable = invoice.line_ids.filtered(
+                    lambda l: l.account_id.account_type == 'asset_receivable'
+                ).account_id
+                open_lines = payments.move_id.line_ids.filtered(
+                    lambda l: l.account_id in receivable
+                    and not l.reconciled and l.credit > 0)
+                for line in open_lines:
+                    if invoice.payment_state not in ('not_paid', 'partial'):
+                        break
+                    invoice.js_assign_outstanding_line(line.id)
+
+    def action_register_hotel_payment(self):
+        """Ouvre la fenêtre « Encaisser » (acompte ou paiement)."""
+        self.ensure_one()
+        if self.state == 'cancel':
+            raise UserError(_("Impossible d'encaisser sur une réservation annulée."))
+        if not self.partner_id:
+            raise UserError(_("Renseignez le client avant d'encaisser."))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Encaisser — %s", self.name),
+            'res_model': 'hotel.reservation.payment.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_reservation_id': self.id},
+        }
+
+    def action_view_payments(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Paiements — %s", self.name),
+            'res_model': 'account.payment',
+            'view_mode': 'tree,form',
+            'domain': [('hotel_reservation_id', '=', self.id)],
+            'context': {'create': False},
+        }
 
     @api.onchange('booking_type')
     def _onchange_booking_type(self):
@@ -198,7 +272,10 @@ class HotelReservation(models.Model):
             'name': _("Factures"),
             'res_model': 'account.move',
             'view_mode': 'tree,form',
-            'domain': [('hotel_reservation_id', '=', self.id)],
+            # Factures et avoirs seulement : les écritures des paiements
+            # portent aussi la réservation (bouton « Paiements »).
+            'domain': [('hotel_reservation_id', '=', self.id),
+                       ('move_type', 'in', ('out_invoice', 'out_refund'))],
         }
 
     def action_send_confirmation(self):
@@ -369,8 +446,35 @@ class HotelReservation(models.Model):
         maintenance_open = self.env['hotel.maintenance.request'].search_count([
             ('state', 'in', ('new', 'inprogress'))])
 
+        # Identifiants des enregistrements comptés par chaque tuile : un clic
+        # sur la tuile ouvre exactement ces enregistrements (même filtre que
+        # le chiffre affiché, y compris pour les statuts calculés non stockés).
+        def room_ids(*states):
+            return rooms.filtered(lambda r: r.status in states).ids
+
+        tile_ids = {
+            'occupied_rooms': room_ids('occupied'),
+            'partial_rooms': room_ids('partial'),
+            'available_rooms': room_ids('available', 'cleaning'),
+            'reserved_rooms': room_ids('reserved'),
+            'unavailable_rooms': rooms.filtered('maintenance').ids,
+            'to_clean_rooms': rooms.filtered(
+                lambda r: r.housekeeping_status == 'dirty').ids,
+            'cleaning_free_rooms': room_ids('cleaning'),
+            'all_guests': all_res.mapped('partner_id').ids,
+            'present_guests': occ_lines.mapped('reservation_id.partner_id').ids,
+            'arrivals_today': self.search([
+                ('checkin', '=', today),
+                ('state', 'in', ('confirmed', 'checkin'))]).ids,
+            'departures_today': self.search([
+                ('checkout', '=', today),
+                ('state', 'in', ('checkin', 'checkout'))]).ids,
+            'month_reservations': month_res.ids,
+        }
+
         symbol = self.env.company.currency_id.symbol or ''
         return {
+            'tile_ids': tile_ids,
             'housekeeping_todo': housekeeping_todo,
             'maintenance_open': maintenance_open,
             'total_rooms': total_rooms,

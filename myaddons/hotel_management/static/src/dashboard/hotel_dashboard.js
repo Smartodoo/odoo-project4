@@ -30,6 +30,24 @@ export class HotelDashboard extends Component {
         return `${nb} ${data.currency_symbol || ""}`.trim();
     }
 
+    /** Ids des enregistrements comptés par une tuile (cf. get_dashboard_data). */
+    tileIds(key) {
+        const ids = (this.state.data && this.state.data.tile_ids) || {};
+        return ids[key] || [];
+    }
+
+    /** Ouvre exactement les enregistrements comptés par la tuile `key`. */
+    openTile(model, key, name) {
+        const domain = [["id", "in", this.tileIds(key)]];
+        if (model === "hotel.room") {
+            return this.openRooms(domain, name);
+        }
+        if (model === "hotel.reservation") {
+            return this.openReservations(domain, name);
+        }
+        return this.openModel(model, domain, name, true);
+    }
+
     openRooms(domain, name) {
         this.action.doAction({
             type: "ir.actions.act_window",

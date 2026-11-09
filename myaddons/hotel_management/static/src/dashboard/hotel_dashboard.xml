@@ -16,90 +16,103 @@
                     </button>
                 </div>
 
-                <!-- KPI principaux -->
-                <div class="o_hotel_kpis">
-                    <div class="o_kpi o_kpi_occupied"
-                         t-on-click="() => this.openReservations([['state','=','checkin']], 'En séjour')">
-                        <div class="o_kpi_icon"><i class="fa fa-bed"/></div>
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.occupied"/></div>
-                            <div class="o_kpi_label">Chambres complètes
-                                <t t-if="state.data.partial"> · <t t-esc="state.data.partial"/> partielle(s)</t>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="o_kpi o_kpi_available"
-                         t-on-click="() => this.openRooms([], 'Chambres')">
-                        <div class="o_kpi_icon"><i class="fa fa-check-circle"/></div>
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.available"/></div>
-                            <div class="o_kpi_label">Chambres libres
-                                <t t-if="state.data.reserved"> · <t t-esc="state.data.reserved"/> réservée(s)</t>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="o_kpi o_kpi_guests"
-                         t-on-click="() => this.openReservations([], 'Réservations')">
-                        <div class="o_kpi_icon"><i class="fa fa-users"/></div>
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.total_guests"/></div>
-                            <div class="o_kpi_label">Clients au total</div>
-                        </div>
-                    </div>
-                    <div class="o_kpi o_kpi_present"
-                         t-on-click="() => this.openReservations([['state','=','checkin']], 'Clients présents')">
-                        <div class="o_kpi_icon"><i class="fa fa-user-circle"/></div>
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.present_guests"/></div>
-                            <div class="o_kpi_label">Clients présents</div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Indicateurs regroupés en 3 blocs : Chambres / Clients / Ménage & travaux -->
+                <div class="o_hotel_blocks">
 
-                <!-- Ligne secondaire -->
-                <div class="o_hotel_kpis o_hotel_kpis_small">
-                    <div class="o_kpi o_kpi_soft">
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.arrivals_today"/></div>
-                            <div class="o_kpi_label"><i class="fa fa-sign-in me-1"/>Arrivées aujourd'hui</div>
-                        </div>
-                    </div>
-                    <div class="o_kpi o_kpi_soft">
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.departures_today"/></div>
-                            <div class="o_kpi_label"><i class="fa fa-sign-out me-1"/>Départs aujourd'hui</div>
-                        </div>
-                    </div>
-                    <div class="o_kpi o_kpi_soft"
-                         t-on-click="() => this.openRooms([['maintenance','=',true]], 'Maintenance')">
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.maintenance"/></div>
-                            <div class="o_kpi_label"><i class="fa fa-wrench me-1"/>Maintenance / hors service</div>
-                        </div>
-                    </div>
-                    <div class="o_kpi o_kpi_soft"
-                         t-on-click="() => this.openRooms([['housekeeping_status','=','dirty']], 'À nettoyer')">
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.to_clean"/></div>
-                            <div class="o_kpi_label"><i class="fa fa-magic me-1"/>Chambres à nettoyer
-                                <t t-if="state.data.cleaning"> · <t t-esc="state.data.cleaning"/> libre(s)</t>
+                    <!-- Bloc Chambres -->
+                    <section class="o_hotel_block o_hotel_block_rooms">
+                        <header class="o_hotel_block_head">
+                            <span class="o_hotel_block_icon"><i class="fa fa-bed"/></span>
+                            <h2>Chambres</h2>
+                        </header>
+                        <div class="o_hotel_block_tiles">
+                            <div class="o_hotel_tile o_hotel_tile_danger"
+                                 t-on-click="() => this.openTile('hotel.room', 'occupied_rooms', 'Chambres complètes')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.occupied"/></div>
+                                <div class="o_hotel_tile_label">Chambres complètes</div>
+                                <div class="o_hotel_tile_sub o_hotel_tile_link" t-if="state.data.partial"
+                                     title="Voir les chambres partiellement occupées"
+                                     t-on-click.stop="() => this.openTile('hotel.room', 'partial_rooms', 'Chambres occupées partiellement')">
+                                    <t t-esc="state.data.partial"/> partielle(s)
+                                </div>
+                            </div>
+                            <div class="o_hotel_tile o_hotel_tile_success"
+                                 t-on-click="() => this.openTile('hotel.room', 'available_rooms', 'Chambres libres')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.available"/></div>
+                                <div class="o_hotel_tile_label">Chambres libres</div>
+                                <div class="o_hotel_tile_sub o_hotel_tile_link" t-if="state.data.reserved"
+                                     title="Voir les chambres réservées"
+                                     t-on-click.stop="() => this.openTile('hotel.room', 'reserved_rooms', 'Chambres réservées')">
+                                    <t t-esc="state.data.reserved"/> réservée(s)
+                                </div>
+                            </div>
+                            <div class="o_hotel_tile o_hotel_tile_muted"
+                                 t-on-click="() => this.openTile('hotel.room', 'unavailable_rooms', 'Chambres en maintenance / hors service')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.maintenance"/></div>
+                                <div class="o_hotel_tile_label">Maintenance / hors service</div>
                             </div>
                         </div>
-                    </div>
-                    <div class="o_kpi o_kpi_soft"
-                         t-on-click="() => this.openModel('hotel.housekeeping', [['state','in',['todo','inprogress']]], 'Ménage à faire')">
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.housekeeping_todo"/></div>
-                            <div class="o_kpi_label"><i class="fa fa-tasks me-1"/>Tâches ménage</div>
+                    </section>
+
+                    <!-- Bloc Clients -->
+                    <section class="o_hotel_block o_hotel_block_guests">
+                        <header class="o_hotel_block_head">
+                            <span class="o_hotel_block_icon"><i class="fa fa-users"/></span>
+                            <h2>Clients</h2>
+                        </header>
+                        <div class="o_hotel_block_tiles">
+                            <div class="o_hotel_tile"
+                                 t-on-click="() => this.openTile('res.partner', 'all_guests', 'Clients')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.total_guests"/></div>
+                                <div class="o_hotel_tile_label">Clients au total</div>
+                            </div>
+                            <div class="o_hotel_tile"
+                                 t-on-click="() => this.openTile('res.partner', 'present_guests', 'Clients présents')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.present_guests"/></div>
+                                <div class="o_hotel_tile_label">Clients présents</div>
+                            </div>
+                            <div class="o_hotel_tile"
+                                 t-on-click="() => this.openTile('hotel.reservation', 'arrivals_today', 'Arrivées du jour')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.arrivals_today"/></div>
+                                <div class="o_hotel_tile_label"><i class="fa fa-sign-in me-1"/>Arrivées aujourd'hui</div>
+                            </div>
+                            <div class="o_hotel_tile"
+                                 t-on-click="() => this.openTile('hotel.reservation', 'departures_today', 'Départs du jour')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.departures_today"/></div>
+                                <div class="o_hotel_tile_label"><i class="fa fa-sign-out me-1"/>Départs aujourd'hui</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="o_kpi o_kpi_soft"
-                         t-on-click="() => this.openModel('hotel.maintenance.request', [['state','in',['new','inprogress']]], 'Interventions ouvertes')">
-                        <div class="o_kpi_body">
-                            <div class="o_kpi_value"><t t-esc="state.data.maintenance_open"/></div>
-                            <div class="o_kpi_label"><i class="fa fa-wrench me-1"/>Interventions</div>
+                    </section>
+
+                    <!-- Bloc Ménage & travaux -->
+                    <section class="o_hotel_block o_hotel_block_ops">
+                        <header class="o_hotel_block_head">
+                            <span class="o_hotel_block_icon"><i class="fa fa-magic"/></span>
+                            <h2>Ménage &amp; travaux</h2>
+                        </header>
+                        <div class="o_hotel_block_tiles">
+                            <div class="o_hotel_tile"
+                                 t-on-click="() => this.openTile('hotel.room', 'to_clean_rooms', 'Chambres à nettoyer')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.to_clean"/></div>
+                                <div class="o_hotel_tile_label">Chambres à nettoyer</div>
+                                <div class="o_hotel_tile_sub o_hotel_tile_link" t-if="state.data.cleaning"
+                                     title="Voir les chambres libres en attente de ménage"
+                                     t-on-click.stop="() => this.openTile('hotel.room', 'cleaning_free_rooms', 'Chambres libres à nettoyer')">
+                                    <t t-esc="state.data.cleaning"/> libre(s)
+                                </div>
+                            </div>
+                            <div class="o_hotel_tile"
+                                 t-on-click="() => this.openModel('hotel.housekeeping', [['state','in',['todo','inprogress']]], 'Tâches ménage à faire / en cours')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.housekeeping_todo"/></div>
+                                <div class="o_hotel_tile_label"><i class="fa fa-tasks me-1"/>Tâches ménage</div>
+                            </div>
+                            <div class="o_hotel_tile"
+                                 t-on-click="() => this.openModel('hotel.maintenance.request', [['state','in',['new','inprogress']]], 'Interventions en cours')">
+                                <div class="o_hotel_tile_value"><t t-esc="state.data.maintenance_open"/></div>
+                                <div class="o_hotel_tile_label"><i class="fa fa-wrench me-1"/>Interventions</div>
+                            </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
 
                 <div class="o_hotel_grid">
@@ -149,7 +162,9 @@
                     <div class="o_hotel_card">
                         <h3>Ce mois-ci</h3>
                         <div class="o_hotel_stat_row">
-                            <div class="o_hotel_stat">
+                            <div class="o_hotel_stat o_hotel_stat_link"
+                                 title="Voir les réservations du mois"
+                                 t-on-click="() => this.openTile('hotel.reservation', 'month_reservations', 'Réservations du mois')">
                                 <div class="o_hotel_stat_value"><t t-esc="state.data.month_reservations"/></div>
                                 <div class="o_hotel_stat_label">Réservations</div>
                             </div>
