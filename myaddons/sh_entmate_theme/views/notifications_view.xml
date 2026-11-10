@@ -52,7 +52,7 @@
 			<field name="name">sh.announcement.tree</field>
 			<field name="model">sh.announcement</field>
 			<field name="arch" type="xml">
-				<tree>
+				<list>
 					<field name="name"/>
 					<field name="date"/>
 					<field name="is_popup_notification"/>
@@ -60,7 +60,7 @@
 					<field name="is_animation"/>
 					<!-- <field name="direction"/> -->
 					<field name="active" widget="boolean_toggle"/>
-				</tree>
+				</list>
 		  	</field>
 		</record>		
 		
@@ -69,7 +69,7 @@
 		<record id='sh_web_notitification_settings_action' model='ir.actions.act_window'>
 			<field name="name">Notification</field>
 			<field name="res_model">sh.announcement</field>
-			<field name="view_mode">tree,form</field>
+			<field name="view_mode">list,form</field>
 			<field name="type">ir.actions.act_window</field>
 		</record>
 		

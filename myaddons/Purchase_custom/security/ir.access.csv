@@ -1,0 +1,10 @@
+id,name,model_id,group_id/id,operation,domain
+access_purchase_order_custom,access_purchase_order_custom,purchase.order,custom_groups.group_financiere,r,
+access_versement_versement,access_versement_versement,versement.versement,base.group_everyone,crud,
+access_distribution_montant,access_distribution_montant,distribution.montant,base.group_everyone,crud,
+access_nettoyage_situation,access_nettoyage_situation,nettoyage.situation,base.group_everyone,crud,
+nettoyage_situation_company_rule,Situation Nettoyage : multi-société,nettoyage.situation,,crud,"['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]"
+access_nettoyage_camion,access_nettoyage_camion,nettoyage.camion,base.group_everyone,crud,
+access_nettoyage_chauffeur,access_nettoyage_chauffeur,nettoyage.chauffeur,base.group_everyone,crud,
+access_situation_brise_roche,access_situation_brise_roche,situation.brise.roche,base.group_everyone,crud,
+situation_brise_roche_company_rule,Situation Brise Roche : multi-société,situation.brise.roche,,crud,"['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]"

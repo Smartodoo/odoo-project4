@@ -7,7 +7,6 @@
             <field name="model">nettoyage.situation</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">Purchase_custom.report_nettoyage_sous_traitant_document</field>
-            <field name="report_file">Purchase_custom.report_nettoyage_sous_traitant_document</field>
             <field name="binding_model_id" ref="model_nettoyage_situation"/>
             <field name="binding_type">report</field>
             <field name="binding_view_types">list</field>
@@ -51,31 +50,31 @@
                         <!-- Infos entreprise -->
                         <div style="margin-bottom: 14pt;">
                             <div><strong>Entreprise :</strong>
-                                <span t-esc="company.name"/>
+                                <span t-out="company.name"/>
                             </div>
                             <div><strong>Adresse :</strong>
-                                <span t-esc="company.partner_id.contact_address or company.partner_id.city or ''"/>
+                                <span t-out="company.partner_id.contact_address or company.partner_id.city or ''"/>
                             </div>
                             <div t-if="docs[0].project_id"><strong>Projet :</strong>
-                                <span t-esc="docs[0].project_id.name"/>
+                                <span t-out="docs[0].project_id.name"/>
                             </div>
                             <div t-if="sous_traitant"><strong>Sous-traitant :</strong>
-                                <span t-esc="sous_traitant.name"/>
+                                <span t-out="sous_traitant.name"/>
                             </div>
                         </div>
 
                         <!-- Titre Décompte -->
                         <div style="text-align: center; border: 1pt solid #000; padding: 6pt; margin-bottom: 4pt; font-weight: 700;">
                             DECOMPTE SITUATION
-                            <t t-if="ref_situation"> N° <span t-esc="ref_situation"/></t>
+                            <t t-if="ref_situation"> N° <span t-out="ref_situation"/></t>
                             <t t-if="date_min and date_max">
-                                DU <span t-esc="date_min.strftime('%d/%m/%Y')"/>
-                                AU <span t-esc="date_max.strftime('%d/%m/%Y')"/>
+                                DU <span t-out="date_min.strftime('%d/%m/%Y')"/>
+                                AU <span t-out="date_max.strftime('%d/%m/%Y')"/>
                             </t>
                         </div>
                         <div style="text-align: center; border: 1pt solid #000; padding: 4pt; margin-bottom: 12pt; font-weight: 700;">
                             <t t-if="docs[0].project_id">
-                                PROJET : <span t-esc="docs[0].project_id.name"/>
+                                PROJET : <span t-out="docs[0].project_id.name"/>
                             </t>
                         </div>
 
@@ -97,22 +96,22 @@
                                     <t t-set="rownum" t-value="rownum + 1"/>
                                     <tr>
                                         <td style="border: 1pt solid #000; padding: 5pt; text-align: center;">
-                                            <t t-esc="rownum"/>
+                                            <t t-out="rownum"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 5pt;">
-                                            <t t-esc="g[0][0]"/>
+                                            <t t-out="g[0][0]"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 5pt;">
-                                            <t t-esc="g[1]['observation'] or 'EVACUATION DES TERRES A LA DECHARGE PUBLIQUE ET CENTRALE A BETON'"/>
+                                            <t t-out="g[1]['observation'] or 'EVACUATION DES TERRES A LA DECHARGE PUBLIQUE ET CENTRALE A BETON'"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 5pt;">
-                                            <t t-esc="g[0][1]"/>
+                                            <t t-out="g[0][1]"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
-                                            <t t-esc="'%.2f' % g[1]['voyages']"/>
+                                            <t t-out="'%.2f' % g[1]['voyages']"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
-                                            <t t-esc="'%.2f' % g[1]['montant']"/>
+                                            <t t-out="'%.2f' % g[1]['montant']"/>
                                         </td>
                                     </tr>
                                 </t>
@@ -120,10 +119,10 @@
                                 <tr style="background: #d0d0d0; font-weight: 700;">
                                     <td colspan="4" style="border: 1pt solid #000; padding: 6pt; text-align: right;">MONTANT TOTAL A PAYER</td>
                                     <td style="border: 1pt solid #000; padding: 6pt; text-align: right;">
-                                        <t t-esc="'%.2f' % total_voyages"/>
+                                        <t t-out="'%.2f' % total_voyages"/>
                                     </td>
                                     <td style="border: 1pt solid #000; padding: 6pt; text-align: right;">
-                                        <t t-esc="'%.2f' % total_montant"/>
+                                        <t t-out="'%.2f' % total_montant"/>
                                     </td>
                                 </tr>
                             </tbody>
@@ -134,7 +133,7 @@
                             <tr>
                                 <td style="border: 1pt solid #000; padding: 5pt;">Total voyages</td>
                                 <td style="border: 1pt solid #000; padding: 5pt; text-align: right; width: 18%;">
-                                    <t t-esc="'%.2f' % total_voyages"/>
+                                    <t t-out="'%.2f' % total_voyages"/>
                                 </td>
                             </tr>
                         </table>
@@ -145,16 +144,16 @@
                             <br/>
                             <strong>
                                 <t t-set="amount_words" t-value="company.currency_id.amount_to_text(total_montant) if company.currency_id else '%.2f' % total_montant"/>
-                                <span t-esc="amount_words"/>
+                                <span t-out="amount_words"/>
                             </strong>
                         </div>
 
                         <!-- Pied : ville + date -->
                         <div style="margin-top: 24pt; text-align: right;">
                             Fait à
-                            <span t-esc="company.partner_id.city or '...'"/>
+                            <span t-out="company.partner_id.city or '...'"/>
                             le :
-                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                            <span t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
                         </div>
 
                         <div style="margin-top: 50pt; display: table; width: 100%;">

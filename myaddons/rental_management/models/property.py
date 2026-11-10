@@ -160,7 +160,7 @@ class PropertyApartment(models.Model):
             'name': _('Historique des Locations'),
             'type': 'ir.actions.act_window',
             'res_model': 'property.rental',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('property_id', '=', self.id)],
         }
 
@@ -179,4 +179,7 @@ class PropertyApartment(models.Model):
             'target': 'new',
         }
 
-    _sql_constraints = [('name_uniq', 'unique(name)', 'La référence doit être unique !')]
+    _name_uniq = models.Constraint(
+        'unique(name)',
+        "La r\u00e9f\u00e9rence doit \u00eatre unique !",
+    )

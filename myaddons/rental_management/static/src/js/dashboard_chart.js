@@ -1,13 +1,13 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 export class RentalDashboard extends Component {
     setup() {
         this.rpc = useService("rpc");
-        this.state = useState({
+        this.state = proxy({
             kpi: {
                 ongoing_count: 0,
                 monthly_revenue: 0,

@@ -37,7 +37,7 @@
                                 rapide et confirmée par e-mail.
                             </p>
                             <a href="/hotel/rooms" class="ah_footer_cta">
-                                <i class="fa fa-calendar"/> Réserver un séjour
+                                <i class="oi oi-filled" data-icon="calendar_today"/> Réserver un séjour
                             </a>
                         </div>
                         <div class="col-lg-2 col-6">
@@ -62,26 +62,26 @@
                             <h5>Nous contacter</h5>
                             <ul class="list-unstyled ah_footer_contact">
                                 <li t-if="ft_company.street or ft_company.city">
-                                    <i class="fa fa-map-marker"/>
+                                    <i class="oi" data-icon="location_on"/>
                                     <span>
-                                        <t t-esc="ft_company.street"/><t t-if="ft_company.street and ft_company.city">, </t>
-                                        <t t-esc="ft_company.zip"/> <t t-esc="ft_company.city"/>
+                                        <t t-out="ft_company.street"/><t t-if="ft_company.street and ft_company.city">, </t>
+                                        <t t-out="ft_company.zip"/> <t t-out="ft_company.city"/>
                                     </span>
                                 </li>
                                 <li t-if="ft_company.phone">
-                                    <i class="fa fa-phone"/>
-                                    <a t-attf-href="tel:#{ft_company.phone}" t-esc="ft_company.phone"/>
+                                    <i class="oi oi-filled" data-icon="phone"/>
+                                    <a t-attf-href="tel:#{ft_company.phone}" t-out="ft_company.phone"/>
                                 </li>
                                 <li t-if="ft_company.email">
-                                    <i class="fa fa-envelope-o"/>
-                                    <a t-attf-href="mailto:#{ft_company.email}" t-esc="ft_company.email"/>
+                                    <i class="oi" data-icon="mail"/>
+                                    <a t-attf-href="mailto:#{ft_company.email}" t-out="ft_company.email"/>
                                 </li>
                                 <li>
-                                    <i class="fa fa-comments-o"/>
+                                    <i class="oi" data-icon="forum"/>
                                     <a href="/contactus">Formulaire de contact</a>
                                 </li>
                                 <li>
-                                    <i class="fa fa-clock-o"/>
+                                    <i class="oi" data-icon="schedule"/>
                                     <span>Réservation en ligne 24h/24, 7j/7</span>
                                 </li>
                             </ul>
@@ -96,7 +96,7 @@
               name="Auberge - Copyright">
         <xpath expr="//span[hasclass('o_footer_copyright_name')]" position="replace">
             <span class="o_footer_copyright_name me-2">
-                © <t t-esc="datetime.date.today().year"/> <t t-esc="website.company_id.name"/> · Tous droits réservés
+                © <t t-out="datetime.date.today().year"/> <t t-out="website.company_id.name"/> · Tous droits réservés
             </span>
         </xpath>
     </template>

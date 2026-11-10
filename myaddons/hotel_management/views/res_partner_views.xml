@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_hotel_reservations" type="object"
-                        class="oe_stat_button" icon="fa-bed"
+                        class="oe_stat_button" icon="bed"
                         invisible="hotel_reservation_count == 0">
                     <field name="hotel_reservation_count" widget="statinfo"
                            string="Séjours"/>

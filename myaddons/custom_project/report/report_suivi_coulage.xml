@@ -23,7 +23,6 @@
             <field name="model">suivi.coulage</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">custom_project.report_suivi_coulage_template</field>
-            <field name="report_file">custom_project.report_suivi_coulage_template</field>
             <field name="paperformat_id" ref="paperformat_suivi_coulage"/>
             <field name="binding_model_id" ref="model_suivi_coulage"/>
             <field name="binding_type">report</field>
@@ -97,7 +96,7 @@
                                 <span class="sc-title-num">
                                     N&#176; <span t-field="doc.name"/>
                                     <span class="sc-state"
-                                          t-esc="{'draft': 'Brouillon', 'in_progress': 'En Cours', 'done': 'Terminé'}.get(doc.state, '-')"/>
+                                          t-out="{'draft': 'Brouillon', 'in_progress': 'En Cours', 'done': 'Terminé'}.get(doc.state, '-')"/>
                                 </span>
                             </div>
 
@@ -109,10 +108,10 @@
                                             <tr><td class="k">Projet :</td><td class="v"><span t-field="doc.project_id.name"/></td></tr>
                                             <tr><td class="k">Société :</td><td class="v"><span t-field="doc.company_id.name"/></td></tr>
                                             <tr><td class="k">Date Début :</td><td class="v">
-                                                <span t-if="doc.date_start" t-esc="doc.date_start.strftime('%d/%m/%Y')"/>
+                                                <span t-if="doc.date_start" t-out="doc.date_start.strftime('%d/%m/%Y')"/>
                                             </td></tr>
                                             <tr><td class="k">Date Fin :</td><td class="v">
-                                                <span t-if="doc.date_end" t-esc="doc.date_end.strftime('%d/%m/%Y')"/>
+                                                <span t-if="doc.date_end" t-out="doc.date_end.strftime('%d/%m/%Y')"/>
                                             </td></tr>
                                         </table>
                                     </td>
@@ -139,27 +138,27 @@
                                 <tr>
                                     <td class="sc-kpi blue">
                                         <span class="sc-kpi-label">Coulages</span>
-                                        <div class="sc-kpi-value"><t t-esc="len(lines)"/></div>
+                                        <div class="sc-kpi-value"><t t-out="len(lines)"/></div>
                                     </td>
                                     <td class="sc-kpi teal">
                                         <span class="sc-kpi-label">Volume m&#179;</span>
-                                        <div class="sc-kpi-value"><t t-esc="'%.1f' % total_qte"/></div>
+                                        <div class="sc-kpi-value"><t t-out="'%.1f' % total_qte"/></div>
                                     </td>
                                     <td class="sc-kpi green">
                                         <span class="sc-kpi-label">Conformes 28j</span>
-                                        <div class="sc-kpi-value"><t t-esc="len(conf_28)"/></div>
+                                        <div class="sc-kpi-value"><t t-out="len(conf_28)"/></div>
                                     </td>
                                     <td class="sc-kpi red">
                                         <span class="sc-kpi-label">Non conformes</span>
-                                        <div class="sc-kpi-value"><t t-esc="len(nonconf_28)"/></div>
+                                        <div class="sc-kpi-value"><t t-out="len(nonconf_28)"/></div>
                                     </td>
                                     <td class="sc-kpi orange">
                                         <span class="sc-kpi-label">En attente</span>
-                                        <div class="sc-kpi-value"><t t-esc="len(pending)"/></div>
+                                        <div class="sc-kpi-value"><t t-out="len(pending)"/></div>
                                     </td>
                                     <td class="sc-kpi purple">
                                         <span class="sc-kpi-label">Taux conf.</span>
-                                        <div class="sc-kpi-value"><t t-esc="'%.1f' % taux_conf"/>%</div>
+                                        <div class="sc-kpi-value"><t t-out="'%.1f' % taux_conf"/>%</div>
                                     </td>
                                 </tr>
                             </table>
@@ -186,30 +185,30 @@
                                 </thead>
                                 <tbody>
                                     <tr t-foreach="doc.line_ids" t-as="line">
-                                        <td class="text-center"><t t-esc="line.sequence"/></td>
+                                        <td class="text-center"><t t-out="line.sequence"/></td>
                                         <td><span t-field="line.name"/></td>
                                         <td class="text-center">
-                                            <span t-esc="{'bloc_a': 'A', 'bloc_b': 'B', 'bloc_ab': 'A et B'}.get(line.bloc, '-')"/>
+                                            <span t-out="{'bloc_a': 'A', 'bloc_b': 'B', 'bloc_ab': 'A et B'}.get(line.bloc, '-')"/>
                                         </td>
-                                        <td class="text-end"><t t-esc="'%.2f' % (line.quantite or 0)"/></td>
+                                        <td class="text-end"><t t-out="'%.2f' % (line.quantite or 0)"/></td>
                                         <td><span t-field="line.centrale_beton"/></td>
                                         <td class="text-center">
-                                            <span t-if="line.date_coulage" t-esc="line.date_coulage.strftime('%d/%m/%Y')"/>
+                                            <span t-if="line.date_coulage" t-out="line.date_coulage.strftime('%d/%m/%Y')"/>
                                         </td>
-                                        <td class="text-end"><t t-esc="'%.1f' % (line.temperature or 0)"/></td>
+                                        <td class="text-end"><t t-out="'%.1f' % (line.temperature or 0)"/></td>
                                         <td class="text-center"><span t-field="line.heure"/></td>
-                                        <td class="text-center"><t t-esc="line.nb_eprouvettes"/></td>
+                                        <td class="text-center"><t t-out="line.nb_eprouvettes"/></td>
                                         <td class="text-center">
-                                            <span t-if="line.date_7_jours" t-esc="line.date_7_jours.strftime('%d/%m/%Y')"/>
+                                            <span t-if="line.date_7_jours" t-out="line.date_7_jours.strftime('%d/%m/%Y')"/>
                                         </td>
                                         <td class="text-end">
-                                            <span t-if="line.resultat_7_jours" t-esc="'%.1f' % line.resultat_7_jours"/>
+                                            <span t-if="line.resultat_7_jours" t-out="'%.1f' % line.resultat_7_jours"/>
                                         </td>
                                         <td class="text-center">
-                                            <span t-if="line.date_28_jours" t-esc="line.date_28_jours.strftime('%d/%m/%Y')"/>
+                                            <span t-if="line.date_28_jours" t-out="line.date_28_jours.strftime('%d/%m/%Y')"/>
                                         </td>
                                         <td class="text-end">
-                                            <span t-if="line.resultat_28_jours" t-esc="'%.1f' % line.resultat_28_jours"/>
+                                            <span t-if="line.resultat_28_jours" t-out="'%.1f' % line.resultat_28_jours"/>
                                         </td>
                                         <td class="text-center">
                                             <t t-if="line.resultat_28_jours">

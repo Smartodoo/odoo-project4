@@ -53,7 +53,7 @@
                         <div style="text-align:center; font-weight:700; text-decoration:underline; margin-top:10px;">
                             <div style="font-size:14px">BON DE VERSEMENT</div>
                             <div style="font-size:15px; margin-top:6px;">
-                                <span t-esc="doc.name or '/'"/>
+                                <span t-out="doc.name or '/'"/>
                             </div>
                         </div>
 
@@ -69,7 +69,7 @@
                                 <tr>
                                     <td class="label">Fournisseur :</td>
                                     <td>
-                                        <span t-esc="doc.fournisseur_id.name or ''"/>
+                                        <span t-out="doc.fournisseur_id.name or ''"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -78,7 +78,7 @@
                                     <td>
                                         <t t-if="doc.project_ids">
                                             <t t-foreach="doc.project_ids" t-as="po">
-                                                <span t-esc="po.name or ''"/>
+                                                <span t-out="po.name or ''"/>
                                                 ,
                                                 <br/>
                                             </t>
@@ -92,7 +92,7 @@
                                 <tr>
                                     <td class="label">Lot :</td>
                                     <td>
-                                        <span t-esc="doc.lot or '-'"/>
+                                        <span t-out="doc.lot or '-'"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -104,7 +104,7 @@
                                         </div>
                                         <div class="amount-words">
                                             <strong>En lettres :</strong>
-                                            <span t-esc="doc.lettre or ''"/>
+                                            <span t-out="doc.lettre or ''"/>
                                         </div>
                                     </td>
                                 </tr>
@@ -115,7 +115,7 @@
                         <div class="objet">
                             <strong>Objet de versement :</strong>
                             <div style="margin-top:6px;">
-                                <t t-raw="doc.objet or ''"/>
+                                <t t-out="doc.objet or ''"/>
                             </div>
                         </div>
                         <br/><br/><br/><br/><br/>

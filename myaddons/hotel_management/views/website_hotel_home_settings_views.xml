@@ -51,7 +51,7 @@
         <field name="res_model">website</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="view_website_hotel_home_form"/>
-        <field name="res_id" ref="website.default_website"/>
+        <field name="res_id" ref="base.default_website"/>
         <field name="target">current</field>
     </record>
 

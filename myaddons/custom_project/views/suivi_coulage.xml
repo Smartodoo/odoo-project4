@@ -3,12 +3,12 @@
 
     <!-- ============== SUIVI COULAGE (Parent) ============== -->
 
-    <!-- Tree View -->
+    <!-- List View -->
     <record id="view_suivi_coulage_tree" model="ir.ui.view">
         <field name="name">suivi.coulage.tree</field>
         <field name="model">suivi.coulage</field>
         <field name="arch" type="xml">
-            <tree string="Suivi des Coulages">
+            <list string="Suivi des Coulages">
                 <field name="name"/>
                 <field name="project_id"/>
                 <field name="maitre_ouvrage"/>
@@ -18,7 +18,7 @@
                 <field name="date_start"/>
                 <field name="date_end"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'in_progress'" decoration-success="state == 'done'"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -56,7 +56,7 @@
                     <notebook>
                         <page string="Lignes de Coulage" name="lines">
                             <field name="line_ids">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="sequence" string="N°" widget="handle"/>
                                     <field name="name"/>
                                     <field name="bloc"/>
@@ -75,7 +75,7 @@
                                     <field name="heure" optional="hide"/>
                                     <field name="nb_eprouvettes" optional="hide"/>
                                     <field name="state" widget="badge" decoration-info="state == 'pending'" decoration-warning="state == 'test_7'" decoration-success="state == 'done'"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                         <page string="Notes" name="notes">
@@ -84,11 +84,7 @@
                     </notebook>
                     <field name="company_id" invisible="1"/>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -107,7 +103,7 @@
                 <filter string="En Cours" name="in_progress" domain="[('state', '=', 'in_progress')]"/>
                 <filter string="Terminé" name="done" domain="[('state', '=', 'done')]"/>
                 <separator/>
-                <group expand="0" string="Grouper par">
+                <group>
                     <filter string="Projet" name="group_project" context="{'group_by': 'project_id'}"/>
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Maître d'Ouvrage" name="group_maitre" context="{'group_by': 'maitre_ouvrage'}"/>
@@ -118,12 +114,12 @@
 
     <!-- ============== SUIVI COULAGE LINE ============== -->
 
-    <!-- Tree View for Lines (standalone) -->
+    <!-- List View for Lines (standalone) -->
     <record id="view_suivi_coulage_line_tree" model="ir.ui.view">
         <field name="name">suivi.coulage.line.tree</field>
         <field name="model">suivi.coulage.line</field>
         <field name="arch" type="xml">
-            <tree string="Lignes de Coulage" default_order="sequence">
+            <list string="Lignes de Coulage" default_order="sequence">
                 <field name="sequence" string="N°"/>
                 <field name="coulage_id"/>
                 <field name="project_id"/>
@@ -140,7 +136,7 @@
                 <field name="is_conforme_28" widget="boolean_toggle"/>
                 <field name="laboratoire"/>
                 <field name="state" widget="badge" decoration-info="state == 'pending'" decoration-warning="state == 'test_7'" decoration-success="state == 'done'"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -213,7 +209,7 @@
                 <filter string="Conforme 28j" name="conforme_28" domain="[('is_conforme_28', '=', True)]"/>
                 <filter string="Non Conforme 28j" name="non_conforme_28" domain="[('is_conforme_28', '=', False), ('resultat_28_jours', '>', 0)]"/>
                 <separator/>
-                <group expand="0" string="Grouper par">
+                <group>
                     <filter string="Suivi Coulage" name="group_coulage" context="{'group_by': 'coulage_id'}"/>
                     <filter string="Projet" name="group_project" context="{'group_by': 'project_id'}"/>
                     <filter string="Bloc" name="group_bloc" context="{'group_by': 'bloc'}"/>
@@ -231,7 +227,7 @@
     <record id="action_suivi_coulage" model="ir.actions.act_window">
         <field name="name">Suivi des Coulages</field>
         <field name="res_model">suivi.coulage</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créer un nouveau suivi de coulage
@@ -246,7 +242,7 @@
     <record id="action_suivi_coulage_line" model="ir.actions.act_window">
         <field name="name">Toutes les Lignes de Coulage</field>
         <field name="res_model">suivi.coulage.line</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Aucune ligne de coulage
@@ -268,7 +264,7 @@
         <field name="arch" type="xml">
             <!-- Add stat button for coulages -->
             <xpath expr="//div[@name='button_box']" position="inside">
-                <button name="action_view_coulages" type="object" class="oe_stat_button" icon="fa-flask">
+                <button name="action_view_coulages" type="object" class="oe_stat_button" icon="science">
                     <div class="o_stat_info">
                         <field name="coulage_count" widget="statinfo" string="Coulages"/>
                     </div>

@@ -5,17 +5,14 @@
             <t t-call="portal.portal_docs_entry">
                 <field name="title">Mes Locations</field>
                 <field name="url" eval="'/my/rentals'"/>
-                <field name="placeholder_count" t-esc="rental_count"/>
+                <field name="placeholder_count" t-out="rental_count"/>
             </t>
         </xpath>
     </template>
 
     <template id="portal_my_rentals" name="Mes Locations">
-        <t t-call="portal.portal_layout">
-            <t t-set="breadcrumbs_searchbar" t-value="True"/>
-            <t t-call="portal.portal_searchbar">
-                <t t-set="title">Mes Contrats de Location</t>
-            </t>
+        <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
+            <t t-call="portal.portal_searchbar" title.translate="Mes Contrats de Location"/>
             <t t-if="not rentals">
                 <div class="alert alert-info">Vous n'avez pas encore de réservations.</div>
             </t>
@@ -38,7 +35,7 @@
                             <td><span t-field="rental.date_end"/></td>
                             <td class="text-end">
                                 <span t-attf-class="badge rounded-pill #{'bg-success' if rental.state == 'ongoing' else 'bg-info'}">
-                                    <t t-esc="rental.state"/>
+                                    <t t-out="rental.state"/>
                                 </span>
                             </td>
                         </tr>

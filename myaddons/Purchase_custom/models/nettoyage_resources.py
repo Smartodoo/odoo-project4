@@ -14,10 +14,10 @@ class NettoyageCamion(models.Model):
         default=lambda self: self.env.company, index=True,
     )
 
-    _sql_constraints = [
-        ('matriculation_unique', 'unique(name, company_id)',
-         "Cette matriculation existe déjà pour cette société."),
-    ]
+    _matriculation_unique = models.Constraint(
+        'unique(name, company_id)',
+        "Cette matriculation existe d\u00e9j\u00e0 pour cette soci\u00e9t\u00e9.",
+    )
 
 
 class NettoyageChauffeur(models.Model):

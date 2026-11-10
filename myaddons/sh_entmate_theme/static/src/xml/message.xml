@@ -64,16 +64,9 @@
     </t>-->
 
     <t t-inherit="mail.AttachmentList" t-inherit-mode="extension">
+        <!-- Odoo 20: only add the theme class; core t-att-class (Owl 3 `this.` syntax) is kept -->
         <xpath expr="//div[hasclass('o-mail-AttachmentList')]" position="attributes">
-            <attribute name="t-att-class">
-                {
-                'o-inComposer': env.inComposer,
-                'o-inChatWindow': env.inChatWindow,
-                'me-2 pe-4': isInChatWindowAndIsAlignedLeft and !env.inComposer,
-                'ms-2 ps-4': isInChatWindowAndIsAlignedRight and !env.inComposer,
-                'sh_message_attchment': true,
-                }
-            </attribute>
+            <attribute name="class" add="sh_message_attchment" separator=" "/>
         </xpath>
     </t>
 

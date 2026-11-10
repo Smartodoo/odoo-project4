@@ -4,7 +4,7 @@ import { isMobileOS } from "@web/core/browser/feature_detection";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 
-import { jsonrpc } from "@web/core/network/rpc_service";
+import { rpc } from "@web/core/network/rpc";
 import { session } from "@web/session";
 import { onWillStart } from "@odoo/owl";
 import { onMounted } from "@odoo/owl";
@@ -82,7 +82,7 @@ patch(NavBar.prototype, {
         var self = this
         localStorage.setItem('LastCreatedTab',actionId)
 
-        jsonrpc('/add/mutli/tab', {
+        rpc('/add/mutli/tab', {
                 'name':tab_name,
                 'url':url,
                 'actionId':actionId,
@@ -95,7 +95,7 @@ patch(NavBar.prototype, {
 
     addmultitabtags: async function (ev) {
         var self = this
-        var rec = await jsonrpc('/get/mutli/tab', {});
+        var rec = await rpc('/get/mutli/tab', {});
         if (rec){
                 $('.multi_tab_section').empty()
                 $.each(rec, function( key, value ) {
@@ -137,7 +137,7 @@ patch(NavBar.prototype, {
     _RemoveTab: function (ev) {
         var self = this
         var multi_tab_id = $(ev.target).parent().find('a').attr('multi_tab_id')
-        jsonrpc('/remove/multi/tab', {
+        rpc('/remove/multi/tab', {
             'multi_tab_id':multi_tab_id,
         }).then(function(rec) {
             if (rec){
@@ -184,6 +184,19 @@ patch(NavBar.prototype, {
     getAppClassName(app){
         var app_name = app.xmlid
         return app_name.replaceAll('.', '_')
+    },
+    // Full-page apps home menu (Odoo Enterprise style): when the apps Dropdown
+    // opens, hide the current app's brand/sections and the underlying view so
+    // the clean home screen shows.
+    onAppsMenuStateChanged(isOpen){
+        document.body.classList.toggle("sh_apps_home_open", isOpen);
+        if (isOpen) {
+            // Open the apps panel right under the navbar, wherever it is (a
+            // banner such as "Database neutralized" can push it down).
+            const navbar = document.querySelector(".o_main_navbar");
+            const top = navbar ? Math.max(navbar.getBoundingClientRect().bottom, 0) : 0;
+            document.body.style.setProperty("--sh-apps-menu-top", `${top}px`);
+        }
     },
     getIconStyle() {
         return app_icon_style;

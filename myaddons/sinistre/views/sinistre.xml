@@ -6,7 +6,7 @@
             <field name="name">Sinistre list</field>
             <field name="model">sinistre</field>
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="vehicle_id"/>
                     <field name="license_plate"/>
                     <field name="driver_id"/>
@@ -22,7 +22,7 @@
                            decoration-warning="state == 'en_cours'"
                            decoration-success="state == 'termine'"
                            optional="show"/>
-                </tree>
+                </list>
             </field>
         </record>
 
@@ -34,7 +34,7 @@
                 <form string="Sinistre">
                     <header>
                         <button name="%(sinistre.action_report_constat)d" string="Imprimer Constat"
-                                type="action" class="btn-primary" icon="fa-print"/>
+                                type="action" class="btn-primary" icon="print"/>
                         <field name="state" widget="statusbar" options="{'clickable': True}"/>
                     </header>
                     <sheet>
@@ -130,11 +130,7 @@
                                    colspan="2"/>
                         </group>
                     </sheet>
-                    <div class="oe_chatter">
-                        <field name="message_follower_ids" widget="mail_followers"/>
-                        <field name="activity_ids" widget="mail_activity"/>
-                        <field name="message_ids" widget="mail_thread"/>
-                    </div>
+                    <chatter/>
                 </form>
             </field>
         </record>
@@ -169,7 +165,7 @@
         <record model="ir.actions.act_window" id="sinistre.action_window">
             <field name="name">Sinistre window</field>
             <field name="res_model">sinistre</field>
-            <field name="view_mode">tree,form,search</field>
+            <field name="view_mode">list,form,search</field>
         </record>
 
         <!-- server action -->
@@ -181,7 +177,7 @@
             <field name="code">
                 action = {
                 "type": "ir.actions.act_window",
-                "view_mode": "tree,form",
+                "view_mode": "list,form",
                 "res_model": model._name,
                 }
             </field>
@@ -222,16 +218,16 @@
             <field name="name">vehicle.type.list</field>
             <field name="model">vehicle.type</field>
             <field name="arch" type="xml">
-                <tree string="Vehicle Type">
+                <list string="Vehicle Type">
                     <field name="name"/>
-                </tree>
+                </list>
             </field>
         </record>
         <!-- action vehicle type -->
         <record id="vehicle_type_action" model="ir.actions.act_window">
             <field name="name">Genre de véhicule</field>
             <field name="res_model">vehicle.type</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem name="Sinistre" id="sinistre.menu_root" web_icon="sinistre,static/description/icon.png"
@@ -270,16 +266,16 @@
             <field name="name">vehicle.availability.list</field>
             <field name="model">vehicle.availability</field>
             <field name="arch" type="xml">
-                <tree string="Disponibilité du véhicule">
+                <list string="Disponibilité du véhicule">
                     <field name="name"/>
-                </tree>
+                </list>
             </field>
         </record>
 
         <record id="vehicle_availability_action" model="ir.actions.act_window">
             <field name="name">Disponibilité du véhicule</field>
             <field name="res_model">vehicle.availability</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem id="vehicle_availability_menu" name="Disponibilité du véhicule"
@@ -295,7 +291,7 @@
                 <xpath expr="//field[@name='future_driver_id']" position="after">
                     <field name="availability_id"/>
                 </xpath>
-                <xpath expr="//notebook/page[@name='note']" position="after">
+                <xpath expr="//notebook/page[@name='description']" position="after">
                     <page string="Document" name="document_page">
                         <group>
                             <group string="Type de document">
@@ -346,16 +342,16 @@
             <field name="name">assurance.type.list</field>
             <field name="model">assurance.type</field>
             <field name="arch" type="xml">
-                <tree string="Type d'assurance">
+                <list string="Type d'assurance">
                     <field name="name"/>
-                </tree>
+                </list>
             </field>
         </record>
 
         <record id="assurance_type_action" model="ir.actions.act_window">
             <field name="name">Type d'assurance</field>
             <field name="res_model">assurance.type</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem id="assurance_type_menu" name="Type d'assurance"
@@ -370,7 +366,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//sheet" position="inside">
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_charges" type="object" class="oe_stat_button" icon="fa-gavel">
+                        <button name="action_view_charges" type="object" class="oe_stat_button" icon="gavel">
                             <field name="charge_count" widget="statinfo" string="Charges"/>
                         </button>
                     </div>
@@ -412,16 +408,16 @@
             <field name="name">maintenance.type.list</field>
             <field name="model">maintenance.type</field>
             <field name="arch" type="xml">
-                <tree string="Type de maintenance">
+                <list string="Type de maintenance">
                     <field name="name"/>
-                </tree>
+                </list>
             </field>
         </record>
 
         <record id="maintenance_type_action" model="ir.actions.act_window">
             <field name="name">Type de maintenance</field>
             <field name="res_model">maintenance.type</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem id="maintenance_type_menu" name="Type de maintenance"
@@ -431,7 +427,7 @@
         <record id="vidange_type_action" model="ir.actions.act_window">
             <field name="name">Type de vidange</field>
             <field name="res_model">vidange.type</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem id="vidange_type_menu" name="Type de vidange"
@@ -478,12 +474,12 @@
             <field name="number_next">1</field>
         </record>
 
-        <!-- Amande Penalite Tree View -->
+        <!-- Amande Penalite List View -->
         <record id="amande_penalite_view_tree" model="ir.ui.view">
             <field name="name">amande.penalite.tree</field>
             <field name="model">amande.penalite</field>
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="name"/>
                     <field name="type"/>
                     <field name="reference"/>
@@ -492,7 +488,7 @@
                     <field name="cout"/>
                     <field name="autorite"/>
                     <field name="contract_id"/>
-                </tree>
+                </list>
             </field>
         </record>
 
@@ -531,7 +527,7 @@
         <record id="amande_penalite_action" model="ir.actions.act_window">
             <field name="name">Amandes et Pénalités</field>
             <field name="res_model">amande.penalite</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem id="amande_penalite_menu" name="Amandes et Pénalités"
@@ -543,9 +539,9 @@
             <field name="name">type.amande.penalite.tree</field>
             <field name="model">type.amande.penalite</field>
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="name"/>
-                </tree>
+                </list>
             </field>
         </record>
 
@@ -566,7 +562,7 @@
         <record id="type_amande_penalite_action" model="ir.actions.act_window">
             <field name="name">Type d'amande et pénalité</field>
             <field name="res_model">type.amande.penalite</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem id="type_amande_penalite_menu" name="Type d'amande et pénalité"
@@ -578,9 +574,9 @@
             <field name="name">autorite.penalite.tree</field>
             <field name="model">autorite.penalite</field>
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="name"/>
-                </tree>
+                </list>
             </field>
         </record>
 
@@ -601,7 +597,7 @@
         <record id="autorite_penalite_action" model="ir.actions.act_window">
             <field name="name">Autorité de pénalité</field>
             <field name="res_model">autorite.penalite</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">list,form</field>
         </record>
 
         <menuitem id="autorite_penalite_menu" name="Autorité de pénalité"

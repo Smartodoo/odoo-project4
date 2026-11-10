@@ -8,16 +8,21 @@
             <field name="exclusive" eval="True"/>
         </record>
 
+        <record id="privilege_custom_groups" model="res.groups.privilege">
+            <field name="name">Autres Groupes</field>
+            <field name="category_id" ref="custom_groups.custom_groups"/>
+        </record>
+
         <!-- Groupe Financière -->
         <record id="group_financiere" model="res.groups">
             <field name="name">Groupe Financière</field>
-            <field name="category_id" ref="custom_groups.custom_groups"/>
+            <field name="privilege_id" ref="privilege_custom_groups"/>
         </record>
 
         <!-- Groupe Technique -->
         <record id="group_technique" model="res.groups">
             <field name="name">Groupe Technique</field>
-            <field name="category_id" ref="custom_groups.custom_groups"/>
+            <field name="privilege_id" ref="privilege_custom_groups"/>
         </record>
 
     </data>

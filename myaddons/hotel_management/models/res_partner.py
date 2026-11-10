@@ -70,9 +70,9 @@ class ResPartner(models.Model):
         return super().write(vals)
 
     def _compute_hotel_reservation_count(self):
-        groups = self.env['hotel.reservation'].read_group(
-            [('partner_id', 'in', self.ids)], ['partner_id'], ['partner_id'])
-        mapping = {g['partner_id'][0]: g['partner_id_count'] for g in groups}
+        groups = self.env['hotel.reservation']._read_group(
+            [('partner_id', 'in', self.ids)], ['partner_id'], ['__count'])
+        mapping = {partner.id: count for partner, count in groups}
         for rec in self:
             rec.hotel_reservation_count = mapping.get(rec.id, 0)
 
@@ -82,7 +82,7 @@ class ResPartner(models.Model):
             'type': 'ir.actions.act_window',
             'name': "Réservations",
             'res_model': 'hotel.reservation',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('partner_id', '=', self.id)],
             'context': {'default_partner_id': self.id},
         }

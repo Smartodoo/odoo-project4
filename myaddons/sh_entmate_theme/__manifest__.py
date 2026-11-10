@@ -7,7 +7,7 @@
     "support": "support@softhealer.com",
     "license": "OPL-1",
     "category": "Themes/Backend",
-    "version": "0.0.3",
+    "version": "20.0.0.0.4",
     "summary": "Enterprise Backend Theme, Enterprise Theme, Backend Enterprise Theme, Flexible Enterprise Theme, Enter prise Theme Odoo",
     "description": """Do you want odoo enterpise look in your community version? Are You looking for modern, creative, clean, clear, materialise odoo enterpise look theme for your backend? So you are at the right place, We have made sure that this theme is highly clean, modern, fully customizable enterprise look theme. Cheers!""",
     "depends":
@@ -20,7 +20,7 @@
     [
         "data/theme_config_data.xml",
         "security/base_security.xml",
-        "security/ir.model.access.csv",
+        "security/ir.access.csv",
         "views/views.xml",
         "views/assets.xml",
         "views/login_layout.xml",
@@ -36,7 +36,15 @@
 
         'web.assets_backend': [
 
-            # header // 
+            # jQuery — Odoo 19 no longer ships jQuery in the backend bundle and
+            # Odoo 20 removed web/static/lib/jquery entirely, so a copy (taken from
+            # Odoo 19 core) is vendored here; the theme's legacy scripts rely on "$".
+            'sh_entmate_theme/static/lib/jquery/jquery.js',
+            # Odoo 20 removed FontAwesome; re-declare the font face for the theme's
+            # pseudo-element glyphs (content: '\\fxxx').
+            'sh_entmate_theme/static/lib/fontawesome/fontawesome_face.css',
+
+            # header //
             "sh_entmate_theme/static/src/scss/header/header.scss",
 
             # sidebar styles // 
@@ -117,7 +125,9 @@
             # # Odoo standard js
             # 'sh_entmate_theme/static/src/js/route_service.js',
             # 'sh_entmate_theme/static/src/js/action_service.js',
-            'sh_entmate_theme/static/src/js/dropdown.js',
+            # dropdown.js patched the pre-17 Dropdown API (state.open/changeStateAndNotify),
+            # fully rewritten in Odoo 19 — disabled during the 19 migration.
+            # 'sh_entmate_theme/static/src/js/dropdown.js',
 
             # # On refresh custom js
             "sh_entmate_theme/static/src/js/On_refresh.js",
@@ -173,7 +183,9 @@
             'sh_entmate_theme/static/src/scss/sticky/sticky_list_inside_form.scss',
             'sh_entmate_theme/static/src/scss/sticky/sticky_list.scss',
             'sh_entmate_theme/static/src/scss/sticky/sticky_pivot.scss',
-            'sh_entmate_theme/static/src/js/pivot_view_sticky/pivot_sticky_dropdown.js',
+            # pivot_sticky_dropdown.js patched the pre-17 Dropdown API and the removed
+            # PivotGroupByMenu component — disabled during the 19 migration.
+            # 'sh_entmate_theme/static/src/js/pivot_view_sticky/pivot_sticky_dropdown.js',
 
             # # Firebase  and bus Notification
             'https://www.gstatic.com/firebasejs/8.4.3/firebase-app.js',
@@ -223,6 +235,7 @@
         ],
 
         'web.assets_frontend': [
+            'sh_entmate_theme/static/lib/fontawesome/fontawesome_face.css',
             'sh_entmate_theme/static/src/scss/login_page_style.scss',
             'sh_entmate_theme/static/src/scss/font_family/fonts.scss',
         ],

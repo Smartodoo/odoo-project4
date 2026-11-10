@@ -19,12 +19,12 @@
     <!--        sequence="10"-->
     <!--        groups="base.group_user"/>-->
 
-    <!-- Tree View -->
+    <!-- List View -->
     <record id="view_cunsomation_stock_tree" model="ir.ui.view">
         <field name="name">cunsomation.stock.tree</field>
         <field name="model">cunsomation.stock</field>
         <field name="arch" type="xml">
-            <tree string="Consommations Stock" decoration-danger="quantity &lt;= 0">
+            <list string="Consommations Stock" decoration-danger="quantity &lt;= 0">
                 <field name="product_id" string="Produit"/>
                 <field name="project_id" string="Projet"/>
                 <field name="quantity" string="Quantité" widget="float"/>
@@ -32,7 +32,7 @@
                 <field name="user_id" string="Utilisateur" widget="many2one_avatar"/>
                 <field name="company_id" string="Société" groups="base.group_multi_company"/>
                 <field name="purchase_order_id" string="Bon de commande"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -51,12 +51,12 @@
                 <filter
                         name="today"
                         string="Aujourd'hui"
-                        domain="[('date_consumption', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+                        domain="[('date_consumption', '&gt;=', 'now')]"/>
 
                 <filter
                         name="this_week"
                         string="Cette semaine"
-                        domain="[('date_consumption', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')), ('date_consumption', '&lt;=', (context_today() + datetime.timedelta(days=7)).strftime('%Y-%m-%d 23:59:59'))]"/>
+                        domain="[('date_consumption', '&gt;=', 'now'), ('date_consumption', '&lt;=', '+7d')]"/>
 
                 <filter
                         name="my_consumptions"
@@ -65,7 +65,7 @@
 
                 <separator/>
 
-                <group expand="0" string="Group By">
+                <group>
                     <filter name="group_by_product" string="Produit" context="{'group_by': 'product_id'}"/>
                     <filter name="group_by_project" string="Projet" context="{'group_by': 'project_id'}"/>
                     <filter name="group_by_user" string="Utilisateur" context="{'group_by': 'user_id'}"/>
@@ -96,7 +96,7 @@
     <!--                    <div class="oe_button_box" name="button_box">-->
     <!--                        <button-->
     <!--                            class="oe_stat_button"-->
-    <!--                            icon="fa-external-link"-->
+    <!--                            icon="open_in_new"-->
     <!--                            type="action"-->
     <!--                            name="%(action_cunsomation_stock)d"-->
     <!--                            string="Voir toutes les consommations"/>-->
@@ -166,7 +166,7 @@
     <record id="action_cunsomation_stock" model="ir.actions.act_window">
         <field name="name">Consommations Stock</field>
         <field name="res_model">cunsomation.stock</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Aucune consommation enregistrée.

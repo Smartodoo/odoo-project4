@@ -1,0 +1,12 @@
+/* Odoo 20 dropped the FontAwesome 4.7 font from the web client (icons are now
+ * Material Symbols). This theme still draws many glyphs through
+ * `font-family: FontAwesome; content: '\fxxx'` pseudo-elements, so the font face
+ * (copied from Odoo 19 core, SIL OFL 1.1) is re-declared here. Only the
+ * @font-face is provided -- no .fa / .fa-* classes. */
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'), url('fonts/fontawesome-webfont.woff?v=4.7.0') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}

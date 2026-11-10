@@ -39,7 +39,7 @@
                             <div class="o_setting_left_pane">
                             </div>
                             <div class="o_setting_right_pane" style="margin-top: 10px;">
-                                <i class="fa fa-fw o_button_icon fa-arrow-right btn btn-link btn-group" string=" " >
+                                <i class="oi oi-fw o_button_icon btn btn-link btn-group" data-icon="arrow_forward" string=" " >
                                 </i><a href="/sh_entmate_theme/static/src/WebPushNotificationFirebaseSetup.pdf" target="_blank" style="margin-left: 5px;">How to setup firebase  click to download PDF file</a>
                             </div>
                         </div>

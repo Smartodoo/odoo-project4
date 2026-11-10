@@ -173,7 +173,7 @@ class CustomProjectCoulage(models.Model):
             'name': _('Suivi des Coulages'),
             'type': 'ir.actions.act_window',
             'res_model': 'suivi.coulage',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('project_id', '=', self.id)],
             'context': {
                 'default_project_id': self.id,

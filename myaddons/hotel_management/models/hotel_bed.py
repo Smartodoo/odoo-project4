@@ -30,12 +30,14 @@ class HotelBed(models.Model):
     current_guest_id = fields.Many2one(
         'res.partner', string="Client", compute='_compute_status')
 
-    _sql_constraints = [
-        ('name_room_uniq', 'unique(name, room_id)',
-         "Cette référence de lit existe déjà dans cette chambre."),
-        ('price_non_negative', 'CHECK(price >= 0)',
-         "Le prix d'un lit ne peut pas être négatif."),
-    ]
+    _name_room_uniq = models.Constraint(
+        'unique(name, room_id)',
+        "Cette r\u00e9f\u00e9rence de lit existe d\u00e9j\u00e0 dans cette chambre.",
+    )
+    _price_non_negative = models.Constraint(
+        'CHECK(price >= 0)',
+        "Le prix d'un lit ne peut pas \u00eatre n\u00e9gatif.",
+    )
 
     @api.model
     def default_get(self, fields_list):

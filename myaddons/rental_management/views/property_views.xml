@@ -3,7 +3,7 @@
     <record id="action_property_apartment" model="ir.actions.act_window">
         <field name="name">🏠 Appartements</field>
         <field name="res_model">property.apartment</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="context">{'search_default_group_by_state': 1}</field>
     </record>
 
@@ -30,20 +30,20 @@
                 <field name="avg_occupancy"/>
 
                 <templates>
-                    <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click p-0 mb-3 overflow-hidden"
+                    <t t-name="card">
+                        <div class="p-0 mb-3 overflow-hidden"
                              style="background: #ffffff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
 
                             <div class="position-relative" style="height: 180px; overflow: hidden;">
                                 <t t-if="record.image.raw_value">
-                                    <img t-att-src="kanban_image('property.apartment', 'image', record.id.raw_value)"
+                                    <img t-att-src="'/web/image/property.apartment/' + record.id.raw_value + '/image'"
                                          style="object-fit: cover; width: 100%; height: 100%;"
                                          alt="Appartement"/>
                                 </t>
                                 <t t-else="">
                                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                                                 height: 100%; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fa fa-building-o" style="font-size: 48px; color: white; opacity: 0.5;"
+                                        <i class="oi" data-icon="business" style="font-size: 48px; color: white; opacity: 0.5;"
                                            title="Image par défaut"/>
                                     </div>
                                 </t>
@@ -54,7 +54,7 @@
                                                             record.state.raw_value == 'soon' ? 'bg-warning' :
                                                             record.state.raw_value == 'maintenance' ? 'bg-info' : 'bg-secondary'}"
                                           style="font-size: 0.75rem; padding: 6px 12px; border-radius: 20px;">
-                                        <t t-esc="record.state.value"/>
+                                        <t t-out="record.state.value"/>
                                     </span>
                                 </div>
 
@@ -80,7 +80,7 @@
                                 </div>
 
                                 <div class="text-muted small mb-2">
-                                    <i class="fa fa-map-marker text-danger me-1" title="Emplacement"/>
+                                    <i class="oi text-danger me-1" data-icon="location_on" title="Emplacement"/>
                                     <span>Bloc<field name="block"/>, Étage
                                         <field name="floor"/>
                                     </span>
@@ -88,7 +88,7 @@
 
                                 <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
                                     <span>
-                                        <i class="fa fa-expand me-1" title="Surface m2"/>
+                                        <i class="oi me-1" data-icon="expand_content" title="Surface m2"/>
                                         <field name="surface"/>
                                         m²
                                     </span>
@@ -102,20 +102,20 @@
                                             background: #f8fafc; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
                                     <div class="text-center">
                                         <div style="font-weight: 700; color: #1e293b; font-size: 14px;">
-                                            <t t-esc="record.total_rentals.raw_value"/>
+                                            <t t-out="record.total_rentals.raw_value"/>
                                         </div>
                                         <div style="font-size: 10px; color: #94a3b8;">LOCS</div>
                                     </div>
                                     <div class="text-center"
                                          style="border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
                                         <div style="font-weight: 700; color: #1e293b; font-size: 14px;">
-                                            <t t-esc="record.total_revenue.value"/>
+                                            <t t-out="record.total_revenue.value"/>
                                         </div>
                                         <div style="font-size: 10px; color: #94a3b8;">REVENUS</div>
                                     </div>
                                     <div class="text-center">
                                         <div style="font-weight: 700; color: #1e293b; font-size: 14px;">
-                                            <t t-esc="record.avg_occupancy.raw_value"/>
+                                            <t t-out="record.avg_occupancy.raw_value"/>
                                         </div>
                                         <div style="font-size: 10px; color: #94a3b8;">JOURS</div>
                                     </div>
@@ -124,17 +124,17 @@
                                 <button t-if="record.state.raw_value == 'available'"
                                         class="btn btn-primary btn-sm w-100 rounded-pill" type="object"
                                         name="action_rent_now">
-                                    <i class="fa fa-calendar-check-o me-2" title="Réserver maintenant"/>Réserver
+                                    <i class="oi me-2" data-icon="event_available" title="Réserver maintenant"/>Réserver
                                 </button>
                                 <button t-if="record.state.raw_value == 'occupied'"
                                         class="btn btn-outline-danger btn-sm w-100 rounded-pill" type="object"
                                         name="action_view_history">
-                                    <i class="fa fa-eye me-2" title="Voir l'historique"/>Historique
+                                    <i class="oi me-2" data-icon="visibility" title="Voir l'historique"/>Historique
                                 </button>
                                 <button t-if="record.state.raw_value == 'maintenance'"
                                         class="btn btn-outline-info btn-sm w-100 rounded-pill" type="object"
                                         name="action_create_maintenance">
-                                    <i class="fa fa-wrench me-2" title="Maintenance"/>Maintenance
+                                    <i class="oi me-2" data-icon="build" title="Maintenance"/>Maintenance
                                 </button>
                             </div>
                         </div>
@@ -148,7 +148,7 @@
         <field name="name">property.apartment.tree</field>
         <field name="model">property.apartment</field>
         <field name="arch" type="xml">
-            <tree decoration-success="state == 'available'" decoration-danger="state == 'occupied'"
+            <list decoration-success="state == 'available'" decoration-danger="state == 'occupied'"
                   decoration-info="state == 'maintenance'">
                 <field name="name"/>
                 <field name="type"/>
@@ -159,7 +159,7 @@
                 <field name="state" widget="badge" decoration-success="state == 'available'"
                        decoration-danger="state == 'occupied'" decoration-info="state == 'maintenance'"/>
                 <field name="total_revenue" sum="Total"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -182,10 +182,10 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_history" type="object" class="oe_stat_button" icon="fa-history">
+                        <button name="action_view_history" type="object" class="oe_stat_button" icon="history">
                             <field name="total_rentals" widget="statinfo" string="Locations"/>
                         </button>
-                        <button name="action_view_revenue" type="object" class="oe_stat_button" icon="fa-money">
+                        <button name="action_view_revenue" type="object" class="oe_stat_button" icon="payments">
                             <field name="total_revenue" widget="statinfo" string="Revenus"/>
                         </button>
                     </div>
@@ -237,21 +237,17 @@
                         </page>
                         <page string="🔧 Maintenances">
                             <field name="maintenance_ids" readonly="1">
-                                <tree>
+                                <list>
                                     <field name="name"/>
                                     <field name="date_reported"/>
                                     <field name="priority"/>
                                     <field name="state" widget="badge"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -264,7 +260,7 @@
                 <field name="name"/>
                 <field name="type"/>
                 <filter string="Disponibles" name="available" domain="[('state', '=', 'available')]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter string="Statut" name="group_by_state" context="{'group_by': 'state'}"/>
                 </group>
             </search>

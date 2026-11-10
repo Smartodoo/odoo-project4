@@ -20,7 +20,7 @@
 	.o_breadcrumb_full > .breadcrumb {width: 100%!important;}
 	.o_search_options .o_dropdown .dropdown-toggle:first-child{ padding: .8rem 0.75rem;}
 	.o_view_controller .o_form_view .o_form_statusbar{margin-top:0px;}
-	.o_menu_apps .fa.fa-bars{padding-top: 16px;}
+	.o_menu_apps .oi[data-icon='menu']{padding-top: 16px;}
 	.o_form_view .o_group .o_group_col_6 {width: 100%;}
 	.o_mail_thread .a_right .o_thread_message_core .o_mail_info, .o_mail_activity .a_right .o_thread_message_core .o_mail_info{right: 5%!important;}
 	.o_form_view .oe_chatter {min-width: 100%;max-width: 100%;}
@@ -528,7 +528,7 @@
 		}
 		>div {
 			&:first-child {
-				span.fa {
+				span.oi {
 					height: 100%;
 					padding: 16px;
 				}
@@ -558,7 +558,7 @@
 				border-bottom: 1px solid #8f8f8f;
 				display: flex;
 				align-items: center;
-				.o_enable_searchview.fa-close {
+				.o_enable_searchview[data-icon='close'] {
 					font-size: 14px !important;
 					padding: .5rem 0.75rem;
 					margin-left: 0px;
@@ -591,7 +591,7 @@
 		color: #ffffff;
 		text-transform: uppercase;
 		font-weight: 500;
-		.fa.fa-ellipsis-v {
+		.oi[data-icon='more_vert'] {
 			display: none;
 		}
 		>span {
@@ -854,7 +854,7 @@
 	.o_mail_discuss_button_multi_user_channel {
 		color: #212529;
 	}
-	.o_switch_view_button_icon.fa {
+	.o_switch_view_button_icon.oi {
 		font-size: 17px !important;
 	}
 	.o_mail_discuss_mobile_mailboxes_buttons.o_hidden {
@@ -862,7 +862,7 @@
 	}
 	.o_mail_mobile_tabs {
 		.o_mail_mobile_tab {
-			span.fa {
+			span.oi {
 				font-size: 1.3rem !important;
 			}
 		}
@@ -981,7 +981,7 @@
 		}
 		.o_navbar_apps_menu {
 			.dropdown-toggle {
-				.fa.fa-th {
+				.oi[data-icon='grid_view'] {
 					font-size: 16px !important;
 				}
 			}
@@ -1546,7 +1546,7 @@
 			padding: 10px 0 !important;
 		}
 	}
-	.fa-calendar-o.fa-stack-2x {
+	[data-icon='calendar_today']:not(.oi-filled).oi-stack-2x {
 		font-size: 2em !important;
 	}
 	.o_mail_thread {
@@ -1753,7 +1753,7 @@
 			.o_searchview {
 				border-bottom: 1px solid #8f8f8f;
 				align-items: center;
-				.o_enable_searchview.fa-close {
+				.o_enable_searchview[data-icon='close'] {
 					font-size: 14px !important;
 					padding: .5rem 0.75rem;
 				}
@@ -1784,7 +1784,7 @@
 			}
 		}
 	}
-	.o_switch_view_button_icon.fa {
+	.o_switch_view_button_icon.oi {
 		font-size: 1.2em !important;
 		font-size: 16px !important;
 	}
@@ -1902,7 +1902,7 @@
 					justify-content: flex-start;
 					align-items: center;
 					border-bottom: 2px solid #dee2e6;
-					.btn.fa.fa-arrow-left {
+					.btn.oi[data-icon='arrow_back'] {
 						order: initial;
 						padding-left: 0;
 					}
@@ -1978,7 +1978,7 @@
 		}
 	}
 	.sh-mobile-toggle {
-		.fa.fa-th {
+		.oi[data-icon='grid_view'] {
 			font-size: 20px !important;
 		}
 	}
@@ -2048,23 +2048,23 @@
 		display: none !important;
 	}
 	.o_form_button_edit {
-		.fa.fa-pencil {
+		.oi[data-icon='edit'] {
 			display: none;
 		}
 	}
 	.o_form_button_save {
-		.fa.fa-check {
+		.oi[data-icon='check'] {
 			display: none;
 		}
 	}
 	.o-kanban-button-new {
-		.fa.fa-plus {
+		.oi[data-icon='add'] {
 			display: none;
 			color: #212121;
 		}
 	}
 	.o_list_button_add {
-		.fa.fa-plus {
+		.oi[data-icon='add'] {
 			display: none;
 		}
 	}
@@ -2199,7 +2199,7 @@
 			}
 		}
 		.o_dropdown_toggler_btn {
-			.fa {
+			.oi {
 				margin-right: 5px;
 			}
 		}
@@ -2453,7 +2453,7 @@
 						right: auto;
 					}
 					.dropdown-toggle.btn.btn-link {
-						.fa-bug {
+						[data-icon='bug_report'] {
 							color: #fff;
 						}
 					}
@@ -2543,7 +2543,7 @@
 	.o_ChatWindow {
 		.o_ChatWindow_header {
 			.o_ThreadIcon.o_ChatWindowHeader_icon {
-				.fa {
+				.oi {
 					color: #fff;
 				}
 			}
@@ -2616,7 +2616,7 @@
 				align-content: center;
 				background: #68465f;
 				color: white;
-				span.fa {
+				span.oi {
 					height: 100%;
 					padding: 16px;
 				}
@@ -2627,7 +2627,7 @@
 		.badge {
 			border: 1px solid $primaryColor;
 			border-radius: 20px !important;
-			i.fa {
+			i.oi {
 				font-size: 10px !important;
 			}
 		}
@@ -2649,7 +2649,7 @@
 		color: #ffffff;
 		text-transform: uppercase;
 		font-weight: 500;
-		.fa.fa-ellipsis-v {
+		.oi[data-icon='more_vert'] {
 			display: none;
 		}
 		>span {

@@ -6,7 +6,7 @@
         <field name="res_model">custom.project</field>
         <field name="domain">[('is_internal', '=', True),('company_id', '=', allowed_company_ids[0])]</field>
         <field name="context">{'default_is_internal': True}</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créer votre premier projet interne
@@ -22,7 +22,7 @@
         <field name="res_model">custom.project</field>
         <field name="domain">[('is_internal', '=', False),('company_id', '=', allowed_company_ids[0])]</field>
         <field name="context">{'default_is_internal': False}</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créer votre premier projet externe
@@ -44,7 +44,7 @@
             allowed_company_ids[0])]
         </field>
         <field name="context">{'default_contact_type': 'SUBCONTRACTOR','default_is_company': False}</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
     <record id="action_open_subcontractors_entreprises" model="ir.actions.act_window">
         <field name="name">Sous-traitants</field>
@@ -53,7 +53,7 @@
             allowed_company_ids[0])]
         </field>
         <field name="context">{'default_contact_type': 'SUBCONTRACTOR','default_is_company': True}</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
     <!-- Sous-traitants sub-menus (parent defined in menu_base.xml) -->
     <menuitem id="s_traitons_individuels" name="Sous-traitants Individuels" parent="sous_traitons" sequence="1"

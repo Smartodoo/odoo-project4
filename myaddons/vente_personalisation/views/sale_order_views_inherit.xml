@@ -36,7 +36,7 @@
                        position="before">
                     <field name="price_type"/>
                 </xpath>
-                <xpath expr="//field[@name='order_line']/tree//field[@name='price_unit']"
+                <xpath expr="//field[@name='order_line']/list//field[@name='price_unit']"
                        position="before">
                     <field name="price_type"/>
                 </xpath>
@@ -53,7 +53,7 @@
                     <button type="object" name="action_open_payments"
                             context="{'create': 0, 'edit': 0}"
                             class="oe_stat_button"
-                            icon="fa-credit-card">
+                            icon="credit_card">
                         <div class="o_stat_info">
                             <field name="payment_count" widget="statinfo" string="Paiements"/>
                         </div>

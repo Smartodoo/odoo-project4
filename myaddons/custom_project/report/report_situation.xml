@@ -175,7 +175,7 @@
                         <div class="report-page">
                             <!-- Header / Entête -->
                             <div class="report-header">
-                                <h2>SITUATION N° <t t-esc="o.get_subcontractor_situation_number()"/> </h2>
+                                <h2>SITUATION N° <t t-out="o.get_subcontractor_situation_number()"/> </h2>
                             </div>
 
                             <!-- Infos situation (gauche) et sous-traitant (droite) côte à côte
@@ -190,7 +190,7 @@
                                         <t t-if="o.name">
                                             <div style="margin-bottom: 4px;">
                                                 <strong>Nom Situation :</strong>
-                                                <span t-esc="o.name"/>
+                                                <span t-out="o.name"/>
                                             </div>
                                         </t>
                                         <t t-if="o.date">
@@ -202,7 +202,7 @@
                                         <t t-if="o.project_id and o.project_id.name">
                                             <div style="margin-bottom: 4px;">
                                                 <strong>Projet :</strong>
-                                                <span t-esc="o.project_id.name"/>
+                                                <span t-out="o.project_id.name"/>
                                             </div>
                                         </t>
                                         <t t-if="o.type_situation">
@@ -215,7 +215,7 @@
                                         <t t-if="o.lots_id">
                                             <div style="margin-bottom: 4px;">
                                                 <strong>Lot :</strong>
-                                                <span t-esc="', '.join(o.lots_id.mapped('name'))"/>
+                                                <span t-out="', '.join(o.lots_id.mapped('name'))"/>
                                             </div>
                                         </t>
                                     </td>
@@ -223,31 +223,31 @@
                                         <t t-if="sub and sub.name">
                                             <div style="margin-bottom: 4px;">
                                                 <strong>Sous-traitant :</strong>
-                                                <span t-esc="sub.name"/>
+                                                <span t-out="sub.name"/>
                                             </div>
                                         </t>
                                         <t t-if="addr_parts">
                                             <div style="margin-bottom: 4px;">
                                                 <strong>Adresse :</strong>
-                                                <span t-esc="', '.join(addr_parts)"/>
+                                                <span t-out="', '.join(addr_parts)"/>
                                             </div>
                                         </t>
                                         <t t-if="sub.phone">
                                             <div style="margin-bottom: 4px;">
                                                 <strong>Téléphone :</strong>
-                                                <span t-esc="sub.phone"/>
+                                                <span t-out="sub.phone"/>
                                             </div>
                                         </t>
                                         <t t-if="sub.email">
                                             <div style="margin-bottom: 4px;">
                                                 <strong>Email :</strong>
-                                                <span t-esc="sub.email"/>
+                                                <span t-out="sub.email"/>
                                             </div>
                                         </t>
                                         <t t-if="sub.vat">
                                             <div style="margin-bottom: 4px;">
                                                 <strong>NIF :</strong>
-                                                <span t-esc="sub.vat"/>
+                                                <span t-out="sub.vat"/>
                                             </div>
                                         </t>
                                     </td>
@@ -309,26 +309,26 @@
                                         </tr>
                                         <t t-foreach="primary_lines" t-as="line">
                                             <tr>
-                                                <td style="text-align: center;"><t t-esc="line.num"/></td>
-                                                <td><t t-esc="line.designation"/></td>
-                                                <td style="text-align: center;"><t t-esc="line.unit and line.unit.name or ''"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_marche"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_precedente"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_du_mois"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_cummulee"/></td>
-                                                <td><t t-esc="'%.2f' % line.prix_unitaire_convention"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_marche"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_precedent"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_mois"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_cummulee"/></td>
+                                                <td style="text-align: center;"><t t-out="line.num"/></td>
+                                                <td><t t-out="line.designation"/></td>
+                                                <td style="text-align: center;"><t t-out="line.unit and line.unit.name or ''"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_marche"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_precedente"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_du_mois"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_cummulee"/></td>
+                                                <td><t t-out="'%.2f' % line.prix_unitaire_convention"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_marche"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_precedent"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_mois"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_cummulee"/></td>
                                             </tr>
                                         </t>
                                         <tr class="subtotal-row">
                                             <td colspan="8" style="text-align: right; padding-right: 8px;">S/TOTAL (I)</td>
-                                            <td style="text-align: right;"><t t-esc="'%.2f' % sum(primary_lines.mapped('montant_marche'))"/></td>
-                                            <td style="text-align: right;"><t t-esc="'%.2f' % sum(primary_lines.mapped('montant_precedent'))"/></td>
-                                            <td style="text-align: right;"><t t-esc="'%.2f' % sum(primary_lines.mapped('montant_mois'))"/></td>
-                                            <td style="text-align: right;"><t t-esc="'%.2f' % sum(primary_lines.mapped('montant_cummulee'))"/></td>
+                                            <td style="text-align: right;"><t t-out="'%.2f' % sum(primary_lines.mapped('montant_marche'))"/></td>
+                                            <td style="text-align: right;"><t t-out="'%.2f' % sum(primary_lines.mapped('montant_precedent'))"/></td>
+                                            <td style="text-align: right;"><t t-out="'%.2f' % sum(primary_lines.mapped('montant_mois'))"/></td>
+                                            <td style="text-align: right;"><t t-out="'%.2f' % sum(primary_lines.mapped('montant_cummulee'))"/></td>
                                         </tr>
                                     </t>
 
@@ -340,26 +340,26 @@
                                         </tr>
                                         <t t-foreach="secondary_lines" t-as="line">
                                             <tr>
-                                                <td style="text-align: center;"><t t-esc="line.num"/></td>
-                                                <td><t t-esc="line.designation"/></td>
-                                                <td style="text-align: center;"><t t-esc="line.unit and line.unit.name or ''"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_marche"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_precedente"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_du_mois"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_cummulee"/></td>
-                                                <td><t t-esc="'%.2f' % line.prix_unitaire_convention"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_marche"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_precedent"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_mois"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_cummulee"/></td>
+                                                <td style="text-align: center;"><t t-out="line.num"/></td>
+                                                <td><t t-out="line.designation"/></td>
+                                                <td style="text-align: center;"><t t-out="line.unit and line.unit.name or ''"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_marche"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_precedente"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_du_mois"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_cummulee"/></td>
+                                                <td><t t-out="'%.2f' % line.prix_unitaire_convention"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_marche"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_precedent"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_mois"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_cummulee"/></td>
                                             </tr>
                                         </t>
                                         <tr class="subtotal-row">
                                             <td colspan="8" style="text-align: right; padding-right: 8px;">S/TOTAL (II)</td>
-                                            <td style="text-align: right;"><t t-esc="'%.2f' % sum(secondary_lines.mapped('montant_marche'))"/></td>
-                                            <td style="text-align: right;"><t t-esc="'%.2f' % sum(secondary_lines.mapped('montant_precedent'))"/></td>
-                                            <td style="text-align: right;"><t t-esc="'%.2f' % sum(secondary_lines.mapped('montant_mois'))"/></td>
-                                            <td style="text-align: right;"><t t-esc="'%.2f' % sum(secondary_lines.mapped('montant_cummulee'))"/></td>
+                                            <td style="text-align: right;"><t t-out="'%.2f' % sum(secondary_lines.mapped('montant_marche'))"/></td>
+                                            <td style="text-align: right;"><t t-out="'%.2f' % sum(secondary_lines.mapped('montant_precedent'))"/></td>
+                                            <td style="text-align: right;"><t t-out="'%.2f' % sum(secondary_lines.mapped('montant_mois'))"/></td>
+                                            <td style="text-align: right;"><t t-out="'%.2f' % sum(secondary_lines.mapped('montant_cummulee'))"/></td>
                                         </tr>
                                     </t>
 
@@ -367,18 +367,18 @@
                                     <t t-if="other_lines">
                                         <t t-foreach="other_lines" t-as="line">
                                             <tr>
-                                                <td style="text-align: center;"><t t-esc="line.num"/></td>
-                                                <td><t t-esc="line.designation"/></td>
-                                                <td style="text-align: center;"><t t-esc="line.unit and line.unit.name or ''"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_marche"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_precedente"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_du_mois"/></td>
-                                                <td><t t-esc="'%.2f' % line.qty_cummulee"/></td>
-                                                <td><t t-esc="'%.2f' % line.prix_unitaire_convention"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_marche"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_precedent"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_mois"/></td>
-                                                <td><t t-esc="'%.2f' % line.montant_cummulee"/></td>
+                                                <td style="text-align: center;"><t t-out="line.num"/></td>
+                                                <td><t t-out="line.designation"/></td>
+                                                <td style="text-align: center;"><t t-out="line.unit and line.unit.name or ''"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_marche"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_precedente"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_du_mois"/></td>
+                                                <td><t t-out="'%.2f' % line.qty_cummulee"/></td>
+                                                <td><t t-out="'%.2f' % line.prix_unitaire_convention"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_marche"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_precedent"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_mois"/></td>
+                                                <td><t t-out="'%.2f' % line.montant_cummulee"/></td>
                                             </tr>
                                         </t>
                                     </t>
@@ -393,28 +393,28 @@
                                     <!-- MONTANT TOTAL H.T -->
                                     <tr class="total-row">
                                         <td colspan="8" style="text-align: right; padding-right: 8px;">MONTANT TOTAL H.T</td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % ht_marche"/></td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % ht_prec"/></td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % ht_mois"/></td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % ht_cumul"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % ht_marche"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % ht_prec"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % ht_mois"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % ht_cumul"/></td>
                                     </tr>
 
                                     <!-- TVA -->
                                     <tr class="total-row">
-                                        <td colspan="8" style="text-align: right; padding-right: 8px;">TVA <t t-esc="'%.0f' % tax_percent"/>%</td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % (ht_marche * tax_rate)"/></td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % (ht_prec * tax_rate)"/></td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % (ht_mois * tax_rate)"/></td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % (ht_cumul * tax_rate)"/></td>
+                                        <td colspan="8" style="text-align: right; padding-right: 8px;">TVA <t t-out="'%.0f' % tax_percent"/>%</td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % (ht_marche * tax_rate)"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % (ht_prec * tax_rate)"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % (ht_mois * tax_rate)"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % (ht_cumul * tax_rate)"/></td>
                                     </tr>
 
                                     <!-- MONTANT TOTAL EN TTC -->
                                     <tr class="total-ttc-row">
                                         <td colspan="8" style="text-align: right; padding-right: 8px;">MONTANT TOTAL EN TTC</td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % (ht_marche * (1 + tax_rate))"/></td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % (ht_prec * (1 + tax_rate))"/></td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % (ht_mois * (1 + tax_rate))"/></td>
-                                        <td style="text-align: right;"><t t-esc="'%.2f' % (ht_cumul * (1 + tax_rate))"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % (ht_marche * (1 + tax_rate))"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % (ht_prec * (1 + tax_rate))"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % (ht_mois * (1 + tax_rate))"/></td>
+                                        <td style="text-align: right;"><t t-out="'%.2f' % (ht_cumul * (1 + tax_rate))"/></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -430,7 +430,7 @@
                                 <strong>Arrêtée la présente situation à la somme de :</strong>
                                 <br/>
                                 <span style="font-style: italic; font-size: 12px;">
-                                    <t t-esc="o.amount_to_words()"/>
+                                    <t t-out="o.amount_to_words()"/>
                                 </span>
                             </div>
 
@@ -439,7 +439,7 @@
                                 <div style="width: 45%; float: left; text-align: center;">
                                     <strong>Le Sous-traitant</strong>
                                     <br/>
-                                    <span t-esc="o.original_subcontractor_id.name"/>
+                                    <span t-out="o.original_subcontractor_id.name"/>
                                     <br/><br/><br/>
                                     <div style="border-top: 1px solid #333; width: 80%; margin: 0 auto; padding-top: 5px;">
                                         Signature et cachet
@@ -448,7 +448,7 @@
                                 <div style="width: 45%; float: right; text-align: center;">
                                     <strong>L'Entreprise</strong>
                                     <br/>
-                                    <span t-esc="o.company_id.name"/>
+                                    <span t-out="o.company_id.name"/>
                                     <br/><br/><br/>
                                     <div style="border-top: 1px solid #333; width: 80%; margin: 0 auto; padding-top: 5px;">
                                         Signature et cachet
@@ -470,7 +470,6 @@
         <field name="model">situation</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">custom_project.report_situation_document</field>
-        <field name="report_file">custom_project.report_situation_document</field>
         <field name="binding_type">report</field>
     </record>
 </odoo>

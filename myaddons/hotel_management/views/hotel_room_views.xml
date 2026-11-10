@@ -4,7 +4,7 @@
         <field name="name">hotel.room.tree</field>
         <field name="model">hotel.room</field>
         <field name="arch" type="xml">
-            <tree create="0">
+            <list create="0">
                 <field name="name"/>
                 <field name="room_type_id"/>
                 <field name="floor"/>
@@ -22,7 +22,7 @@
                        decoration-primary="status == 'cleaning'"
                        decoration-muted="status in ('maintenance', 'out_of_service')"/>
                 <field name="current_guest_ids" widget="many2many_tags" optional="show"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -42,11 +42,11 @@
                 <field name="bed_count"/>
                 <field name="beds_free_count"/>
                 <templates>
-                    <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_global_click o_hotel_room_card o_hotel_room_card_#{record.status.raw_value}">
+                    <t t-name="card">
+                        <div t-attf-class="o_hotel_room_card o_hotel_room_card_#{record.status.raw_value}">
                             <div class="o_hotel_room_top">
                                 <strong class="o_hotel_room_no">
-                                    <i class="fa fa-key me-1" title="Chambre"/><field name="name"/>
+                                    <i class="oi me-1" data-icon="key" title="Chambre"/><field name="name"/>
                                 </strong>
                                 <span t-attf-class="badge rounded-pill o_hotel_room_badge_#{record.status.raw_value}">
                                     <field name="status"/>
@@ -61,8 +61,8 @@
                             <field name="bed_map"/>
                             <div class="o_hotel_room_meta">
                                 <span t-if="record.bed_count.raw_value" class="o_hotel_room_free">
-                                    <b><t t-esc="record.beds_free_count.raw_value"/></b>
-                                    / <t t-esc="record.bed_count.raw_value"/> lits libres
+                                    <b><t t-out="record.beds_free_count.raw_value"/></b>
+                                    / <t t-out="record.bed_count.raw_value"/> lits libres
                                 </span>
                                 <span t-if="record.current_rental_amount.raw_value" class="o_hotel_room_price">
                                     <field name="current_rental_amount" widget="monetary"/>
@@ -70,7 +70,7 @@
                                 </span>
                             </div>
                             <div t-if="record.current_guest_ids.raw_value.length" class="small o_hotel_room_guest">
-                                <i class="fa fa-user me-1" title="Client"/><field name="current_guest_ids" widget="many2many_tags"/>
+                                <i class="oi oi-filled me-1" data-icon="person" title="Client"/><field name="current_guest_ids" widget="many2many_tags"/>
                             </div>
                         </div>
                     </t>
@@ -94,17 +94,17 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_reservations" type="object"
-                                class="oe_stat_button" icon="fa-calendar-check-o">
+                                class="oe_stat_button" icon="event_available">
                             <field name="reservation_count" widget="statinfo"
                                    string="Réservations"/>
                         </button>
                         <button name="action_view_housekeeping" type="object"
-                                class="oe_stat_button" icon="fa-magic">
+                                class="oe_stat_button" icon="wand_stars">
                             <field name="housekeeping_count" widget="statinfo"
                                    string="Ménage"/>
                         </button>
                         <button name="action_view_maintenance" type="object"
-                                class="oe_stat_button" icon="fa-wrench">
+                                class="oe_stat_button" icon="build">
                             <field name="maintenance_count" widget="statinfo"
                                    string="Travaux"/>
                         </button>
@@ -140,7 +140,7 @@
                         </group>
                     </group>
                     <div class="text-muted small mb-2" colspan="2">
-                        <i class="fa fa-info-circle me-1" title="Info"/>
+                        <i class="oi oi-filled me-1" data-icon="info" title="Info"/>
                         Le <b>statut actuel</b> combine ces états, par ordre de priorité :
                         <b>hors service / maintenance</b> (technique) &gt;
                         <b>occupation</b> (réservations en cours) &gt;
@@ -160,7 +160,7 @@
                     </div>
                     <div class="o_hotel_rental" name="rental">
                         <div class="o_hotel_rental_head">
-                            <span class="o_hotel_rental_icon"><i class="fa fa-tags" title="Tarifs"/></span>
+                            <span class="o_hotel_rental_icon"><i class="oi" data-icon="sell" title="Tarifs"/></span>
                             <div>
                                 <div class="o_hotel_rental_title">Location &amp; tarifs</div>
                                 <div class="o_hotel_rental_sub">
@@ -179,7 +179,7 @@
                             <!-- Réservation en cours (aujourd'hui) -->
                             <div class="o_hotel_kpi o_hotel_kpi_current">
                                 <div class="o_hotel_kpi_head">
-                                    <span class="o_hotel_kpi_icon"><i class="fa fa-calendar-check-o" title="Réservation"/></span>
+                                    <span class="o_hotel_kpi_icon"><i class="oi" data-icon="event_available" title="Réservation"/></span>
                                     <div class="o_hotel_kpi_titles">
                                         <div class="o_hotel_kpi_label">Réservation en cours</div>
                                         <div class="o_hotel_kpi_sub" invisible="not current_reservation_id">
@@ -193,16 +193,16 @@
                                 </div>
                                 <div class="o_hotel_kpi_foot" invisible="not current_reservation_id">
                                     <div class="o_hotel_kpi_row">
-                                        <i class="fa fa-user" title="Client"/>
+                                        <i class="oi oi-filled" data-icon="person" title="Client"/>
                                         <field name="current_guest_id" readonly="1" options="{'no_open': True}"/>
                                     </div>
                                     <div class="o_hotel_kpi_row">
-                                        <i class="fa fa-hashtag" title="Référence"/>
+                                        <i class="oi" data-icon="tag" title="Référence"/>
                                         <field name="current_reservation_id" readonly="1"/>
                                     </div>
                                 </div>
                                 <div class="o_hotel_kpi_empty" invisible="current_reservation_id">
-                                    <i class="fa fa-moon-o" title="Libre"/>
+                                    <i class="oi" data-icon="dark_mode" title="Libre"/>
                                     <span>Aucune réservation aujourd'hui</span>
                                 </div>
                             </div>
@@ -211,7 +211,7 @@
                             <div class="o_hotel_kpi o_hotel_kpi_total"
                                  invisible="not current_reservation_count">
                                 <div class="o_hotel_kpi_head">
-                                    <span class="o_hotel_kpi_icon"><i class="fa fa-money" title="Total"/></span>
+                                    <span class="o_hotel_kpi_icon"><i class="oi" data-icon="payments" title="Total"/></span>
                                     <div class="o_hotel_kpi_titles">
                                         <div class="o_hotel_kpi_label">Total en cours</div>
                                         <div class="o_hotel_kpi_sub">Confirmées et enregistrées</div>
@@ -221,7 +221,7 @@
                                             title="Voir les réservations en cours">
                                         <field name="current_reservation_count" readonly="1"/>
                                         <span>&#160;résa</span>
-                                        <i class="fa fa-angle-right ms-1" title="Voir"/>
+                                        <i class="oi ms-1" data-icon="keyboard_arrow_right" title="Voir"/>
                                     </button>
                                 </div>
                                 <div class="o_hotel_kpi_value">
@@ -232,11 +232,11 @@
                                 </div>
                                 <div class="o_hotel_kpi_split">
                                     <div class="o_hotel_kpi_stat o_hotel_kpi_stat_paid">
-                                        <span class="o_hotel_kpi_stat_label"><i class="fa fa-check-circle" title="Encaissé"/> Encaissé</span>
+                                        <span class="o_hotel_kpi_stat_label"><i class="oi oi-filled" data-icon="check_circle" title="Encaissé"/> Encaissé</span>
                                         <field name="current_reservation_paid" widget="monetary" readonly="1"/>
                                     </div>
                                     <div class="o_hotel_kpi_stat o_hotel_kpi_stat_due">
-                                        <span class="o_hotel_kpi_stat_label"><i class="fa fa-clock-o" title="Reste"/> Reste à encaisser</span>
+                                        <span class="o_hotel_kpi_stat_label"><i class="oi" data-icon="schedule" title="Reste"/> Reste à encaisser</span>
                                         <field name="current_reservation_due" widget="monetary" readonly="1"/>
                                     </div>
                                 </div>
@@ -245,7 +245,7 @@
                             <!-- Tarifs de base -->
                             <div class="o_hotel_kpi o_hotel_kpi_room">
                                 <div class="o_hotel_kpi_head">
-                                    <span class="o_hotel_kpi_icon"><i class="fa fa-home" title="Chambre"/></span>
+                                    <span class="o_hotel_kpi_icon"><i class="oi" data-icon="home" title="Chambre"/></span>
                                     <div class="o_hotel_kpi_titles">
                                         <div class="o_hotel_kpi_label">Chambre entière</div>
                                         <div class="o_hotel_kpi_sub">Tarif de base</div>
@@ -259,7 +259,7 @@
 
                             <div class="o_hotel_kpi o_hotel_kpi_bed" invisible="not bed_count">
                                 <div class="o_hotel_kpi_head">
-                                    <span class="o_hotel_kpi_icon"><i class="fa fa-bed" title="Lit"/></span>
+                                    <span class="o_hotel_kpi_icon"><i class="oi" data-icon="bed" title="Lit"/></span>
                                     <div class="o_hotel_kpi_titles">
                                         <div class="o_hotel_kpi_label">Au lit</div>
                                         <div class="o_hotel_kpi_sub">Tarif de base</div>
@@ -279,7 +279,7 @@
                                     Lits : <field name="bed_summary" class="oe_inline"/>
                                 </span>
                                 <button name="action_manage_beds" type="object"
-                                        string="Gérer les lits" icon="fa-bed"
+                                        string="Gérer les lits" icon="bed"
                                         class="btn-secondary"
                                         groups="hotel_management.group_hotel_manager"/>
                             </div>
@@ -288,7 +288,7 @@
                                 et les boutons Entrer / Sortir.
                             </div>
                             <field name="bed_ids" readonly="1">
-                                <tree create="0" delete="0">
+                                <list create="0" delete="0">
                                     <field name="name" string="Référence"/>
                                     <field name="price" widget="monetary"/>
                                     <field name="currency_id" column_invisible="1"/>
@@ -298,7 +298,7 @@
                                            decoration-danger="status == 'occupied'"
                                            decoration-muted="status in ('maintenance', 'out_of_service')"/>
                                     <field name="current_guest_id"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                         <page string="Équipements" name="amenities">
@@ -325,10 +325,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -350,7 +347,7 @@
                 <filter name="out_of_service" string="Hors service" domain="[('technical_state', '=', 'out_of_service')]"/>
                 <separator/>
                 <filter name="archived" string="Archivées" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="group_type" string="Type" context="{'group_by': 'room_type_id'}"/>
                     <filter name="group_mode" string="Mode (défaut)" context="{'group_by': 'rental_mode'}"/>
                     <filter name="group_floor" string="Étage" context="{'group_by': 'floor'}"/>
@@ -366,7 +363,7 @@
     <record id="action_hotel_room" model="ir.actions.act_window">
         <field name="name">Chambres</field>
         <field name="res_model">hotel.room</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="view_hotel_room_search"/>
     </record>
 
@@ -376,14 +373,14 @@
         <field name="model">hotel.room</field>
         <field name="priority">95</field>
         <field name="arch" type="xml">
-            <tree string="Chambres">
+            <list string="Chambres">
                 <field name="name"/>
                 <field name="room_type_id"/>
                 <field name="floor"/>
                 <field name="capacity"/>
                 <field name="rental_mode"/>
                 <field name="bed_summary" string="Lits créés"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -402,11 +399,11 @@
                     <notebook>
                         <page string="Lits" name="beds">
                             <field name="bed_ids" context="{'default_room_id': id}">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="name" string="Référence"/>
                                     <field name="active" string="Actif"
                                            widget="boolean_toggle"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                         <page string="Équipements" name="amenities">
@@ -433,10 +430,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -444,10 +438,10 @@
     <record id="action_hotel_room_config" model="ir.actions.act_window">
         <field name="name">Chambres</field>
         <field name="res_model">hotel.room</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_hotel_room_search"/>
         <field name="view_ids" eval="[(5, 0, 0),
-            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_hotel_room_config_tree')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_hotel_room_config_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_hotel_room_config_form')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Créez votre première chambre</p>

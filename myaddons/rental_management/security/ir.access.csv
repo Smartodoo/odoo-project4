@@ -1,0 +1,12 @@
+id,name,model_id,group_id/id,operation,domain
+access_property_apartment_user,property.apartment.user,property.apartment,base.group_user,crud,
+access_property_apartment_portal,property.apartment.portal,property.apartment,base.group_portal,r,
+access_property_rental_user,property.rental.user,property.rental,base.group_user,crud,
+rule_rental_portal,Location: Locataire ne voit que ses contrats,property.rental,base.group_portal,r,"[('client_id', '=', user.partner_id.id)]"
+access_property_seasonal_rate_user,property.seasonal.rate.user,property.seasonal.rate,base.group_user,crud,
+access_property_inspection_user,property.inspection.user,property.inspection,base.group_user,crud,
+access_rental_payment_user,rental.payment.user,rental.payment,base.group_user,crud,
+rule_payment_portal,Paiement: Locataire ne voit que ses paiements,rental.payment,base.group_portal,r,"[('client_id', '=', user.partner_id.id)]"
+access_rental_service_user,rental.service.user,rental.service,base.group_user,crud,
+access_property_maintenance_user,property.maintenance.user,property.maintenance,base.group_user,crud,
+access_rental_dashboard_user,rental.dashboard.user,rental.dashboard,base.group_user,cru,

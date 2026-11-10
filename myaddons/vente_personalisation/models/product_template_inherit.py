@@ -39,7 +39,7 @@ class ProductTemplate(models.Model):
     @api.model
     def create(self, vals):
         product = super(ProductTemplate, self).create(vals)
-        product.detailed_type = 'product'
+        product.write({'type': 'consu', 'is_storable': True})  # Odoo 18+: 'product' -> consu + is_storable
         product.set_default_buy_route()
         for route in product.route_ids:
             print(f"Route ID: {route.id}, Route Name: {route.name}")

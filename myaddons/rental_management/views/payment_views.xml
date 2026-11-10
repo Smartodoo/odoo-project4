@@ -3,14 +3,14 @@
     <record id="action_payment" model="ir.actions.act_window">
         <field name="name">💳 Paiements</field>
         <field name="res_model">rental.payment</field>
-        <field name="view_mode">tree,form,pivot,graph</field>
+        <field name="view_mode">list,form,pivot,graph</field>
     </record>
 
     <record id="view_payment_tree" model="ir.ui.view">
         <field name="name">rental.payment.tree</field>
         <field name="model">rental.payment</field>
         <field name="arch" type="xml">
-            <tree decoration-success="state == 'confirmed'"
+            <list decoration-success="state == 'confirmed'"
                   decoration-muted="state == 'cancelled'"
                   decoration-info="payment_type == 'deposit'"
                   decoration-warning="payment_type == 'penalty'">
@@ -24,8 +24,8 @@
                 <field name="state" widget="badge"/>
 
                 <button name="action_confirm" string="Confirmer" type="object"
-                        icon="fa-check" invisible="state != 'draft'"/>
-            </tree>
+                        icon="check" invisible="state != 'draft'"/>
+            </list>
         </field>
     </record>
 

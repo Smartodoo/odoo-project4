@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
-                <button class="oe_stat_button" name="action_preview_po" type="object" icon="fa-eye">
+                <button class="oe_stat_button" name="action_preview_po" type="object" icon="visibility">
                         <span class="o_stat_text">Preview RFQ/ Purchase Order</span>
                 </button>
             </xpath>

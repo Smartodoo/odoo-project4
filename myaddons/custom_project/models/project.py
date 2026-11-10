@@ -166,7 +166,7 @@ class CustomProject(models.Model):
             'name': _('Observations'),
             'type': 'ir.actions.act_window',
             'res_model': 'custom.project.observation',
-            'view_mode': 'tree,kanban,form',
+            'view_mode': 'list,kanban,form',
             'domain': [('project_id', '=', self.id)],
             'context': {
                 'default_project_id': self.id,
@@ -205,7 +205,7 @@ class CustomProject(models.Model):
             'type': 'ir.actions.act_window',
             'name': f'Consommations - {self.name}',
             'res_model': 'cunsomation.stock',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('project_id', '=', self.id)],
             'context': {
                 'default_project_id': self.id,
@@ -392,19 +392,10 @@ class CustomProject(models.Model):
                 return uom
 
             # Create new UOM if not found
-            uom_category = self.env['uom.category'].search([], limit=1)
-            if not uom_category:
-                uom_category = self.env['uom.category'].create({
-                    'name': 'Unités de mesure'
-                })
-
+            # Odoo 19+ : plus de uom.category ; unité autonome (sans unité de référence)
             uom = self.env['uom.uom'].create({
                 'name': search_name,
-                'category_id': uom_category.id,
-                'uom_type': 'reference',
-                'factor': 1.0,
-                'rounding': 0.001,
-                'company_id': self.env.company.id,
+                'relative_factor': 1.0,
             })
 
             _logger.info("✅ Created new UOM: %s", search_name)
@@ -1868,7 +1859,7 @@ class CustomProject(models.Model):
             'name': _('Situations'),
             'type': 'ir.actions.act_window',
             'res_model': 'situation',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('project_id', '=', self.id)],
             'context': {'default_project_id': self.id},
             'target': 'current',

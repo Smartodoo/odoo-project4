@@ -1,4 +1,5 @@
 /* @odoo-module */
+import { user } from "@web/core/user";
 
 import { Component, useState, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
@@ -22,7 +23,7 @@ export class NightMode extends Component {
 
         const data = await this.orm.searchRead(
             "res.users",
-            [['id', '=', session.uid]],
+            [['id', '=', user.userId]],
             ["sh_enable_night_mode"]
             );
             if (data) {

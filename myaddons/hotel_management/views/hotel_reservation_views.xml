@@ -32,7 +32,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_invoices" type="object"
-                                class="oe_stat_button" icon="fa-file-text-o"
+                                class="oe_stat_button" icon="article"
                                 invisible="invoice_count == 0">
                             <field name="invoice_count" widget="statinfo"
                                    string="Factures"/>
@@ -74,7 +74,7 @@
                     </group>
                     <div class="alert alert-warning d-flex align-items-center mb-3" role="alert"
                          invisible="not line_ids or guest_count &lt;= places">
-                        <i class="fa fa-exclamation-triangle me-2" title="Attention"/>
+                        <i class="oi me-2" data-icon="warning" title="Attention"/>
                         <span>
                             <field name="guest_count" class="oe_inline fw-bold"/> personne(s) pour
                             <field name="places" class="oe_inline fw-bold"/> place(s) réservée(s) :
@@ -84,7 +84,7 @@
                     <notebook>
                         <page string="Chambres" name="rooms">
                             <field name="line_ids">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="room_id"/>
                                     <field name="booking_type" column_invisible="1"/>
                                     <field name="available_bed_ids" column_invisible="1"/>
@@ -98,7 +98,7 @@
                                     <field name="price_unit" widget="monetary"/>
                                     <field name="price_subtotal" widget="monetary" readonly="1"/>
                                     <field name="currency_id" column_invisible="1"/>
-                                </tree>
+                                </list>
                             </field>
                             <group class="oe_subtotal_footer">
                                 <field name="room_count"/>
@@ -115,11 +115,7 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -128,7 +124,7 @@
         <field name="name">hotel.reservation.tree</field>
         <field name="model">hotel.reservation</field>
         <field name="arch" type="xml">
-            <tree decoration-info="state == 'confirmed'"
+            <list decoration-info="state == 'confirmed'"
                   decoration-success="state == 'checkin'"
                   decoration-muted="state in ('checkout', 'cancel')">
                 <field name="name"/>
@@ -149,12 +145,12 @@
                        decoration-success="state == 'checkin'"
                        decoration-muted="state in ('checkout', 'cancel')"/>
                 <button name="action_confirm" type="object" string="Confirmer"
-                        icon="fa-check" invisible="state != 'draft'"/>
+                        icon="check" invisible="state != 'draft'"/>
                 <button name="action_checkin" type="object" string="Entrer"
-                        icon="fa-sign-in" invisible="state != 'confirmed'"/>
+                        icon="login" invisible="state != 'confirmed'"/>
                 <button name="action_checkout" type="object" string="Sortir"
-                        icon="fa-sign-out" invisible="state != 'checkin'"/>
-            </tree>
+                        icon="logout" invisible="state != 'checkin'"/>
+            </list>
         </field>
     </record>
 
@@ -184,10 +180,10 @@
                 <filter name="checkin" string="En séjour" domain="[('state', '=', 'checkin')]"/>
                 <separator/>
                 <filter name="arrivals_today" string="Arrivées du jour"
-                        domain="[('checkin', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                        domain="[('checkin', '=', 'today')]"/>
                 <filter name="departures_today" string="Départs du jour"
-                        domain="[('checkout', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <group expand="0" string="Regrouper par">
+                        domain="[('checkout', '=', 'today')]"/>
+                <group>
                     <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
                     <filter name="group_partner" string="Client" context="{'group_by': 'partner_id'}"/>
                     <filter name="group_checkin" string="Arrivée" context="{'group_by': 'checkin'}"/>
@@ -199,7 +195,7 @@
     <record id="action_hotel_reservation" model="ir.actions.act_window">
         <field name="name">Réservations</field>
         <field name="res_model">hotel.reservation</field>
-        <field name="view_mode">tree,form,calendar</field>
+        <field name="view_mode">list,form,calendar</field>
         <field name="search_view_id" ref="view_hotel_reservation_search"/>
     </record>
 </odoo>

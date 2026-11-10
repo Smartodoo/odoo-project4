@@ -3,12 +3,12 @@
 
     <!-- ============== DECOMPTE BET (Parent) ============== -->
 
-    <!-- Tree View -->
+    <!-- List View -->
     <record id="view_decompte_bet_tree" model="ir.ui.view">
         <field name="name">decompte.bet.tree</field>
         <field name="model">decompte.bet</field>
         <field name="arch" type="xml">
-            <tree string="Décomptes BET">
+            <list string="Décomptes BET">
                 <field name="name"/>
                 <field name="numero_decompte"/>
                 <field name="date_decompte"/>
@@ -18,7 +18,7 @@
                 <field name="line_count"/>
                 <field name="montant_total_cumule" sum="Total"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'validated'" decoration-success="state == 'paid'"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -64,7 +64,7 @@
                     <notebook>
                         <page string="Lignes du Décompte" name="lines">
                             <field name="line_ids">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="sequence" string="N°" widget="handle"/>
                                     <field name="name" width="300"/>
                                     <field name="date"/>
@@ -75,7 +75,7 @@
                                     <field name="montant_precedent" sum="Total Préc."/>
                                     <field name="montant_mois" sum="Total Mois"/>
                                     <field name="montant_cumule" sum="Total Cumul"/>
-                                </tree>
+                                </list>
                             </field>
                             <group class="oe_subtotal_footer">
                                 <div class="oe_subtotal_footer_separator">
@@ -104,11 +104,7 @@
                     <field name="company_id" invisible="1"/>
                     <field name="currency_id" invisible="1"/>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -128,7 +124,7 @@
                 <filter string="Validé" name="validated" domain="[('state', '=', 'validated')]"/>
                 <filter string="Payé" name="paid" domain="[('state', '=', 'paid')]"/>
                 <separator/>
-                <group expand="0" string="Grouper par">
+                <group>
                     <filter string="Projet" name="group_project" context="{'group_by': 'project_id'}"/>
                     <filter string="BET" name="group_bet" context="{'group_by': 'bet_name'}"/>
                     <filter string="État" name="group_state" context="{'group_by': 'state'}"/>
@@ -140,12 +136,12 @@
 
     <!-- ============== DECOMPTE BET LINE ============== -->
 
-    <!-- Tree View for Lines (standalone) -->
+    <!-- List View for Lines (standalone) -->
     <record id="view_decompte_bet_line_tree" model="ir.ui.view">
         <field name="name">decompte.bet.line.tree</field>
         <field name="model">decompte.bet.line</field>
         <field name="arch" type="xml">
-            <tree string="Lignes de Décompte" default_order="sequence">
+            <list string="Lignes de Décompte" default_order="sequence">
                 <field name="sequence" string="N°"/>
                 <field name="decompte_id"/>
                 <field name="project_id"/>
@@ -158,7 +154,7 @@
                 <field name="montant_precedent" sum="Total"/>
                 <field name="montant_mois" sum="Total"/>
                 <field name="montant_cumule" sum="Total"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -208,7 +204,7 @@
     <record id="action_decompte_bet" model="ir.actions.act_window">
         <field name="name">Décomptes BET</field>
         <field name="res_model">decompte.bet</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Créer un nouveau décompte BET
@@ -223,7 +219,7 @@
     <record id="action_decompte_bet_line" model="ir.actions.act_window">
         <field name="name">Toutes les Lignes de Décompte</field>
         <field name="res_model">decompte.bet.line</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Aucune ligne de décompte
@@ -243,7 +239,7 @@
         <field name="arch" type="xml">
             <!-- Add stat button for decomptes -->
             <xpath expr="//div[@name='button_box']" position="inside">
-                <button name="action_view_decomptes" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                <button name="action_view_decomptes" type="object" class="oe_stat_button" icon="article">
                     <div class="o_stat_info">
                         <field name="decompte_count" widget="statinfo" string="Décomptes"/>
                     </div>

@@ -47,7 +47,7 @@ class Annoucement(models.Model):
                     CODE_SOUND_SUCCESS = "" 
                     for user in self.user_ids:
                         notifications.append((
-                            user.partner_id,'simple_notification',
+                            user,'simple_notification',
                             {'title': _('Notitification'), 'message': CODE_SOUND_SUCCESS + str(self.description_text)}  # sorted to make deterministic for tests
                         ))
                         
@@ -55,8 +55,10 @@ class Annoucement(models.Model):
                     CODE_SOUND_FAIL = "" 
                     for user in self.user_ids:
                         notifications.append((
-                            user.partner_id,'simple_notification',
+                            user,'simple_notification',
                             {'title': _('Notitification'), 'message': CODE_SOUND_FAIL + str(self.description_text)}  # sorted to make deterministic for tests
                         ))
                 
-        self.env['bus.bus']._sendmany(notifications)
+        # Odoo 20: bus.bus._sendmany removed; send per user via bus.listener.mixin
+        for target, ntype, payload in notifications:
+            target._bus_send(ntype, payload)

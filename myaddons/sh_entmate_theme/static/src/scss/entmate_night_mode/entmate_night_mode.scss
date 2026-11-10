@@ -973,7 +973,7 @@ body {
     //     background-size: cover;
     // }
 
-    .fa-star-o {
+    [data-icon='star']:not(.oi-filled) {
       color: $sh_night_mode_text_color !important;
     }
 
@@ -983,7 +983,7 @@ body {
       .sh_entmate_theme_appmenu_div {
         .dropdown-toggle {
           #app_toggle {
-            .fa-th {
+            [data-icon='grid_view'] {
               color: white;
             }
           }
@@ -3110,7 +3110,7 @@ body {
                       .oe_kanban_bottom_left {
                         .o_field_widget {
                           .o_priority {
-                            .fa-star-o {
+                            [data-icon='star']:not(.oi-filled) {
                               color: rgba(209, 209, 209, 0.76) !important;
                             }
                           }
@@ -3184,7 +3184,7 @@ body {
                         .o_row {
                           .o_field_widget {
                             .o_priority {
-                              .fa-star-o {
+                              [data-icon='star']:not(.oi-filled) {
                                 color: $sh_night_mode_text_color !important;
                               }
                             }
@@ -3553,7 +3553,7 @@ body {
                 .o_kanban_record_top {
                   .o_field_widget {
                     .o_priority {
-                      .fa-star-o {
+                      [data-icon='star']:not(.oi-filled) {
                         color: $sh_night_mode_text_color;
                       }
                     }
@@ -3658,7 +3658,7 @@ body {
                       .o_kanban_inline_block {
                         color: $sh_night_mode_text_color !important;
 
-                        .fa {
+                        .oi {
                           color: $sh_night_mode_text_color;
                         }
                       }
@@ -3830,11 +3830,11 @@ body {
                   .o_field_widget {
                     .o_priority {
                       a {
-                        &.fa-star-o {
+                        &[data-icon='star']:not(.oi-filled) {
                           color: $sh_night_mode_text_color;
                         }
 
-                        &.fa-star {
+                        &[data-icon='star'].oi-filled {
                           color: #f3cc00 !important;
                         }
                       }
@@ -4190,7 +4190,7 @@ body {
                       }
                     }
 
-                    .fa {
+                    .oi {
                       color: $sh_night_mode_text_color;
                     }
 
@@ -5610,7 +5610,7 @@ body {
                     span {
                       color: $sh_night_mode_text_color;
 
-                      .fa-plus {
+                      [data-icon='add'] {
                         color: $extra_color_night_mode;
 
                         + span {
@@ -6750,7 +6750,7 @@ body {
                           .o_lead_opportunity_form_inline_fields {
                             .o_field_widget {
                               .o_priority {
-                                .fa-star-o {
+                                [data-icon='star']:not(.oi-filled) {
                                   color: $sh_night_mode_text_color;
                                 }
                               }
@@ -7032,7 +7032,7 @@ body {
                                       border-color: $sh_night_mode_border_color !important;
                                       background: $sh_night_mode_primary_color !important;
 
-                                      .fa-trash-o {
+                                      [data-icon='delete']:not(.oi-filled) {
                                         color: $sh_night_mode_text_color !important;
                                       }
 
@@ -8493,7 +8493,7 @@ body {
               .btn {
                 color: $sh_night_mode_text_color !important;
 
-                .fa-stack{
+                .oi-stack{
                   display: flex;
                   justify-content: center;
                   align-items: center;
@@ -8699,7 +8699,7 @@ body {
                                               background: $sh_night_mode_hover_or_focus_color;
                                             }
 
-                                            .fa {
+                                            .oi {
                                               color: $sh_night_mode_text_color;
                                             }
 
@@ -9388,7 +9388,7 @@ body {
                                       div {
                                         color: $sh_night_mode_text_color;
 
-                                        .fa {
+                                        .oi {
                                           color: $sh_night_mode_text_color;
                                         }
 
@@ -10005,7 +10005,7 @@ body {
                                   .oe_kanban_bottom_left {
                                     .o_field_widget {
                                       .o_priority {
-                                        .fa-star-o {
+                                        [data-icon='star']:not(.oi-filled) {
                                           color: rgba(
                                             209,
                                             209,
@@ -10084,7 +10084,7 @@ body {
                                     .o_row {
                                       .o_field_widget {
                                         .o_priority {
-                                          .fa-star-o {
+                                          [data-icon='star']:not(.oi-filled) {
                                             color: $sh_night_mode_text_color !important;
                                           }
                                         }
@@ -10350,7 +10350,7 @@ body {
                             .o_kanban_record_top {
                               .o_field_widget {
                                 .o_priority {
-                                  .fa-star-o {
+                                  [data-icon='star']:not(.oi-filled) {
                                     color: $sh_night_mode_text_color;
                                   }
                                 }
@@ -10461,11 +10461,11 @@ body {
                               .o_field_widget {
                                 .o_priority {
                                   a {
-                                    &.fa-star-o {
+                                    &[data-icon='star']:not(.oi-filled) {
                                       color: $sh_night_mode_text_color;
                                     }
 
-                                    &.fa-star {
+                                    &[data-icon='star'].oi-filled {
                                       color: #f3cc00 !important;
                                     }
                                   }

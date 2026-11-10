@@ -46,11 +46,11 @@
         <field name="name">Paiement.Situation.view.tree</field>
         <field name="model">paiement.situation</field>
         <field name="arch" type="xml">
-            <tree string="Paiement Situation">
+            <list string="Paiement Situation">
                 <field name="reference"/>
                 <field name="payment_date"/>
                 <field name="amount_paid"/>
-            </tree>
+            </list>
         </field>
     </record>
 </odoo>

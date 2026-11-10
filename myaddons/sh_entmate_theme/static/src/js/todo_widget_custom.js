@@ -1,6 +1,7 @@
 /** @odoo-module **/
+import { user } from "@web/core/user";
 import { Component, useState, xml } from "@odoo/owl";
-import { jsonrpc } from "@web/core/network/rpc_service";
+import { rpc } from "@web/core/network/rpc";
 import { session } from "@web/session";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -169,7 +170,7 @@ export class ToDoWidget extends Component {
 	   async getAllTodo() {
 		    const data = await this.orm.searchRead(
             "sh.todo",
-            [['user_id', '=', session.uid]],
+            [['user_id', '=', user.userId]],
             ['name','is_done']
             );
             return data

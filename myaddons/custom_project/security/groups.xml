@@ -8,31 +8,36 @@
             <field name="sequence">15</field>
         </record>
 
+        <record id="privilege_group_projet_category" model="res.groups.privilege">
+            <field name="name">Projets Sous-traitants</field>
+            <field name="category_id" ref="custom_project.group_projet_category"/>
+        </record>
+
         <!-- Lecture Seule Versements Sous-traitants Group -->
         <record id="group_versement_st_lecture_seule" model="res.groups">
             <field name="name">Versements Sous-traitants - Lecture Seule</field>
-            <field name="category_id" ref="custom_project.group_projet_category"/>
+            <field name="privilege_id" ref="privilege_group_projet_category"/>
             <field name="comment">Accès en lecture seule sur les versements sous-traitants.</field>
         </record>
 
         <!-- Lecture Seule Situations Group -->
         <record id="group_situation_lecture_seule" model="res.groups">
             <field name="name">Situations - Lecture Seule</field>
-            <field name="category_id" ref="custom_project.group_projet_category"/>
+            <field name="privilege_id" ref="privilege_group_projet_category"/>
             <field name="comment">Accès en lecture seule sur les situations.</field>
         </record>
 
         <!-- Group for Initial Project Information Only -->
         <record id="group_project_initial_info" model="res.groups">
             <field name="name">Projets - Informations Initiales</field>
-            <field name="category_id" ref="custom_project.group_projet_category"/>
+            <field name="privilege_id" ref="privilege_group_projet_category"/>
             <field name="comment">Accès limité pour remplir uniquement les informations initiales du projet (nom et contractant).</field>
         </record>
 
         <!-- Group for Read-Only Access to Projects -->
         <record id="group_project_readonly" model="res.groups">
             <field name="name">Projets - Lecture Seule</field>
-            <field name="category_id" ref="custom_project.group_projet_category"/>
+            <field name="privilege_id" ref="privilege_group_projet_category"/>
             <field name="comment">Accès en lecture seule sur les projets (sans modification, création ou suppression).</field>
         </record>
     </data>

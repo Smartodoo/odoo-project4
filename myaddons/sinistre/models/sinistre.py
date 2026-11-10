@@ -203,7 +203,7 @@ class FleetVehicleLogContractInherit(models.Model):
             'type': 'ir.actions.act_window',
             'name': 'Charges',
             'res_model': 'amande.penalite',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('contract_id', '=', self.id)],
             'context': {'default_contract_id': self.id},
         }

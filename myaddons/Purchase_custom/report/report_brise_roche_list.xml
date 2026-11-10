@@ -7,7 +7,6 @@
             <field name="model">situation.brise.roche</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">Purchase_custom.report_brise_roche_list_document</field>
-            <field name="report_file">Purchase_custom.report_brise_roche_list_document</field>
             <field name="binding_model_id" ref="model_situation_brise_roche"/>
             <field name="binding_type">report</field>
             <field name="binding_view_types">list</field>
@@ -38,26 +37,26 @@
                         <!-- Infos entreprise -->
                         <div style="margin-bottom: 12pt; font-size: 10pt;">
                             <div><strong>Entreprise :</strong>
-                                <span t-esc="company.name"/>
+                                <span t-out="company.name"/>
                             </div>
                             <div><strong>Adresse :</strong>
-                                <span t-esc="company.partner_id.contact_address or company.partner_id.city or ''"/>
+                                <span t-out="company.partner_id.contact_address or company.partner_id.city or ''"/>
                             </div>
                             <div t-if="docs[0].project_id"><strong>Projet :</strong>
-                                <span t-esc="docs[0].project_id.name"/>
+                                <span t-out="docs[0].project_id.name"/>
                             </div>
                             <div t-if="sous_traitant"><strong>Sous-traitant :</strong>
-                                <span t-esc="sous_traitant.name"/>
+                                <span t-out="sous_traitant.name"/>
                             </div>
                         </div>
 
                         <!-- Titre Décompte -->
                         <div style="text-align: center; border: 1pt solid #000; padding: 6pt; margin-bottom: 10pt; font-weight: 700; font-size: 11pt;">
                             DECOMPTE SITUATION
-                            <t t-if="ref_situation"> N° <span t-esc="ref_situation"/></t>
+                            <t t-if="ref_situation"> N° <span t-out="ref_situation"/></t>
                             <t t-if="date_min and date_max">
-                                DU <span t-esc="date_min.strftime('%d/%m/%Y')"/>
-                                AU <span t-esc="date_max.strftime('%d/%m/%Y')"/>
+                                DU <span t-out="date_min.strftime('%d/%m/%Y')"/>
+                                AU <span t-out="date_max.strftime('%d/%m/%Y')"/>
                             </t>
                         </div>
 
@@ -93,34 +92,34 @@
                                 <t t-foreach="docs" t-as="d">
                                     <tr>
                                         <td style="border: 1pt solid #000; padding: 4pt;">
-                                            <t t-if="d.date" t-esc="d.date.strftime('%d/%m/%Y')"/>
+                                            <t t-if="d.date" t-out="d.date.strftime('%d/%m/%Y')"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 4pt;">
-                                            <span t-esc="d.type_engin or ''"/>
+                                            <span t-out="d.type_engin or ''"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 4pt;">
-                                            <span t-esc="d.n_bon or ''"/>
+                                            <span t-out="d.n_bon or ''"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 4pt;">
-                                            <span t-esc="d.engin or ''"/>
+                                            <span t-out="d.engin or ''"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 4pt;">
-                                            <span t-esc="d.designation or ''"/>
+                                            <span t-out="d.designation or ''"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 4pt; text-align: right;">
-                                            <t t-esc="'%.2f' % (d.nombre_heures or 0)"/>
+                                            <t t-out="'%.2f' % (d.nombre_heures or 0)"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 4pt; text-align: right;">
-                                            <t t-esc="'%.2f' % (d.total_journalite or 0)"/>
+                                            <t t-out="'%.2f' % (d.total_journalite or 0)"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 4pt; text-align: right;">
-                                            <t t-esc="'%.2f' % (d.prix_unitaire_jour or 0)"/>
+                                            <t t-out="'%.2f' % (d.prix_unitaire_jour or 0)"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 4pt; text-align: right;">
-                                            <t t-esc="'%.2f' % (d.montant or 0)"/>
+                                            <t t-out="'%.2f' % (d.montant or 0)"/>
                                         </td>
                                         <td style="border: 1pt solid #000; padding: 4pt;">
-                                            <span t-esc="d.observation or ''"/>
+                                            <span t-out="d.observation or ''"/>
                                         </td>
                                     </tr>
                                 </t>
@@ -128,14 +127,14 @@
                                 <tr style="background: #e5e5e5; font-weight: 700;">
                                     <td colspan="5" style="border: 1pt solid #000; padding: 5pt; text-align: right;">TOTAL</td>
                                     <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
-                                        <t t-esc="'%.2f' % total_heures"/>
+                                        <t t-out="'%.2f' % total_heures"/>
                                     </td>
                                     <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
-                                        <t t-esc="'%.2f' % total_journ"/>
+                                        <t t-out="'%.2f' % total_journ"/>
                                     </td>
                                     <td style="border: 1pt solid #000; padding: 5pt;"></td>
                                     <td style="border: 1pt solid #000; padding: 5pt; text-align: right;">
-                                        <t t-esc="'%.2f' % total_montant"/>
+                                        <t t-out="'%.2f' % total_montant"/>
                                     </td>
                                     <td style="border: 1pt solid #000; padding: 5pt;"></td>
                                 </tr>
@@ -143,7 +142,7 @@
                                 <tr style="background: #d0d0d0; font-weight: 700;">
                                     <td colspan="8" style="border: 1pt solid #000; padding: 6pt; text-align: right;">MONTANT TOTAL A PAYER</td>
                                     <td colspan="2" style="border: 1pt solid #000; padding: 6pt; text-align: right;">
-                                        <t t-esc="'%.2f' % total_montant"/>
+                                        <t t-out="'%.2f' % total_montant"/>
                                     </td>
                                 </tr>
                             </tbody>
@@ -155,16 +154,16 @@
                             <br/>
                             <strong>
                                 <t t-set="amount_words" t-value="company.currency_id.amount_to_text(total_montant) if company.currency_id else '%.2f' % total_montant"/>
-                                <span t-esc="amount_words"/>
+                                <span t-out="amount_words"/>
                             </strong>
                         </div>
 
                         <!-- Pied : ville + date -->
                         <div style="margin-top: 24pt; text-align: right;">
                             Fait à
-                            <span t-esc="company.partner_id.city or '...'"/>
+                            <span t-out="company.partner_id.city or '...'"/>
                             le :
-                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                            <span t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
                         </div>
                         <div style="margin-top: 6pt; text-align: right; font-weight: 700;">ENTREPRISE</div>
 

@@ -53,7 +53,7 @@
                                 <div class="prevision-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid rgba(102, 126, 234, 0.1);">
                                     <div style="display: flex; align-items: center; gap: 18px;">
                                         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 16px; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);">
-                                            <i class="fa fa-cubes" style="color: white; font-size: 26px;"/>
+                                            <i class="oi" data-icon="inventory_2" style="color: white; font-size: 26px;"/>
                                         </div>
                                         <div>
                                             <h3 style="margin: 0; font-size: 22px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px;">Produits Prévus</h3>
@@ -62,7 +62,7 @@
                                     </div>
                                     <div style="display: flex; gap: 12px;">
                                         <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 10px 18px; border-radius: 25px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);">
-                                            <i class="fa fa-check-circle" style="margin-right: 6px;"/>Stock OK
+                                            <i class="oi oi-filled" data-icon="check_circle" style="margin-right: 6px;"/>Stock OK
                                         </div>
                                     </div>
                                 </div>
@@ -70,13 +70,13 @@
                                 <!-- Table Container -->
                                 <div class="task-table-container" style="border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
                                     <field name="observation_line_ids" nolabel="1" readonly="state == 'confirmed'" class="task-list-tree o_sticky_task_list">
-                                        <tree editable="bottom" decoration-danger="quantity_observation > quantity_remaining" decoration-warning="quantity_observation > 0 and quantity_observation > quantity_stock * 0.7" decoration-success="quantity_observation > 0 and quantity_observation &lt;= quantity_remaining">
+                                        <list editable="bottom" decoration-danger="quantity_observation > quantity_remaining" decoration-warning="quantity_observation > 0 and quantity_observation > quantity_stock * 0.7" decoration-success="quantity_observation > 0 and quantity_observation &lt;= quantity_remaining">
                                             <field name="product_id" string="Produit"/>
                                             <field name="quantity_observation" string="Qté Prévision"/>
                                             <field name="quantity_stock" string="Qté Stock" readonly="1"/>
                                             <field name="quantity_consumed" string="Qté Consommée" readonly="1"/>
                                             <field name="quantity_remaining" string="Qté Restante" readonly="1"/>
-                                        </tree>
+                                        </list>
                                     </field>
                                 </div>
 
@@ -274,17 +274,17 @@
         </field>
     </record>
 
-    <!-- Observation Tree View -->
+    <!-- Observation List View -->
     <record id="view_custom_project_observation_tree" model="ir.ui.view">
         <field name="name">custom.project.observation.tree</field>
         <field name="model">custom.project.observation</field>
         <field name="arch" type="xml">
-            <tree string="Observations">
+            <list string="Observations">
                 <field name="name"/>
                 <field name="project_id"/>
                 <field name="assigned_to_id" widget="many2one_avatar"/>
                 <field name="date_observation"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -297,8 +297,8 @@
                 <field name="name"/>
                 <field name="assigned_to_id"/>
                 <templates>
-                    <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click" t-attf-style="border-left: 3px">
+                    <t t-name="card">
+                        <div class="" t-attf-style="border-left: 3px">
                             <div class="oe_kanban_details">
                                 <strong>
                                     <field name="name"/>
@@ -321,6 +321,6 @@
     <record id="action_custom_project_observation" model="ir.actions.act_window">
         <field name="name">Observations</field>
         <field name="res_model">custom.project.observation</field>
-        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
     </record>
 </odoo>

@@ -53,8 +53,8 @@ class ResPartnerExt(models.Model):
     #         'name': 'Documents',
     #         'type': 'ir.actions.act_window',
     #         'res_model': 'document.page',
-    #         'views': [(False, 'kanban'), (False, 'tree'), (False, 'form')],
-    #         'view_mode': 'kanban,tree,form',
+    #         'views': [(False, 'kanban'), (False, 'list'), (False, 'form')],
+    #         'view_mode': 'kanban,list,form',
     #         'target': 'current',
     #         'context': dict(self.env.context, **file_data['context']),  # merge contexte
     #         'domain': [('partner_id', '=', [self.id])],

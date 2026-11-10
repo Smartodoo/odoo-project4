@@ -1,10 +1,11 @@
 /* @odoo-module */
+import { user } from "@web/core/user";
 
 import { Component, useState, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { session } from "@web/session";
-import { jsonrpc } from "@web/core/network/rpc_service";
+import { rpc } from "@web/core/network/rpc";
 import { renderToFragment } from "@web/core/utils/render";
 import { onWillStart } from "@odoo/owl";
 var show_company = false;
@@ -14,10 +15,10 @@ export class GlobalSearchSh extends Component {
 
     async setup() {
         super.setup()
-         this.user = useService("user");
+
          // todo
         /*onWillStart(async () => {
-            show_company = await this.user.hasGroup('base.group_multi_company');
+            show_company = await user.hasGroup('base.group_multi_company');
             
         });*/
         this.orm = useService("orm");
@@ -72,7 +73,7 @@ export class GlobalSearchSh extends Component {
         }
         var self = this;
 
-        await jsonrpc("/web/dataset/call_kw/global.search/get_search_result", {
+        await rpc("/web/dataset/call_kw/global.search/get_search_result", {
                     model: 'global.search',
                     method: 'get_search_result',
                     args: [[query]],

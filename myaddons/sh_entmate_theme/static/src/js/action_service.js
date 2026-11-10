@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { proxy } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { makeContext } from "@web/core/context";
 import { useDebugCategory } from "@web/core/debug/debug_context";
@@ -9,6 +10,7 @@ import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
+import { useChildSubEnv } from "@web/owl2/utils";
 import { View, ViewNotFoundError } from "@web/views/view";
 import { ActionDialog } from "@web/webclient/actions/action_dialog";
 import { CallbackRecorder } from "@web/webclient/actions/action_hook";
@@ -61,7 +63,7 @@ export class InvalidButtonParamsError extends Error {}
 const CTX_KEY_REGEX = /^(?:(?:default_|search_default_|show_).+|.+_view_ref|group_by|group_by_no_leaf|active_id|active_ids|orderedBy)$/;
 
 // only register this template once for all dynamic classes ControllerComponent
-const ControllerComponentTemplate = xml`<t t-component="Component" t-props="props"/>`;
+const ControllerComponentTemplate = xml`<t t-component="this.Component" t-props="this.props"/>`;
 
 function makeActionManager(env) {
     const keepLast = new KeepLast();
@@ -661,13 +663,13 @@ function makeActionManager(env) {
 
             var shnextStack = controllerStack.slice(0, 0).concat(controllerArray);
 
-            controller.config.breadcrumbs = reactive(
+            controller.config.breadcrumbs = proxy(
                 action.target === "new" ? [] : _getBreadcrumbs(shnextStack)
             );
 
 
         }else{
-            controller.config.breadcrumbs = reactive(
+            controller.config.breadcrumbs = proxy(
                 action.target === "new" ? [] : _getBreadcrumbs(nextStack)
             );
     
@@ -1062,7 +1064,7 @@ function makeActionManager(env) {
            // Check whether tab is alredy there in list
            if(jQuery.inArray(controller['action']['id'], controller_tab_list) == -1){
                if(action.name != undefined){
-                   var li_xpath ='<div class="item sh_active" data-action="'+controller['action']['id']+'" data-controller="'+controller['jsId']+'">'+action.name+'<i style="margin-left:7px;" class="fa fa-times sh_remove_tab"/></div>'
+                   var li_xpath ='<div class="item sh_active" data-action="'+controller['action']['id']+'" data-controller="'+controller['jsId']+'">'+action.name+'<i style="margin-left:7px;" class="oi sh_remove_tab" data-icon="close"/></div>'
                }else if(action.res_id && action.res_model){
                    let result = await rpc.query({
                        model: action.res_model,
@@ -1071,7 +1073,7 @@ function makeActionManager(env) {
                        fields: ['name'],
                    });
                    if(result[0] && result[0].name){
-                       var li_xpath ='<div class="item sh_active" data-action="'+controller['action']['id']+'" data-controller="'+controller['jsId']+'">'+result[0].name+'<i style="margin-left:7px;" class="fa fa-times sh_remove_tab"/></div>'
+                       var li_xpath ='<div class="item sh_active" data-action="'+controller['action']['id']+'" data-controller="'+controller['jsId']+'">'+result[0].name+'<i style="margin-left:7px;" class="oi sh_remove_tab" data-icon="close"/></div>'
                    }
                }
                 

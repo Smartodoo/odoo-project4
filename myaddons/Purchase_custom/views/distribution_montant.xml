@@ -19,11 +19,11 @@
         <field name="name">distribution_tree</field>
         <field name="model">distribution.montant</field>
         <field name="arch" type="xml">
-            <tree create="false" delete="false" editable="bottom">
+            <list create="false" delete="false" editable="bottom">
                 <field name="purchase_id"/>
                 <field name="total"/>
                 <field name="montant"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -31,7 +31,7 @@
     <record id="distribution_montant_action" model="ir.actions.act_window">
         <field name="name">Distribution des montants</field>
         <field name="res_model">distribution.montant</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
 

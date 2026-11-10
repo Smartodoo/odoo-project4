@@ -220,7 +220,6 @@
         <field name="model">sinistre</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">sinistre.constat_report_template</field>
-        <field name="report_file">sinistre.constat_report_template</field>
         <field name="binding_type">report</field>
     </record>
 </odoo>

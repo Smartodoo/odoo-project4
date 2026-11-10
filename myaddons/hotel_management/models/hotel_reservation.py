@@ -238,7 +238,7 @@ class HotelReservation(models.Model):
             'type': 'ir.actions.act_window',
             'name': _("Factures"),
             'res_model': 'account.move',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('hotel_reservation_id', '=', self.id)],
         }
 
@@ -435,11 +435,11 @@ class HotelReservation(models.Model):
             'guests': r.guest_count,
         } for r in arrivals]
 
-        by_type_groups = Room.read_group([], ['room_type_id'], ['room_type_id'])
+        by_type_groups = Room._read_group([], ['room_type_id'], ['__count'])
         rooms_by_type = [{
-            'name': g['room_type_id'][1] if g['room_type_id'] else _('Sans type'),
-            'count': g['room_type_id_count'],
-        } for g in by_type_groups]
+            'name': room_type.display_name if room_type else _('Sans type'),
+            'count': count,
+        } for room_type, count in by_type_groups]
 
         housekeeping_todo = self.env['hotel.housekeeping'].search_count([
             ('state', 'in', ('todo', 'inprogress'))])

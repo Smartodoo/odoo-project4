@@ -23,7 +23,6 @@
             <field name="model">decompte.bet</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">custom_project.report_decompte_bet_template</field>
-            <field name="report_file">custom_project.report_decompte_bet_template</field>
             <field name="paperformat_id" ref="paperformat_decompte_bet"/>
             <field name="binding_model_id" ref="model_decompte_bet"/>
             <field name="binding_type">report</field>
@@ -98,7 +97,7 @@
                                 <span class="db-title-num">
                                     N&#176; <span t-field="doc.name"/>
                                     <span class="db-state"
-                                          t-esc="{'draft': 'Brouillon', 'validated': 'Validé', 'paid': 'Payé'}.get(doc.state, '-')"/>
+                                          t-out="{'draft': 'Brouillon', 'validated': 'Validé', 'paid': 'Payé'}.get(doc.state, '-')"/>
                                 </span>
                             </div>
 
@@ -129,7 +128,7 @@
                                             <tr><td class="k">Référence :</td><td class="v"><span t-field="doc.name"/></td></tr>
                                             <tr><td class="k">N&#176; :</td><td class="v"><span t-field="doc.numero_decompte"/></td></tr>
                                             <tr><td class="k">Date :</td><td class="v">
-                                                <span t-if="doc.date_decompte" t-esc="doc.date_decompte.strftime('%d/%m/%Y')"/>
+                                                <span t-if="doc.date_decompte" t-out="doc.date_decompte.strftime('%d/%m/%Y')"/>
                                             </td></tr>
                                             <tr><td class="k">Nb lignes :</td><td class="v"><span t-field="doc.line_count"/></td></tr>
                                         </table>
@@ -156,12 +155,12 @@
                                 <tbody>
                                     <tr t-foreach="doc.line_ids" t-as="line"
                                         t-attf-class="{{ 'subtotal' if line.is_subtotal else '' }}">
-                                        <td class="text-center"><t t-esc="line.sequence"/></td>
+                                        <td class="text-center"><t t-out="line.sequence"/></td>
                                         <td><span t-field="line.name"/></td>
-                                        <td class="text-end"><t t-esc="'%.2f' % (line.quantite_precedent or 0)"/></td>
-                                        <td class="text-end"><t t-esc="'%.2f' % (line.quantite_mois or 0)"/></td>
-                                        <td class="text-end"><t t-esc="'%.2f' % (line.quantite_cumule or 0)"/></td>
-                                        <td class="text-end"><t t-esc="'%.2f' % (line.prix_unitaire or 0)"/></td>
+                                        <td class="text-end"><t t-out="'%.2f' % (line.quantite_precedent or 0)"/></td>
+                                        <td class="text-end"><t t-out="'%.2f' % (line.quantite_mois or 0)"/></td>
+                                        <td class="text-end"><t t-out="'%.2f' % (line.quantite_cumule or 0)"/></td>
+                                        <td class="text-end"><t t-out="'%.2f' % (line.prix_unitaire or 0)"/></td>
                                         <td class="text-end">
                                             <span t-field="line.montant_precedent"
                                                   t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>

@@ -746,7 +746,7 @@ class Situation(models.Model):
             'name': 'Paiements des situations',
             'type': 'ir.actions.act_window',
             'res_model': 'paiement.situation',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('situation_id', '=', self.id)],
         }
 

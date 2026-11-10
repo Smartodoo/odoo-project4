@@ -431,7 +431,7 @@ class ResPartner(models.Model):
             'name': "Versements Sous-traitants",
             'type': 'ir.actions.act_window',
             'res_model': 'versement.subcontractor',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('subcontractor_id', '=', self.id)],
             'context': {'default_subcontractor_id': self.id},
         }
@@ -474,7 +474,7 @@ class ResPartner(models.Model):
             'name': "Versements",
             'type': 'ir.actions.act_window',
             'res_model': 'versement.versement',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('fournisseur_id', '=', self.id)],
             'context': {'default_fournisseur_id': self.id},
         }
@@ -485,7 +485,7 @@ class ResPartner(models.Model):
             'name': "Paiements",
             'type': 'ir.actions.act_window',
             'res_model': 'account.payment',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('partner_id', '=', self.id), ('payment_type', '=', 'outbound')],
             'context': {'default_partner_id': self.id, 'default_payment_type': 'outbound'},
         }
@@ -496,7 +496,7 @@ class ResPartner(models.Model):
             'name': "Paiements Sous-traitants",
             'type': 'ir.actions.act_window',
             'res_model': 'paiement.situation',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('partner_id', '=', self.id)],
             'context': {'default_partner_id': self.id},
         }

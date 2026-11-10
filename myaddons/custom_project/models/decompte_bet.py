@@ -155,7 +155,7 @@ class CustomProjectDecompte(models.Model):
             'name': _('Décomptes BET'),
             'type': 'ir.actions.act_window',
             'res_model': 'decompte.bet',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('project_id', '=', self.id)],
             'context': {
                 'default_project_id': self.id,

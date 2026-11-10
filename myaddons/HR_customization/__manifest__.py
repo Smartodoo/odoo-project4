@@ -21,7 +21,7 @@
 ###############################################################################
 {
     'name': 'Customize In HR',
-    'version': '17.0.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'HR',
     'summary': 'Personnaliser HR',
     'description': '',

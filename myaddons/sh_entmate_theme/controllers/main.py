@@ -2,6 +2,7 @@
 import json
 from odoo import http
 import base64
+from odoo.tools import BinaryBytes
 from io import BytesIO
 from odoo.tools.misc import file_open
 from datetime import datetime
@@ -10,7 +11,7 @@ from odoo.http import request, route, Controller
 
 
 class todo(Controller):
-    @route('/todo/get_all', type='json', auth='public', methods=['POST'])
+    @route('/todo/get_all', type='jsonrpc', auth='public', methods=['POST'])
     def todo_get_all(self, name, rec, is_done):
         html = request.env['ir.ui.view']._render_template('sh_entmate_theme.todo_card',
                                            {'name': name, 'rec': rec, 'is_done': is_done})
@@ -18,7 +19,7 @@ class todo(Controller):
 
 
 class Main(http.Controller):
-    @http.route('/get_theme_style', type='json', auth="public")
+    @http.route('/get_theme_style', type='jsonrpc', auth="public")
     def get_theme_style(self):
         theme_setting_rec = request.env['sh.ent.theme.config.settings'].sudo().search([
             ('id', '=', 1)], limit=1)
@@ -33,11 +34,11 @@ class Main(http.Controller):
                 'extra_color': theme_setting_rec.extra_color,
                 'header_background_type': theme_setting_rec.header_background_type,
                 'header_background_color': theme_setting_rec.header_background_color,
-                'header_background_image': theme_setting_rec.header_background_image,
+                'header_background_image': theme_setting_rec.header_background_image.to_base64() if theme_setting_rec.header_background_image else False,  # Odoo 20: Binary fields return BinaryValue
                 'header_font_color': theme_setting_rec.header_font_color,
                 'body_background_type': theme_setting_rec.body_background_type,
                 'body_background_color': theme_setting_rec.body_background_color,
-                'body_background_image': theme_setting_rec.body_background_image,
+                'body_background_image': theme_setting_rec.body_background_image.to_base64() if theme_setting_rec.body_background_image else False,  # Odoo 20: Binary fields return BinaryValue
                 'body_font_family': theme_setting_rec.body_font_family,
                 'body_google_font_family': theme_setting_rec.body_google_font_family,
                 'separator_style': theme_setting_rec.separator_style,
@@ -79,22 +80,19 @@ class Main(http.Controller):
             ('id', '=', 1)], limit=1)
 
         if kwargs.get('body_background_img'):
-            body_background_img = base64.b64encode(
-                kwargs.get('body_background_img').read())
+            body_background_img = BinaryBytes(kwargs.get('body_background_img').read())
             if theme_setting_rec:
                 theme_setting_rec.write(
                     {'body_background_image': body_background_img})
 
         if kwargs.get('header_background_img'):
-            body_background_img = base64.b64encode(
-                kwargs.get('header_background_img').read())
+            body_background_img = BinaryBytes(kwargs.get('header_background_img').read())
             if theme_setting_rec:
                 theme_setting_rec.write(
                     {'header_background_image': body_background_img})
 
         if kwargs.get('login_page_background_img'):
-            login_page_background_image = base64.b64encode(
-                kwargs.get('login_page_background_img').read())
+            login_page_background_image = BinaryBytes(kwargs.get('login_page_background_img').read())
             if login_page_background_image:
                 theme_setting_rec.write(
                     {'login_page_background_image': login_page_background_image})
@@ -107,23 +105,16 @@ class Main(http.Controller):
             config_obj = request.env.company.config_details
             
             js = """
-            this.addEventListener('install', function(e) {
-         e.waitUntil(
-           caches.open('video-store').then(function(cache) {
-             return cache.addAll([
-                 '/sh_entmate_theme/static/index.js'
-             ]);
-           })
-         );
-        });
-        
-        this.addEventListener('fetch', function(e) {
-          e.respondWith(
-            caches.match(e.request).then(function(response) {
-              return response || fetch(e.request);
-            })
-          );
-        });
+            // Take control immediately and purge any caches left by older
+            // service-worker versions so clients never serve stale assets.
+            self.addEventListener('install', function(e){ self.skipWaiting(); });
+            self.addEventListener('activate', function(e){
+                e.waitUntil((async function(){
+                    var keys = await caches.keys();
+                    await Promise.all(keys.map(function(k){ return caches.delete(k); }));
+                    await self.clients.claim();
+                })());
+            });
             importScripts('https://www.gstatic.com/firebasejs/8.4.2/firebase-app.js');
             importScripts('https://www.gstatic.com/firebasejs/8.4.2/firebase-messaging.js');
             var firebaseConfig =
@@ -149,24 +140,16 @@ class Main(http.Controller):
         else:
             
             js = """
-           this.addEventListener('install', function(e) {
-         e.waitUntil(
-           caches.open('video-store').then(function(cache) {
-             return cache.addAll([
-                 '/sh_entmate_theme/static/index.js'
-             ]);
-           })
-         );
-        });
-        
-        this.addEventListener('fetch', function(e) {
-          e.respondWith(
-            caches.match(e.request).then(function(response) {
-              return response || fetch(e.request);
-            })
-          );
-        });
-    
+            // Web push disabled: take control and purge caches left by older
+            // service-worker versions so clients never serve stale assets.
+            self.addEventListener('install', function(e){ self.skipWaiting(); });
+            self.addEventListener('activate', function(e){
+                e.waitUntil((async function(){
+                    var keys = await caches.keys();
+                    await Promise.all(keys.map(function(k){ return caches.delete(k); }));
+                    await self.clients.claim();
+                })());
+            });
             """
             return http.request.make_response(js, [('Content-Type', 'text/javascript')])
         
@@ -200,7 +183,7 @@ class Main(http.Controller):
             
             request.env['sh.push.notification'].sudo().create(vals)
 
-    @http.route('/web/_config', type='json', auth="public")
+    @http.route('/web/_config', type='jsonrpc', auth="public")
     def sendConfig(self):
 
         config_vals = {}
@@ -225,7 +208,7 @@ class Main(http.Controller):
             return json_vals
     
     # MULTI TAB START
-    @http.route(['/add/mutli/tab'], type='json', auth='public')
+    @http.route(['/add/mutli/tab'], type='jsonrpc', auth='public')
     def add_multi_tab(self, **kw):
         user = request.env.user
 
@@ -244,7 +227,7 @@ class Main(http.Controller):
 
         return True
 
-    @http.route(['/get/mutli/tab'], type='json', auth='public')
+    @http.route(['/get/mutli/tab'], type='jsonrpc', auth='public')
     def get_multi_tab(self, **kw):
         obj = request.env['biz.multi.tab']
         user = request.env.user
@@ -254,7 +237,7 @@ class Main(http.Controller):
         else:
             return False
 
-    @http.route(['/remove/multi/tab'], type='json', auth='public')
+    @http.route(['/remove/multi/tab'], type='jsonrpc', auth='public')
     def remove_multi_tab(self, **kw):
         multi_tab = request.env['biz.multi.tab'].sudo().search(
             [('id', '=', kw.get('multi_tab_id'))])
@@ -267,7 +250,7 @@ class Main(http.Controller):
         }
         return values
 
-    @http.route(['/update/tab/details'], type='json', auth='public')
+    @http.route(['/update/tab/details'], type='jsonrpc', auth='public')
     def update_tabaction(self, **kw):
         tabId = kw.get('tabId')
         TabTitle = kw.get('TabTitle')

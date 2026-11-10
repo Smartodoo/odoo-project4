@@ -1,0 +1,11 @@
+id,name,model_id,group_id/id,operation,domain
+access_sinistre_manager,access_sinistre_manager,sinistre,fleet.fleet_group_manager,crud,
+access_vehicle_type,access_vehicle_type,vehicle.type,base.group_everyone,crud,
+access_sinistre_print_wizard,access_sinistre_print_wizard,sinistre.print.wizard,fleet.fleet_group_manager,crud,
+access_vehicle_availability,access_vehicle_availability,vehicle.availability,base.group_everyone,crud,
+access_assurance_type,access_assurance_type,assurance.type,base.group_everyone,crud,
+access_maintenance_type,access_maintenance_type,maintenance.type,base.group_everyone,crud,
+access_vidange_type,access_vidange_type,vidange.type,base.group_everyone,crud,
+access_amande_penalite,access_amande_penalite,amande.penalite,base.group_everyone,crud,
+access_type_amande_penalite,access_type_amande_penalite,type.amande.penalite,base.group_everyone,crud,
+access_autorite_penalite,access_autorite_penalite,autorite.penalite,base.group_everyone,crud,

@@ -17,17 +17,9 @@
    <t t-name="sh_entmate_theme.ActionContainer" owl="1">
         <div class="o_action_manager">
         <NavTab/>
-        <t t-raw="notification_template"/>
-        <t t-if="info.Component" t-component="info.Component" className="'o_action'" t-props="info.componentProps" t-key="info.id"/>
+        <t t-out="this.notification_template"/>
+        <t t-if="this.info.Component" t-component="this.info.Component" className="'o_action'" t-props="this.info.componentProps" t-key="this.info.id"/>
         </div>
     </t>
 
-    <t t-extend="Throbber">
-        <t t-jquery=".oe_blockui_spin" t-operation="replace"> 
-            <div class="oe_blockui_spin"></div>
-        </t>
-        <t t-jquery=".oe_throbber_message" t-operation="replace"> 
-             <div class="oe_throbber_message" style="color:white;display:none;"></div>
-        </t>
-    </t>
 </template>

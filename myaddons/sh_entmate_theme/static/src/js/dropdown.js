@@ -14,7 +14,7 @@ import {
     useEffect,
     useExternalListener,
     useRef,
-    useState,
+    proxy,
     useChildSubEnv,
 } from "@odoo/owl";
 
@@ -39,13 +39,13 @@ patch(components.Dropdown.prototype, {
 
             super.setup()
         if(this.props.class == 'o_navbar_apps_menu sh_first_load sh_entmate_theme_appmenu_div'){
-                this.state = useState({
+                this.state = proxy({
                     open: true,
                     groupIsOpen: this.props.startOpen,
                 });
            
         }else{
-            this.state = useState({
+            this.state = proxy({
                 open: this.props.startOpen,
                 groupIsOpen: this.props.startOpen,
             });

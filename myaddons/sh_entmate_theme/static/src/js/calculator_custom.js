@@ -1,4 +1,5 @@
 /* @odoo-module */
+import { user } from "@web/core/user";
 
 import { Component, useState, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
@@ -16,7 +17,7 @@ export class CalculaterSh extends Component {
        async onWillStart() {
             const data = await this.orm.searchRead(
             "res.users",
-            [['id', '=', session.uid]],
+            [['id', '=', user.userId]],
             ["sh_enable_calculator_mode"]
             );
 

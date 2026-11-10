@@ -3,7 +3,7 @@
 
 from odoo import fields,models,api,_
 from odoo.exceptions import UserError
-FIELD_TYPES = [(key, key) for key in sorted(fields.Field.by_type)]
+FIELD_TYPES = [(key, key) for key in sorted(fields.Field._by_type__)]
 
 class ResCompany(models.Model):
     _inherit = 'res.company'

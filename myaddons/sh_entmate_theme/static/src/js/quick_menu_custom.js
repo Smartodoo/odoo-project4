@@ -5,7 +5,7 @@ import { useModel } from "@web/model/model";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { session } from "@web/session";
-import { jsonrpc } from "@web/core/network/rpc_service";
+import { rpc } from "@web/core/network/rpc";
 import { renderToFragment } from "@web/core/utils/render";
 import { onWillStart } from "@odoo/owl";
 
@@ -21,8 +21,8 @@ export class QuickMenuSh extends Component {
         	super.setup()
             this.orm = useService("orm");
             this.actionService = useService("action");
-            this.action = this.props.action;
-            this.model = this.props.model;
+            this.action = this.props?.action; // Odoo 20: no this.props without useProps()
+            this.model = this.props?.model;
             this._search_def = $.Deferred();
             this.onWillStart()
             this.sh_enable_quick_menu_mode = session.sh_enable_quick_menu_mode
@@ -67,7 +67,7 @@ export class QuickMenuSh extends Component {
 		async onWillStart() {
             var self = this;
             
-            var quick_menus_html = await jsonrpc("/web/dataset/call_kw/sh.wqm.quick.menu/get_quick_menu_data", {
+            var quick_menus_html = await rpc("/web/dataset/call_kw/sh.wqm.quick.menu/get_quick_menu_data", {
                     model: 'sh.wqm.quick.menu',
                     method: 'get_quick_menu_data',
                     args: ['', ['name', 'sh_url']],
@@ -108,7 +108,7 @@ export class QuickMenuSh extends Component {
         async _searchData() {
             var query = $(".sh_bookmark_search").val();
             var self = this;
-            var menus = await jsonrpc("/web/dataset/call_kw/sh.wqm.quick.menu/get_search_result", {
+            var menus = await rpc("/web/dataset/call_kw/sh.wqm.quick.menu/get_search_result", {
                     model: 'sh.wqm.quick.menu',
                     method: 'get_search_result',
                     args: [[query]],
@@ -140,7 +140,7 @@ export class QuickMenuSh extends Component {
             var self = this;
             var id = parseInt(e.target.dataset.id);
             if (id !== NaN) {
-                var quick_menus_html = await jsonrpc("/web/dataset/call_kw/sh.wqm.quick.menu/remove_quick_menu_data", {
+                var quick_menus_html = await rpc("/web/dataset/call_kw/sh.wqm.quick.menu/remove_quick_menu_data", {
                     model: 'sh.wqm.quick.menu',
                     method: 'remove_quick_menu_data',
                     args: ['', id],
@@ -202,7 +202,7 @@ export class QuickMenuSh extends Component {
 
             var self = this;
 
-            var search_result = await jsonrpc("/web/dataset/call_kw/sh.wqm.quick.menu/set_quick_url", {
+            var search_result = await rpc("/web/dataset/call_kw/sh.wqm.quick.menu/set_quick_url", {
                     model: 'sh.wqm.quick.menu',
                     method: 'set_quick_url',
                     args: ['', sh_url, model, res_id, action_id],
