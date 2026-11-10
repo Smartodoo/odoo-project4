@@ -287,7 +287,7 @@ class PropertyRental(models.Model):
             'name': _('Paiements'),
             'type': 'ir.actions.act_window',
             'res_model': 'rental.payment',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('rental_id', '=', self.id)],
         }
 

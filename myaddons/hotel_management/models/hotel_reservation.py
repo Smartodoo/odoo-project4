@@ -140,7 +140,7 @@ class HotelReservation(models.Model):
     def _compute_payment_amounts(self):
         # sudo : la réception voit les montants sans droits comptables
         for rec in self:
-            posted = rec.sudo().payment_ids.filtered(lambda p: p.state == 'posted')
+            posted = rec.sudo().payment_ids.filtered(lambda p: p.state in ('paid', 'reconciled'))  # Odoo 18+ : plus d'état 'posted'
             # Montant signé : + pour un encaissement, - pour un remboursement
             rec.amount_paid = sum(posted.mapped('amount_company_currency_signed'))
             rec.deposit_amount = sum(posted.filtered(
@@ -164,7 +164,7 @@ class HotelReservation(models.Model):
             if not invoices:
                 continue
             payments = rec.payment_ids.filtered(
-                lambda p: p.state == 'posted' and p.payment_type == 'inbound')
+                lambda p: p.state in ('paid', 'reconciled') and p.payment_type == 'inbound')
             for invoice in invoices.sorted('invoice_date'):
                 receivable = invoice.line_ids.filtered(
                     lambda l: l.account_id.account_type == 'asset_receivable'
@@ -199,7 +199,7 @@ class HotelReservation(models.Model):
             'type': 'ir.actions.act_window',
             'name': _("Paiements — %s", self.name),
             'res_model': 'account.payment',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('hotel_reservation_id', '=', self.id)],
             'context': {'create': False},
         }
@@ -252,7 +252,7 @@ class HotelReservation(models.Model):
         Account = self.env['account.account']
         account = Account.search([
             ('account_type', '=', 'income'),
-            ('company_id', '=', self.company_id.id),
+            ('company_ids', 'in', self.company_id.id),  # Odoo 18+ : comptes multi-sociétés
         ], limit=1)
         if not account:
             account = Account.search([('account_type', '=', 'income')], limit=1)
@@ -312,7 +312,7 @@ class HotelReservation(models.Model):
             'type': 'ir.actions.act_window',
             'name': _("Factures"),
             'res_model': 'account.move',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             # Factures et avoirs seulement : les écritures des paiements
             # portent aussi la réservation (bouton « Paiements »).
             'domain': [('hotel_reservation_id', '=', self.id),
@@ -512,11 +512,11 @@ class HotelReservation(models.Model):
             'guests': r.guest_count,
         } for r in arrivals]
 
-        by_type_groups = Room.read_group([], ['room_type_id'], ['room_type_id'])
+        by_type_groups = Room._read_group([], ['room_type_id'], ['__count'])
         rooms_by_type = [{
-            'name': g['room_type_id'][1] if g['room_type_id'] else _('Sans type'),
-            'count': g['room_type_id_count'],
-        } for g in by_type_groups]
+            'name': room_type.display_name if room_type else _('Sans type'),
+            'count': count,
+        } for room_type, count in by_type_groups]
 
         housekeeping_todo = self.env['hotel.housekeeping'].search_count([
             ('state', 'in', ('todo', 'inprogress'))])

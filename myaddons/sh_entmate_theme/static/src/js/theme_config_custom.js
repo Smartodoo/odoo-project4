@@ -1,9 +1,10 @@
 /* @odoo-module */
+import { user } from "@web/core/user";
 
 import { Component, useState, xml, onWillStart } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { jsonrpc } from "@web/core/network/rpc_service";
+import { rpc } from "@web/core/network/rpc";
 import { renderToFragment } from "@web/core/utils/render";
 
 
@@ -29,7 +30,7 @@ export class ThemeConfigurationTemplate extends Component {
 				$('.o_web_client').addClass("sh_iphone_safari")
 			}
 		}
-        this.user = useService("user");
+
         var color_change = false;
         if (!$('.backmate_theme_layout').length){
             var self = this
@@ -55,7 +56,7 @@ export class ThemeConfigurationTemplate extends Component {
 
                                 color_change = true;
 
-                                jsonrpc("/web/dataset/call_kw/res.lang/onchange_theme_style_js", {
+                                rpc("/web/dataset/call_kw/res.lang/onchange_theme_style_js", {
                                             model: 'sh.ent.theme.config.settings',
                                             method: 'onchange_theme_style_js',
                                             args: [color_id],
@@ -139,7 +140,7 @@ export class ThemeConfigurationTemplate extends Component {
             });
 
             $('.o_web_client').append(theme_configuration_html)
-            jsonrpc('/get_theme_style',{}).then(function (data) {
+            rpc('/get_theme_style',{}).then(function (data) {
 
                 var active_color = data['theme_style']
                 if (active_color) {
@@ -433,7 +434,7 @@ export class ThemeConfigurationTemplate extends Component {
 
    async onWillStart() {
 //        TODO
-        /*this.is_group_theme_configuration_user = await this.user.hasGroup("sh_entmate_theme.group_theme_configuration");*/
+        /*this.is_group_theme_configuration_user = await user.hasGroup("sh_entmate_theme.group_theme_configuration");*/
         this.is_group_theme_configuration_user = true
     }
 

@@ -1,4 +1,5 @@
 /** @odoo-module **/
+import { user } from "@web/core/user";
 
 
 import { ListController } from "@web/views/list/list_controller";
@@ -20,7 +21,7 @@ patch(ListController.prototype, {
     async search_enable_expand_collapse() {
             const data = await this.orm.searchRead(
             "res.users",
-            [['id', '=', session.uid]],
+            [['id', '=', user.userId]],
             ["sh_enable_expand_collapse"]
             );
              if (data) {

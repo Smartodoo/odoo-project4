@@ -40,7 +40,7 @@
 								<button
 								type="object"
 								name="action_preview_theme_style"
-								class="btn-sm btn-link mb4 fa fa-eye"
+								class="oi btn-sm btn-link mb4" data-icon="visibility"
 								aria-label="Preview"
 								title="Preview"
 								context="{'which_style': 'theme'}"
@@ -87,7 +87,7 @@
 								<button
 			                        type="object"
 			                        name="action_preview_theme_style"
-			                        class="btn-sm btn-link mb4 fa fa-eye"
+			                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 			                        aria-label="Preview"
 			                        title="Preview"
 			                        context="{'which_style': 'kanban box'}"
@@ -152,7 +152,7 @@
 								<button
 			                        type="object"
 			                        name="action_preview_theme_style"
-			                        class="btn-sm btn-link mb4 fa fa-eye"
+			                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 			                        aria-label="Preview"
 			                        title="Preview"
 			                        context="{'which_style': 'button'}"
@@ -173,7 +173,7 @@
 								<button
 			                        type="object"
 			                        name="action_preview_theme_style"
-			                        class="btn-sm btn-link mb4 fa fa-eye"
+			                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 			                        aria-label="Preview"
 			                        title="Preview"
 			                        context="{'which_style': 'separator'}"
@@ -194,7 +194,7 @@
 									<button
 					                        type="object"
 					                        name="action_preview_theme_style"
-					                        class="btn-sm btn-link mb4 fa fa-eye"
+					                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 					                        aria-label="Preview"
 					                        title="Preview"
 					                        context="{'which_style': 'enterprise_svg'}"
@@ -217,7 +217,7 @@
 								<button
 									type="object"
 									name="action_preview_theme_style"
-									class="btn-sm btn-link mb4 fa fa-eye"
+									class="oi btn-sm btn-link mb4" data-icon="visibility"
 									aria-label="Preview"
 									title="Preview"
 									context="{'which_style': 'predefined_list_view'}"
@@ -245,7 +245,7 @@
 								<button
 			                        type="object"
 			                        name="action_preview_theme_style"
-			                        class="btn-sm btn-link mb4 fa fa-eye"
+			                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 			                        aria-label="Preview"
 			                        title="Preview"
 			                        context="{'which_style': 'login_page'}"
@@ -277,7 +277,7 @@
 								<button
 			                        type="object"
 			                        name="action_preview_theme_style"
-			                        class="btn-sm btn-link mb4 fa fa-eye"
+			                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 			                        aria-label="Preview"
 			                        title="Preview"
 			                        context="{'which_style': 'login_page'}"
@@ -327,7 +327,7 @@
 									<button
 				                        type="object"
 				                        name="action_preview_theme_style"
-				                        class="btn-sm btn-link mb4 fa fa-eye"
+				                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 				                        aria-label="Preview"
 				                        title="Preview"
 				                        context="{'which_style': 'mobile'}"
@@ -342,7 +342,7 @@
 										<button
 				                        type="object"
 				                        name="action_preview_theme_style"
-				                        class="btn-sm btn-link mb4 fa fa-eye"
+				                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 				                        aria-label="Preview"
 				                        title="Preview"
 				                        context="{'which_style': 'checkbox'}"
@@ -357,7 +357,7 @@
 									<button
 				                        type="object"
 				                        name="action_preview_theme_style"
-				                        class="btn-sm btn-link mb4 fa fa-eye"
+				                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 				                        aria-label="Preview"
 				                        title="Preview"
 				                        context="{'which_style': 'radio'}"
@@ -377,7 +377,7 @@
 									<button
 										type="object"
 										name="action_preview_theme_style"
-										class="btn-sm btn-link mb4 fa fa-eye"
+										class="oi btn-sm btn-link mb4" data-icon="visibility"
 										aria-label="Preview"
 										title="Preview"
 										context="{'which_style': 'horizontal_tab_style'}"
@@ -406,7 +406,7 @@
 										<button
 				                        type="object"
 				                        name="action_preview_theme_style"
-				                        class="btn-sm btn-link mb4 fa fa-eye"
+				                        class="oi btn-sm btn-link mb4" data-icon="visibility"
 				                        aria-label="Preview"
 				                        title="Preview"
 				                        context="{'which_style': 'scrollbar_style'}"
@@ -420,7 +420,7 @@
 										<button
 											type="object"
 											name="action_preview_theme_style"
-											class="btn-sm btn-link mb4 fa fa-eye"
+											class="oi btn-sm btn-link mb4" data-icon="visibility"
 											aria-label="Preview"
 											title="Preview"
 											context="{'which_style': 'discuss_chatter_style'}"
@@ -436,7 +436,7 @@
 										  <button
 											type="object"
 											name="action_preview_theme_style"
-											class="btn-sm btn-link mb4 fa fa-eye"
+											class="oi btn-sm btn-link mb4" data-icon="visibility"
 											aria-label="Preview"
 											title="Preview"
 											context="{'which_style': 'app_icon_style'}"
@@ -452,7 +452,7 @@
 										  <button
 										  type="object"
 										  name="action_preview_theme_style"
-										  class="btn-sm btn-link mb4 fa fa-eye"
+										  class="oi btn-sm btn-link mb4" data-icon="visibility"
 										  aria-label="Preview"
 										  title="Preview"
 										  context="{'which_style': 'backend_all_icon_style'}"

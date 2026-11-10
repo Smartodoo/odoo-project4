@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'Hide Any Menu User Wise',
-    'version': '17.0.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Extra Tools',
     'summary': 'Hide Menu, Odoo17 Hide Menu, Hide Menu Odoo, Restrict Menu Items, Odoo17 Menu, Odoo17, Odoo Apps',
     'description': 'Hide Any Menu Item User Wise, Hide Menu Items, Hide Menu',
@@ -31,8 +31,8 @@
     'website': "https://www.cybrosys.com",
     'depends': ['base'],
     'data': [
-        'security/security.xml',
         'views/res_users_views.xml',
+        'security/ir.access.csv',
     ],
     'license': 'LGPL-3',
     'images': ['static/description/banner.jpg'],

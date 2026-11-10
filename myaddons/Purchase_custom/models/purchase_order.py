@@ -168,7 +168,7 @@ class PurchaseOrderInheri(models.Model):
             #         'name': f"Achat consommable : {line.product_id.name}",
             #         'product_id': line.product_id.id,
             #         'total_amount_currency': line.price_subtotal,
-            #         'tax_ids': [(6, 0, line.taxes_id.ids)],
+            #         'tax_ids': [(6, 0, line.tax_ids.ids)],
             #         'quantity': line.product_qty,
             #         'employee_id': self.env.user.employee_id.id,
             #         'payment_mode': 'company_account',
@@ -267,7 +267,7 @@ class PurchaseOrderInheri(models.Model):
             'name': "Paiements enregistrés",
             'type': 'ir.actions.act_window',
             'res_model': 'account.payment',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('purchase_order_id', '=', self.id)],
             'context': {'default_purchase_order_id': self.id},
         }
@@ -346,10 +346,10 @@ class PurchaseOrderInheri(models.Model):
                 invoice_line_vals = {
                     'name': line.name,
                     'product_id': line.product_id.id,
-                    'product_uom_id': line.product_uom.id,
+                    'product_uom_id': line.uom_id.id,
                     'quantity': line.product_qty,
                     'price_unit': line.price_unit,
-                    'tax_ids': [(6, 0, line.taxes_id.ids)],
+                    'tax_ids': [(6, 0, line.tax_ids.ids)],
                     'purchase_line_id': line.id,
                 }
                 invoice_lines.append((0, 0, invoice_line_vals))
@@ -398,10 +398,10 @@ class AccountMoveInherit(models.Model):
                 new_lines.append((0, 0, {
                     'name': line.name,
                     'product_id': line.product_id.id,
-                    'product_uom_id': line.product_uom.id,
+                    'product_uom_id': line.uom_id.id,
                     'quantity': line.product_qty,
                     'price_unit': line.price_unit,
-                    'tax_ids': [(6, 0, line.taxes_id.ids)],
+                    'tax_ids': [(6, 0, line.tax_ids.ids)],
                     'purchase_line_id': line.id,
                 }))
         self.invoice_line_ids = [(5, 0, 0)] + new_lines

@@ -2,7 +2,7 @@
 
 {
     'name': 'Purchase Report Preview',
-    'version': '17.0.0.1',
+    'version': '20.0.0.1',
     'author': 'Livedigital Technologies Private Limited',
     'company': 'Livedigital Technologies Private Limited',
     'maintainer': 'Livedigital Technologies Private Limited',

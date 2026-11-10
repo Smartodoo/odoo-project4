@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
 
-            <xpath expr="//field[@name='company_type']" position="after">
+            <xpath expr="//field[@name='function']" position="before">
                 <field name="contact_type" widget="radio"/>
             </xpath>
             <xpath expr="//page[@name='internal_notes']" position="after">
@@ -28,7 +28,7 @@
         <field name="inherit_id" ref="base.view_res_partner_filter"/>
         <field name="arch" type="xml">
             <!-- Ajouter un filtre pour le type de contact -->
-            <xpath expr="//group[@name='group_by']" position="inside">
+            <xpath expr="//filter[@name='group_country']" position="after">
                 <filter name="contact_type" string="type de contact" context="{'group_by':'contact_type'}"/>
             </xpath>
         </field>

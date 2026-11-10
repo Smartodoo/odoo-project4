@@ -14,13 +14,11 @@ travaux, personnel hôtelier.
     'author': "SmartOdoo",
     'website': "https://smartodoo.com",
     'category': 'Services/Hotel',
-    'version': '17.0.1.10.0',
+    'version': '20.0.1.10.0',
     'license': 'LGPL-3',
     'depends': ['mail', 'web', 'contacts', 'website', 'portal', 'account'],
     'data': [
         'security/hotel_security.xml',
-        'security/ir.model.access.csv',
-        'security/hotel_website_security.xml',
         'data/hotel_sequence.xml',
         'data/hotel_data.xml',
         'data/mail_template_data.xml',
@@ -45,6 +43,7 @@ travaux, personnel hôtelier.
         'views/website_hotel_layout.xml',
         'views/website_hotel_menus.xml',
         'views/portal_hotel_templates.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

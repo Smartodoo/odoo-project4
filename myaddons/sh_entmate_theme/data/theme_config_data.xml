@@ -14,7 +14,7 @@
         <record id="sh_entmate_theme_settings_attachment_scss_file" model="ir.attachment">
             <field name="public" eval="True"/>
             <field name="name">Back Theme Settings scss File</field>
-        	<field name="datas" type="base64" file="sh_entmate_theme/data/back_theme_config_main_scss.scss"></field>            
+        	<field name="raw" type="bytes" file="sh_entmate_theme/data/back_theme_config_main_scss.scss"/>            
             <field name="res_model">ir.ui.view</field>
             <field name="type">binary</field>
             <field name="mimetype">text/scss</field>
@@ -48,10 +48,10 @@
             <field name="progress_height">4px</field>
             <field name="progress_color">#ad86a3</field>
   			
-  			<field name="login_page_background_image" type="base64" file="sh_entmate_theme/static/src/img/login/login_bg.jpg"/> 
-  			<field name="login_page_banner_image" type="base64" file="sh_entmate_theme/static/src/img/login/login_banner_img.png"/>   			  			         
+  			<field name="login_page_background_image" type="bytes" file="sh_entmate_theme/static/src/img/login/login_bg.jpg"/> 
+  			<field name="login_page_banner_image" type="bytes" file="sh_entmate_theme/static/src/img/login/login_banner_img.png"/>   			  			         
 
-  			<field name="body_background_image" type="base64" file="sh_entmate_theme/static/src/img/background/body_bg.jpg"/> 
+  			<field name="body_background_image" type="bytes" file="sh_entmate_theme/static/src/img/background/body_bg.jpg"/> 
             <field name="breadcrumb_style">style_7</field>
             <field name="app_icon_style">style_1</field>
             <field name="backend_all_icon_style">backend_fontawesome_icon</field>

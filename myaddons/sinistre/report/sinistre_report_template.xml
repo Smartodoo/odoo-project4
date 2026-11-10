@@ -5,8 +5,8 @@
                 <div class="page" style="text_center">
                     <h2 class="text-center">
                         Sinistres —
-                        <t t-esc="env.context.get('report_month_name')"/>
-                        <t t-esc="env.context.get('report_year')"/>
+                        <t t-out="env.context.get('report_month_name')"/>
+                        <t t-out="env.context.get('report_year')"/>
                     </h2>
                     <br/>
                     <table class="table table-sm">
@@ -23,16 +23,16 @@
                         <tbody>
                             <tr t-foreach="docs" t-as="sinistre">
                                 <td>
-                                    <t t-esc="sinistre.vehicle_id.name"/>
+                                    <t t-out="sinistre.vehicle_id.name"/>
                                 </td>
                                 <td>
-                                    <t t-esc="sinistre.license_plate"/>
+                                    <t t-out="sinistre.license_plate"/>
                                 </td>
                                 <td>
-                                    <t t-esc="sinistre.driver_id.name"/>
+                                    <t t-out="sinistre.driver_id.name"/>
                                 </td>
                                 <td>
-                                    <t t-esc="sinistre.date_accident"/>
+                                    <t t-out="sinistre.date_accident"/>
                                 </td>
                                 <td>
                                     <t t-if="sinistre.payment_state == 'payé'">Régler</t>
@@ -56,7 +56,6 @@
         <field name="model">sinistre</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">sinistre.sinistre_report_template</field>
-        <field name="report_file">sinistre.sinistre_report_template</field>
         <field name="binding_type">report</field>
     </record>
 </odoo>

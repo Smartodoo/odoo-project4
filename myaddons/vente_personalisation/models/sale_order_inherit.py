@@ -43,7 +43,7 @@ class SaleOrder(models.Model):
             'name': "Paiements enregistrés",
             'type': 'ir.actions.act_window',
             'res_model': 'account.payment',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('sale_order_id', '=', self.id)],
             'context': {'default_sale_order_id': self.id},
         }

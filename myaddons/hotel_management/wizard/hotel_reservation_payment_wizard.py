@@ -117,7 +117,7 @@ class HotelReservationPaymentWizard(models.TransientModel):
             'date': self.date,
             'journal_id': self.payment_method_line_id.journal_id.id,
             'payment_method_line_id': self.payment_method_line_id.id,
-            'ref': self._get_payment_ref(),
+            'memo': self._get_payment_ref(),  # Odoo 18+: ref -> memo
             'hotel_reservation_id': reservation.id,
             'hotel_payment_kind': self.payment_kind,
         }

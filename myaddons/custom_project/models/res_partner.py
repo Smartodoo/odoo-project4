@@ -788,7 +788,7 @@ class CustomProjectInherit(models.Model):
         return {
             'name': ('Stocks liés au projet: %s') % self.name,
             'type': 'ir.actions.act_window',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'res_model': 'custom.stock',
             'domain': [('project_id', '=', self.id)],
             'context': {'default_project_id': self.id},
@@ -807,7 +807,7 @@ class CustomProjectInherit(models.Model):
         return {
             'name': ('Achats liés au projet: %s') % self.name,
             'type': 'ir.actions.act_window',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'res_model': 'purchase.order',
             'domain': [('project_id', '=', self.id)],
             'context': {'default_project_id': self.id},
@@ -866,7 +866,7 @@ class ResPartner(models.Model):
             'name': "Situations",
             'type': 'ir.actions.act_window',
             'res_model': 'situation',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('original_subcontractor_id', '=', self.id)],
             'context': {'default_original_subcontractor_id': self.id},
         }
@@ -876,7 +876,7 @@ class ResPartner(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': 'Engagments',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'res_model': 'projects.associated',
             'domain': [('original_subcontractor_id', '=', self.id)],
 

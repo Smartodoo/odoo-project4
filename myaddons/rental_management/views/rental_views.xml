@@ -6,7 +6,7 @@
     <record id="action_property_rental_all" model="ir.actions.act_window">
         <field name="name">📋 Réservations</field>
         <field name="res_model">property.rental</field>
-        <field name="view_mode">tree,form,calendar,pivot,graph</field>
+        <field name="view_mode">list,form,calendar,pivot,graph</field>
         <field name="context">{'search_default_confirmed': 1}</field>
     </record>
 
@@ -107,7 +107,7 @@
                                 color: #92400e; padding: 20px 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
                         <div style="width: 48px; height: 48px; background: #f59e0b; border-radius: 12px;
                                     display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
-                            <i class="fa fa-exclamation-triangle" title="Alerte expiration"/>
+                            <i class="oi" data-icon="warning" title="Alerte expiration"/>
                         </div>
                         <div>
                             <div style="font-weight: 700; font-size: 16px;">⚠️ Cette location expire bientôt</div>
@@ -125,7 +125,7 @@
                     <!-- STAT BUTTONS -->
                     <div class="oe_button_box" name="button_box">
                         <button name="action_register_payment" type="object"
-                                class="oe_stat_button" icon="fa-credit-card"
+                                class="oe_stat_button" icon="credit_card"
                                 invisible="state in ('draft', 'cancelled', 'done')">
                             <span class="o_stat_text">Payer</span>
                         </button>
@@ -136,7 +136,7 @@
                             <span class="o_stat_text">Service</span>
                         </button>
 
-                        <button name="action_view_payments" type="object" class="oe_stat_button" icon="fa-money">
+                        <button name="action_view_payments" type="object" class="oe_stat_button" icon="payments">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value">
                                     <field name="amount_due" widget="monetary"/>
@@ -216,21 +216,21 @@
                     <notebook>
                         <page string="💳 Paiements">
                             <field name="payment_ids" readonly="0">
-                                <tree>
+                                <list>
                                     <field name="date"/>
                                     <field name="amount"/>
                                     <field name="payment_method"/>
                                     <field name="payment_type"/>
                                     <field name="state" widget="badge"/>
                                     <button name="action_confirm" string="Confirmer" type="object"
-                                            icon="fa-check" invisible="state != 'draft'"/>
-                                </tree>
+                                            icon="check" invisible="state != 'draft'"/>
+                                </list>
                             </field>
                         </page>
 
                         <page string="🛎️ Prestations">
                             <field name="service_ids">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="service_type"/>
                                     <field name="description"/>
                                     <field name="date"/>
@@ -238,30 +238,26 @@
                                     <field name="quantity"/>
                                     <field name="total"/>
                                     <field name="state" widget="badge"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
 
                         <page string="📋 États des Lieux">
                             <field name="inspection_ids" readonly="1">
-                                <tree>
+                                <list>
                                     <field name="name"/>
                                     <field name="inspection_type"/>
                                     <field name="date"/>
                                     <field name="inspector_id"/>
                                     <field name="damage_found"/>
                                     <field name="state" widget="badge"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
                 </sheet>
 
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -273,7 +269,7 @@
         <field name="name">property.rental.tree</field>
         <field name="model">property.rental</field>
         <field name="arch" type="xml">
-            <tree decoration-muted="state == 'done'"
+            <list decoration-muted="state == 'done'"
                   decoration-info="state == 'draft'"
                   decoration-success="state == 'confirmed'"
                   decoration-warning="state == 'expiring'">
@@ -298,7 +294,7 @@
                        decoration-success="payment_status == 'paid'"/>
                 <field name="state" widget="badge"/>
                 <field name="days_remaining" optional="show"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -330,12 +326,11 @@
                 <filter string="Annuel" name="period_year" domain="[('period_type', '=', 'year')]"/>
 
                 <filter string="Ce mois" name="this_month"
-                        domain="[('date_start', '&gt;=', context_today().strftime('%%Y-%%m-01'))]"/>
+                        domain="[('date_start', '&gt;=', '=1d')]"/>
                 <filter string="Expire cette semaine" name="expiring_this_week"
-                        domain="[('date_end', '&lt;=', (context_today() + relativedelta(days=7)).strftime('%%Y-%%m-%%d')),
-                                  ('state', 'in', ('ongoing', 'expiring'))]"/>
+                        domain="[('date_end', '&lt;=', '+7d'), ('state', 'in', ('ongoing', 'expiring'))]"/>
 
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter string="Appartement" name="group_by_apt" context="{'group_by': 'property_id'}"/>
                     <filter string="Client" name="group_by_client" context="{'group_by': 'client_id'}"/>
                     <filter string="État" name="group_by_state" context="{'group_by': 'state'}"/>

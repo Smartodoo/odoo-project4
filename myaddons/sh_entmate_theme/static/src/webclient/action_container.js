@@ -1,7 +1,7 @@
 /** @odoo-module **/
+import { user } from "@web/core/user";
 import { ActionDialog } from "@web/webclient/actions/action_dialog";
 import { ActionContainer } from '@web/webclient/actions/action_container';
-const { Component, tags } = owl;
 import { NavBar } from '@web/webclient/navbar/navbar';
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
@@ -31,7 +31,9 @@ patch(components.ActionContainer.prototype, {
     setup() {
        super.setup()
        this.orm = useService("orm");
-       this.render_action_template()
+       // Odoo 20: core setup() already subscribes to ACTION_MANAGER:UPDATE (useListener);
+       // only load the announcement banner here.
+       this.render_notification_template();
 
     },
 
@@ -39,13 +41,13 @@ patch(components.ActionContainer.prototype, {
         
         const output = await this.orm.searchRead(
                         "sh.announcement",
-                        [['is_popup_notification', '=', false], ['user_ids.id', 'in', [session.user_context.uid]]],
+                        [['is_popup_notification', '=', false], ['user_ids.id', 'in', [user.userId]]],
                         ['is_popup_notification', 'font_size', 'font_family', 'padding', 'name', 'description', 'is_animation', 'direction', 'user_ids', 'simple_text', 'background_color', 'font_color', 'description_text']
                         );
         if (output){
             var i;
             for (i = 0; i < output.length; i++) {
-                if (output[i]['user_ids'].includes(session.user_context.uid)) {
+                if (output[i]['user_ids'].includes(user.userId)) {
                     display_notice = true;
                     background_color = output[i]['background_color']
                     font_size = output[i]['font_size']
@@ -92,18 +94,6 @@ patch(components.ActionContainer.prototype, {
         }
 
     },
-    async render_action_template(){
-        var self = this
-        await self.render_notification_template().then(function (data){
-            self.info = {};
-            self.notification_template = notification_template;
-            self.onActionManagerUpdate = ({ detail: info }) => {
-                self.info = info;
-                self.render();
-            };
-            self.env.bus.addEventListener("ACTION_MANAGER:UPDATE", self.onActionManagerUpdate);
-        });
-    },
 
     close_backmate_theme_layout(){
         /*close pop-ups*/
@@ -122,11 +112,11 @@ patch(components.ActionContainer.prototype, {
 
 ActionContainer.components = { ActionDialog, NavTab };
 ActionContainer.template = xml`
-    <t t-name="web.ActionContainer" t-on-click="close_backmate_theme_layout" >
+    <t t-name="web.ActionContainer" t-on-click="this.close_backmate_theme_layout" >
       <div class="o_action_manager">
         <NavTab/>
-        <t t-if="info.Component" t-component="info.Component" className="'o_action'" t-props="info.componentProps" t-key="info.id"/>
+        <t t-if="this.info.Component" t-component="this.info.Component" className="'o_action'" t-props="this.info.componentProps" t-key="this.info.id"/>
       </div>
     </t>`;
-ActionContainer.props = {};
+// Odoo 20 / Owl 3: static props are no longer allowed (ActionContainer.props = {} removed)
 

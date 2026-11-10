@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Tree View -->
+        <!-- List View -->
         <record id="situation_brise_roche_view_tree" model="ir.ui.view">
             <field name="name">situation.brise.roche.tree</field>
             <field name="model">situation.brise.roche</field>
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="name"/>
                     <field name="date"/>
                     <field name="type_engin"/>
@@ -18,7 +18,7 @@
                     <field name="total_journalite"/>
                     <field name="prix_unitaire_jour"/>
                     <field name="montant" sum="Total"/>
-                </tree>
+                </list>
             </field>
         </record>
 
@@ -69,10 +69,10 @@
                     <field name="engin"/>
                     <field name="project_id"/>
                     <field name="sous_traitant_id"/>
-                    <filter name="filter_today" string="Aujourd'hui" domain="[('date','=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter name="filter_today" string="Aujourd'hui" domain="[('date', '=', 'today')]"/>
                     <filter name="filter_this_month" string="Ce mois" domain="[('date','&gt;=', (context_today() - datetime.timedelta(days=context_today().day - 1)).strftime('%Y-%m-%d'))]"/>
                     <separator/>
-                    <group expand="0" string="Grouper par">
+                    <group>
                         <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
                         <filter name="group_type_engin" string="Type d'engin" context="{'group_by': 'type_engin'}"/>
                         <filter name="group_engin" string="Engin" context="{'group_by': 'engin'}"/>
@@ -99,8 +99,8 @@
                     <field name="total_journalite"/>
                     <field name="montant"/>
                     <templates>
-                        <t t-name="kanban-box">
-                            <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                        <t t-name="card">
+                            <div t-attf-class="oe_kanban_card">
                                 <div class="oe_kanban_content">
                                     <div class="o_kanban_record_top">
                                         <strong><field name="name"/></strong>
@@ -126,7 +126,7 @@
         <record id="situation_brise_roche_action" model="ir.actions.act_window">
             <field name="name">Situation Brise Roche</field>
             <field name="res_model">situation.brise.roche</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">kanban,list,form</field>
             <field name="domain">[('company_id', '=', allowed_company_ids[0])]</field>
             <field name="search_view_id" ref="situation_brise_roche_view_search"/>
         </record>

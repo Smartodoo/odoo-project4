@@ -4,7 +4,7 @@
         <field name="name">hotel.bed.tree</field>
         <field name="model">hotel.bed</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
+            <list editable="bottom">
                 <field name="name"/>
                 <field name="room_id"/>
                 <field name="room_type_id" readonly="1"/>
@@ -16,7 +16,7 @@
                        decoration-danger="status == 'occupied'"
                        decoration-muted="status in ('maintenance', 'out_of_service')"/>
                 <field name="current_guest_id" readonly="1" optional="show"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -54,7 +54,7 @@
                 <field name="name"/>
                 <field name="room_id"/>
                 <filter name="archived" string="Archivés" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Regrouper par">
+                <group>
                     <filter name="group_room" string="Chambre" context="{'group_by': 'room_id'}"/>
                     <filter name="group_type" string="Type" context="{'group_by': 'room_type_id'}"/>
                 </group>
@@ -65,7 +65,7 @@
     <record id="action_hotel_bed" model="ir.actions.act_window">
         <field name="name">Lits</field>
         <field name="res_model">hotel.bed</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_hotel_bed_search"/>
     </record>
 
@@ -75,7 +75,7 @@
         <field name="model">hotel.room</field>
         <field name="priority">90</field>
         <field name="arch" type="xml">
-            <tree string="Nombre de lits" create="0" delete="0">
+            <list string="Nombre de lits" create="0" delete="0">
                 <field name="name" string="Chambre"/>
                 <field name="room_type_id"/>
                 <field name="floor"/>
@@ -89,7 +89,7 @@
                        decoration-danger="status == 'occupied'"
                        decoration-primary="status == 'cleaning'"
                        decoration-muted="status in ('maintenance', 'out_of_service')"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -122,7 +122,7 @@
                     </group>
                     <separator string="Lits de la chambre"/>
                     <field name="bed_ids" context="{'default_room_id': id}">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="name" string="Référence"/>
                             <field name="price" widget="monetary"/>
                             <field name="currency_id" column_invisible="1"/>
@@ -133,7 +133,7 @@
                                    decoration-muted="status in ('maintenance', 'out_of_service')"/>
                             <field name="current_guest_id" readonly="1"/>
                             <field name="active" string="Actif" widget="boolean_toggle"/>
-                        </tree>
+                        </list>
                     </field>
                 </sheet>
             </form>
@@ -143,10 +143,10 @@
     <record id="action_hotel_room_beds" model="ir.actions.act_window">
         <field name="name">Nombre de lits</field>
         <field name="res_model">hotel.room</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_hotel_room_search"/>
         <field name="view_ids" eval="[(5, 0, 0),
-            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_hotel_room_beds_tree')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_hotel_room_beds_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_hotel_room_beds_form')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Aucune chambre pour le moment</p>

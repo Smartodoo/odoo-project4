@@ -1,4 +1,6 @@
 /* @odoo-module */
+import { usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import core from "web.core";
 var _t = core._t;
@@ -61,7 +63,7 @@ patch(ListRenderer.prototype, 'sh_attachment_in_tree_view/static/src/js/list_con
 
         this.dialogService = useService("dialog");
         this.orm = useService("orm");
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
         this.messaging = useService("messaging");
 
         //Open Record Code :-

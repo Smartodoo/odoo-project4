@@ -3,19 +3,19 @@
 
 {
     "name": "sinistre",
-    'version': '17.0.1.0.0',
+    'version': '20.0.1.0.0',
     "author": "hamitouche younes",
     'description': '',
     "category": "Tools",
     "license": "AGPL-3",
     "depends": ['hr', 'fleet', 'base', 'contacts', ],
     "data": [
-        'security/ir.model.access.csv',
 
         'wizard/print_report_accident_date.xml',
         'report/sinistre_report_template.xml',
         'report/constat_report_template.xml',
         'views/sinistre.xml',
+        'security/ir.access.csv',
 
     ],
 

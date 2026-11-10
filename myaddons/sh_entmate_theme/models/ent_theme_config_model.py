@@ -764,7 +764,7 @@ class sh_entmate_theme_settings(models.Model):
     ], string="Background Type", default="bg_color")
 
     login_page_background_color = fields.Char(
-        string='Background Color', default="#B3FFB8")
+        string='Login Page Background Color', default="#B3FFB8")
     login_page_background_image = fields.Binary(string='Background Image ')
     login_page_box_color = fields.Char(string='Box Color')
     login_page_banner_image = fields.Binary(string='Banner Image')
@@ -1067,10 +1067,10 @@ $progress_color:%s;
                 ], limit=1)
 
                 # Check if the file to save had already been modified
-                datas = base64.b64encode((content or "\n").encode("utf-8"))
+                raw = (content or "\n").encode("utf-8")
                 if search_attachment:
                     # If it was already modified, simply override the corresponding attachment content
-                    search_attachment.sudo().write({"datas": datas})
+                    search_attachment.sudo().write({"raw": raw})
 
                 else:
                     # If not, create a new attachment
@@ -1078,7 +1078,7 @@ $progress_color:%s;
                         "name": "Back Theme Settings scss File",
                         "type": "binary",
                         "mimetype": "text/scss",
-                        "datas": datas,
+                        "raw": raw,
                         "url": url,
                         "public": True,
                         "res_model": "ir.ui.view",
@@ -1087,7 +1087,7 @@ $progress_color:%s;
                     IrAttachment.sudo().create(new_attach)
 
                 # clear the catch to applied our new theme effects.
-                self.env.registry.clear_cache()
+                self.env.transaction.invalidate_ormcache()
                 IrAttachment.regenerate_assets_bundles()
 
         return res

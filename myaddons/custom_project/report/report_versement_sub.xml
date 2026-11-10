@@ -53,7 +53,7 @@
                         <div style="text-align:center; font-weight:700; text-decoration:underline; margin-top:10px;">
                             <div style="font-size:14px">BON DE VERSEMENT</div>
                             <div style="font-size:15px; margin-top:6px;">
-                                <span t-esc="doc.name or '/'"/>
+                                <span t-out="doc.name or '/'"/>
                             </div>
                         </div>
                         <!-- Date à droite -->
@@ -68,7 +68,7 @@
                                 <tr>
                                     <td class="label">Sous-traitant :</td>
                                     <td>
-                                        <span t-esc="doc.subcontractor_id.name or ''"/>
+                                        <span t-out="doc.subcontractor_id.name or ''"/>
                                     </td>
                                 </tr>
                                 <tr>
@@ -76,7 +76,7 @@
                                     <td>
                                         <!-- adaptation si ton champ est nested -->
                                         <t t-if="doc.project_id">
-                                            <span t-esc="(doc.project_id.project_id.name)"/>
+                                            <span t-out="(doc.project_id.project_id.name)"/>
                                         </t>
                                         <t t-if="not doc.project_id">
                                             <span>-</span>
@@ -87,7 +87,7 @@
                                     <td class="label">Lot :</td>
                                     <td>
                                         <t t-foreach="doc.lots_id" t-as="lot" t-if="doc.lots_id">
-                                            <span t-esc="lot.name"/>
+                                            <span t-out="lot.name"/>
                                         </t>
                                         <t t-if="not doc.lots_id">-</t>
                                     </td>
@@ -101,7 +101,7 @@
                                         </div>
                                         <div class="amount-words">
                                             <strong>En lettres :</strong>
-                                            <span t-esc="doc.amount_en_words or ''"/>
+                                            <span t-out="doc.amount_en_words or ''"/>
                                         </div>
                                     </td>
                                 </tr>
@@ -112,7 +112,7 @@
                         <div class="objet">
                             <strong>Objet de versement :</strong>
                             <div style="margin-top:6px;">
-                                <t t-raw="doc.objet_versement or ''"/>
+                                <t t-out="doc.objet_versement or ''"/>
                             </div>
                         </div>
                         <br/><br/><br/><br/><br/>

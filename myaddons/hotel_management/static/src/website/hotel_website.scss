@@ -158,7 +158,7 @@
         border-radius: 12px;
         cursor: pointer;
         transition: border-color .15s ease, background .15s ease;
-        > .fa { font-size: 22px; color: #4b6cb7; }
+        > .oi { font-size: 22px; color: #4b6cb7; }
         .o_hotel_choice_title { font-weight: 600; }
         .o_hotel_choice_price { font-size: 13px; color: #6b7086; }
         &:hover { border-color: #b9c6ea; }
@@ -190,20 +190,20 @@
         font-size: 13px;
         cursor: pointer;
         transition: all .15s ease;
-        > .fa { font-size: 18px; color: #17a673; }
+        > .oi { font-size: 18px; color: #17a673; }
         &.o_hotel_bed_taken {
             border-color: #f5c0b7;
             background: #fdf1ef;
             color: #c0392b;
             cursor: not-allowed;
-            > .fa { color: #c0392b; }
+            > .oi { color: #c0392b; }
         }
     }
     .btn-check:checked + .o_hotel_bed_option {
         border-color: #17a673;
         background: #17a673;
         color: #fff;
-        > .fa { color: #fff; }
+        > .oi { color: #fff; }
     }
     // Lits masqués quand le client choisit la chambre entière
     form:has(#bt_room:checked) .o_hotel_bed_pick { display: none; }
@@ -254,8 +254,8 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
         cursor: pointer;
         &:hover { transform: translateY(-2px); text-decoration: none; }
-        .fa-arrow-right { transition: transform .2s ease; }
-        &:hover .fa-arrow-right { transform: translateX(3px); }
+        [data-icon='arrow_forward'] { transition: transform .2s ease; }
+        &:hover [data-icon='arrow_forward'] { transform: translateX(3px); }
     }
     .ah_btn_gold {
         background: linear-gradient(135deg, $ah-gold-2, $ah-gold);
@@ -326,7 +326,7 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         font-weight: 600;
         letter-spacing: .06em;
         text-transform: uppercase;
-        .fa { color: $ah-gold-2; }
+        .oi { color: $ah-gold-2; }
     }
     .ah_hero .ah_hero_title {
         color: $ah-on-dark;
@@ -375,7 +375,7 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         border-radius: 14px;
         cursor: pointer;
         min-width: 0;
-        > .fa { color: $ah-gold; font-size: 18px; }
+        > .oi { color: $ah-gold; font-size: 18px; }
         > span { display: flex; flex-direction: column; min-width: 0; width: 100%; }
         small {
             font-size: 11px;
@@ -468,7 +468,7 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         border: 1px solid $ah-line;
         transition: transform .25s ease, box-shadow .25s ease;
         &:hover { transform: translateX(4px); box-shadow: 0 12px 28px rgba($ah-ink, .07); }
-        > .fa {
+        > .oi {
             flex: 0 0 44px;
             height: 44px;
             display: flex; align-items: center; justify-content: center;
@@ -520,7 +520,7 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         letter-spacing: .1em;
         text-transform: uppercase;
         color: $ah-gold-dark;
-        .fa { margin-right: 4px; }
+        .oi { margin-right: 4px; }
     }
     .ah_badge_price {
         display: flex;
@@ -562,7 +562,7 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             padding: 0;
             margin: 10px 0 30px;
             li { padding: 7px 0; font-weight: 500; color: $ah-ink; }
-            .fa {
+            .oi {
                 width: 22px; height: 22px;
                 display: inline-flex; align-items: center; justify-content: center;
                 margin-right: 10px;
@@ -611,7 +611,7 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         h3 { color: $ah-on-dark; }
         > p { color: $ah-on-dark-soft; }
         ul li { color: $ah-on-dark; }
-        ul .fa { background: rgba($ah-gold-2, .22); color: $ah-gold-2; }
+        ul .oi { background: rgba($ah-gold-2, .22); color: $ah-gold-2; }
         .ah_offer_price strong { color: $ah-on-dark; }
         .ah_offer_price small { color: $ah-on-dark-soft; }
         .ah_offer_icon { background: rgba($ah-gold-2, .18); color: $ah-gold-2; }
@@ -685,8 +685,8 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
     }
     .ah_room_type { left: 16px; background: rgba(255, 255, 255, .96); color: $ah-ink; }
-    .ah_room_mode { right: 16px; background: $ah-ink; color: $ah-on-dark; .fa { color: $ah-gold-2; } }
-    .ah_room_mode.ah_mode_bed { background: $ah-gold-2; color: $ah-ink; .fa { color: $ah-ink; } }
+    .ah_room_mode { right: 16px; background: $ah-ink; color: $ah-on-dark; .oi { color: $ah-gold-2; } }
+    .ah_room_mode.ah_mode_bed { background: $ah-gold-2; color: $ah-ink; .oi { color: $ah-ink; } }
     .ah_room_body { padding: 22px 24px 20px; display: flex; flex-direction: column; flex: 1; }
     .ah_room_top {
         display: flex;
@@ -708,7 +708,7 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         margin: 10px 0 18px;
         font-size: 14px;
         color: $ah-muted;
-        .fa { color: $ah-gold-dark; margin-right: 3px; }
+        .oi { color: $ah-gold-dark; margin-right: 3px; }
     }
     .ah_room_foot {
         margin-top: auto;
@@ -722,7 +722,7 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         display: flex;
         align-items: center;
         gap: 8px;
-        .fa {
+        .oi {
             width: 32px; height: 32px;
             display: inline-flex; align-items: center; justify-content: center;
             border-radius: 10px;
@@ -809,7 +809,7 @@ $ah-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         font-weight: 600;
         transition: background .25s ease, border-color .25s ease, transform .25s ease;
         span { color: $ah-on-dark; }
-        .fa {
+        .oi {
             width: 44px; height: 44px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 12px;
@@ -959,7 +959,7 @@ footer#bottom.o_footer {
         display: flex;
         align-items: flex-start;
         gap: 12px;
-        .fa { color: $ah-gold-2; width: 18px; margin-top: 4px; text-align: center; }
+        .oi { color: $ah-gold-2; width: 18px; margin-top: 4px; text-align: center; }
     }
     .o_footer_copyright {
         background: rgba(0, 0, 0, .25);
@@ -1006,7 +1006,7 @@ footer#bottom.o_footer {
         border-color: $ah-line;
         .o_hotel_booking_price { color: $ah-ink; font-family: $ah-serif; }
     }
-    .o_hotel_choice_card > .fa { color: $ah-gold-dark; }
+    .o_hotel_choice_card > .oi { color: $ah-gold-dark; }
     .btn-check:checked + .o_hotel_choice_card { border-color: $ah-gold; background: #fdf7ea; }
 }
 
@@ -1185,7 +1185,7 @@ footer#bottom.o_footer {
         color: $ah-on-dark;
         font-weight: 600;
         font-size: 15px;
-        .fa { color: $ah-gold-2; margin-right: 6px; }
+        .oi { color: $ah-gold-2; margin-right: 6px; }
     }
     .ah_search_types {
         display: inline-flex;
@@ -1201,7 +1201,7 @@ footer#bottom.o_footer {
             color: $ah-on-dark-soft;
             font-size: 13px;
             font-weight: 500;
-            .fa { color: $ah-gold-2; }
+            .oi { color: $ah-gold-2; }
         }
     }
 
@@ -1235,7 +1235,7 @@ footer#bottom.o_footer {
     }
     .ah_float_info {
         padding: 12px 14px 14px;
-        span { display: block; color: $ah-on-dark-soft; font-size: 12.5px; font-weight: 500; .fa { color: $ah-gold-2; } }
+        span { display: block; color: $ah-on-dark-soft; font-size: 12.5px; font-weight: 500; .oi { color: $ah-gold-2; } }
         strong { display: block; color: $ah-on-dark; font-size: 16px; margin-top: 2px; }
         strong span { display: inline; font: inherit; color: inherit; }
         small { color: $ah-on-dark-soft; font-weight: 400; }
@@ -1309,7 +1309,7 @@ header .navbar-brand.logo .ah_logo_light { display: none !important; }
         }
     }
     .o_header_mobile_buttons_wrap, .o_header_mobile_buttons_wrap .btn,
-    .o_header_mobile_buttons_wrap .fa, .navbar-toggler { color: #fff !important; }
+    .o_header_mobile_buttons_wrap .oi, .navbar-toggler { color: #fff !important; }
 
     // Au défilement : bandeau bleu nuit en verre dépoli
     &.o_header_affixed > .navbar,
@@ -1375,7 +1375,7 @@ header .navbar-brand.logo .ah_logo_light { display: none !important; }
         font-size: 13.5px;
         font-weight: 600;
         box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
-        .fa { color: $ah-gold-dark; }
+        .oi { color: $ah-gold-dark; }
     }
     .ah_showcase_edit {
         position: absolute;
@@ -1466,14 +1466,14 @@ header .navbar-brand.logo .ah_logo_light { display: none !important; }
 // ---------------------------------------------------------------------
 .o_auberge_home {
     .ah_hero_stats strong span { font: inherit; }
-    .ah_showcase_facts .fa { color: $ah-gold-2; margin-right: 2px; }
+    .ah_showcase_facts .oi { color: $ah-gold-2; margin-right: 2px; }
     .ah_amenities { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
     .ah_section_dark .ah_amenity small {
         margin-top: -6px;
         font-size: 12.5px;
         font-weight: 500;
         color: $ah-on-dark-soft;
-        .fa {
+        .oi {
             width: auto; height: auto;
             display: inline;
             background: none;
@@ -1625,9 +1625,9 @@ header .navbar-brand.logo .ah_logo_light { display: none !important; }
         background: rgba(255, 255, 255, .94);
         color: $ah-ink;
         box-shadow: 0 8px 20px rgba(0, 0, 0, .2);
-        .fa { color: $ah-gold-dark; }
+        .oi { color: $ah-gold-dark; }
     }
-    .ah_type_mode_bed { background: $ah-gold-2; .fa { color: $ah-ink; } }
+    .ah_type_mode_bed { background: $ah-gold-2; .oi { color: $ah-ink; } }
 
     .ah_type_body {
         position: absolute;
@@ -1650,7 +1650,7 @@ header .navbar-brand.logo .ah_logo_light { display: none !important; }
         gap: 6px 14px;
         font-size: 14px;
         color: $ah-on-dark-soft;
-        .fa { color: $ah-gold-2; margin-right: 4px; }
+        .oi { color: $ah-gold-2; margin-right: 4px; }
     }
     // Description et équipements dévoilés au survol
     .ah_type_more {
@@ -1682,7 +1682,7 @@ header .navbar-brand.logo .ah_logo_light { display: none !important; }
             color: $ah-on-dark;
             font-size: 12px;
         }
-        .fa { color: $ah-gold-2; }
+        .oi { color: $ah-gold-2; }
     }
     .ah_type_foot {
         display: flex;

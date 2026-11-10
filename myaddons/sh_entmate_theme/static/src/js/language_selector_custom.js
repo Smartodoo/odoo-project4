@@ -1,10 +1,11 @@
 /* @odoo-module */
+import { user } from "@web/core/user";
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, onWillStart, proxy, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { session } from "@web/session";
-import { jsonrpc } from "@web/core/network/rpc_service";
+import { rpc } from "@web/core/network/rpc";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
@@ -15,14 +16,17 @@ export class LanguageTemplate extends Component {
        setup() {
             this.actionService = useService("action");
             this.orm = useService("orm");
-            this.onWillStart()
-            this.fetch_sh_get_installed_lang()
+            this.state = proxy({ languages_list: [], selected_lang: user.context.lang });
+            onWillStart(async () => {
+                await this.check_language_enabled();
+                await this.fetch_sh_get_installed_lang();
+            });
         }
 
-       async onWillStart() {
+       async check_language_enabled() {
             const data = await this.orm.searchRead(
             "res.users",
-            [['id', '=', session.uid]],
+            [['id', '=', user.userId]],
             ["sh_enable_language_selection"]
             );
 
@@ -34,20 +38,18 @@ export class LanguageTemplate extends Component {
        }
 
        async fetch_sh_get_installed_lang() {
-            var self = this;
-            jsonrpc("/web/dataset/call_kw/res.lang/sh_get_installed_lang", {
+            const languages = await rpc("/web/dataset/call_kw/res.lang/sh_get_installed_lang", {
                     model: 'res.lang',
                     method: 'sh_get_installed_lang',
                     args: [],
                     kwargs: {},
-                }).then(function (languages) {
-                    self.languages_list = languages
-                    self.selected_lang = session.user_context.lang
-                    });
+                });
+            this.state.languages_list = languages || [];
+            this.state.selected_lang = user.context.lang;
        }
 
-       onBeforeOpen() {
-        this.fetch_sh_get_installed_lang();
+       async onBeforeOpen() {
+        await this.fetch_sh_get_installed_lang();
         }
 
        change_sh_user_lang(e){
@@ -55,7 +57,7 @@ export class LanguageTemplate extends Component {
             var lang = e[0]
             var self = this;
 
-            this.orm.write("res.users", [parseInt(session.user_context.uid)], { 'lang': lang }).then(function () {
+            this.orm.write("res.users", [parseInt(user.userId)], { 'lang': lang }).then(function () {
             self.actionService.doAction({
                         name: 'Reload Context',
                         type: 'ir.actions.client',

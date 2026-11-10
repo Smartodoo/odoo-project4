@@ -2,13 +2,13 @@
 
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, onWillStart, proxy } from "@odoo/owl";
 
 export class HotelDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.state = useState({ data: null, loading: true });
+        this.state = proxy({ data: null, loading: true });
         onWillStart(() => this.loadData());
     }
 

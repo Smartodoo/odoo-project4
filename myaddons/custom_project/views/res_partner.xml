@@ -47,7 +47,7 @@
                             </group>
                             <field name="task_line_ids" nolabel="1" options="{'limit': 10000}"
                                    widget="section_and_note_one2many">
-                                <tree editable="bottom" infinite="1" nolabel="1"
+                                <list editable="bottom" infinite="1" nolabel="1"
                                       default_order="task_id_import_source,no"
                                       decoration-success="task_id_import_source == 'primary' and not quantity_exceeds"
                                       decoration-danger="quantity_exceeds"
@@ -67,7 +67,7 @@
                                     <field name="amount_distributed" optional="hide"/>
                                     <field name="total_price" optional="show"/>
                                     <field name="task_id_import_source" column_invisible="1"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -146,11 +146,11 @@
         <field name="name">project.associated.tree</field>
         <field name="model">projects.associated</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="project_id"/>
                 <field name="client_id"/>
                 <field name="state"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -162,7 +162,7 @@
         </field>
         <field name="domain">[('original_subcontractor_id', '=', context.get('default_original_subcontractor_id'))]
         </field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <!-- Vue héritée de res.partner -->
@@ -194,7 +194,7 @@
                         string="Convention"
                         type="action"
                         class="oe_stat_button"
-                        context="{'default_original_subcontractor_id': active_id}"
+                        context="{'default_original_subcontractor_id': id}"
                         invisible="contact_type != 'SUBCONTRACTOR'"
                         groups="base.group_user">
                     <field name="nombre_projets" widget="statinfo"/>
@@ -203,7 +203,7 @@
                         string="Engagments"
                         type="object"
                         class="oe_stat_button"
-                        context="{'default_original_subcontractor_id': active_id}"
+                        context="{'default_original_subcontractor_id': id}"
                         groups="base.group_user" invisible="is_company != False">
                     <field name="nombre_projets" widget="statinfo" string="Engagments"/>
                 </button>
@@ -229,7 +229,7 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_tree"/>
         <field name="arch" type="xml">
-            <xpath expr="//tree" position="inside">
+            <xpath expr="//list" position="inside">
                 <field name="nombre_projets"/>
                 <field name="nombre_situations"/>
             </xpath>
@@ -241,12 +241,12 @@
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
             <!-- Add order-level category filter -->
-            <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="before">
+            <xpath expr="//field[@name='order_line']/list//field[@name='product_id']" position="before">
                 <field name="product_category_id"/>
             </xpath>
 
             <!-- داخل order_line form: عيّن attributes لحقل product_id (domain/context) -->
-            <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="replace">
+            <xpath expr="//field[@name='order_line']/list//field[@name='product_id']" position="replace">
                 <field name="product_id"/>
                 <!--                <attribute name="domain">[('purchase_ok', '=', True), ('categ_id', '=', product_category_id)]</attribute>-->
                 <!--                <attribute name="context">{'search_default_categ_id': parent.product_category_id}</attribute>-->

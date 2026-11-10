@@ -73,8 +73,6 @@
     'depends': ['base', 'mail', 'website', 'portal'],
     'data': [
         # Sécurité
-        'security/ir.model.access.csv',
-        'security/rental_security.xml',
 
         # Données de base
         'data/ir_sequence_data.xml',
@@ -96,6 +94,7 @@
         'views/public_templates.xml',
         'views/report_templates.xml',
         'views/portal_templates.xml',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [

@@ -5,7 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 var sh_disable_auto_edit_model = false
 import { session } from "@web/session";
-import { jsonrpc } from "@web/core/network/rpc_service";
+import { rpc } from "@web/core/network/rpc";
 import { Component, onRendered, useEffect, useRef, useState } from "@odoo/owl";
 import { useModel } from "@web/model/model";
 

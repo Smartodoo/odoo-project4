@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='internal_notes']" position="after">
-                <page string="🏠 Profil Locataire" invisible="is_tenant == False and company_type == 'company'">
+                <page string="🏠 Profil Locataire" invisible="not is_tenant and is_company">
                     <group>
                         <group string="🆔 Identité">
                             <field name="is_tenant" widget="boolean_toggle"/>
@@ -47,7 +47,7 @@
     <record id="action_tenants" model="ir.actions.act_window">
         <field name="name">👥 Locataires</field>
         <field name="res_model">res.partner</field>
-        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="domain">[('is_tenant', '=', True)]</field>
         <field name="context">{'default_is_tenant': True}</field>
     </record>

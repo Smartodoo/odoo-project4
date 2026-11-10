@@ -275,16 +275,16 @@
         input[type="radio"]{
             &:checked{
                 +{
-                    .fa {display: inline-block;}
+                    .oi {display: inline-block;}
                 }
             }
         }
     } 
     .theme_style_box{
-        .fa {position: absolute;right: -5px;top: -5px;z-index: 1;display: none;color: $primaryColor;}
+        .oi {position: absolute;right: -5px;top: -5px;z-index: 1;display: none;color: $primaryColor;}
     } 
     .pre_theme_color_box{
-        .fa {position: absolute;right: -5px;top: -5px;z-index: 1;display: none;color: $primaryColor;}
+        .oi {position: absolute;right: -5px;top: -5px;z-index: 1;display: none;color: $primaryColor;}
     } 
     .theme_color_box {position: relative;cursor: pointer;margin-bottom: 0;}
     .theme_color_box{
@@ -300,7 +300,7 @@
         input[type="radio"]{
             &:checked{
                 +{
-                    .fa {display: inline-block;}
+                    .oi {display: inline-block;}
                 }
 
             }
@@ -311,14 +311,14 @@
         input[type="radio"]{
             &:checked{
                 +{
-                    .fa {display: inline-block;}
+                    .oi {display: inline-block;}
                 }
 
             }
 
         }
     } 
-    .theme_color_box .fa {position: absolute;right: -5px;top: -5px;z-index: 1;display: none;color: $primaryColor;}
+    .theme_color_box .oi {position: absolute;right: -5px;top: -5px;z-index: 1;display: none;color: $primaryColor;}
     .sh_sidebar_box{
         width: 85px;height: 48px;border-radius: 4px;
     }
@@ -333,7 +333,7 @@
     .sh_theme_design {width:100%;}
     
     .sh_theme_design {
-        i.fa {
+        i.oi {
             &:before {
                 content: "\f056";
                 content: "\f068";
@@ -358,7 +358,7 @@
         margin-bottom: 10px;
     }
     .sh_theme_design.collapsed {
-        i.fa {
+        i.oi {
             &:before {
                 content: "\f055";
                 content: "\f067";
@@ -382,7 +382,7 @@
             }
             li {
                 .theme_style_box {
-                    i.fa {
+                    i.oi {
                         color: #333;
                         font-size: 20px !important;
                     }
@@ -400,7 +400,7 @@
             }
             li {
                 .theme_style_box {
-                    i.fa {
+                    i.oi {
                         color: #333;
                         font-size: 20px !important;
                     }
@@ -408,7 +408,7 @@
             }
         }
         .theme_color_box {
-            .fa {
+            .oi {
                 color: #fff;
                 right: auto;
                 left: 50%;
@@ -461,7 +461,7 @@
     }
     #pre_theme_color_id {
         .pre_theme_color_box {
-            .fa {
+            .oi {
                 color: #2c3782;
                 right: auto;
                 left: 50%;
@@ -478,7 +478,7 @@
         input[type="radio"] {
             &:checked {
                 + {
-                    .fa-check {
+                    [data-icon='check'] {
                         font-size: 15px !important;
                     }
                     span {

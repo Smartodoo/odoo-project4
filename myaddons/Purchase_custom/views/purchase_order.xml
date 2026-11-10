@@ -33,7 +33,7 @@
                 <attribute name="invisible">1</attribute>
             </xpath>
 
-            <xpath expr="//button[@name='action_create_invoice']" position="replace">
+            <xpath expr="//header" position="inside">
                 <button name="action_create_invoice" string="Create Bill" type="object" class="oe_highlight"
                         context="{'create_bill':True}"
                         invisible="state not in ('purchase', 'done') or invoice_status in ('no', 'invoiced') or show_payment_button_purchase != True"
@@ -64,14 +64,14 @@
                         context="{'create': 0, 'edit': 0}"
                         class="oe_stat_button"
                         invisible="show_payment_button_purchase != True"
-                        icon="fa-credit-card">
+                        icon="credit_card">
                     <div class="o_stat_info">
                         <field name="payment_count_purchase" widget="statinfo" string="Paiements"/>
                     </div>
                 </button>
                 <button type="object" name="action_preview_bon_commande"
                         class="oe_stat_button"
-                        icon="fa-eye">
+                        icon="visibility">
                     <span class="o_stat_text">Aperçu Bon de Commande</span>
                 </button>
             </xpath>
@@ -101,7 +101,7 @@
         <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
         <field name="arch" type="xml">
             <!-- Supprimer le dashboard KPIs en haut de la liste -->
-            <xpath expr="//tree" position="attributes">
+            <xpath expr="//list" position="attributes">
                 <attribute name="js_class"></attribute>
                 <attribute name="sample">0</attribute>
             </xpath>

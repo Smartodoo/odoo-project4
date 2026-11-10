@@ -6,7 +6,6 @@
         <field name="model">property.rental</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">rental_management.report_contract_template</field>
-        <field name="report_file">rental_management.report_contract_template</field>
         <field name="print_report_name">'Contrat - %s' % (object.name)</field>
         <field name="binding_model_id" ref="model_property_rental"/>
         <field name="binding_type">report</field>
@@ -128,7 +127,6 @@
         <field name="model">property.rental</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">rental_management.report_quittance_template</field>
-        <field name="report_file">rental_management.report_quittance_template</field>
         <field name="print_report_name">'Quittance - %s' % (object.name)</field>
         <field name="binding_model_id" ref="model_property_rental"/>
         <field name="binding_type">report</field>
@@ -178,7 +176,7 @@
                                     DA
                                 </strong>
                                 <t t-if="doc.amount_paid">
-                                    (<span t-esc="res_company.currency_id.amount_to_text(doc.amount_paid)"/>)
+                                    (<span t-out="res_company.currency_id.amount_to_text(doc.amount_paid)"/>)
                                 </t>
                             </p>
 
@@ -218,7 +216,7 @@
                                                 <span t-field="res_company.city"/>
                                             </strong>
                                             , le
-                                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                                            <span t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
                                         </p>
                                         <div style="margin-top: 20px;">
                                             <p>

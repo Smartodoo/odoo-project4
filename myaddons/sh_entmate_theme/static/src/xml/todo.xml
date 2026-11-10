@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <template>
     <t t-name="ToDoTemplate">
-        <t t-if="sh_enable_todo_mode">
+        <t t-if="this.sh_enable_todo_mode">
             <div class="todo">
-                <span class="float-right fa fa-tasks" id="todo_icon" t-on-click="_click_todo" style="font-size: 16px !important;"/>
+                <span class="oi float-right" data-icon="checklist" id="todo_icon" t-on-click="this._click_todo" style="font-size: 16px !important;"/>
                 <!--            <a class="float-right" role="button">-->
                 <!--            </a>-->
             </div>
@@ -14,14 +14,14 @@
         <div class="todo_layout" id="todo_layout">
             <div class="theme_header">
                 <h3>To Do</h3>
-                <i class="fa fa-close close_todo_setting" t-on-click="_close_todo"></i>
+                <i class="oi close_todo_setting" data-icon="close" t-on-click="this._close_todo"></i>
             </div>
             <div class="add_todo_section">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control sh_add_todo_input" required="required" t-on-keydown="add_todo"
+                    <input type="text" class="form-control sh_add_todo_input" required="required" t-on-keydown="this.add_todo"
                            placeholder="Add To Do..." aria-label="Add To Do..." aria-describedby="basic-addon2"/>
                     <div class="input-group-append">
-                        <button class="btn btn-primary sh_add_todo" t-on-click="_click_add_todo" type="button">Add
+                        <button class="btn btn-primary sh_add_todo" t-on-click="this._click_add_todo" type="button">Add
                         </button>
                     </div>
                 </div>

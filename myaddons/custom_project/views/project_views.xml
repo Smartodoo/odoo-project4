@@ -22,10 +22,10 @@
         <field name="name">custom.stock.tree</field>
         <field name="model">custom.stock</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="product_id"/>
                 <field name="quantity"/>
-            </tree>
+            </list>
         </field>
     </record>
     <record id="view_custom_stock_search" model="ir.ui.view">
@@ -56,7 +56,7 @@
                             string="Situation finale"
                             type="action"
                             class="oe_stat_button"
-                            context="{'default_project_id': active_id}"
+                            context="{'default_project_id': id}"
                     />
 
                 </header>
@@ -70,7 +70,7 @@
                         </button>
                         <button
                                 class="oe_stat_button"
-                                icon="fa-bar-chart"
+                                icon="bar_chart"
                                 type="object"
                                 name="action_view_consumptions">
                             <div class="o_stat_info">
@@ -79,14 +79,14 @@
                             </div>
                         </button>
                         <button name="open_custom_stock" string="Articles de stock" type="object"
-                                class="oe_stat_button" icon="fa-cubes">
+                                class="oe_stat_button" icon="inventory_2">
                             <field name="nombre_stock_article" widget="statinfo"/>
                         </button>
 <!--                        <button name="action_view_observations" type="object" string="Observations"-->
-<!--                                class="oe_stat_button" icon="fa-comments">-->
+<!--                                class="oe_stat_button" icon="forum" icon_class="oi-filled">-->
 <!--                            <field name="observation_count" widget="statinfo" string="Observations"/>-->
 <!--                        </button>-->
-                        <button name="action_view_observations" type="object" class="oe_stat_button" icon="fa-comments">
+                        <button name="action_view_observations" type="object" class="oe_stat_button" icon="forum" icon_class="oi-filled">
                             <div class="o_stat_info">
 <!--                                <field name="observation_count" widget="statinfo" string="Observations"/>-->
                                 <field name="open_observation_count" widget="statinfo" string="Prevision"/>
@@ -123,7 +123,7 @@
                             <div style="padding: 20px; background: #f8fafc; min-height: 400px;">
                                 <!-- Compact Header -->
                                 <div style="display: flex; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
-                                    <i class="fa fa-file-excel-o" style="font-size: 24px; color: #059669; margin-right: 12px;"/>
+                                    <i class="oi" data-icon="table_chart" style="font-size: 24px; color: #059669; margin-right: 12px;"/>
                                     <div>
                                         <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1e293b;">Importation Excel</h3>
                                         <span style="font-size: 13px; color: #64748b;">Chargez vos fichiers de données</span>
@@ -137,13 +137,13 @@
                                     <div style="flex: 1; min-width: 280px; background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
                                         <div style="display: flex; align-items: center; margin-bottom: 16px;">
                                             <span style="background: #ede9fe; color: #7c3aed; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                                                <i class="fa fa-cogs" style="margin-right: 5px;"/>SERVICES
+                                                <i class="oi" data-icon="settings_applications" style="margin-right: 5px;"/>SERVICES
                                             </span>
                                         </div>
 
                                         <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; margin-bottom: 14px;">
                                             <div style="display: flex; align-items: center; gap: 10px;">
-                                                <i class="fa fa-file-o" style="color: #94a3b8; font-size: 18px;"/>
+                                                <i class="oi" data-icon="description" style="color: #94a3b8; font-size: 18px;"/>
                                                 <div style="flex: 1;">
                                                     <field name="import_file" filename="import_filename" widget="binary"/>
                                                     <field name="import_filename" readonly="1" class="text-muted" style="font-size: 11px;"/>
@@ -154,7 +154,7 @@
                                         <button name="import_excel_file" type="object"
                                                 class="btn btn-sm"
                                                 style="background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;">
-                                            <i class="fa fa-upload" style="margin-right: 6px;"/>Importer
+                                            <i class="oi" data-icon="upload" style="margin-right: 6px;"/>Importer
                                         </button>
                                     </div>
 
@@ -162,13 +162,13 @@
                                     <div style="flex: 1; min-width: 280px; background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;" invisible="is_internal != True">
                                         <div style="display: flex; align-items: center; margin-bottom: 16px;">
                                             <span style="background: #d1fae5; color: #059669; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                                                <i class="fa fa-home" style="margin-right: 5px;"/>LOGEMENTS
+                                                <i class="oi" data-icon="home" style="margin-right: 5px;"/>LOGEMENTS
                                             </span>
                                         </div>
 
                                         <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; margin-bottom: 14px;">
                                             <div style="display: flex; align-items: center; gap: 10px;">
-                                                <i class="fa fa-file-o" style="color: #94a3b8; font-size: 18px;"/>
+                                                <i class="oi" data-icon="description" style="color: #94a3b8; font-size: 18px;"/>
                                                 <div style="flex: 1;">
                                                     <field name="import_other_file" filename="import_other_filename" widget="binary" invisible="is_internal != True"/>
                                                     <field name="import_other_filename" readonly="1" invisible="is_internal != True" class="text-muted" style="font-size: 11px;"/>
@@ -179,14 +179,14 @@
                                         <button name="action_import_other_file" type="object"
                                                 class="btn btn-sm" invisible="is_internal != True"
                                                 style="background: #059669; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;">
-                                            <i class="fa fa-upload" style="margin-right: 6px;"/>Importer
+                                            <i class="oi" data-icon="upload" style="margin-right: 6px;"/>Importer
                                         </button>
                                     </div>
                                 </div>
 
                                 <!-- Compact Tips -->
                                 <div style="margin-top: 20px; padding: 12px 16px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
-                                    <i class="fa fa-lightbulb-o" style="color: #d97706; font-size: 16px;"/>
+                                    <i class="oi" data-icon="lightbulb" style="color: #d97706; font-size: 16px;"/>
                                     <span style="font-size: 13px; color: #92400e;">Format requis: Excel (.xlsx) avec les colonnes correspondantes au modèle</span>
                                 </div>
                             </div>
@@ -207,7 +207,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
-                                                <i class="fa fa-calculator" style="font-size: 20px;"/>
+                                                <i class="oi" data-icon="calculate" style="font-size: 20px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -221,7 +221,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
-                                                <i class="fa fa-percent" style="font-size: 20px;"/>
+                                                <i class="oi" data-icon="percent" style="font-size: 20px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -235,7 +235,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
-                                                <i class="fa fa-money" style="font-size: 20px;"/>
+                                                <i class="oi" data-icon="payments" style="font-size: 20px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -244,7 +244,7 @@
                                 <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                                     <div style="display: flex; align-items: center; margin-bottom: 15px;">
                                         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 10px 12px; margin-right: 12px;">
-                                            <i class="fa fa-list-alt" style="color: white; font-size: 18px;"/>
+                                            <i class="oi" data-icon="list_alt" style="color: white; font-size: 18px;"/>
                                         </div>
                                         <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #2d3436;">Détail des Services</h3>
                                     </div>
@@ -271,7 +271,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
-                                                <i class="fa fa-home" style="font-size: 20px;"/>
+                                                <i class="oi" data-icon="home" style="font-size: 20px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -285,7 +285,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
-                                                <i class="fa fa-percent" style="font-size: 20px;"/>
+                                                <i class="oi" data-icon="percent" style="font-size: 20px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -299,7 +299,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 10px;">
-                                                <i class="fa fa-money" style="font-size: 20px;"/>
+                                                <i class="oi" data-icon="payments" style="font-size: 20px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -308,7 +308,7 @@
                                 <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                                     <div style="display: flex; align-items: center; margin-bottom: 15px;">
                                         <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; padding: 10px 12px; margin-right: 12px;">
-                                            <i class="fa fa-building" style="color: white; font-size: 18px;"/>
+                                            <i class="oi" data-icon="business" style="color: white; font-size: 18px;"/>
                                         </div>
                                         <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #2d3436;">Détail des Logments</h3>
                                     </div>
@@ -334,7 +334,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px;">
-                                                <i class="fa fa-money" style="font-size: 24px;"/>
+                                                <i class="oi" data-icon="payments" style="font-size: 24px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -348,7 +348,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px;">
-                                                <i class="fa fa-check-circle" style="font-size: 24px;"/>
+                                                <i class="oi oi-filled" data-icon="check_circle" style="font-size: 24px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -362,7 +362,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px;">
-                                                <i class="fa fa-hourglass-half" style="font-size: 24px;"/>
+                                                <i class="oi" data-icon="hourglass_bottom" style="font-size: 24px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -376,7 +376,7 @@
                                                 </div>
                                             </div>
                                             <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px;">
-                                                <i class="fa fa-file-text-o" style="font-size: 24px;"/>
+                                                <i class="oi" data-icon="article" style="font-size: 24px;"/>
                                             </div>
                                         </div>
                                     </div>
@@ -398,8 +398,8 @@
                                         <field name="progress" widget="progressbar" options="{'editable': false}"/>
                                     </div>
                                     <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 13px; color: #636e72;">
-                                        <span><i class="fa fa-flag-o" style="margin-right: 5px;"/> Début: 0%</span>
-                                        <span><i class="fa fa-flag-checkered" style="margin-right: 5px;"/> Objectif: 100%</span>
+                                        <span><i class="oi" data-icon="flag" style="margin-right: 5px;"/> Début: 0%</span>
+                                        <span><i class="oi" data-icon="sports_score" style="margin-right: 5px;"/> Objectif: 100%</span>
                                     </div>
                                 </div>
 
@@ -408,7 +408,7 @@
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                                         <div style="display: flex; align-items: center;">
                                             <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 14px; padding: 14px; margin-right: 15px; box-shadow: 0 8px 20px rgba(240, 147, 251, 0.3);">
-                                                <i class="fa fa-table" style="color: white; font-size: 22px;"/>
+                                                <i class="oi" data-icon="table_chart" style="color: white; font-size: 22px;"/>
                                             </div>
                                             <div>
                                                 <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #2d3436;">Situation Finale</h3>
@@ -416,14 +416,14 @@
                                             </div>
                                         </div>
                                         <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 16px; box-shadow: 0 6px 15px rgba(240, 147, 251, 0.3);">
-                                            <i class="fa fa-list-ol" style="margin-right: 8px;"/>
+                                            <i class="oi" data-icon="format_list_numbered" style="margin-right: 8px;"/>
                                             <field name="situation_final_count"/> lignes
                                         </div>
                                     </div>
                                     <!-- Table Container with Modern Styling -->
                                     <div style="border-radius: 16px; overflow: hidden; border: 1px solid #e9ecef;">
                                         <field name="situation_final_ids" nolabel="1" readonly="1">
-                                            <tree decoration-success="difference1 &gt;= 0" decoration-danger="difference1 &lt; 0" style="font-size: 14px;">
+                                            <list decoration-success="difference1 &gt;= 0" decoration-danger="difference1 &lt; 0" style="font-size: 14px;">
                                                 <field name="designation2" string="Désignation"/>
                                                 <field name="quantity_marche" string="Qté Marché" sum="Total"/>
                                                 <field name="quantity_cumulee" string="Qté Cumulée" sum="Total"/>
@@ -432,7 +432,7 @@
                                                 <field name="difference1" string="Diff. Qté" sum="Total"/>
                                                 <field name="difference2" string="Diff. Montant" sum="Total" widget="monetary"/>
                                                 <field name="progress_percentage" string="Avancement" widget="progressbar"/>
-                                            </tree>
+                                            </list>
                                         </field>
                                     </div>
                                     <!-- Legend -->
@@ -451,10 +451,10 @@
                                 <!-- Action Buttons -->
                                 <div style="display: flex; gap: 15px; margin-top: 20px;">
                                     <button name="action_view_situations" type="object" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600;">
-                                        <i class="fa fa-list" style="margin-right: 8px;"/> Voir les Situations
+                                        <i class="oi" data-icon="format_list_bulleted" style="margin-right: 8px;"/> Voir les Situations
                                     </button>
-                                    <button name="%(custom_project.action_open_view_situation_final)d" type="action" class="btn btn-secondary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600; color: white;" context="{'default_project_id': active_id}">
-                                        <i class="fa fa-table" style="margin-right: 8px;"/> Gérer Situation Finale
+                                    <button name="%(custom_project.action_open_view_situation_final)d" type="action" class="btn btn-secondary" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600; color: white;" context="{'default_project_id': id}">
+                                        <i class="oi" data-icon="table_chart" style="margin-right: 8px;"/> Gérer Situation Finale
                                     </button>
                                 </div>
                             </div>
@@ -475,7 +475,7 @@
         <field name="name">custom.project.tree.intern</field>
         <field name="model">custom.project</field>
         <field name="arch" type="xml">
-            <tree decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-muted="state == 'cancelled'" decoration-bf="state == 'done'">
+            <list decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-muted="state == 'cancelled'" decoration-bf="state == 'done'">
                 <field name="name"/>
                 <field name="client_id"/>
                 <field name="total_intern" sum="Total"/>
@@ -485,7 +485,7 @@
                 <field name="situation_count"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-warning="state == 'done'" decoration-danger="state == 'cancelled'"/>
                 <field name="currency_id" invisible="1"/>
-            </tree>
+            </list>
 
         </field>
     </record>
@@ -524,8 +524,8 @@
                 <field name="currency_id"/>
                 <field name="is_internal"/>
                 <templates>
-                    <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_card oe_kanban_global_click #{kanban_color(record.color.raw_value)}">
+                    <t t-name="card">
+                        <div t-attf-class="oe_kanban_card #{'oe_kanban_color_' + (record.color.raw_value or 0)}">
                             <div class="oe_kanban_content">
                                 <div class="o_kanban_record_top">
                                     <div class="o_kanban_record_headings">
@@ -553,7 +553,7 @@
                                 <div class="o_kanban_record_bottom">
                                     <div class="oe_kanban_bottom_left">
                                         <span class="badge rounded-pill">
-                                            <i class="fa fa-file-text-o"/> <field name="situation_count"/> Situations
+                                            <i class="oi" data-icon="article"/> <field name="situation_count"/> Situations
                                         </span>
                                     </div>
                                     <div class="oe_kanban_bottom_right">
@@ -593,18 +593,18 @@
         </field>
     </record>
 
-    <!-- Simplified Tree View for Initial Info Only -->
+    <!-- Simplified List View for Initial Info Only -->
     <record id="view_custom_project_tree_initial_info" model="ir.ui.view">
         <field name="name">custom.project.tree.initial.info</field>
         <field name="model">custom.project</field>
         <field name="priority">50</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name"/>
                 <field name="is_internal" string="Interne" widget="boolean_toggle"/>
                 <field name="client_id"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -613,9 +613,9 @@
         <field name="name">Projets - Informations Initiales</field>
         <field name="res_model">custom.project</field>
         <field name="domain">[('state', '=', 'draft')]</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="view_ids" eval="[(5, 0, 0),
-            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_custom_project_tree_initial_info')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_custom_project_tree_initial_info')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_custom_project_form_initial_info')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -653,7 +653,7 @@
                                 class="oe_stat_button">
                             <field name="nombre_achat" widget="statinfo"/>
                         </button>
-                        <button class="oe_stat_button" icon="fa-bar-chart" type="object"
+                        <button class="oe_stat_button" icon="bar_chart" type="object"
                                 name="action_view_consumptions">
                             <div class="o_stat_info">
                                 <field name="consumption_count" widget="statinfo" string="Consommations"/>
@@ -703,13 +703,13 @@
                                 </group>
                             </group>
                             <field name="situation_final_ids" readonly="1">
-                                <tree>
+                                <list>
                                     <field name="designation2"/>
                                     <field name="quantity_marche" sum="Total"/>
                                     <field name="quantity_cumulee" sum="Total"/>
                                     <field name="montant_marche" sum="Total" widget="monetary"/>
                                     <field name="montant_cumulee" sum="Total" widget="monetary"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                         <page string="Description">
@@ -722,13 +722,13 @@
         </field>
     </record>
 
-    <!-- Read-Only Tree View -->
+    <!-- Read-Only List View -->
     <record id="view_custom_project_tree_readonly" model="ir.ui.view">
         <field name="name">custom.project.tree.readonly</field>
         <field name="model">custom.project</field>
         <field name="priority">60</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false" delete="false">
+            <list create="false" edit="false" delete="false">
                 <field name="name"/>
                 <field name="is_internal" string="Interne"/>
                 <field name="client_id"/>
@@ -737,7 +737,7 @@
                 <field name="total_remaining" sum="Restant"/>
                 <field name="progress" widget="progressbar"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'" decoration-warning="state == 'done'" decoration-danger="state == 'cancelled'"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -745,9 +745,9 @@
     <record id="action_custom_project_readonly" model="ir.actions.act_window">
         <field name="name">Projets (Consultation)</field>
         <field name="res_model">custom.project</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="view_ids" eval="[(5, 0, 0),
-            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_custom_project_tree_readonly')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_custom_project_tree_readonly')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_custom_project_form_readonly')})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

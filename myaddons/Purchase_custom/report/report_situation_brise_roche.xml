@@ -7,7 +7,6 @@
             <field name="model">situation.brise.roche</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">Purchase_custom.report_situation_brise_roche_document</field>
-            <field name="report_file">Purchase_custom.report_situation_brise_roche_document</field>
             <field name="binding_model_id" ref="model_situation_brise_roche"/>
             <field name="binding_type">report</field>
             <field name="print_report_name">'Situation_Brise_Roche_%s' % (object.name or '').replace('/', '_')</field>
@@ -63,21 +62,21 @@
                                 <div class="col-4">
                                     <div class="sbr-info-card">
                                         <span class="label">Référence</span>
-                                        <span class="value" t-esc="o.name or '—'"/>
+                                        <span class="value" t-out="o.name or '—'"/>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="sbr-info-card">
                                         <span class="label">Date</span>
                                         <span class="value">
-                                            <t t-esc="o.date.strftime('%d/%m/%Y') if o.date else '—'"/>
+                                            <t t-out="o.date.strftime('%d/%m/%Y') if o.date else '—'"/>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="sbr-info-card">
                                         <span class="label">N° Bon</span>
-                                        <span class="value" t-esc="o.n_bon or '—'"/>
+                                        <span class="value" t-out="o.n_bon or '—'"/>
                                     </div>
                                 </div>
                             </div>
@@ -88,25 +87,25 @@
                                 <div class="col-6">
                                     <div class="sbr-info-card">
                                         <span class="label">Type d'engin</span>
-                                        <span class="value" t-esc="o.type_engin or '—'"/>
+                                        <span class="value" t-out="o.type_engin or '—'"/>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="sbr-info-card">
                                         <span class="label">Engin</span>
-                                        <span class="value" t-esc="o.engin or '—'"/>
+                                        <span class="value" t-out="o.engin or '—'"/>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="sbr-info-card">
                                         <span class="label">Projet</span>
-                                        <span class="value" t-esc="o.project_id.name or '—'"/>
+                                        <span class="value" t-out="o.project_id.name or '—'"/>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="sbr-info-card">
                                         <span class="label">Sous-traitant</span>
-                                        <span class="value" t-esc="o.sous_traitant_id.name or '—'"/>
+                                        <span class="value" t-out="o.sous_traitant_id.name or '—'"/>
                                     </div>
                                 </div>
                             </div>
@@ -125,17 +124,17 @@
                                 <tbody>
                                     <tr>
                                         <td>
-                                            <strong t-esc="o.engin or 'Brise Roche'"/>
-                                            <t t-if="o.type_engin"> — <span t-esc="o.type_engin"/></t>
+                                            <strong t-out="o.engin or 'Brise Roche'"/>
+                                            <t t-if="o.type_engin"> — <span t-out="o.type_engin"/></t>
                                         </td>
                                         <td style="text-align:right;">
-                                            <t t-esc="'%.2f' % (o.nombre_heures or 0.0)"/> h
+                                            <t t-out="'%.2f' % (o.nombre_heures or 0.0)"/> h
                                         </td>
                                         <td style="text-align:right;">
-                                            <t t-esc="'%.2f' % (o.total_journalite or 0.0)"/>
+                                            <t t-out="'%.2f' % (o.total_journalite or 0.0)"/>
                                         </td>
                                         <td style="text-align:right;">
-                                            <t t-esc="'%.2f' % (o.prix_unitaire_jour or 0.0)"/>
+                                            <t t-out="'%.2f' % (o.prix_unitaire_jour or 0.0)"/>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -144,14 +143,14 @@
                             <!-- ===== Total ===== -->
                             <div class="sbr-totaux">
                                 MONTANT TOTAL :
-                                <t t-esc="'%.2f' % (o.montant or 0.0)"/> DA
+                                <t t-out="'%.2f' % (o.montant or 0.0)"/> DA
                             </div>
 
                             <!-- ===== Observation ===== -->
                             <t t-if="o.observation">
                                 <div class="sbr-section-title">Observation</div>
                                 <div class="sbr-observation">
-                                    <span t-esc="o.observation"/>
+                                    <span t-out="o.observation"/>
                                 </div>
                             </t>
 

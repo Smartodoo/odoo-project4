@@ -3,14 +3,14 @@
     <record id="action_inspection" model="ir.actions.act_window">
         <field name="name"> États des Lieux</field>
         <field name="res_model">property.inspection</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <record id="view_inspection_tree" model="ir.ui.view">
         <field name="name">property.inspection.tree</field>
         <field name="model">property.inspection</field>
         <field name="arch" type="xml">
-            <tree decoration-info="inspection_type == 'entry'"
+            <list decoration-info="inspection_type == 'entry'"
                   decoration-danger="inspection_type == 'exit'"
                   decoration-warning="damage_found == True">
                 <field name="name"/>
@@ -21,7 +21,7 @@
                 <field name="damage_found"/>
                 <field name="estimated_repair_cost"/>
                 <field name="state" widget="badge"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -103,11 +103,7 @@
                     <field name="notes" placeholder="Observations générales..."/>
                 </sheet>
 
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>

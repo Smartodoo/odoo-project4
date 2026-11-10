@@ -32,7 +32,7 @@
                     </group>
                 </group>
                 <div class="text-muted small" invisible="payment_kind != 'deposit'">
-                    <i class="fa fa-info-circle me-1" title="Info"/>
+                    <i class="oi oi-filled me-1" data-icon="info" title="Info"/>
                     L'acompte sera déduit automatiquement de la facture à sa validation.
                 </div>
                 <footer>
@@ -80,7 +80,7 @@
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.view_account_journal_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='inbound_payment_method_line_ids']/tree/field[@name='name']" position="after">
+            <xpath expr="//field[@name='inbound_payment_method_line_ids']/list/field[@name='name']" position="after">
                 <field name="hotel_payment_mode" optional="show"/>
             </xpath>
         </field>

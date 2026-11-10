@@ -12,8 +12,6 @@
     'depends': ['base', 'sale', 'hr', 'purchase', 'account', 'contacts', 'custom_project', 'fleet', 'mail'],
     'data': [
         'security/groups.xml',
-        'security/ir.model.access.csv',
-        'security/multicompany_rules.xml',
         'views/purchase_order.xml',
         'views/distribution_montant.xml',
         'views/versement.xml',
@@ -28,6 +26,7 @@
         'report/report_nettoyage_chauffeur_camion.xml',
         'report/report_nettoyage_sous_traitant.xml',
         'report/report_brise_roche_list.xml',
+        'security/ir.access.csv',
     ],
     'installable': True,
     'application': False,

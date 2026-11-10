@@ -1,15 +1,16 @@
 /** @odoo-module **/
+import { user } from "@web/core/user";
 
 import { Component } from "@odoo/owl";
 import { session } from "@web/session";
-import { jsonrpc } from "@web/core/network/rpc_service";
+import { rpc } from "@web/core/network/rpc";
 import { useService, useBus } from "@web/core/utils/hooks";
 
 /*rpc.query({
     model: 'res.users',
     method: 'search_read',
     fields: ['sh_enable_zoom'],
-    domain: [['id', '=', session.uid]]
+    domain: [['id', '=', user.userId]]
 }, { async: false }).then(function (data) {
     if (data) {
         _.each(data, function (user) {
@@ -32,10 +33,10 @@ export class ZoomWidget extends Component {
 
     /*search_sh_enable_zoom(){
           var self = this;
-          jsonrpc("/web/dataset/call_kw/res.users/search_read", {
+          rpc("/web/dataset/call_kw/res.users/search_read", {
                     model: 'res.users',
                     method: 'search_read',
-                    args: [[['id', '=', session.uid]]],
+                    args: [[['id', '=', user.userId]]],
                     kwargs: {},
                 }).then(function (data) {
                     

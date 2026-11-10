@@ -19,6 +19,10 @@
          « Brouillon de facture », une facture validée « Facture ». -->
     <template id="report_invoice_document_no_proforma"
               inherit_id="account.report_invoice_document">
-        <xpath expr="//h2/span[@t-else='']" position="replace"/>
+        <!-- Odoo 18+ : titre porté par layout_document_title ; on utilise toujours
+             la branche « normale » (Facture / Brouillon de facture), jamais « Proforma ». -->
+        <xpath expr="//t[@t-set='layout_document_title']/t[@t-if='not proforma']" position="attributes">
+            <attribute name="t-if">True</attribute>
+        </xpath>
     </template>
 </odoo>

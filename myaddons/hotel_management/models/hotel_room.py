@@ -130,15 +130,18 @@ class HotelRoom(models.Model):
     maintenance_count = fields.Integer(
         string="Nb demandes travaux", compute='_compute_operation_counts')
 
-    _sql_constraints = [
-        ('name_company_uniq', 'unique(name, company_id)',
-         "Ce numéro de chambre existe déjà."),
-        ('capacity_positive', 'CHECK(capacity > 0)',
-         "La capacité d'une chambre doit être d'au moins 1 personne."),
-        ('prices_non_negative',
-         'CHECK(price >= 0 AND room_price >= 0 AND bed_price >= 0)',
-         "Les prix d'une chambre (chambre entière, lit) ne peuvent pas être négatifs."),
-    ]
+    _name_company_uniq = models.Constraint(
+        'unique(name, company_id)',
+        "Ce num\u00e9ro de chambre existe d\u00e9j\u00e0.",
+    )
+    _capacity_positive = models.Constraint(
+        'CHECK(capacity > 0)',
+        "La capacit\u00e9 d'une chambre doit \u00eatre d'au moins 1 personne.",
+    )
+    _prices_non_negative = models.Constraint(
+        'CHECK(price >= 0 AND room_price >= 0 AND bed_price >= 0)',
+        "Les prix d'une chambre (chambre enti\u00e8re, lit) ne peuvent pas \u00eatre n\u00e9gatifs.",
+    )
 
     @api.onchange('room_type_id')
     def _onchange_room_type_id(self):
@@ -256,7 +259,7 @@ class HotelRoom(models.Model):
             'type': 'ir.actions.act_window',
             'name': _("Réservations — %s") % self.name,
             'res_model': 'hotel.reservation',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('line_ids.room_id', '=', self.id)],
             'context': {'default_line_ids': [(0, 0, {'room_id': self.id})]},
         }
@@ -267,7 +270,7 @@ class HotelRoom(models.Model):
             'type': 'ir.actions.act_window',
             'name': _("Ménage — %s") % self.name,
             'res_model': 'hotel.housekeeping',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('room_id', '=', self.id)],
             'context': {'default_room_id': self.id},
         }
@@ -278,7 +281,7 @@ class HotelRoom(models.Model):
             'type': 'ir.actions.act_window',
             'name': _("Travaux & Maintenance — %s") % self.name,
             'res_model': 'hotel.maintenance.request',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('room_id', '=', self.id)],
             'context': {'default_room_id': self.id},
         }
@@ -417,7 +420,7 @@ class HotelRoom(models.Model):
                 css, label = 'reserved', "Réservé — %s" % line.partner_id.name
             chips.append(Markup(
                 '<span class="o_hotel_bed_chip o_hotel_bed_chip_%s" title="%s">'
-                '<i class="fa fa-bed"></i> %s</span>') % (
+                '<i class="oi" data-icon="bed"></i> %s</span>') % (
                     css, escape(label), escape(bed.name)))
         return Markup('<div class="o_hotel_bed_map">%s</div>') % Markup('').join(chips)
 

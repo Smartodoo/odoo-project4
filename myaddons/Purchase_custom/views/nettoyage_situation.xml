@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Tree View -->
+        <!-- List View -->
         <record id="nettoyage_situation_view_tree" model="ir.ui.view">
             <field name="name">nettoyage.situation.tree</field>
             <field name="model">nettoyage.situation</field>
             <field name="arch" type="xml">
-                <tree>
+                <list>
                     <field name="name"/>
                     <field name="date"/>
                     <field name="camion_id"/>
@@ -20,7 +20,7 @@
                     <field name="nombre_voyages" optional="show"/>
                     <field name="prix_unitaire_voyage" optional="hide"/>
                     <field name="montant" sum="Total"/>
-                </tree>
+                </list>
             </field>
         </record>
 
@@ -88,10 +88,10 @@
                     <filter name="filter_mode_heures" string="Mode Heures" domain="[('mode_calcul','=','heures')]"/>
                     <filter name="filter_mode_voyages" string="Mode Voyages" domain="[('mode_calcul','=','voyages')]"/>
                     <separator/>
-                    <filter name="filter_today" string="Aujourd'hui" domain="[('date','=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter name="filter_today" string="Aujourd'hui" domain="[('date', '=', 'today')]"/>
                     <filter name="filter_this_month" string="Ce mois" domain="[('date','&gt;=', (context_today() - datetime.timedelta(days=context_today().day - 1)).strftime('%Y-%m-%d'))]"/>
                     <separator/>
-                    <group expand="0" string="Grouper par">
+                    <group>
                         <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
                         <filter name="group_camion" string="Camion" context="{'group_by': 'camion_id'}"/>
                         <filter name="group_chauffeur" string="Chauffeur" context="{'group_by': 'chauffeur_id'}"/>
@@ -120,8 +120,8 @@
                     <field name="nombre_voyages"/>
                     <field name="montant"/>
                     <templates>
-                        <t t-name="kanban-box">
-                            <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                        <t t-name="card">
+                            <div t-attf-class="oe_kanban_card">
                                 <div class="oe_kanban_content">
                                     <div class="o_kanban_record_top">
                                         <strong><field name="name"/></strong>
@@ -152,7 +152,7 @@
         <record id="nettoyage_situation_action" model="ir.actions.act_window">
             <field name="name">Situation Nettoyage</field>
             <field name="res_model">nettoyage.situation</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">kanban,list,form</field>
             <field name="domain">[('company_id', '=', allowed_company_ids[0])]</field>
             <field name="search_view_id" ref="nettoyage_situation_view_search"/>
         </record>

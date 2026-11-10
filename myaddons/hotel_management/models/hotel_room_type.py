@@ -25,17 +25,19 @@ class HotelRoomType(models.Model):
     room_ids = fields.One2many('hotel.room', 'room_type_id', string="Chambres")
     room_count = fields.Integer(string="Nb chambres", compute='_compute_room_count')
 
-    _sql_constraints = [
-        ('default_capacity_positive', 'CHECK(default_capacity > 0)',
-         "La capacité par défaut d'un type de chambre doit être d'au moins 1 personne."),
-        ('list_price_non_negative', 'CHECK(list_price >= 0)',
-         "Le prix d'un type de chambre ne peut pas être négatif."),
-    ]
+    _default_capacity_positive = models.Constraint(
+        'CHECK(default_capacity > 0)',
+        "La capacit\u00e9 par d\u00e9faut d'un type de chambre doit \u00eatre d'au moins 1 personne.",
+    )
+    _list_price_non_negative = models.Constraint(
+        'CHECK(list_price >= 0)',
+        "Le prix d'un type de chambre ne peut pas \u00eatre n\u00e9gatif.",
+    )
 
     def _compute_room_count(self):
-        groups = self.env['hotel.room'].read_group(
-            [('room_type_id', 'in', self.ids)], ['room_type_id'], ['room_type_id'])
-        mapping = {g['room_type_id'][0]: g['room_type_id_count'] for g in groups}
+        groups = self.env['hotel.room']._read_group(
+            [('room_type_id', 'in', self.ids)], ['room_type_id'], ['__count'])
+        mapping = {room_type.id: count for room_type, count in groups}
         for rec in self:
             rec.room_count = mapping.get(rec.id, 0)
 
@@ -45,7 +47,7 @@ class HotelRoomType(models.Model):
             'type': 'ir.actions.act_window',
             'name': self.name,
             'res_model': 'hotel.room',
-            'view_mode': 'kanban,tree,form',
+            'view_mode': 'kanban,list,form',
             'domain': [('room_type_id', '=', self.id)],
             'context': {'default_room_type_id': self.id},
         }

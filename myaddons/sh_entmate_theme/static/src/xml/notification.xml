@@ -2,51 +2,51 @@
 <template id="todo_card">
     <t t-name="sh_entmate_theme.notification">
         <div>
-            <t t-if="simple_text">
-                <t t-if="simple_text">
-                    <t t-if="is_animation">
+            <t t-if="this.simple_text">
+                <t t-if="this.simple_text">
+                    <t t-if="this.is_animation">
                         <div id='object' style='position:relative;'>
-                        <marquee direction="direction" t-att-style="style">
+                        <marquee direction="direction" t-att-style="this.style">
                     <div id='object1'>
-                        <t t-esc="content"/>
+                        <t t-out="this.content"/>
                     </div>
                 </marquee>
                 <div class="sh_animated_notification"
-                     style='position: absolute;right: 5px;font-size: 15px;top: 0px;cursor: pointer;' t-on-click="close_notification">
-                <span class='fa fa-times sh_close_notification' />
+                     style='position: absolute;right: 5px;font-size: 15px;top: 0px;cursor: pointer;' t-on-click="this.close_notification">
+                <span class='oi sh_close_notification' data-icon='close' />
                 <div>
                 </div>
                 </div>
                 </div>
                     </t>
                      <t t-else="">
-                         <div id='object1' t-att-style="style">
-                             <t t-esc="content"/>
-                             <div class="sh_simple_text_notification" style='position: absolute;right: 5px;font-size: 15px;top: 0px;cursor: pointer;' t-on-click="close_notification">
-                                 <span class='fa fa-times sh_close_notification'/>
+                         <div id='object1' t-att-style="this.style">
+                             <t t-out="this.content"/>
+                             <div class="sh_simple_text_notification" style='position: absolute;right: 5px;font-size: 15px;top: 0px;cursor: pointer;' t-on-click="this.close_notification">
+                                 <span class='oi sh_close_notification' data-icon='close'/>
                              </div>
                          </div>
                      </t>
                 </t>
             </t>
             <t t-else="">
-                <t t-if="is_animation">
+                <t t-if="this.is_animation">
                     <div id="object"  style='position:relative;'>
                         <marquee direction="direction">
                             <div id='object1'>
-                                <t t-esc="content"/>
+                                <t t-out="this.content"/>
                             </div>
                         </marquee>
-                        <div class="sh_animated_notification" style='position: absolute;right: 5px;font-size: 15px;top: 0px;cursor: pointer;' t-on-click="close_notification">
-                            <span class='fa fa-times sh_close_notification' />
+                        <div class="sh_animated_notification" style='position: absolute;right: 5px;font-size: 15px;top: 0px;cursor: pointer;' t-on-click="this.close_notification">
+                            <span class='oi sh_close_notification' data-icon='close' />
                         </div>
                     </div>
                 </t>
                 <t t-else="">
                     <div id='object1' style='position:relative;'>
-                        <t t-esc="content"/>
-                        <div class="sh_simple_text_notification" style='position: absolute;right: 5px;font-size: 15px;top: 0px;cursor: pointer;' t-on-click="close_notification">
-                            <span class='fa fa-times sh_close_notification' />
+                        <t t-out="this.content"/>
+                        <div class="sh_simple_text_notification" style='position: absolute;right: 5px;font-size: 15px;top: 0px;cursor: pointer;' t-on-click="this.close_notification">
+                            <span class='oi sh_close_notification' data-icon='close' />
                         </div>
                     </div>
                 </t>

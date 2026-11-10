@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-inherit="web.FormView" t-inherit-mode="extension">
-        <xpath expr="//Layout/t[@t-set-slot='control-panel-create-button'][2]" position="inside">
-                <t t-if="disableEditButton()">
-                    <t t-if="shDisplayButtons()">
+        <!-- Odoo 20: the 'control-panel-create-button' slot no longer exists; append to 'control-panel-buttons' -->
+        <xpath expr="//Layout/t[@t-set-slot='control-panel-buttons']" position="inside">
+                <t t-if="!this.env.inDialog and this.disableEditButton()">
+                    <t t-if="this.shDisplayButtons()">
                         <button type="button" data-hotkey="c"
-                            t-on-click="_onClickEditView" class="btn btn-outline-primary sh_form_button_edit saved">Edit</button>
+                            t-on-click="this._onClickEditView" class="btn btn-outline-primary sh_form_button_edit saved">Edit</button>
                     </t>
                     <t t-else="">
                         <button type="button" data-hotkey="c"
-                            t-on-click="_onClickEditView" class="btn btn-outline-primary sh_form_button_edit dirty">Edit</button>
+                            t-on-click="this._onClickEditView" class="btn btn-outline-primary sh_form_button_edit dirty">Edit</button>
                     </t>
                     <!-- <t t-if="model.root.isInEdition">
                         <button
@@ -20,7 +21,7 @@
                             t-on-click.stop="saveButtonClicked"
                             data-tooltip="Save manually"
                             aria-label="Save manually">
-                            <i class="fa fa-cloud-upload fa-fw" />
+                            <i class="oi oi-fw" data-icon="cloud_upload" />
                         </button>
                         <button
                             type="button"
@@ -30,7 +31,7 @@
                             t-on-click.stop="discard"
                             data-tooltip="Discard changes"
                             aria-label="Discard changes">
-                            <i class="fa fa-undo fa-fw" />
+                            <i class="oi oi-fw" data-icon="undo" />
                         </button>
                     </t> -->
                 </t>

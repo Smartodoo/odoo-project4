@@ -92,7 +92,7 @@
 
                                                 <div class="selection-check"
                                                      style="display:none; position:absolute; top:10px; right:10px; background:#4f46e5; color:white; border-radius:50%; width:25px; height:25px; text-align:center; z-index:10;">
-                                                    <i class="fa fa-check" style="line-height:25px; font-size: 12px;"/>
+                                                    <i class="oi" data-icon="check" style="line-height:25px; font-size: 12px;"/>
                                                 </div>
 
                                                 <div style="height: 180px; position: relative; overflow: hidden; border-radius: 18px 18px 0 0;">
@@ -103,32 +103,32 @@
                                                     </t>
                                                     <t t-else="">
                                                         <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f1f5f9; color: #cbd5e1;">
-                                                            <i class="fa fa-building fa-3x"/>
+                                                            <i class="oi oi-3x" data-icon="business"/>
                                                         </div>
                                                     </t>
                                                     <div class="price-tag"
                                                          style="position: absolute; bottom: 16px; right: 16px;">
-                                                        <t t-esc="prop.price_month"/>
+                                                        <t t-out="prop.price_month"/>
                                                         <span style="font-size: 12px; opacity: 0.8;">DA/mois</span>
                                                     </div>
                                                 </div>
 
                                                 <div class="p-3">
                                                     <h5 class="fw-bold mb-1 apartment-name">
-                                                        <t t-esc="prop.name"/>
+                                                        <t t-out="prop.name"/>
                                                     </h5>
                                                     <p class="text-muted small mb-3">
-                                                        <i class="fa fa-map-marker me-1 text-primary"/>
-                                                        <t t-esc="prop.address"/>
+                                                        <i class="oi me-1 text-primary" data-icon="location_on"/>
+                                                        <t t-out="prop.address"/>
                                                     </p>
 
                                                     <div class="d-flex flex-wrap gap-2">
                                                         <span class="feature-pill">
-                                                            <t t-esc="prop.type"/>
+                                                            <t t-out="prop.type"/>
                                                         </span>
                                                         <span class="feature-pill">
-                                                            <i class="fa fa-expand me-1"/>
-                                                            <t t-esc="prop.surface"/>m²
+                                                            <i class="oi me-1" data-icon="expand_content"/>
+                                                            <t t-out="prop.surface"/>m²
                                                         </span>
                                                         <t t-if="prop.is_furnished">
                                                             <span class="feature-pill">Meublé</span>
@@ -180,7 +180,7 @@
 
                                 <div id="selection_summary" class="alert alert-success mt-4 shadow-sm"
                                      style="display:none; border-left: 5px solid #4f46e5;">
-                                    <i class="fa fa-info-circle me-2"></i>
+                                    <i class="oi oi-filled me-2" data-icon="info"></i>
                                     Vous avez sélectionné l'appartement :
                                     <strong id="chosen_apartment_name">...</strong>
                                 </div>

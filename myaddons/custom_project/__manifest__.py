@@ -7,8 +7,6 @@
     "description": "Custom Project Management with Subcontractors",
     "data": [
         "security/groups.xml",
-        "security/ir.model.access.csv",
-        "security/regles_de securites.xml",
         "views/menu_base.xml",
         "data/payments_method.xml",
         "data/ir_sequence.xml",
@@ -29,6 +27,7 @@
         'views/suivi_coulage.xml',
         'views/decompte_bet.xml',
         "views/menu.xml",
+        'security/ir.access.csv',
     ],
     "assets": {
         "web.assets_backend": [

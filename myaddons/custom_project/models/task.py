@@ -94,13 +94,10 @@ class CustomTask(models.Model):
         else:
             # Créer une nouvelle unité
             try:
-                category_id = self.env.ref('uom.product_uom_categ_unit').id
+                # Odoo 19+ : plus de uom.category ; une unité autonome = sans unité de référence
                 new_unit = self.env['uom.uom'].create({
                     'name': unit_name,
-                    'category_id': category_id,
-                    'factor': 1.0,
-                    'uom_type': 'reference',
-                    'rounding': 0.001,
+                    'relative_factor': 1.0,
                 })
                 _logger.info(f"Unité créée: {unit_name} (ID: {new_unit.id})")
                 return new_unit.id

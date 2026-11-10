@@ -7,15 +7,11 @@ import { session } from "@web/session";
 const loadMenusUrl = `/web/webclient/load_menus`;
 
 function makeFetchLoadMenus() {
-    const cacheHashes = session.cache_hashes;
-    let loadMenusHash = cacheHashes.load_menus || new Date().getTime().toString();
     return async function fetchLoadMenus(reload) {
-        if (reload) {
-            loadMenusHash = new Date().getTime().toString();
-        } else if (odoo.loadMenusPromise) {
+        if (!reload && odoo.loadMenusPromise) {
             return odoo.loadMenusPromise;
         }
-        const res = await browser.fetch(`${loadMenusUrl}/${loadMenusHash}`);
+        const res = await browser.fetch(loadMenusUrl, { cache: "no-store" });
         if (!res.ok) {
             throw new Error("Error while fetching menus");
         }
@@ -60,10 +56,8 @@ function makeMenus(env, menusData, fetchLoadMenus) {
             menu = typeof menu === "number" ? this.getMenu(menu) : menu;
             if (menu && menu.appID !== currentAppId) {
                 currentAppId = menu.appID;
+                browser.sessionStorage.setItem("menu_id", currentAppId);
                 env.bus.trigger("MENUS:APP-CHANGED");
-                // FIXME: lock API: maybe do something like
-                // pushState({menu_id: ...}, { lock: true}); ?
-                env.services.router.pushState({ menu_id: menu.id }, { lock: true });
             }
             $("body").removeClass("sh_sidebar_background_enterprise");
             $(".sh_search_container").css("display", "none");
@@ -83,7 +77,7 @@ function makeMenus(env, menusData, fetchLoadMenus) {
 }
 
 export const menuService = {
-    dependencies: ["action", "router"],
+    dependencies: ["action"],
     async start(env) {
         const fetchLoadMenus = makeFetchLoadMenus();
         const menusData = await fetchLoadMenus();

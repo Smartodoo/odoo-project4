@@ -419,9 +419,8 @@ p{font-size:13px !important;}
 @if $is_used_google_font == "False"{
     h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 ,a ,label , b ,p ,div,span, body{font-family: $body_font_family;}
 }
- .fa{
-     font: normal normal normal 14px/1 FontAwesome !important;
- }
+// Odoo 20: was `.fa { font: ... FontAwesome !important }`; upgrade_code rewrote it to
+// `.oi`, which forced every Material Symbols icon onto FontAwesome. Removed.
 
 .o_form_view{
     .o_field_widget.oe_inline{

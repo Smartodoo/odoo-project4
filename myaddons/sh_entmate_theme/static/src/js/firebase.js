@@ -1,10 +1,10 @@
 /** @odoo-module **/
-import { jsonrpc } from "@web/core/network/rpc_service";
+import { rpc } from "@web/core/network/rpc";
 
 var vapid = ''
 var firebaseConfig = {};
 
-jsonrpc("/web/_config", {}).then(function (data) {
+rpc("/web/_config", {}).then(function (data) {
     		
     if(data){
 

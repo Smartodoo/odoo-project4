@@ -20,7 +20,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_preview_report" type="object"
-                                class="oe_stat_button" icon="fa-eye">
+                                class="oe_stat_button" icon="visibility">
                             <span class="o_stat_text">Aperçu</span>
                         </button>
                     </div>
@@ -59,19 +59,15 @@
                     </group>
                     <group>
                         <field name="tasks_ids">
-                            <tree editable="bottom" nolabel="1">
+                            <list editable="bottom" nolabel="1">
                                 <field name="designation" readonly="1"/>
                                 <field name="montant_mois" readonly="1"/>
                                 <field name="amount_distributed"/>
-                            </tree>
+                            </list>
                         </field>
                     </group>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -80,20 +76,20 @@
         <field name="name">versement.subcontractor.tree</field>
         <field name="model">versement.subcontractor</field>
         <field name="arch" type="xml">
-            <tree string="Versement Subcontractors">
+            <list string="Versement Subcontractors">
                 <field name="name"/>
                 <field name="amount"/>
                 <field name="date"/>
                 <field name="subcontractor_id"/>
                 <field name="state"/>
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="action_versement_subcontractor" model="ir.actions.act_window">
         <field name="name">Versement Subcontractors</field>
         <field name="res_model">versement.subcontractor</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
 

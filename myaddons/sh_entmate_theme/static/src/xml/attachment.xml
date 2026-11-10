@@ -18,7 +18,7 @@
                                     <div class="sh_attachment_item border d-flex align-items-center mx-2" t-att-data-id="attachment.attachment_id" t-att-data-name="attachment.attachment_name" t-att-data-mimetype="attachment.attachment_mimetype" t-att-data-record_id="record.resId" t-on-click="(ev) => this._shloadattachmentviewer(ev)">
                                         <span class="sh_attachment_icon o_image me-2" t-att-data-mimetype="attachment.attachment_mimetype"/>
                                         <div class="sh_attachment_name text-nowrap">
-                                            <span><t t-esc="attachment.attachment_name"/></span>
+                                            <span><t t-out="attachment.attachment_name"/></span>
                                         </div>
                                     </div>
                                     <t t-set="counter" t-value="counter + 1"/>
@@ -32,10 +32,10 @@
                                         <t t-set="sh_var" t-value="1"/>
                                         <div class="sh_attachment_item border d-flex align-items-center mx-2 sh_attachment_item_counter " t-att-data-id="attachment.attachment_id" t-att-data-name="attachment.attachment_name" t-att-data-mimetype="attachment.attachment_mimetype" t-att-data-record_id="record.resId" t-on-click="(ev) => this._shloadattachmentviewer(ev)">
                                         <div class="sh_attachment_name text-nowrap">
-                                            <span>+<t t-esc="extra_length"/></span>
+                                            <span>+<t t-out="extra_length"/></span>
                                         </div>
                                     </div>
-                                    <t/>
+                                    </t>
                                 </t>
                             </t>
                         </div>

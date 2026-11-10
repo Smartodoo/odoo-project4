@@ -7,7 +7,7 @@
 		<xpath expr="//div[hasclass('container')]" position="replace">
 			
 			
-            <t t-set="theme_config" t-value="request.env['sh.ent.theme.config.settings'].search([('id','=',1)],limit = 1)" />			
+            <t t-set="theme_config" t-value="request.env['sh.ent.theme.config.settings'].sudo().search([('id','=',1)],limit = 1)" />			
 		
 			<!-- SIDE BY SIDE IMAGE AND LOGIN START HERE STYLE 2-->	
             <div class="container-fluid mb-5 pb-5" t-if="theme_config.login_page_style == 'style_2'">
@@ -23,7 +23,7 @@
 	                        <div t-attf-class="text-center pb-3 border-bottom {{'mb-3' if form_small else 'mb-4'}}">
 	                            <img t-attf-src="/web/binary/company_logo{{ '?dbname='+db if db else '' }}" alt="Logo" style="max-height:120px; max-width: 100%; width:auto"/>
 	                        </div>
-	                        <t t-raw="0"/>
+	                        <t t-out="0"/>
 	                        <div class="text-center small mt-4 pt-3 border-top" t-if="not disable_footer">
 	                            <t t-if="not disable_database_manager">
 	                                <a class="border-right pr-2 mr-1" href="/web/database/manager">Manage Databases</a>
@@ -42,7 +42,7 @@
                         <div t-attf-class="text-center pb-3 border-bottom {{'mb-3' if form_small else 'mb-4'}}">
                             <img t-attf-src="/web/binary/company_logo{{ '?dbname='+db if db else '' }}" alt="Logo" style="max-height:120px; max-width: 100%; width:auto"/>
                         </div>
-                        <t t-raw="0"/>
+                        <t t-out="0"/>
                         <div class="text-center small mt-4 pt-3 border-top" t-if="not disable_footer">
                             <t t-if="not disable_database_manager">
                                 <a class="border-right pr-2 mr-1" href="/web/database/manager">Manage Databases</a>

@@ -231,7 +231,7 @@ class res_users(models.Model):
     sh_enable_night_mode = fields.Boolean('Night Mode')
     sh_enable_calculator_mode = fields.Boolean('Calculator Mode')
     sh_enable_gloabl_search_mode = fields.Boolean('Global Search Mode',default=True)
-    sh_enable_quick_menu_mode  = fields.Boolean("Quick Menu Mode",readonly="False",default=True)
+    sh_enable_quick_menu_mode  = fields.Boolean("Quick Menu Mode",readonly=False,default=True)
     sh_enable_todo_mode  = fields.Boolean("To Do Feature")
     sh_enable_language_selection = fields.Boolean('Language Selection',default=True)
     sh_enable_zoom = fields.Boolean('Zoom View',default=False)

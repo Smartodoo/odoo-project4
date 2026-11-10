@@ -20,10 +20,10 @@ class HotelRateSeason(models.Model):
     company_id = fields.Many2one(
         'res.company', default=lambda self: self.env.company)
 
-    _sql_constraints = [
-        ('price_positive', 'CHECK(price > 0)',
-         "Le tarif saisonnier doit être strictement positif."),
-    ]
+    _price_positive = models.Constraint(
+        'CHECK(price > 0)',
+        "Le tarif saisonnier doit \u00eatre strictement positif.",
+    )
 
     @api.constrains('date_start', 'date_end')
     def _check_dates(self):

@@ -4,7 +4,7 @@
         <field name="name">hotel.room.type.tree</field>
         <field name="model">hotel.room.type</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="code"/>
@@ -13,7 +13,7 @@
                 <field name="list_price" widget="monetary"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="room_count"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -25,7 +25,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_rooms" type="object"
-                                class="oe_stat_button" icon="fa-bed">
+                                class="oe_stat_button" icon="bed">
                             <field name="room_count" widget="statinfo" string="Chambres"/>
                         </button>
                     </div>
@@ -61,6 +61,6 @@
     <record id="action_hotel_room_type" model="ir.actions.act_window">
         <field name="name">Types de chambres</field>
         <field name="res_model">hotel.room.type</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>

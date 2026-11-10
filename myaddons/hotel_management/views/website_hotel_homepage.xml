@@ -6,7 +6,7 @@
             <attribute name="class">oe_structure</attribute>
         </xpath>
         <xpath expr="//div[@id='wrap']" position="inside">
-            <t t-set="company" t-value="request.website.company_id"/>
+            <t t-set="company" t-value="website.company_id"/>
             <t t-set="today" t-value="datetime.date.today().isoformat()"/>
             <t t-set="all_rooms" t-value="request.env['hotel.room'].search([('website_published', '=', True)])"/>
             <t t-set="featured_rooms" t-value="all_rooms[:6]"/>
@@ -37,9 +37,9 @@
                     <a t-if="card_room" t-attf-href="/hotel/room/#{card_room.id}" class="ah_float ah_float_left">
                         <img t-attf-src="/web/image/hotel.room/#{card_room.id}/image" t-attf-alt="Chambre #{card_room.name}"/>
                         <div class="ah_float_info">
-                            <span><i class="fa fa-key"/> Chambre <t t-esc="card_room.name"/> · privée</span>
+                            <span><i class="oi" data-icon="key"/> Chambre <t t-out="card_room.name"/> · privée</span>
                             <strong>
-                                dès <t t-esc="card_room.whole_room_price"
+                                dès <t t-out="card_room.whole_room_price"
                                        t-options='{"widget": "monetary", "display_currency": card_room.currency_id}'/>
                                 <small>/ nuit</small>
                             </strong>
@@ -48,9 +48,9 @@
                     <a t-if="card_bed" t-attf-href="/hotel/room/#{card_bed.id}" class="ah_float ah_float_right">
                         <img t-attf-src="/web/image/hotel.room/#{card_bed.id}/image" t-attf-alt="Chambre #{card_bed.name}"/>
                         <div class="ah_float_info">
-                            <span><i class="fa fa-bed"/> Chambre <t t-esc="card_bed.name"/> · dortoir</span>
+                            <span><i class="oi" data-icon="bed"/> Chambre <t t-out="card_bed.name"/> · dortoir</span>
                             <strong>
-                                dès <t t-esc="card_bed.bed_price_min"
+                                dès <t t-out="card_bed.bed_price_min"
                                        t-options='{"widget": "monetary", "display_currency": card_bed.currency_id}'/>
                                 <small>/ lit</small>
                             </strong>
@@ -60,11 +60,11 @@
                     <div class="container ah_hero_inner">
                         <span t-if="free_tonight" class="ah_live">
                             <i class="ah_live_dot"/>
-                            <strong t-esc="free_tonight"/> chambre<t t-if="free_tonight &gt; 1">s</t>
+                            <strong t-out="free_tonight"/> chambre<t t-if="free_tonight &gt; 1">s</t>
                             disponible<t t-if="free_tonight &gt; 1">s</t> ce soir
                         </span>
                         <span t-else="" class="ah_eyebrow">
-                            <i class="fa fa-star"/> Auberge · Chambres &amp; dortoirs
+                            <i class="oi oi-filled" data-icon="star"/> Auberge · Chambres &amp; dortoirs
                         </span>
                         <h1 class="ah_hero_title">
                             Bien dormir,<br/><em>à prix doux.</em>
@@ -77,21 +77,21 @@
 
                         <ul class="ah_trust">
                             <li>
-                                <span class="ah_trust_icon ah_trust_live"><i class="fa fa-bolt"/></span>
+                                <span class="ah_trust_icon ah_trust_live"><i class="oi" data-icon="flash_on"/></span>
                                 <span class="ah_trust_text">
                                     <strong>Disponibilités en temps réel</strong>
                                     <small>Voyez ce qui est libre, à l'instant</small>
                                 </span>
                             </li>
                             <li>
-                                <span class="ah_trust_icon"><i class="fa fa-envelope-o"/></span>
+                                <span class="ah_trust_icon"><i class="oi" data-icon="mail"/></span>
                                 <span class="ah_trust_text">
                                     <strong>Confirmation par e-mail</strong>
                                     <small>Récapitulatif envoyé dès la réservation</small>
                                 </span>
                             </li>
                             <li>
-                                <span class="ah_trust_icon"><i class="fa fa-tag"/></span>
+                                <span class="ah_trust_icon"><i class="oi" data-icon="label"/></span>
                                 <span class="ah_trust_text">
                                     <strong>Prix clairs</strong>
                                     <small>Le prix affiché est le prix payé</small>
@@ -101,15 +101,15 @@
 
                         <div class="ah_search_panel">
                             <div class="ah_search_head">
-                                <span class="ah_search_title"><i class="fa fa-compass"/> Planifiez votre séjour</span>
+                                <span class="ah_search_title"><i class="oi" data-icon="explore"/> Planifiez votre séjour</span>
                                 <span class="ah_search_types">
-                                    <span><i class="fa fa-key"/> Chambre privée</span>
-                                    <span><i class="fa fa-bed"/> Lit en dortoir</span>
+                                    <span><i class="oi" data-icon="key"/> Chambre privée</span>
+                                    <span><i class="oi" data-icon="bed"/> Lit en dortoir</span>
                                 </span>
                             </div>
                         <form class="ah_search" method="get" action="/hotel/rooms">
                             <label class="ah_search_field">
-                                <i class="fa fa-calendar"/>
+                                <i class="oi oi-filled" data-icon="calendar_today"/>
                                 <span>
                                     <small>Arrivée</small>
                                     <input type="date" name="checkin" t-att-min="today" required="required"/>
@@ -117,7 +117,7 @@
                             </label>
                             <span class="ah_search_sep"/>
                             <label class="ah_search_field">
-                                <i class="fa fa-calendar-check-o"/>
+                                <i class="oi" data-icon="event_available"/>
                                 <span>
                                     <small>Départ</small>
                                     <input type="date" name="checkout" t-att-min="today" required="required"/>
@@ -125,26 +125,26 @@
                             </label>
                             <span class="ah_search_sep"/>
                             <label class="ah_search_field ah_search_guests">
-                                <i class="fa fa-users"/>
+                                <i class="oi oi-filled" data-icon="group"/>
                                 <span>
                                     <small>Voyageurs</small>
                                     <input type="number" name="guests" min="1" value="1"/>
                                 </span>
                             </label>
                             <button type="submit" class="ah_btn ah_btn_gold ah_search_btn">
-                                <i class="fa fa-search"/> <span>Voir les disponibilités</span>
+                                <i class="oi" data-icon="search"/> <span>Voir les disponibilités</span>
                             </button>
                         </form>
                         </div>
 
                         <div class="ah_hero_stats">
                             <div t-if="price_bed">
-                                <strong><small>dès</small><t t-esc="price_bed"
+                                <strong><small>dès</small><t t-out="price_bed"
                                         t-options='{"widget": "monetary", "display_currency": currency}'/></strong>
                                 <span>le lit en dortoir, par nuit</span>
                             </div>
                             <div t-if="price_room">
-                                <strong><small>dès</small><t t-esc="price_room"
+                                <strong><small>dès</small><t t-out="price_room"
                                         t-options='{"widget": "monetary", "display_currency": currency}'/></strong>
                                 <span>la chambre privée, par nuit</span>
                             </div>
@@ -157,7 +157,7 @@
                 </section>
 
                 <!-- ============ VITRINE (photo personnalisable) ============ -->
-                <t t-set="w" t-value="request.website"/>
+                <t t-set="w" t-value="website"/>
                 <t t-set="showcase_src" t-value="w.with_context(bin_size=True).hotel_home_image
                     and '/web/image/website/%s/hotel_home_image?unique=%s' % (w.id, w.write_date and w.write_date.strftime('%Y%m%d%H%M%S'))
                     or '/hotel_management/static/src/img/auberge_showcase.svg'"/>
@@ -169,27 +169,27 @@
                             <div class="ah_showcase_shade"/>
 
                             <span t-if="w.hotel_home_badge" class="ah_showcase_badge">
-                                <i class="fa fa-calendar-check-o"/> <t t-esc="w.hotel_home_badge"/>
+                                <i class="oi" data-icon="event_available"/> <t t-out="w.hotel_home_badge"/>
                             </span>
 
                             <a t-if="request.env.user.has_group('website.group_website_designer')"
                                href="/web#action=hotel_management.action_hotel_website_home"
                                class="ah_showcase_edit" title="Changer la photo et les textes de ce bloc">
-                                <i class="fa fa-pencil"/> Personnaliser ce bloc
+                                <i class="oi oi-filled" data-icon="edit"/> Personnaliser ce bloc
                             </a>
 
                             <div class="ah_showcase_card">
-                                <span class="ah_kicker" t-esc="w.hotel_home_kicker or 'Notre maison'"/>
-                                <h2 t-esc="w.hotel_home_title or 'Bienvenue à L\'Auberge'"/>
-                                <p t-if="w.hotel_home_text" t-esc="w.hotel_home_text"/>
+                                <span class="ah_kicker" t-out="w.hotel_home_kicker or 'Notre maison'"/>
+                                <h2 t-out="w.hotel_home_title or 'Bienvenue à L\'Auberge'"/>
+                                <p t-if="w.hotel_home_text" t-out="w.hotel_home_text"/>
                                 <div t-if="common_amenities" class="ah_showcase_facts">
                                     <t t-foreach="common_amenities" t-as="am">
-                                        <span><i class="fa fa-check"/> <t t-esc="am.name"/></span>
+                                        <span><i class="oi" data-icon="check"/> <t t-out="am.name"/></span>
                                     </t>
                                 </div>
                                 <div class="ah_showcase_actions">
                                     <a href="/hotel/rooms" class="ah_btn ah_btn_gold">
-                                        Découvrir nos chambres <i class="fa fa-arrow-right"/>
+                                        Découvrir nos chambres <i class="oi" data-icon="arrow_forward"/>
                                     </a>
                                     <a href="/contactus" class="ah_btn ah_btn_ghost">Nous écrire</a>
                                 </div>
@@ -217,15 +217,15 @@
                                 </p>
                                 <div class="ah_values">
                                     <div class="ah_value">
-                                        <i class="fa fa-magic"/>
+                                        <i class="oi" data-icon="wand_stars"/>
                                         <div><strong>Propreté soignée</strong><span>Chambres et literie entretenues avec rigueur.</span></div>
                                     </div>
                                     <div class="ah_value">
-                                        <i class="fa fa-heart-o"/>
+                                        <i class="oi" data-icon="favorite"/>
                                         <div><strong>Accueil chaleureux</strong><span>Une équipe disponible et à votre écoute.</span></div>
                                     </div>
                                     <div class="ah_value">
-                                        <i class="fa fa-tag"/>
+                                        <i class="oi" data-icon="label"/>
                                         <div><strong>Prix justes</strong><span>Des tarifs clairs, sans frais cachés.</span></div>
                                     </div>
                                 </div>
@@ -233,7 +233,7 @@
                             <div class="col-lg-6">
                                 <!-- Photos de la galerie (Auberge > Configuration > Page d'accueil du site),
                                      à défaut les photos des chambres -->
-                                <t t-set="gallery_urls" t-value="request.website._hotel_gallery_urls()
+                                <t t-set="gallery_urls" t-value="website._hotel_gallery_urls()
                                     or ['/web/image/hotel.room/%s/image' % g.id for g in gallery_rooms]"/>
                                 <div t-if="gallery_urls" t-attf-class="ah_gallery ah_gallery_#{len(gallery_urls)}">
                                     <t t-foreach="gallery_urls" t-as="g_url">
@@ -241,17 +241,17 @@
                                     </t>
                                     <!-- Étiquette de prix posée dans la grande photo -->
                                     <div t-if="price_bed" class="ah_gallery_badge">
-                                        <span class="ah_badge_label"><i class="fa fa-bed"/> Lit en dortoir</span>
+                                        <span class="ah_badge_label"><i class="oi" data-icon="bed"/> Lit en dortoir</span>
                                         <span class="ah_badge_price">
                                             <small>dès</small>
-                                            <strong t-esc="price_bed"
+                                            <strong t-out="price_bed"
                                                     t-options='{"widget": "monetary", "display_currency": currency}'/>
                                             <small>/ nuit</small>
                                         </span>
                                     </div>
                                 </div>
                                 <div t-else="" class="ah_gallery_empty">
-                                    <i class="fa fa-home"/>
+                                    <i class="oi" data-icon="home"/>
                                 </div>
                             </div>
                         </div>
@@ -270,46 +270,46 @@
                         <div class="row g-4">
                             <div class="col-lg-6">
                                 <div class="ah_offer">
-                                    <div class="ah_offer_icon"><i class="fa fa-key"/></div>
+                                    <div class="ah_offer_icon"><i class="oi" data-icon="key"/></div>
                                     <h3>Chambre privée</h3>
                                     <p>La chambre rien que pour vous : le choix idéal pour les familles, les groupes
                                         et les voyageurs en quête de calme.</p>
                                     <ul>
-                                        <li><i class="fa fa-check"/>Chambre entière réservée à votre nom</li>
-                                        <li><i class="fa fa-check"/>Un espace privé, calme et confortable</li>
-                                        <li><i class="fa fa-check"/>Tous les équipements inclus</li>
+                                        <li><i class="oi" data-icon="check"/>Chambre entière réservée à votre nom</li>
+                                        <li><i class="oi" data-icon="check"/>Un espace privé, calme et confortable</li>
+                                        <li><i class="oi" data-icon="check"/>Tous les équipements inclus</li>
                                     </ul>
                                     <div class="ah_offer_foot">
                                         <div t-if="price_room" class="ah_offer_price">
                                             <small>À partir de</small>
-                                            <strong t-esc="price_room"
+                                            <strong t-out="price_room"
                                                     t-options='{"widget": "monetary", "display_currency": currency}'/>
                                             <small>par nuit</small>
                                         </div>
-                                        <a href="/hotel/rooms" class="ah_btn ah_btn_dark">Réserver une chambre <i class="fa fa-arrow-right"/></a>
+                                        <a href="/hotel/rooms" class="ah_btn ah_btn_dark">Réserver une chambre <i class="oi" data-icon="arrow_forward"/></a>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="ah_offer ah_offer_featured">
                                     <span class="ah_offer_badge">Meilleur prix</span>
-                                    <div class="ah_offer_icon"><i class="fa fa-bed"/></div>
+                                    <div class="ah_offer_icon"><i class="oi" data-icon="bed"/></div>
                                     <h3>Lit en dortoir</h3>
                                     <p>Ne payez que votre lit et partagez l'ambiance conviviale d'une auberge,
                                         au meilleur rapport qualité-prix.</p>
                                     <ul>
-                                        <li><i class="fa fa-check"/>Choisissez votre lit à la réservation</li>
-                                        <li><i class="fa fa-check"/>Dortoirs familiaux ou réservés aux femmes</li>
-                                        <li><i class="fa fa-check"/>Idéal pour les petits budgets</li>
+                                        <li><i class="oi" data-icon="check"/>Choisissez votre lit à la réservation</li>
+                                        <li><i class="oi" data-icon="check"/>Dortoirs familiaux ou réservés aux femmes</li>
+                                        <li><i class="oi" data-icon="check"/>Idéal pour les petits budgets</li>
                                     </ul>
                                     <div class="ah_offer_foot">
                                         <div t-if="price_bed" class="ah_offer_price">
                                             <small>À partir de</small>
-                                            <strong t-esc="price_bed"
+                                            <strong t-out="price_bed"
                                                     t-options='{"widget": "monetary", "display_currency": currency}'/>
                                             <small>par lit et par nuit</small>
                                         </div>
-                                        <a href="/hotel/rooms" class="ah_btn ah_btn_gold">Choisir mon lit <i class="fa fa-arrow-right"/></a>
+                                        <a href="/hotel/rooms" class="ah_btn ah_btn_gold">Choisir mon lit <i class="oi" data-icon="arrow_forward"/></a>
                                     </div>
                                 </div>
                             </div>
@@ -336,39 +336,39 @@
                                             <img t-if="card['image_url']" t-att-src="card['image_url']"
                                                  t-att-alt="rtype.name" loading="lazy"/>
                                             <div t-else="" class="ah_type_placeholder">
-                                                <i t-attf-class="fa #{'fa-bed' if rtype.rental_mode == 'bed' else 'fa-key'}"/>
+                                                <i t-attf-class="oi #{'fa-bed' if rtype.rental_mode == 'bed' else 'fa-key'}"/>
                                             </div>
                                         </div>
                                         <div class="ah_type_shade"/>
                                         <div class="ah_type_shine"/>
 
-                                        <span class="ah_type_num" t-esc="'%02d' % (card_index + 1)"/>
+                                        <span class="ah_type_num" t-out="'%02d' % (card_index + 1)"/>
                                         <span t-attf-class="ah_type_mode #{'ah_type_mode_bed' if rtype.rental_mode == 'bed' else ''}">
-                                            <t t-if="rtype.rental_mode == 'bed'"><i class="fa fa-bed"/> Au lit</t>
-                                            <t t-else=""><i class="fa fa-key"/> Chambre entière</t>
+                                            <t t-if="rtype.rental_mode == 'bed'"><i class="oi" data-icon="bed"/> Au lit</t>
+                                            <t t-else=""><i class="oi" data-icon="key"/> Chambre entière</t>
                                         </span>
 
                                         <div class="ah_type_body">
-                                            <h3 t-esc="rtype.name"/>
+                                            <h3 t-out="rtype.name"/>
                                             <div class="ah_type_meta">
-                                                <span><i class="fa fa-users"/> Jusqu'à <t t-esc="card['capacity']"/> personne<t t-if="card['capacity'] &gt; 1">s</t></span>
+                                                <span><i class="oi oi-filled" data-icon="group"/> Jusqu'à <t t-out="card['capacity']"/> personne<t t-if="card['capacity'] &gt; 1">s</t></span>
                                             </div>
                                             <div class="ah_type_more">
-                                                <p t-if="rtype.description" t-esc="rtype.description"/>
+                                                <p t-if="rtype.description" t-out="rtype.description"/>
                                                 <div t-if="card['amenities']" class="ah_type_amen">
                                                     <t t-foreach="card['amenities']" t-as="am">
-                                                        <span t-att-title="am.name"><i t-attf-class="fa #{am.icon or 'fa-check'}"/> <t t-esc="am.name"/></span>
+                                                        <span t-att-title="am.name"><i t-attf-class="oi #{am.icon or ''}" t-attf-data-icon="#{am.icon or 'check'}"/> <t t-out="am.name"/></span>
                                                     </t>
                                                 </div>
                                             </div>
                                             <div class="ah_type_foot">
                                                 <div t-if="card['price']" class="ah_type_price">
                                                     <small>dès</small>
-                                                    <strong t-esc="card['price']"
+                                                    <strong t-out="card['price']"
                                                             t-options='{"widget": "monetary", "display_currency": currency}'/>
                                                     <small><t t-if="rtype.rental_mode == 'bed'">/ lit</t><t t-else="">/ nuit</t></small>
                                                 </div>
-                                                <span class="ah_type_go" aria-hidden="true"><i class="fa fa-arrow-right"/></span>
+                                                <span class="ah_type_go" aria-hidden="true"><i class="oi" data-icon="arrow_forward"/></span>
                                             </div>
                                         </div>
                                     </a>
@@ -386,7 +386,7 @@
                                 <span class="ah_kicker">Hébergements</span>
                                 <h2 class="ah_h2">Nos chambres &amp; dortoirs</h2>
                             </div>
-                            <a href="/hotel/rooms" class="ah_link">Voir toutes les chambres <i class="fa fa-long-arrow-right"/></a>
+                            <a href="/hotel/rooms" class="ah_link">Voir toutes les chambres <i class="oi" data-icon="east"/></a>
                         </div>
                         <div class="row g-4">
                             <t t-foreach="featured_rooms" t-as="room">
@@ -396,17 +396,17 @@
                                             <img t-if="room.image" t-attf-src="/web/image/hotel.room/#{room.id}/image"
                                                  t-att-alt="room.name" loading="lazy"/>
                                             <div t-else="" class="ah_room_placeholder">
-                                                <i t-attf-class="fa #{'fa-bed' if room.rental_mode == 'bed' else 'fa-key'}"/>
+                                                <i t-attf-class="oi #{'fa-bed' if room.rental_mode == 'bed' else 'fa-key'}"/>
                                             </div>
-                                            <span class="ah_room_type" t-esc="room.room_type_id.name"/>
+                                            <span class="ah_room_type" t-out="room.room_type_id.name"/>
                                             <span t-attf-class="ah_room_mode #{'ah_mode_bed' if room.rental_mode == 'bed' else ''}">
-                                                <t t-if="room.rental_mode == 'bed'"><i class="fa fa-bed"/> Au lit</t>
-                                                <t t-else=""><i class="fa fa-key"/> Privée</t>
+                                                <t t-if="room.rental_mode == 'bed'"><i class="oi" data-icon="bed"/> Au lit</t>
+                                                <t t-else=""><i class="oi" data-icon="key"/> Privée</t>
                                             </span>
                                         </div>
                                         <div class="ah_room_body">
                                             <div class="ah_room_top">
-                                                <h4>Chambre <t t-esc="room.name"/></h4>
+                                                <h4>Chambre <t t-out="room.name"/></h4>
                                                 <div class="ah_room_price">
                                                     <t t-if="room.rental_mode == 'bed'">
                                                         <strong t-field="room.bed_price_min"
@@ -421,18 +421,18 @@
                                                 </div>
                                             </div>
                                             <div class="ah_room_meta">
-                                                <span><i class="fa fa-user-o"/> <t t-esc="room.capacity"/> pers.</span>
-                                                <span t-if="room.bed_count"><i class="fa fa-bed"/> <t t-esc="room.bed_count"/> lit(s)</span>
-                                                <span t-if="room.floor"><i class="fa fa-building-o"/> Étage <t t-esc="room.floor"/></span>
+                                                <span><i class="oi" data-icon="person"/> <t t-out="room.capacity"/> pers.</span>
+                                                <span t-if="room.bed_count"><i class="oi" data-icon="bed"/> <t t-out="room.bed_count"/> lit(s)</span>
+                                                <span t-if="room.floor"><i class="oi" data-icon="business"/> Étage <t t-out="room.floor"/></span>
                                             </div>
                                             <div class="ah_room_foot">
                                                 <div class="ah_room_amen">
                                                     <!-- Uniquement les équipements « Afficher sur l'accueil » -->
                                                     <t t-foreach="room.amenity_ids.filtered('website_home')" t-as="am">
-                                                        <i t-attf-class="fa #{am.icon or 'fa-check'}" t-att-title="am.name"/>
+                                                        <i t-attf-class="oi #{am.icon or ''}" t-att-title="am.name" t-attf-data-icon="#{am.icon or 'check'}"/>
                                                     </t>
                                                 </div>
-                                                <span class="ah_room_go">Réserver <i class="fa fa-arrow-right"/></span>
+                                                <span class="ah_room_go">Réserver <i class="oi" data-icon="arrow_forward"/></span>
                                             </div>
                                         </div>
                                     </a>
@@ -452,17 +452,17 @@
                         </div>
                         <div class="ah_steps">
                             <div class="ah_step">
-                                <div class="ah_step_icon"><i class="fa fa-search"/><span>1</span></div>
+                                <div class="ah_step_icon"><i class="oi" data-icon="search"/><span>1</span></div>
                                 <h5>Choisissez vos dates</h5>
                                 <p>Indiquez vos dates et le nombre de voyageurs : les disponibilités s'affichent en temps réel.</p>
                             </div>
                             <div class="ah_step">
-                                <div class="ah_step_icon"><i class="fa fa-hand-pointer-o"/><span>2</span></div>
+                                <div class="ah_step_icon"><i class="oi" data-icon="pan_tool_alt"/><span>2</span></div>
                                 <h5>Chambre ou lit</h5>
                                 <p>Réservez la chambre entière ou sélectionnez directement le lit libre de votre choix.</p>
                             </div>
                             <div class="ah_step">
-                                <div class="ah_step_icon"><i class="fa fa-envelope-open-o"/><span>3</span></div>
+                                <div class="ah_step_icon"><i class="oi" data-icon="drafts"/><span>3</span></div>
                                 <h5>Recevez la confirmation</h5>
                                 <p>Votre réservation est enregistrée et vous recevez immédiatement sa confirmation par e-mail.</p>
                             </div>
@@ -482,17 +482,17 @@
                                     que vous restiez une nuit ou une semaine.
                                     Le détail des équipements de chaque chambre figure sur sa fiche.
                                 </p>
-                                <a href="/hotel/rooms" class="ah_btn ah_btn_gold mt-2">Découvrir les chambres <i class="fa fa-arrow-right"/></a>
+                                <a href="/hotel/rooms" class="ah_btn ah_btn_gold mt-2">Découvrir les chambres <i class="oi" data-icon="arrow_forward"/></a>
                             </div>
                             <div class="col-lg-7">
                                 <div class="ah_amenities">
                                     <t t-foreach="amenities" t-as="am">
                                         <t t-set="am_rooms" t-value="am._website_room_count(all_rooms)"/>
                                         <div t-if="am_rooms" class="ah_amenity">
-                                            <i t-attf-class="fa #{am.icon or 'fa-check'}"/>
-                                            <span t-esc="am.name"/>
-                                            <small t-if="am_rooms == len(all_rooms)"><i class="fa fa-check-circle"/> Dans toutes les chambres</small>
-                                            <small t-else="">Dans <t t-esc="am_rooms"/> chambre<t t-if="am_rooms &gt; 1">s</t></small>
+                                            <i t-attf-class="oi #{am.icon or ''}" t-attf-data-icon="#{am.icon or 'check'}"/>
+                                            <span t-out="am.name"/>
+                                            <small t-if="am_rooms == len(all_rooms)"><i class="oi oi-filled" data-icon="check_circle"/> Dans toutes les chambres</small>
+                                            <small t-else="">Dans <t t-out="am_rooms"/> chambre<t t-if="am_rooms &gt; 1">s</t></small>
                                         </div>
                                     </t>
                                 </div>
@@ -511,16 +511,16 @@
                                     et recevez votre confirmation par e-mail.</p>
                                 <div class="ah_cta_contact" t-if="company.phone or company.email">
                                     <a t-if="company.phone" t-attf-href="tel:#{company.phone}">
-                                        <i class="fa fa-phone"/> <t t-esc="company.phone"/>
+                                        <i class="oi oi-filled" data-icon="phone"/> <t t-out="company.phone"/>
                                     </a>
                                     <a t-if="company.email" t-attf-href="mailto:#{company.email}">
-                                        <i class="fa fa-envelope-o"/> <t t-esc="company.email"/>
+                                        <i class="oi" data-icon="mail"/> <t t-out="company.email"/>
                                     </a>
                                 </div>
                             </div>
                             <div class="ah_cta_btns">
                                 <a href="/hotel/rooms" class="ah_btn ah_btn_gold ah_btn_lg">
-                                    <i class="fa fa-calendar"/> Réserver maintenant
+                                    <i class="oi oi-filled" data-icon="calendar_today"/> Réserver maintenant
                                 </a>
                                 <a href="/contactus" class="ah_btn ah_btn_ghost ah_btn_lg">Nous contacter</a>
                             </div>
