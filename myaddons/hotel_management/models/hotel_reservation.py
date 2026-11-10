@@ -204,6 +204,39 @@ class HotelReservation(models.Model):
             'context': {'create': False},
         }
 
+    @api.constrains('deposit_amount', 'amount_total')
+    def _check_deposit_not_above_total(self):
+        for rec in self:
+            # On ne contrôle que lorsqu'un total est connu (lignes saisies) :
+            # un acompte encaissé avant d'ajouter les chambres reste permis.
+            if rec.amount_total and rec.deposit_amount > rec.amount_total + 0.01:
+                raise ValidationError(_(
+                    "L'acompte (%(deposit)s) ne peut pas dépasser le total du "
+                    "séjour (%(total)s).",
+                    deposit=rec.deposit_amount, total=rec.amount_total))
+
+    @api.constrains('adults', 'children')
+    def _check_guest_counts(self):
+        for rec in self:
+            if (rec.adults or 0) < 1:
+                raise ValidationError(_(
+                    "Une réservation doit compter au moins un adulte."))
+            if (rec.children or 0) < 0:
+                raise ValidationError(_(
+                    "Le nombre d'enfants ne peut pas être négatif."))
+
+    @api.constrains('state', 'checkin', 'checkout', 'line_ids',
+                    'line_ids.room_id', 'line_ids.bed_ids', 'adults', 'children')
+    def _check_booking_integrity(self):
+        """Toute modification d'une réservation déjà confirmée ou enregistrée
+        est revalidée : places suffisantes et aucune surréservation. Sans cela,
+        changer les dates ou les chambres d'une réservation confirmée pouvait
+        créer un conflit sans alerte."""
+        for rec in self:
+            if rec.state in ('confirmed', 'checkin'):
+                rec._check_guest_places()
+                rec._check_availability()
+
     @api.onchange('booking_type')
     def _onchange_booking_type(self):
         """Le type de location est choisi sur la réservation : on l'applique à
@@ -231,6 +264,14 @@ class HotelReservation(models.Model):
             raise UserError(_("Renseignez le client avant de facturer."))
         if not self.line_ids:
             raise UserError(_("Rien à facturer sur ce séjour."))
+        existing = self.invoice_ids.filtered(lambda m: m.state != 'cancel')
+        if existing:
+            raise UserError(_(
+                "Une facture existe déjà pour la réservation %(name)s : %(inv)s.\n\n"
+                "Utilisez le bouton « Factures » pour la consulter, ou annulez-la "
+                "avant d'en créer une nouvelle.",
+                name=self.name,
+                inv=', '.join(existing.mapped('display_name'))))
         income = self._get_income_account()
         if not income:
             raise UserError(_("Aucun compte de produits configuré dans la comptabilité."))
@@ -333,6 +374,11 @@ class HotelReservation(models.Model):
 
     def action_confirm(self):
         for rec in self:
+            if rec.state != 'draft':
+                raise UserError(_(
+                    "Seule une réservation en brouillon peut être confirmée "
+                    "(%(name)s est « %(state)s »).",
+                    name=rec.name, state=rec._state_label()))
             if not rec.line_ids:
                 raise UserError(_("Ajoutez au moins une chambre avant de confirmer."))
             rec._check_guest_places()
@@ -341,11 +387,22 @@ class HotelReservation(models.Model):
 
     def action_checkin(self):
         for rec in self:
+            if rec.state != 'confirmed':
+                raise UserError(_(
+                    "L'enregistrement (check-in) n'est possible que sur une "
+                    "réservation confirmée (%(name)s est « %(state)s »).",
+                    name=rec.name, state=rec._state_label()))
             rec._check_guest_places()
             rec._check_availability()
             rec.state = 'checkin'
 
     def action_checkout(self):
+        for rec in self:
+            if rec.state != 'checkin':
+                raise UserError(_(
+                    "Le départ (check-out) n'est possible que sur une réservation "
+                    "enregistrée, client présent (%(name)s est « %(state)s »).",
+                    name=rec.name, state=rec._state_label()))
         Housekeeping = self.env['hotel.housekeeping']
         for rec in self:
             rec.state = 'checkout'
@@ -364,6 +421,26 @@ class HotelReservation(models.Model):
 
     def action_draft(self):
         self.write({'state': 'draft'})
+
+    def _state_label(self):
+        self.ensure_one()
+        return dict(self._fields['state'].selection).get(self.state, self.state)
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_only_draft_or_cancel(self):
+        """On ne supprime pas une réservation engagée : confirmée, client
+        présent, terminée, ou déjà facturée. Il faut l'annuler d'abord."""
+        for rec in self:
+            if rec.state not in ('draft', 'cancel'):
+                raise UserError(_(
+                    "La réservation %(name)s est « %(state)s » et ne peut pas être "
+                    "supprimée. Annulez-la d'abord (bouton « Annuler »).",
+                    name=rec.name, state=rec._state_label()))
+            if rec.invoice_ids.filtered(lambda m: m.state != 'cancel'):
+                raise UserError(_(
+                    "La réservation %(name)s possède des factures et ne peut pas "
+                    "être supprimée.",
+                    name=rec.name))
 
     @api.model
     def get_dashboard_data(self):
@@ -600,6 +677,29 @@ class HotelReservationLine(models.Model):
             # Par lit : l'utilisateur sélectionne les lits disponibles.
             self.bed_ids = [(5, 0, 0)]
         self._apply_price()
+
+    @api.constrains('price_unit')
+    def _check_price_unit(self):
+        for line in self:
+            if line.price_unit < 0:
+                raise ValidationError(_(
+                    "Le prix par nuit d'une chambre ne peut pas être négatif."))
+
+    @api.constrains('room_id', 'reservation_id')
+    def _check_unique_room_per_reservation(self):
+        """Une même chambre ne doit figurer qu'une fois par réservation :
+        les lits se regroupent sur une seule ligne."""
+        for line in self:
+            if not (line.room_id and line.reservation_id):
+                continue
+            twin = line.reservation_id.line_ids.filtered(
+                lambda l: l.room_id == line.room_id and l.id != line.id)
+            if twin:
+                raise ValidationError(_(
+                    "La chambre %(room)s figure plusieurs fois dans la "
+                    "réservation %(res)s. Regroupez-la sur une seule ligne "
+                    "(et, en mode « par lit », sélectionnez-y tous les lits voulus).",
+                    room=line.room_id.name, res=line.reservation_id.name))
 
     @api.constrains('booking_type', 'bed_ids', 'room_id')
     def _check_beds(self):

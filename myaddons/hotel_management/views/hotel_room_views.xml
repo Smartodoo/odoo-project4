@@ -88,7 +88,7 @@
                     <button name="action_set_in_service" type="object"
                             string="Remettre en service" class="btn-primary"
                             invisible="status != 'out_of_service'"/>
-                    <field name="status" widget="statusbar" class="o_hotel_statusbar"
+                    <field name="status" widget="statusbar" class="o_hotel_status"
                            statusbar_visible="available,reserved,partial,occupied,cleaning,maintenance,out_of_service"/>
                 </header>
                 <sheet>
@@ -114,7 +114,38 @@
                         <label for="name"/>
                         <h1><field name="name" placeholder="ex : 101"/></h1>
                     </div>
-                    <field name="bed_availability" invisible="1"/>
+                    <!-- État de la chambre : le statut global ET ses 3 composantes,
+                         pour voir sans ambiguïté où en est réellement la chambre. -->
+                    <group string="État de la chambre">
+                        <group>
+                            <field name="status" widget="badge" string="Statut actuel"
+                                   decoration-success="status == 'available'"
+                                   decoration-info="status == 'reserved'"
+                                   decoration-warning="status == 'partial'"
+                                   decoration-danger="status == 'occupied'"
+                                   decoration-primary="status == 'cleaning'"
+                                   decoration-muted="status in ('maintenance', 'out_of_service')"/>
+                            <field name="technical_state" widget="badge" readonly="1"
+                                   decoration-success="technical_state == 'in_service'"
+                                   decoration-warning="technical_state == 'maintenance'"
+                                   decoration-danger="technical_state == 'out_of_service'"/>
+                        </group>
+                        <group>
+                            <field name="housekeeping_status" widget="badge" readonly="1"
+                                   decoration-success="housekeeping_status == 'clean'"
+                                   decoration-warning="housekeeping_status == 'dirty'"
+                                   decoration-info="housekeeping_status == 'inprogress'"/>
+                            <field name="bed_availability" string="Occupation des lits"
+                                   invisible="not bed_count"/>
+                        </group>
+                    </group>
+                    <div class="text-muted small mb-2" colspan="2">
+                        <i class="fa fa-info-circle me-1" title="Info"/>
+                        Le <b>statut actuel</b> combine ces états, par ordre de priorité :
+                        <b>hors service / maintenance</b> (technique) &gt;
+                        <b>occupation</b> (réservations en cours) &gt;
+                        <b>à nettoyer</b> (ménage). Une chambre à nettoyer reste vendable.
+                    </div>
                     <field name="current_guest_ids" invisible="1"/>
                     <field name="current_reservation_id" invisible="1"/>
                     <field name="bed_count" invisible="1"/>

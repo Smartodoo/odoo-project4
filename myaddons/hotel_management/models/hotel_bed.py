@@ -33,6 +33,8 @@ class HotelBed(models.Model):
     _sql_constraints = [
         ('name_room_uniq', 'unique(name, room_id)',
          "Cette référence de lit existe déjà dans cette chambre."),
+        ('price_non_negative', 'CHECK(price >= 0)',
+         "Le prix d'un lit ne peut pas être négatif."),
     ]
 
     @api.model

@@ -133,6 +133,11 @@ class HotelRoom(models.Model):
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id)',
          "Ce numéro de chambre existe déjà."),
+        ('capacity_positive', 'CHECK(capacity > 0)',
+         "La capacité d'une chambre doit être d'au moins 1 personne."),
+        ('prices_non_negative',
+         'CHECK(price >= 0 AND room_price >= 0 AND bed_price >= 0)',
+         "Les prix d'une chambre (chambre entière, lit) ne peuvent pas être négatifs."),
     ]
 
     @api.onchange('room_type_id')
