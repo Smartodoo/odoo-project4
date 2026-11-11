@@ -12,6 +12,12 @@
                     <field name="hotel_reservation_count" widget="statinfo"
                            string="Séjours"/>
                 </button>
+                <button name="action_view_hotel_payments" type="object"
+                        class="oe_stat_button" icon="payments"
+                        invisible="hotel_payment_count == 0">
+                    <field name="hotel_payment_count" widget="statinfo"
+                           string="Paiements auberge"/>
+                </button>
             </xpath>
             <xpath expr="//notebook" position="inside">
                 <page string="Auberge" name="hotel">
@@ -24,7 +30,36 @@
                         <group string="Pièce d'identité">
                             <field name="hotel_id_type"/>
                             <field name="hotel_id_number"/>
+                            <field name="hotel_id_document" filename="hotel_id_document_name"/>
+                            <field name="hotel_id_document_name" invisible="1"/>
                         </group>
+                        <group string="Conditions tarifaires">
+                            <field name="hotel_discount"/>
+                            <field name="hotel_special_room_price" widget="monetary"/>
+                            <field name="hotel_special_bed_price" widget="monetary"/>
+                            <field name="hotel_currency_id" invisible="1"/>
+                        </group>
+                        <group string="Suivi">
+                            <field name="hotel_amount_due" widget="monetary"
+                                   decoration-danger="hotel_amount_due &gt; 0"/>
+                        </group>
+                    </group>
+                    <group string="Observations">
+                        <field name="hotel_note" nolabel="1" placeholder="Remarques sur le client…"/>
+                    </group>
+                    <group string="Historique des séjours">
+                        <field name="hotel_reservation_ids" nolabel="1" readonly="1">
+                            <list>
+                                <field name="name"/>
+                                <field name="checkin"/>
+                                <field name="checkout"/>
+                                <field name="nights"/>
+                                <field name="amount_total" widget="monetary"/>
+                                <field name="amount_due" widget="monetary"/>
+                                <field name="currency_id" column_invisible="1"/>
+                                <field name="state" widget="badge"/>
+                            </list>
+                        </field>
                     </group>
                 </page>
             </xpath>

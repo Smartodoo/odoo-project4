@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ================= ACTIONS D'IMPRESSION (cahier des charges §19) ================= -->
+    <record id="action_report_hotel_reservation_confirmation" model="ir.actions.report">
+        <field name="name">Confirmation de réservation</field>
+        <field name="model">hotel.reservation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management.report_reservation_confirmation</field>
+        <field name="print_report_name">'Confirmation - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_hotel_reservation"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_hotel_guest_card" model="ir.actions.report">
+        <field name="name">Fiche client</field>
+        <field name="model">hotel.reservation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management.report_guest_card</field>
+        <field name="print_report_name">'Fiche client - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_hotel_reservation"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_hotel_stay" model="ir.actions.report">
+        <field name="name">Rapport de séjour</field>
+        <field name="model">hotel.reservation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management.report_stay</field>
+        <field name="print_report_name">'Séjour - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_hotel_reservation"/>
+        <field name="binding_type">report</field>
+    </record>
+
+
+    <record id="action_report_hotel_activity" model="ir.actions.report">
+        <field name="name">Rapport d'activité</field>
+        <field name="model">hotel.activity.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management.report_activity</field>
+        <field name="print_report_name">'Rapport activite %s - %s' % (object.date_from, object.date_to)</field>
+    </record>
+
+    <record id="action_report_hotel_room_status" model="ir.actions.report">
+        <field name="name">État des chambres</field>
+        <field name="model">hotel.room</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management.report_room_status</field>
+        <field name="print_report_name">'Etat des chambres'</field>
+        <field name="binding_model_id" ref="model_hotel_room"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- ================= GABARITS ================= -->
+
+    <!-- Bloc commun : client + séjour -->
+    <template id="report_reservation_header">
+        <div class="row mb-4">
+            <div class="col-6">
+                <h6 class="text-uppercase text-muted">Client</h6>
+                <div><strong t-field="o.partner_id.name"/></div>
+                <div t-if="o.partner_id.phone">Tél. : <span t-field="o.partner_id.phone"/></div>
+                <div t-if="o.partner_id.email"><span t-field="o.partner_id.email"/></div>
+                <div t-if="o.partner_id.street"><span t-field="o.partner_id.street"/> <span t-field="o.partner_id.city"/></div>
+            </div>
+            <div class="col-6">
+                <h6 class="text-uppercase text-muted">Séjour</h6>
+                <div>Arrivée : <strong t-field="o.checkin"/></div>
+                <div>Départ : <strong t-field="o.checkout"/></div>
+                <div>Nuits : <strong t-out="o.nights"/> — Personnes : <strong t-out="o.guest_count"/></div>
+                <div>Source : <span t-field="o.source"/></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="report_reservation_lines">
+        <table class="table table-sm o_main_table">
+            <thead>
+                <tr>
+                    <th>Désignation</th>
+                    <th class="text-end">Quantité</th>
+                    <th class="text-end">Prix unitaire</th>
+                    <th class="text-end">Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr t-foreach="o.line_ids" t-as="line">
+                    <td><t t-out="line._invoice_label()"/></td>
+                    <td class="text-end"><t t-out="line.nights"/></td>
+                    <td class="text-end"><span t-field="line.price_unit"/></td>
+                    <td class="text-end"><span t-field="line.price_subtotal"/></td>
+                </tr>
+                <tr t-foreach="o.service_ids" t-as="svc">
+                    <td><span t-field="svc.name"/> (<span t-field="svc.date"/>)</td>
+                    <td class="text-end"><span t-field="svc.quantity"/></td>
+                    <td class="text-end"><span t-field="svc.price_unit"/></td>
+                    <td class="text-end"><span t-field="svc.price_subtotal"/></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="row justify-content-end">
+            <div class="col-6">
+                <table class="table table-sm">
+                    <tr t-if="o.amount_discount">
+                        <td>Montant avant remise</td>
+                        <td class="text-end"><span t-field="o.amount_gross"/></td>
+                    </tr>
+                    <tr t-if="o.amount_discount">
+                        <td>Remise</td>
+                        <td class="text-end">- <span t-field="o.amount_discount"/></td>
+                    </tr>
+                    <tr t-if="o.amount_tax">
+                        <td>Total HT</td>
+                        <td class="text-end"><span t-field="o.amount_untaxed"/></td>
+                    </tr>
+                    <tr t-if="o.amount_tax">
+                        <td>Taxes</td>
+                        <td class="text-end"><span t-field="o.amount_tax"/></td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td>Total séjour</td>
+                        <td class="text-end"><span t-field="o.amount_total"/></td>
+                    </tr>
+                    <tr>
+                        <td>Déjà payé</td>
+                        <td class="text-end"><span t-field="o.amount_paid"/></td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td>Reste à payer</td>
+                        <td class="text-end"><span t-field="o.amount_due"/></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </template>
+
+    <!-- 1. Confirmation de réservation -->
+    <template id="report_reservation_confirmation">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Confirmation de réservation <span t-field="o.name"/></h2>
+                        <p>Nous avons le plaisir de confirmer la réservation suivante.</p>
+                        <t t-call="hotel_management.report_reservation_header"/>
+                        <t t-call="hotel_management.report_reservation_lines"/>
+                        <div t-if="o.amount_due &gt; 0 and o.company_id.hotel_deposit_instructions" class="mt-3">
+                            <h6>Paiement de l'acompte</h6>
+                            <p>Acompte demandé : <strong t-field="o.deposit_requested"/></p>
+                            <p t-field="o.company_id.hotel_deposit_instructions" style="white-space: pre-line;"/>
+                        </div>
+                        <p class="mt-4 text-muted">Merci de votre confiance. Nous vous attendons le <span t-field="o.checkin"/>.</p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- 2. Fiche client (check-in) -->
+    <template id="report_guest_card">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Fiche client — <span t-field="o.name"/></h2>
+                        <table class="table table-bordered mt-3">
+                            <tr><th style="width: 35%;">Nom</th><td t-out="o.partner_id.hotel_last_name or o.partner_id.name"/></tr>
+                            <tr><th>Prénom</th><td t-out="o.partner_id.hotel_first_name or ''"/></tr>
+                            <tr><th>Date de naissance</th><td><span t-field="o.partner_id.hotel_birthdate"/></td></tr>
+                            <tr><th>Adresse</th><td><span t-field="o.partner_id.street"/> <span t-field="o.partner_id.city"/></td></tr>
+                            <tr><th>Téléphone</th><td t-out="o.partner_id.phone or ''"/></tr>
+                            <tr><th>E-mail</th><td t-out="o.partner_id.email or ''"/></tr>
+                            <tr><th>Pièce d'identité</th><td><span t-field="o.partner_id.hotel_id_type"/> n° <t t-out="o.partner_id.hotel_id_number or ''"/></td></tr>
+                            <tr><th>Arrivée / départ</th><td><span t-field="o.checkin"/> → <span t-field="o.checkout"/> (<t t-out="o.nights"/> nuit(s))</td></tr>
+                            <tr><th>Chambre(s) / lit(s)</th>
+                                <td><t t-foreach="o.line_ids" t-as="line"><div t-out="line._invoice_label()"/></t></td></tr>
+                            <tr><th>Personnes</th><td><t t-out="o.adults"/> adulte(s), <t t-out="o.children"/> enfant(s)</td></tr>
+                            <tr><th>Acompte versé</th><td><span t-field="o.deposit_amount"/></td></tr>
+                            <tr><th>Observations</th><td t-out="o.note or ''"/></tr>
+                        </table>
+                        <div class="row mt-5">
+                            <div class="col-6">Signature du client :</div>
+                            <div class="col-6">Visa de la réception :</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- 3. Rapport de séjour -->
+    <template id="report_stay">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Rapport de séjour <span t-field="o.name"/> — <span t-field="o.state"/></h2>
+                        <t t-call="hotel_management.report_reservation_header"/>
+                        <t t-call="hotel_management.report_reservation_lines"/>
+                        <h5 class="mt-4" t-if="o.payment_ids">Paiements</h5>
+                        <table class="table table-sm" t-if="o.payment_ids">
+                            <thead><tr><th>Date</th><th>Référence</th><th>Type</th><th>Mode</th><th class="text-end">Montant</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="o.sudo().payment_ids.filtered(lambda p: p.state in ('paid', 'reconciled'))" t-as="p">
+                                    <td><span t-field="p.date"/></td>
+                                    <td t-out="p.name"/>
+                                    <td><span t-field="p.hotel_payment_kind"/></td>
+                                    <td><span t-field="p.hotel_payment_mode"/></td>
+                                    <td class="text-end"><span t-field="p.amount_company_currency_signed"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div t-if="o.invoice_ids">
+                            Facture(s) : <t t-out="', '.join(o.sudo().invoice_ids.mapped('name'))"/>
+                        </div>
+                        <p t-if="o.note" class="mt-3"><strong>Observations :</strong> <span t-field="o.note"/></p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+
+    <!-- 5. Rapport d'activité / chiffre d'affaires -->
+    <template id="report_activity">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o.get_report_data()"/>
+                <t t-set="cur" t-value="o.currency_id"/>
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Rapport d'activité du <span t-field="o.date_from"/> au <span t-field="o.date_to"/></h2>
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <table class="table table-sm">
+                                    <tr><td>CA hébergement (HT)</td><td class="text-end fw-bold"><t t-out="d['revenue']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td></tr>
+                                    <tr><td>Consommations &amp; services</td><td class="text-end"><t t-out="d['services']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td></tr>
+                                    <tr><td>Encaissements</td><td class="text-end"><t t-out="d['collected']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td></tr>
+                                    <tr><td>Impayés (séjours en cours / terminés)</td><td class="text-end"><t t-out="d['unpaid']" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td></tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm">
+                                    <tr><td>Taux d'occupation (chambres)</td><td class="text-end fw-bold"><t t-out="'%.1f' % d['occupancy_rooms']"/> %</td></tr>
+                                    <tr><td>Taux d'occupation (lits)</td><td class="text-end"><t t-out="'%.1f' % d['occupancy_beds']"/> %</td></tr>
+                                    <tr><td>Nuitées chambre / lit</td><td class="text-end"><t t-out="'%.1f' % d['room_nights']"/> / <t t-out="'%.0f' % d['bed_nights']"/></td></tr>
+                                    <tr><td>Réservations / clients</td><td class="text-end"><t t-out="d['reservation_count']"/> / <t t-out="d['guest_count']"/></td></tr>
+                                    <tr><td>Durée moyenne des séjours</td><td class="text-end"><t t-out="'%.1f' % d['avg_stay']"/> nuit(s)</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <h5>Par source</h5>
+                                <table class="table table-sm">
+                                    <thead><tr><th>Source</th><th class="text-end">Nuitées</th><th class="text-end">CA</th></tr></thead>
+                                    <tr t-foreach="d['by_source']" t-as="r">
+                                        <td t-out="r[0]"/><td class="text-end" t-out="'%.1f' % r[2]"/>
+                                        <td class="text-end"><t t-out="r[1]" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                    </tr>
+                                </table>
+                                <h5>Encaissements par mode</h5>
+                                <table class="table table-sm">
+                                    <tr t-foreach="d['by_mode']" t-as="r">
+                                        <td t-out="r[0]"/>
+                                        <td class="text-end"><t t-out="r[1]" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <h5>Par chambre</h5>
+                                <table class="table table-sm">
+                                    <thead><tr><th>Chambre</th><th class="text-end">Nuitées</th><th class="text-end">CA</th></tr></thead>
+                                    <tr t-foreach="d['by_room']" t-as="r">
+                                        <td t-out="r[0]"/><td class="text-end" t-out="'%.1f' % r[2]"/>
+                                        <td class="text-end"><t t-out="r[1]" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <h5 class="mt-3">CA par jour</h5>
+                        <table class="table table-sm">
+                            <thead><tr><th>Jour</th><th class="text-end">Nuitées chambre</th><th class="text-end">CA</th></tr></thead>
+                            <tr t-foreach="d['by_day']" t-as="r">
+                                <td t-out="r[0].strftime('%d/%m/%Y')"/>
+                                <td class="text-end" t-out="'%.1f' % r[2]"/>
+                                <td class="text-end"><t t-out="r[1]" t-options="{'widget': 'monetary', 'display_currency': cur}"/></td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- 6. État des chambres -->
+    <template id="report_room_status">
+        <t t-call="web.html_container">
+            <t t-set="o" t-value="docs[:1]"/>
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>État des chambres au <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/></h2>
+                    <table class="table table-sm o_main_table mt-3">
+                        <thead>
+                            <tr>
+                                <th>Chambre</th><th>Étage</th><th>Type</th><th>Statut</th>
+                                <th>Ménage</th><th>Lits libres</th><th>Client(s) présent(s)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="docs" t-as="room">
+                                <td><strong t-out="room.name"/></td>
+                                <td t-out="room.floor or ''"/>
+                                <td t-out="room.room_type_id.name"/>
+                                <td><span t-field="room.status"/></td>
+                                <td><span t-field="room.housekeeping_status"/></td>
+                                <td t-out="room.bed_availability or ''"/>
+                                <td t-out="', '.join(room.current_guest_ids.mapped('name'))"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -10,6 +10,7 @@
                 <field name="date_end"/>
                 <field name="room_type_id" placeholder="Tous les types"/>
                 <field name="price" widget="monetary"/>
+                <field name="bed_price" widget="monetary"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>

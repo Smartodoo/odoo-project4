@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_caisse_session" model="ir.actions.report">
+        <field name="name">État de caisse</field>
+        <field name="model">caisse.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">caisse.report_caisse_session</field>
+        <field name="print_report_name">'Etat de caisse - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_caisse_session"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- 4. État de caisse -->
+    <template id="report_caisse_session">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>État de caisse <span t-field="o.name"/></h2>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div>Caissier : <strong t-field="o.user_id"/></div>
+                                <div>Ouverture : <span t-field="o.date_open"/></div>
+                                <div t-if="o.date_close">Fermeture : <span t-field="o.date_close"/></div>
+                                <div>État : <span t-field="o.state"/></div>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm">
+                                    <tr><td>Fond de caisse</td><td class="text-end"><span t-field="o.opening_balance"/></td></tr>
+                                    <tr><td>Total encaissé</td><td class="text-end"><span t-field="o.total_collected"/></td></tr>
+                                    <tr><td>Total dépensé</td><td class="text-end"><span t-field="o.total_spent"/></td></tr>
+                                    <tr class="fw-bold"><td>Solde théorique</td><td class="text-end"><span t-field="o.theoretical_balance"/></td></tr>
+                                    <tr t-if="o.state == 'closed'"><td>Espèces comptées</td><td class="text-end"><span t-field="o.closing_balance"/></td></tr>
+                                    <tr t-if="o.state == 'closed'" class="fw-bold"><td>Écart de caisse</td><td class="text-end"><span t-field="o.difference"/></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <h5>Journal de caisse</h5>
+                        <table class="table table-sm o_main_table">
+                            <thead><tr><th>Date</th><th>Type</th><th>Justification / client</th><th>Pièce</th><th class="text-end">Montant</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="o.sudo().payment_ids.filtered(lambda p: p.state in ('paid', 'reconciled'))" t-as="p">
+                                    <td><span t-field="p.date"/></td>
+                                    <td>Paiement client (<span t-field="p.hotel_payment_kind"/>)</td>
+                                    <td><t t-out="p.partner_id.name"/> — <t t-out="p.hotel_reservation_id.name or ''"/></td>
+                                    <td t-out="p.name"/>
+                                    <td class="text-end"><span t-field="p.amount_company_currency_signed"/></td>
+                                </tr>
+                                <tr t-foreach="o.move_ids" t-as="m">
+                                    <td><span t-field="m.date"/></td>
+                                    <td><span t-field="m.move_type"/></td>
+                                    <td><t t-out="m.reason"/><t t-if="m.partner_id"> — <t t-out="m.partner_id.name"/></t></td>
+                                    <td t-out="m.reference or ''"/>
+                                    <td class="text-end"><span t-field="m.signed_amount"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h5 class="mt-3">Paiements par mode (période de la session)</h5>
+                        <table class="table table-sm w-50">
+                            <tr t-foreach="o.payments_by_mode()" t-as="row">
+                                <td t-out="row[0]"/>
+                                <td class="text-end"><t t-out="row[1]" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                            </tr>
+                        </table>
+                        <div class="row mt-5">
+                            <div class="col-6">Signature du caissier :</div>
+                            <div class="col-6">Visa du responsable :</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -11,6 +11,7 @@ HOTEL_PAYMENT_MODES = [
 HOTEL_PAYMENT_KINDS = [
     ('deposit', 'Acompte'),
     ('payment', 'Paiement'),
+    ('refund', 'Remboursement'),
 ]
 
 
@@ -69,6 +70,12 @@ class AccountJournal(models.Model):
             ('journal_id.company_id', '=', company.id),
             ('journal_id.active', '=', True),
         ], order='sequence, id', limit=1)
+
+    @api.model
+    def _hotel_get_outbound_method_line(self, journal):
+        """Ligne de mode de paiement sortant d'un journal (remboursements)."""
+        return journal.outbound_payment_method_line_ids.sorted(
+            lambda l: (l.payment_method_id.code != 'manual', l.sequence))[:1]
 
     @api.model
     def _hotel_setup_payment_modes(self):

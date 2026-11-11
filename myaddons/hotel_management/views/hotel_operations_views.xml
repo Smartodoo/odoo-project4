@@ -8,6 +8,8 @@
             <list>
                 <field name="name"/>
                 <field name="role"/>
+                <field name="employee_id" optional="show"/>
+                <field name="department_id" optional="show"/>
                 <field name="phone"/>
                 <field name="email"/>
                 <field name="user_id"/>
@@ -20,7 +22,16 @@
         <field name="model">hotel.staff</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_create_employee" type="object" string="Créer la fiche employé"
+                            invisible="employee_id" class="btn-secondary"
+                            help="Crée la fiche Employés Odoo : contrat, service, horaires, présences, congés."/>
+                </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_employee" type="object" class="oe_stat_button"
+                                icon="badge" invisible="not employee_id" string="Fiche employé"/>
+                    </div>
                     <field name="image" widget="image" class="oe_avatar"/>
                     <div class="oe_title">
                         <label for="name"/>
@@ -29,6 +40,10 @@
                     <group>
                         <group>
                             <field name="role"/>
+                            <field name="employee_id"/>
+                            <field name="department_id" invisible="not employee_id"/>
+                            <field name="job_title" invisible="not employee_id"/>
+                            <field name="resource_calendar_id" invisible="not employee_id"/>
                             <field name="user_id"/>
                         </group>
                         <group>
@@ -76,7 +91,7 @@
         <field name="model">hotel.housekeeping</field>
         <field name="arch" type="xml">
             <list decoration-warning="state == 'todo'" decoration-info="state == 'inprogress'"
-                  decoration-muted="state == 'cancel'">
+                  decoration-danger="state == 'to_repair'" decoration-muted="state == 'cancel'">
                 <field name="name"/>
                 <field name="room_id"/>
                 <field name="cleaning_type"/>
@@ -85,8 +100,15 @@
                 <field name="state" widget="badge"
                        decoration-warning="state == 'todo'"
                        decoration-info="state == 'inprogress'"
-                       decoration-success="state == 'done'"
+                       decoration-success="state in ('done', 'inspected')"
+                       decoration-danger="state == 'to_repair'"
                        decoration-muted="state == 'cancel'"/>
+                <button name="action_start" type="object" string="Démarrer" icon="play_arrow"
+                        invisible="state != 'todo'"/>
+                <button name="action_done" type="object" string="Terminer" icon="check"
+                        invisible="state != 'inprogress'"/>
+                <button name="action_inspect" type="object" string="Contrôler" icon="verified"
+                        invisible="state != 'done'" groups="hotel_management.group_hotel_manager"/>
             </list>
         </field>
     </record>
@@ -101,12 +123,19 @@
                             class="btn-primary" invisible="state != 'todo'"/>
                     <button name="action_done" string="Terminer" type="object"
                             class="btn-primary" invisible="state != 'inprogress'"/>
+                    <button name="action_inspect" string="Contrôler" type="object"
+                            class="btn-primary" invisible="state != 'done'"
+                            groups="hotel_management.group_hotel_manager"
+                            help="Le responsable valide le ménage : la chambre passe « Contrôlée »."/>
+                    <button name="action_to_repair" string="Signaler une réparation" type="object"
+                            invisible="state in ('to_repair', 'cancel')"
+                            help="Un problème est constaté : la chambre passe « À réparer » et une demande de travaux est créée."/>
                     <button name="action_cancel" string="Annuler" type="object"
-                            invisible="state in ('done', 'cancel')"/>
+                            invisible="state in ('done', 'inspected', 'cancel')"/>
                     <button name="action_reset" string="Réinitialiser" type="object"
-                            invisible="state != 'cancel'"/>
+                            invisible="state not in ('cancel', 'to_repair')"/>
                     <field name="state" widget="statusbar" class="o_hotel_statusbar o_hotel_statusbar_flow"
-                           statusbar_visible="todo,inprogress,done"/>
+                           statusbar_visible="todo,inprogress,done,inspected"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -121,6 +150,8 @@
                         <group>
                             <field name="staff_id"/>
                             <field name="reservation_id"/>
+                            <field name="inspected_by_id" invisible="not inspected_by_id"/>
+                            <field name="maintenance_id" invisible="not maintenance_id"/>
                         </group>
                     </group>
                     <group string="Notes">
@@ -139,9 +170,13 @@
             <search>
                 <field name="room_id"/>
                 <field name="staff_id"/>
-                <filter name="todo" string="À faire" domain="[('state', '=', 'todo')]"/>
-                <filter name="inprogress" string="En cours" domain="[('state', '=', 'inprogress')]"/>
-                <filter name="done" string="Terminées" domain="[('state', '=', 'done')]"/>
+                <filter name="todo" string="À nettoyer" domain="[('state', '=', 'todo')]"/>
+                <filter name="inprogress" string="En nettoyage" domain="[('state', '=', 'inprogress')]"/>
+                <filter name="done" string="Nettoyées (à contrôler)" domain="[('state', '=', 'done')]"/>
+                <filter name="inspected" string="Contrôlées" domain="[('state', '=', 'inspected')]"/>
+                <filter name="to_repair" string="À réparer" domain="[('state', '=', 'to_repair')]"/>
+                <separator/>
+                <filter name="mine" string="Mes tâches" domain="[('staff_id.user_id', '=', uid)]"/>
                 <separator/>
                 <filter name="checkout" string="Après départ" domain="[('cleaning_type', '=', 'checkout')]"/>
                 <group>

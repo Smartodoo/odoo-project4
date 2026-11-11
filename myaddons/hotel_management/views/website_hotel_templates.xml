@@ -363,6 +363,15 @@
                                         t-options='{"widget": "monetary", "display_currency": reservation.currency_id}'/></td></tr>
                             </table>
                         </div>
+                        <div class="o_hotel_confirm_card mx-auto mt-3 text-start"
+                             t-if="reservation.company_id.hotel_deposit_instructions and reservation.deposit_requested">
+                            <h5>Acompte pour garantir votre réservation</h5>
+                            <p class="mb-1">Montant demandé :
+                                <strong t-field="reservation.deposit_requested"
+                                        t-options='{"widget": "monetary", "display_currency": reservation.currency_id}'/></p>
+                            <p class="mb-0" style="white-space: pre-line;" t-out="reservation.company_id.hotel_deposit_instructions"/>
+                            <p class="text-muted small mb-0">Indiquez la référence <strong t-out="reservation.name"/> lors du virement.</p>
+                        </div>
                         <p class="text-muted mt-3">
                             Notre équipe vous contactera pour finaliser votre séjour.
                         </p>

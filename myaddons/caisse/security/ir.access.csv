@@ -1,0 +1,4 @@
+id,name,model_id,group_id/id,operation,domain
+access_caisse_session_user,caisse.session.user,caisse.session,caisse.group_caisse_user,cru,
+access_caisse_session_manager,caisse.session.manager,caisse.session,caisse.group_caisse_manager,crud,
+access_caisse_move_user,caisse.move.user,caisse.move,caisse.group_caisse_user,crud,

@@ -2,21 +2,24 @@
     'name': "Auberge",
     'summary': "Gestion complète d'un hôtel : chambres, réservations, tableau de bord",
     'description': """
-Gestion Hôtelière (PMS)
-=======================
-Phase 1 — Cœur :
-  * Chambres, types de chambres, équipements
-  * Réservations (multi-chambres, check-in / check-out)
-  * Tableau de bord : occupation, disponibilité, clients, statistiques
-Phases suivantes : site web de réservation, restauration, ménage,
-travaux, personnel hôtelier.
+Gestion d'auberge (PMS) — cahier des charges complet
+=====================================================
+  * Chambres, lits, types, équipements, tarifs saisonniers et tarifs clients
+  * Réservations (chambre ou lit), planning graphique, check-in / check-out
+  * Consommations et services, remises, facturation automatique
+  * Paiements (acompte, partiel, total, remboursement) — caisse : module « caisse »
+  * Ménage (à nettoyer, en nettoyage, nettoyée, contrôlée, à réparer), travaux
+  * Personnel (intégration des applications Employés, Présences, Congés)
+  * Tableau de bord, statistiques, rapports PDF, alertes
+  * Site web de réservation en ligne
 """,
     'author': "SmartOdoo",
     'website': "https://smartodoo.com",
     'category': 'Services/Hotel',
-    'version': '20.0.1.10.0',
+    'version': '20.0.2.0.0',
     'license': 'LGPL-3',
-    'depends': ['mail', 'web', 'contacts', 'website', 'portal', 'account'],
+    'depends': ['mail', 'web', 'contacts', 'website', 'portal', 'account',
+                'hr', 'hr_attendance', 'hr_holidays'],
     'data': [
         'security/hotel_security.xml',
         'data/hotel_sequence.xml',
@@ -24,6 +27,8 @@ travaux, personnel hôtelier.
         'data/mail_template_data.xml',
         'data/website_data.xml',
         'data/hotel_payment_data.xml',
+        'data/hotel_product_data.xml',
+        'report/hotel_reports.xml',
         'views/hotel_amenity_views.xml',
         'views/hotel_room_type_views.xml',
         'views/hotel_room_views.xml',
@@ -36,6 +41,7 @@ travaux, personnel hôtelier.
         'views/res_partner_views.xml',
         'views/hotel_operations_views.xml',
         'views/hotel_dashboard_views.xml',
+        'views/hotel_report_views.xml',
         'views/hotel_menus.xml',
         'views/website_hotel_home_settings_views.xml',
         'views/website_hotel_templates.xml',
@@ -52,6 +58,9 @@ travaux, personnel hôtelier.
             'hotel_management/static/src/dashboard/hotel_dashboard.scss',
             'hotel_management/static/src/dashboard/hotel_dashboard.js',
             'hotel_management/static/src/dashboard/hotel_dashboard.xml',
+            'hotel_management/static/src/planning/hotel_planning.scss',
+            'hotel_management/static/src/planning/hotel_planning.js',
+            'hotel_management/static/src/planning/hotel_planning.xml',
         ],
         'web.assets_frontend': [
             'hotel_management/static/src/website/hotel_website.scss',

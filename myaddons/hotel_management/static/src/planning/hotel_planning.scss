@@ -1,0 +1,267 @@
+.o_hotel_planning {
+    padding: 16px 20px 32px;
+    height: 100%;
+    overflow: auto;
+    background: var(--o-view-background-color, #fff);
+
+    .o_hp_toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+
+        h1 {
+            font-size: 1.4rem;
+            margin: 0;
+        }
+    }
+
+    .o_hp_controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+
+        .o_hp_date {
+            width: 150px;
+        }
+
+        .o_hp_days {
+            width: 110px;
+        }
+    }
+
+    .o_hp_legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+        color: $o-gray-700;
+    }
+
+    .o_hp_legend_item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .o_hp_legend_hint {
+        font-style: italic;
+        color: $o-gray-600;
+    }
+
+    .o_hp_swatch {
+        display: inline-block;
+        width: 18px;
+        height: 12px;
+        border-radius: 3px;
+    }
+
+    .o_hp_swatch_unavail {
+        background: repeating-linear-gradient(45deg, #e9ecef, #e9ecef 4px, #ced4da 4px, #ced4da 8px);
+    }
+
+    .o_hp_scroll {
+        overflow-x: auto;
+        border: 1px solid $o-gray-300;
+        border-radius: 8px;
+    }
+
+    .o_hp_table {
+        min-width: max-content;
+    }
+
+    .o_hp_row {
+        display: flex;
+        border-bottom: 1px solid $o-gray-200;
+        min-height: 34px;
+    }
+
+    .o_hp_label {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        flex: 0 0 210px;
+        width: 210px;
+        padding: 6px 10px;
+        background: var(--o-view-background-color, #fff);
+        border-right: 1px solid $o-gray-300;
+        cursor: default;
+    }
+
+    .o_hp_room .o_hp_label {
+        cursor: pointer;
+    }
+
+    .o_hp_room_name {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .o_hp_room_meta {
+        font-size: 0.75rem;
+        color: $o-gray-600;
+    }
+
+    .o_hp_bed_label {
+        padding-left: 28px;
+        font-size: 0.85rem;
+        color: $o-gray-700;
+    }
+
+    .o_hp_status {
+        font-size: 0.65rem;
+        font-weight: 500;
+        padding: 1px 6px;
+        border-radius: 8px;
+        background: $o-gray-200;
+        color: $o-gray-700;
+    }
+
+    .o_hp_status_available { background: #d1f2e0; color: #146c43; }
+    .o_hp_status_reserved { background: #dbe7ff; color: #1d4ed8; }
+    .o_hp_status_partial { background: #fff1c2; color: #8a6100; }
+    .o_hp_status_occupied { background: #fcd9d9; color: #b02a37; }
+    .o_hp_status_cleaning { background: #e8dcff; color: #5b21b6; }
+
+    .o_hp_track {
+        flex: 1 1 auto;
+        display: grid;
+        grid-auto-rows: 26px;
+        row-gap: 2px;
+        padding: 3px 0;
+        position: relative;
+    }
+
+    .o_hp_cell {
+        border-right: 1px dashed $o-gray-200;
+        cursor: pointer;
+
+        &:hover {
+            background: rgba(13, 110, 253, 0.08);
+        }
+    }
+
+    .o_hp_weekend {
+        background: rgba(0, 0, 0, 0.025);
+    }
+
+    .o_hp_today {
+        background: rgba(255, 193, 7, 0.14);
+    }
+
+    .o_hp_unavailable .o_hp_track {
+        background: repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(0, 0, 0, 0.05) 6px, rgba(0, 0, 0, 0.05) 12px);
+    }
+
+    .o_hp_bar {
+        z-index: 1;
+        margin: 0 2px;
+        border-radius: 5px;
+        padding: 0 6px;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        cursor: pointer;
+        font-size: 0.78rem;
+        color: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+
+        &:hover {
+            filter: brightness(1.08);
+        }
+    }
+
+    .o_hp_bar_text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_hp_bar_confirmed { background: #3b82f6; }
+    .o_hp_bar_checkin { background: #dc3545; }
+    .o_hp_bar_checkout { background: #8c959f; }
+    .o_hp_bar_draft {
+        background: #fff;
+        color: #1d4ed8;
+        border: 1px dashed #3b82f6;
+        box-shadow: none;
+    }
+
+    .o_hp_cut_left {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        margin-left: 0;
+    }
+
+    .o_hp_cut_right {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        margin-right: 0;
+    }
+
+    .o_hp_head {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: $o-gray-100;
+
+        .o_hp_label {
+            background: $o-gray-100;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .o_hp_track {
+            grid-auto-rows: auto;
+        }
+    }
+
+    .o_hp_day {
+        text-align: center;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        padding: 2px 0;
+        border-right: 1px solid $o-gray-200;
+
+        .o_hp_wd {
+            color: $o-gray-600;
+        }
+
+        .o_hp_dn {
+            font-weight: 600;
+        }
+    }
+
+    .o_hp_foot {
+        background: $o-gray-100;
+        font-size: 0.8rem;
+
+        .o_hp_label {
+            background: $o-gray-100;
+            font-weight: 600;
+        }
+    }
+
+    .o_hp_count {
+        text-align: center;
+        align-self: center;
+        border-right: 1px solid $o-gray-200;
+    }
+
+    .o_hp_count_free { color: #146c43; font-weight: 600; }
+    .o_hp_count_busy { color: #b02a37; font-weight: 600; }
+
+    .o_hp_loading {
+        padding: 40px;
+        text-align: center;
+        color: $o-gray-600;
+    }
+}

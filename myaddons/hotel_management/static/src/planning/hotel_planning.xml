@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Une ligne du planning (chambre ou lit) : cases cliquables + barres -->
+    <t t-name="hotel_management.PlanningRow">
+        <div class="o_hp_track" t-att-style="this.gridStyle()">
+            <t t-foreach="this.state.data.days" t-as="day" t-key="day.date">
+                <div t-attf-class="o_hp_cell {{day.is_weekend ? 'o_hp_weekend' : ''}} {{day.is_today ? 'o_hp_today' : ''}}"
+                     t-att-style="'grid-column: ' + (day_index + 1) + '; grid-row: 1 / span ' + this.lanes(bookings).length"
+                     title="Nouvelle réservation"
+                     t-on-click="() => this.newReservation(room, day_index)"/>
+            </t>
+            <t t-foreach="this.lanes(bookings)" t-as="lane" t-key="lane_index">
+                <t t-foreach="lane" t-as="b" t-key="b.line_id + '-' + lane_index">
+                    <div t-attf-class="o_hp_bar o_hp_bar_{{b.state}} {{b.starts_before ? 'o_hp_cut_left' : ''}} {{b.ends_after ? 'o_hp_cut_right' : ''}}"
+                         t-att-style="this.barStyle(b) + ' grid-row: ' + (lane_index + 1) + ';'"
+                         t-att-title="this.barTitle(b)"
+                         t-on-click.stop="() => this.openReservation(b.reservation_id)">
+                        <span class="o_hp_bar_text"><t t-out="b.partner"/></span>
+                    </div>
+                </t>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="hotel_management.Planning">
+        <div class="o_hotel_planning">
+            <div class="o_hp_toolbar">
+                <h1><i class="oi me-2" data-icon="calendar_month"/>Planning des chambres</h1>
+                <div class="o_hp_controls">
+                    <button class="btn btn-light" title="Période précédente"
+                            t-on-click="() => this.shift(-this.state.days)">
+                        <i class="oi" data-icon="chevron_left"/>
+                    </button>
+                    <button class="btn btn-light" t-on-click="() => this.goToday()">Aujourd'hui</button>
+                    <button class="btn btn-light" title="Période suivante"
+                            t-on-click="() => this.shift(this.state.days)">
+                        <i class="oi" data-icon="chevron_right"/>
+                    </button>
+                    <input type="date" class="form-control o_hp_date" t-att-value="this.state.dateFrom"
+                           t-on-change="(ev) => this.setDate(ev)"/>
+                    <select class="form-select o_hp_days" t-on-change="(ev) => this.setDays(ev)">
+                        <option value="7" t-att-selected="this.state.days === 7">7 jours</option>
+                        <option value="14" t-att-selected="this.state.days === 14">14 jours</option>
+                        <option value="31" t-att-selected="this.state.days === 31">31 jours</option>
+                    </select>
+                    <button class="btn btn-light" t-on-click="() => this.load()" title="Actualiser">
+                        <i class="oi" data-icon="refresh"/>
+                    </button>
+                </div>
+            </div>
+            <div class="o_hp_legend">
+                <span class="o_hp_legend_item"><span class="o_hp_swatch o_hp_bar_confirmed"/>Réservée</span>
+                <span class="o_hp_legend_item"><span class="o_hp_swatch o_hp_bar_checkin"/>Client présent</span>
+                <span class="o_hp_legend_item"><span class="o_hp_swatch o_hp_bar_checkout"/>Parti</span>
+                <span class="o_hp_legend_item"><span class="o_hp_swatch o_hp_bar_draft"/>Brouillon</span>
+                <span class="o_hp_legend_item"><span class="o_hp_swatch o_hp_swatch_unavail"/>Maintenance / hors service</span>
+                <span class="o_hp_legend_hint">Cliquez sur une case vide pour créer une réservation, sur une barre pour l'ouvrir.</span>
+            </div>
+
+            <t t-if="this.state.loading and !this.state.data">
+                <div class="o_hp_loading"><i class="oi oi-spin" data-icon="progress_activity"/> Chargement…</div>
+            </t>
+            <t t-elif="this.state.data">
+                <div class="o_hp_scroll">
+                    <div class="o_hp_table">
+                        <!-- En-tête : jours -->
+                        <div class="o_hp_row o_hp_head">
+                            <div class="o_hp_label">Chambre</div>
+                            <div class="o_hp_track" t-att-style="this.gridStyle()">
+                                <t t-foreach="this.state.data.days" t-as="day" t-key="day.date">
+                                    <div t-attf-class="o_hp_day {{day.is_weekend ? 'o_hp_weekend' : ''}} {{day.is_today ? 'o_hp_today' : ''}}">
+                                        <div class="o_hp_wd"><t t-out="day.weekday"/></div>
+                                        <div class="o_hp_dn"><t t-out="day.day"/>/<t t-out="day.month"/></div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <t t-foreach="this.state.data.rooms" t-as="room" t-key="room.id">
+                            <div t-attf-class="o_hp_row o_hp_room {{room.unavailable ? 'o_hp_unavailable' : ''}}">
+                                <div class="o_hp_label" t-on-click="() => this.openRoom(room.id)" title="Ouvrir la chambre">
+                                    <div class="o_hp_room_name">
+                                        <t t-out="room.name"/>
+                                        <span t-attf-class="o_hp_status o_hp_status_{{room.status}}"><t t-out="room.status_label"/></span>
+                                    </div>
+                                    <div class="o_hp_room_meta">
+                                        <t t-out="room.type"/>
+                                        <t t-if="room.floor"> · Étage <t t-out="room.floor"/></t>
+                                        <t t-if="room.bed_count"> · <t t-out="room.bed_count"/> lit(s)</t>
+                                    </div>
+                                </div>
+                                <t t-if="!room.beds.length">
+                                    <t t-set="bookings" t-value="room.bookings"/>
+                                    <t t-call="hotel_management.PlanningRow"/>
+                                </t>
+                                <t t-else="">
+                                    <div class="o_hp_track o_hp_track_group" t-att-style="this.gridStyle()"/>
+                                </t>
+                            </div>
+                            <t t-foreach="room.beds" t-as="bed" t-key="bed.id">
+                                <div t-attf-class="o_hp_row o_hp_bed {{room.unavailable ? 'o_hp_unavailable' : ''}}">
+                                    <div class="o_hp_label o_hp_bed_label">
+                                        <i class="oi me-1" data-icon="bed"/><t t-out="bed.name"/>
+                                    </div>
+                                    <t t-set="bookings" t-value="bed.bookings"/>
+                                    <t t-call="hotel_management.PlanningRow"/>
+                                </div>
+                            </t>
+                        </t>
+
+                        <!-- Pied : disponibilités par jour -->
+                        <div class="o_hp_row o_hp_foot">
+                            <div class="o_hp_label">Chambres libres</div>
+                            <div class="o_hp_track" t-att-style="this.gridStyle()">
+                                <t t-foreach="this.state.data.days" t-as="day" t-key="day.date">
+                                    <div class="o_hp_count o_hp_count_free"><t t-out="day.rooms_free"/></div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="o_hp_row o_hp_foot">
+                            <div class="o_hp_label">Chambres occupées</div>
+                            <div class="o_hp_track" t-att-style="this.gridStyle()">
+                                <t t-foreach="this.state.data.days" t-as="day" t-key="day.date">
+                                    <div class="o_hp_count o_hp_count_busy"><t t-out="day.rooms_busy"/></div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="o_hp_row o_hp_foot" t-if="this.state.data.totals.beds">
+                            <div class="o_hp_label">Lits libres</div>
+                            <div class="o_hp_track" t-att-style="this.gridStyle()">
+                                <t t-foreach="this.state.data.days" t-as="day" t-key="day.date">
+                                    <div class="o_hp_count o_hp_count_free"><t t-out="day.beds_free"/></div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="o_hp_row o_hp_foot" t-if="this.state.data.totals.beds">
+                            <div class="o_hp_label">Lits occupés</div>
+                            <div class="o_hp_track" t-att-style="this.gridStyle()">
+                                <t t-foreach="this.state.data.days" t-as="day" t-key="day.date">
+                                    <div class="o_hp_count o_hp_count_busy"><t t-out="day.beds_busy"/></div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="o_hp_row o_hp_foot">
+                            <div class="o_hp_label">Arrivées / départs</div>
+                            <div class="o_hp_track" t-att-style="this.gridStyle()">
+                                <t t-foreach="this.state.data.days" t-as="day" t-key="day.date">
+                                    <div class="o_hp_count">
+                                        <span class="text-success" title="Arrivées">↓<t t-out="day.arrivals"/></span>
+                                        <span class="text-danger ms-1" title="Départs">↑<t t-out="day.departures"/></span>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

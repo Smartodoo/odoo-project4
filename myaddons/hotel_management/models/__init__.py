@@ -4,10 +4,13 @@ from . import hotel_room
 from . import hotel_bed
 from . import hotel_rate_season
 from . import hotel_reservation
+from . import hotel_service
 from . import hotel_staff
 from . import hotel_housekeeping
 from . import hotel_maintenance
+from . import hotel_planning
 from . import account_move
 from . import account_payment
 from . import res_partner
+from . import res_company
 from . import website

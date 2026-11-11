@@ -45,6 +45,12 @@
                                     <t t-out="format_amount(object.amount_total, object.currency_id) if object.amount_total else ''"/></td>
                             </tr>
                         </table>
+                        <t t-if="object.company_id.hotel_deposit_instructions and object.deposit_requested and object.amount_due &gt; 0">
+                            <p><strong>Acompte demandé :</strong>
+                                <t t-out="format_amount(object.deposit_requested, object.currency_id)"/>
+                                (référence <t t-out="object.name or ''"/>)</p>
+                            <p style="white-space:pre-line;" t-out="object.company_id.hotel_deposit_instructions or ''"/>
+                        </t>
                         <p>Notre équipe reste à votre disposition et vous contactera pour finaliser votre séjour.</p>
                         <p style="color:#7a7f96;font-size:13px;">À très bientôt,<br/>
                             <t t-out="object.company_id.name or ''">L'hôtel</t></p>

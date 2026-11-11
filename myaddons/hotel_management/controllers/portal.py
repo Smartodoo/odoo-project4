@@ -37,9 +37,8 @@ class HotelCustomerPortal(CustomerPortal):
                 auth='user', website=True)
     def portal_reservation_detail(self, reservation_id, **kw):
         try:
-            reservation = request.env['hotel.reservation'].browse(reservation_id)
-            reservation.check_access_rights('read')
-            reservation.check_access_rule('read')
+            reservation = request.env['hotel.reservation'].browse(reservation_id).exists()
+            reservation.check_access('read')
         except Exception:
             return request.redirect('/my')
         return request.render('hotel_management.portal_reservation_detail', {

@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ================= SESSIONS DE CAISSE (cahier des charges §9) ================= -->
+    <record id="view_caisse_session_form" model="ir.ui.view">
+        <field name="name">caisse.session.form</field>
+        <field name="model">caisse.session</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_close" string="Fermer la caisse" type="object"
+                            class="btn-primary" invisible="state != 'open' or not id"
+                            confirm="Fermer la caisse ? Vérifiez d'abord le montant des espèces comptées."/>
+                    <button name="action_reopen" string="Rouvrir" type="object"
+                            invisible="state != 'closed'"
+                            groups="caisse.group_caisse_manager"/>
+                    <button name="%(caisse.action_report_caisse_session)d"
+                            string="État de caisse" type="action" icon="print" invisible="not id"/>
+                    <field name="state" widget="statusbar" class="o_hotel_statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Session">
+                            <field name="user_id" readonly="state != 'open'"/>
+                            <field name="date_open"/>
+                            <field name="date_close" invisible="not date_close"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Soldes">
+                            <field name="opening_balance" widget="monetary" readonly="state != 'open'"/>
+                            <field name="total_collected" widget="monetary"/>
+                            <field name="total_spent" widget="monetary"/>
+                            <field name="theoretical_balance" widget="monetary" class="fw-bold"/>
+                            <field name="closing_balance" widget="monetary" readonly="state != 'open'"/>
+                            <field name="difference" widget="monetary" invisible="state != 'closed'"
+                                   decoration-danger="difference &lt; 0" decoration-success="difference == 0"
+                                   decoration-warning="difference &gt; 0"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Mouvements de caisse" name="moves">
+                            <field name="move_ids" readonly="state != 'open'">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="move_type"/>
+                                    <field name="reason"/>
+                                    <field name="partner_id" optional="show"/>
+                                    <field name="reference" optional="show"/>
+                                    <field name="destination" optional="hide"
+                                           invisible="move_type != 'transfer'"/>
+                                    <field name="attachment" filename="attachment_name" optional="show"/>
+                                    <field name="attachment_name" column_invisible="1"/>
+                                    <field name="amount" widget="monetary" sum="Total"/>
+                                    <field name="user_id" optional="hide"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Paiements clients en espèces" name="payments">
+                            <field name="payment_ids" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="hotel_reservation_id"/>
+                                    <field name="hotel_payment_kind"/>
+                                    <field name="amount_company_currency_signed" string="Montant" sum="Total"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Paiements par mode" name="by_mode">
+                            <group>
+                                <group>
+                                    <field name="total_cash_payments" widget="monetary" string="Espèces"/>
+                                    <field name="amount_card" widget="monetary"/>
+                                    <field name="amount_transfer" widget="monetary"/>
+                                    <field name="amount_cheque" widget="monetary"/>
+                                </group>
+                            </group>
+                            <div class="text-muted small">
+                                Seules les espèces passent physiquement par la caisse ; les autres modes
+                                sont affichés pour le contrôle (paiements de la période de la session).
+                            </div>
+                        </page>
+                        <page string="Observations" name="note">
+                            <field name="note" placeholder="Remarques, explication d'un écart…"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_caisse_session_list" model="ir.ui.view">
+        <field name="name">caisse.session.list</field>
+        <field name="model">caisse.session</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'open'">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="date_open"/>
+                <field name="date_close"/>
+                <field name="opening_balance" widget="monetary"/>
+                <field name="theoretical_balance" widget="monetary"/>
+                <field name="closing_balance" widget="monetary"/>
+                <field name="difference" widget="monetary"
+                       decoration-danger="difference &lt; 0"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-success="state == 'open'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_caisse_session_search" model="ir.ui.view">
+        <field name="name">caisse.session.search</field>
+        <field name="model">caisse.session</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="user_id"/>
+                <filter name="open" string="Ouvertes" domain="[('state', '=', 'open')]"/>
+                <filter name="closed" string="Fermées" domain="[('state', '=', 'closed')]"/>
+                <filter name="date_open" string="Date d'ouverture" date="date_open"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_caisse_session" model="ir.actions.act_window">
+        <field name="name">Sessions de caisse</field>
+        <field name="res_model">caisse.session</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_caisse_session_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Ouvrez la caisse</p>
+            <p>Saisissez le fond de caisse à l'ouverture ; les paiements clients en espèces
+               s'y rattachent automatiquement. À la fermeture, comptez les espèces : l'écart est calculé.</p>
+        </field>
+    </record>
+
+    <record id="action_caisse_current" model="ir.actions.server">
+        <field name="name">Caisse du jour</field>
+        <field name="model_id" ref="model_caisse_session"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_current()</field>
+    </record>
+
+    <!-- Journal de caisse : tous les mouvements -->
+    <record id="view_caisse_move_list" model="ir.ui.view">
+        <field name="name">caisse.move.list</field>
+        <field name="model">caisse.move</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date"/>
+                <field name="session_id"/>
+                <field name="move_type"/>
+                <field name="reason"/>
+                <field name="partner_id"/>
+                <field name="reference"/>
+                <field name="signed_amount" string="Montant" widget="monetary" sum="Total"/>
+                <field name="user_id"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_caisse_move_form" model="ir.ui.view">
+        <field name="name">caisse.move.form</field>
+        <field name="model">caisse.move</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="session_id" options="{'no_create': True}"/>
+                            <field name="date"/>
+                            <field name="move_type"/>
+                            <field name="amount" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="reason"/>
+                            <field name="partner_id"/>
+                            <field name="reference"/>
+                            <field name="destination" invisible="move_type != 'transfer'"/>
+                            <field name="attachment" filename="attachment_name"/>
+                            <field name="attachment_name" invisible="1"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_caisse_move_search" model="ir.ui.view">
+        <field name="name">caisse.move.search</field>
+        <field name="model">caisse.move</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="reason"/>
+                <field name="session_id"/>
+                <field name="partner_id"/>
+                <filter name="in" string="Entrées" domain="[('move_type', '=', 'in')]"/>
+                <filter name="out" string="Sorties" domain="[('move_type', '=', 'out')]"/>
+                <filter name="expense" string="Dépenses" domain="[('move_type', '=', 'expense')]"/>
+                <filter name="transfer" string="Transferts" domain="[('move_type', '=', 'transfer')]"/>
+                <filter name="date" string="Date" date="date"/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by': 'move_type'}"/>
+                    <filter name="group_session" string="Caisse" context="{'group_by': 'session_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_caisse_move" model="ir.actions.act_window">
+        <field name="name">Journal de caisse</field>
+        <field name="res_model">caisse.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_caisse_move_search"/>
+    </record>
+
+    <!-- Application « Caisse » -->
+    <menuitem id="menu_caisse_root" name="Caisse"
+              web_icon="caisse,static/description/icon.png"
+              sequence="25" groups="caisse.group_caisse_user"/>
+    <menuitem id="menu_caisse_current" name="Caisse du jour"
+              parent="menu_caisse_root" action="action_caisse_current" sequence="1"/>
+    <menuitem id="menu_caisse_sessions" name="Sessions de caisse"
+              parent="menu_caisse_root" action="action_caisse_session" sequence="10"/>
+    <menuitem id="menu_caisse_moves" name="Journal de caisse"
+              parent="menu_caisse_root" action="action_caisse_move" sequence="20"/>
+
+    <!-- Fenêtre « Encaisser » de la réservation : caisse utilisée -->
+    <record id="view_hotel_reservation_payment_wizard_form_caisse" model="ir.ui.view">
+        <field name="name">hotel.reservation.payment.wizard.form.caisse</field>
+        <field name="model">hotel.reservation.payment.wizard</field>
+        <field name="inherit_id" ref="hotel_management.view_hotel_reservation_payment_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='cheque_reference']" position="after">
+                <field name="caisse_session_id" invisible="payment_mode != 'cash'" readonly="1"
+                       placeholder="Aucune caisse ouverte"/>
+            </xpath>
+            <xpath expr="//footer" position="before">
+                <div class="alert alert-warning" role="alert"
+                     invisible="payment_mode != 'cash' or caisse_session_id">
+                    Aucune caisse n'est ouverte : ouvrez la caisse (application Caisse &gt; Caisse du jour)
+                    avant d'encaisser en espèces.
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Paiement : caisse de rattachement -->
+    <record id="view_account_payment_form_caisse" model="ir.ui.view">
+        <field name="name">account.payment.form.caisse</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="hotel_management.view_account_payment_form_hotel"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='hotel_payment_mode']" position="after">
+                <field name="caisse_session_id" invisible="not caisse_session_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

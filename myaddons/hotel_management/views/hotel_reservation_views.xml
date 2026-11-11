@@ -30,6 +30,17 @@
                             type="object" class="btn-primary" icon="payments"
                             invisible="state == 'cancel' or amount_due &lt;= 0"
                             help="Encaisser un acompte ou un paiement (espèces, carte, virement, chèque)."/>
+                    <button name="action_refund_hotel_payment" string="Rembourser"
+                            type="object" invisible="amount_paid &lt;= 0"
+                            help="Rembourser tout ou partie de ce que le client a payé."/>
+                    <button name="%(hotel_management.action_report_hotel_reservation_confirmation)d"
+                            string="Confirmation" type="action" icon="print"
+                            invisible="state not in ('confirmed', 'checkin')"
+                            help="Imprimer la confirmation de réservation."/>
+                    <button name="%(hotel_management.action_report_hotel_guest_card)d"
+                            string="Fiche client" type="action" icon="badge"
+                            invisible="state not in ('confirmed', 'checkin', 'checkout')"
+                            help="Imprimer la fiche client (police) du check-in."/>
                     <field name="state" widget="statusbar" class="o_hotel_statusbar o_hotel_statusbar_flow"
                            statusbar_visible="draft,confirmed,checkin,checkout"/>
                 </header>
@@ -43,8 +54,7 @@
                         </button>
                         <button name="action_view_payments" type="object"
                                 class="oe_stat_button" icon="payments"
-                                invisible="payment_count == 0"
-                                groups="account.group_account_invoice">
+                                invisible="payment_count == 0">
                             <field name="payment_count" widget="statinfo"
                                    string="Paiements"/>
                         </button>
@@ -89,6 +99,9 @@
                             </div>
                             <field name="partner_id_type" invisible="not partner_id"/>
                             <field name="partner_id_number" invisible="not partner_id"/>
+                            <field name="partner_id_document" filename="partner_id_document_name"
+                                   invisible="not partner_id"/>
+                            <field name="partner_id_document_name" invisible="1"/>
                         </group>
                         <group string="Séjour" name="stay">
                             <field name="checkin"/>
@@ -103,6 +116,7 @@
                             </div>
                             <field name="guest_count" string="Total personnes"/>
                             <field name="places"/>
+                            <field name="user_id"/>
                         </group>
                     </group>
                     <div class="alert alert-warning d-flex align-items-center mb-3" role="alert"
@@ -133,8 +147,21 @@
                                     <field name="currency_id" column_invisible="1"/>
                                 </list>
                             </field>
-                            <group class="oe_subtotal_footer">
+                            <group>
+                                <group string="Remise" name="discount">
+                                    <label for="discount_value" string="Remise"/>
+                                    <div class="o_row">
+                                        <field name="discount_value"/>
+                                        <field name="discount_type" nolabel="1"/>
+                                    </div>
+                                </group>
+                                <group class="oe_subtotal_footer">
                                 <field name="room_count"/>
+                                <field name="amount_rooms" widget="monetary"/>
+                                <field name="amount_services" widget="monetary" invisible="not amount_services"/>
+                                <field name="amount_discount" widget="monetary" invisible="not amount_discount"/>
+                                <field name="amount_untaxed" widget="monetary" invisible="not amount_tax"/>
+                                <field name="amount_tax" widget="monetary" invisible="not amount_tax"/>
                                 <field name="amount_total" widget="monetary"/>
                                 <field name="deposit_amount" widget="monetary" string="dont acompte versé"
                                        invisible="not deposit_amount"/>
@@ -144,7 +171,26 @@
                                        decoration-danger="amount_due &gt; 0"
                                        decoration-success="amount_due &lt;= 0 and amount_total &gt; 0"/>
                                 <field name="currency_id" invisible="1"/>
+                                </group>
                             </group>
+                        </page>
+                        <page string="Consommations &amp; services" name="services">
+                            <field name="service_ids" readonly="state == 'cancel'">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="product_id" options="{'no_create': True}"/>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit" widget="monetary"/>
+                                    <field name="price_subtotal" widget="monetary" sum="Total"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <div class="text-muted small">
+                                Ajoutez ici les consommations et services du client (petit-déjeuner,
+                                repas, boissons, blanchisserie…). Ils sont ajoutés à la facture du séjour.
+                                Pour proposer un nouvel article, cochez « Consommation / service Auberge » sur sa fiche.
+                            </div>
                         </page>
                         <page string="Notes" name="notes">
                             <field name="note" placeholder="Remarques, demandes particulières…"/>
@@ -171,6 +217,7 @@
                 <field name="room_count"/>
                 <field name="guest_count"/>
                 <field name="source" optional="hide"/>
+                <field name="user_id" optional="hide"/>
                 <field name="amount_total" widget="monetary" sum="Total"/>
                 <field name="deposit_amount" widget="monetary" sum="Acomptes" optional="hide"/>
                 <field name="amount_paid" widget="monetary" sum="Payé" optional="show"/>
@@ -220,7 +267,15 @@
                         domain="[('checkin', '=', 'today')]"/>
                 <filter name="departures_today" string="Départs du jour"
                         domain="[('checkout', '=', 'today')]"/>
+                <filter name="upcoming" string="À venir"
+                        domain="[('checkin', '&gt;', 'today'), ('state', 'in', ('draft', 'confirmed'))]"/>
+                <filter name="unpaid" string="Impayés"
+                        domain="[('amount_due', '&gt;', 0), ('state', 'in', ('checkin', 'checkout'))]"/>
+                <separator/>
+                <filter name="filter_checkin" string="Date d'arrivée" date="checkin"/>
                 <group>
+                    <filter name="group_source" string="Source" context="{'group_by': 'source'}"/>
+                    <filter name="group_month" string="Mois d'arrivée" context="{'group_by': 'checkin:month'}"/>
                     <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
                     <filter name="group_partner" string="Client" context="{'group_by': 'partner_id'}"/>
                     <filter name="group_checkin" string="Arrivée" context="{'group_by': 'checkin'}"/>
@@ -229,10 +284,37 @@
         </field>
     </record>
 
+    <!-- Statistiques des réservations (§15) : performance par source, durée
+         moyenne des séjours, nombre de clients -->
+    <record id="view_hotel_reservation_pivot" model="ir.ui.view">
+        <field name="name">hotel.reservation.pivot</field>
+        <field name="model">hotel.reservation</field>
+        <field name="arch" type="xml">
+            <pivot string="Réservations" sample="1">
+                <field name="source" type="row"/>
+                <field name="checkin" interval="month" type="col"/>
+                <field name="amount_total" type="measure"/>
+                <field name="nights" type="measure" string="Durée moyenne (nuits)"/>
+                <field name="guest_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_hotel_reservation_graph" model="ir.ui.view">
+        <field name="name">hotel.reservation.graph</field>
+        <field name="model">hotel.reservation</field>
+        <field name="arch" type="xml">
+            <graph string="Réservations par source" type="bar" sample="1">
+                <field name="source"/>
+                <field name="amount_total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
     <record id="action_hotel_reservation" model="ir.actions.act_window">
         <field name="name">Réservations</field>
         <field name="res_model">hotel.reservation</field>
-        <field name="view_mode">list,form,calendar</field>
+        <field name="view_mode">list,form,calendar,pivot,graph</field>
         <field name="search_view_id" ref="view_hotel_reservation_search"/>
     </record>
 </odoo>

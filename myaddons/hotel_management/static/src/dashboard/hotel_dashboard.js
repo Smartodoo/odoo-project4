@@ -91,6 +91,10 @@ export class HotelDashboard extends Component {
         });
     }
 
+    openPlanning() {
+        this.action.doAction("hotel_management.action_hotel_planning");
+    }
+
     openReservation(resId) {
         this.action.doAction({
             type: "ir.actions.act_window",

@@ -10,10 +10,15 @@
             </t>
             <t t-else="">
                 <div class="o_hotel_header">
-                    <h1><i class="oi me-2" data-icon="bed"/>Tableau de bord — Hôtel</h1>
-                    <button class="btn btn-light" t-on-click="() => this.loadData()">
-                        <i class="oi me-1" data-icon="refresh"/>Actualiser
-                    </button>
+                    <h1><i class="oi me-2" data-icon="bed"/>Tableau de bord — Auberge</h1>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" t-on-click="() => this.openPlanning()">
+                            <i class="oi me-1" data-icon="calendar_month"/>Planning
+                        </button>
+                        <button class="btn btn-light" t-on-click="() => this.loadData()">
+                            <i class="oi me-1" data-icon="refresh"/>Actualiser
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Indicateurs regroupés en 3 blocs : Chambres / Clients / Ménage & travaux -->
@@ -102,12 +107,12 @@
                                 </div>
                             </div>
                             <div class="o_hotel_tile"
-                                 t-on-click="() => this.openModel('hotel.housekeeping', [['this.state','in',['todo','inprogress']]], 'Tâches ménage à faire / en cours')">
+                                 t-on-click="() => this.openModel('hotel.housekeeping', [['state','in',['todo','inprogress']]], 'Tâches ménage à faire / en cours')">
                                 <div class="o_hotel_tile_value"><t t-out="this.state.data.housekeeping_todo"/></div>
                                 <div class="o_hotel_tile_label"><i class="oi me-1" data-icon="checklist"/>Tâches ménage</div>
                             </div>
                             <div class="o_hotel_tile"
-                                 t-on-click="() => this.openModel('hotel.maintenance.request', [['this.state','in',['new','inprogress']]], 'Interventions en cours')">
+                                 t-on-click="() => this.openModel('hotel.maintenance.request', [['state','in',['new','inprogress']]], 'Interventions en cours')">
                                 <div class="o_hotel_tile_value"><t t-out="this.state.data.maintenance_open"/></div>
                                 <div class="o_hotel_tile_label"><i class="oi me-1" data-icon="build"/>Interventions</div>
                             </div>
@@ -170,7 +175,31 @@
                             </div>
                             <div class="o_hotel_stat">
                                 <div class="o_hotel_stat_value"><t t-out="this.formatAmount(this.state.data.month_revenue)"/></div>
-                                <div class="o_hotel_stat_label">CA hébergement</div>
+                                <div class="o_hotel_stat_label">Chiffre d'affaires</div>
+                            </div>
+                        </div>
+                        <div class="o_hotel_stat_row mt-2">
+                            <div class="o_hotel_stat">
+                                <div class="o_hotel_stat_value"><t t-out="this.formatAmount(this.state.data.month_collected)"/></div>
+                                <div class="o_hotel_stat_label">Encaissements</div>
+                            </div>
+                            <div class="o_hotel_stat o_hotel_stat_link"
+                                 title="Voir les réservations impayées"
+                                 t-on-click="() => this.openTile('hotel.reservation', 'unpaid', 'Impayés')">
+                                <div class="o_hotel_stat_value text-danger"><t t-out="this.formatAmount(this.state.data.unpaid_total)"/></div>
+                                <div class="o_hotel_stat_label">Impayés (<t t-out="this.state.data.unpaid_count"/>)</div>
+                            </div>
+                        </div>
+                        <div class="o_hotel_stat_row mt-2">
+                            <div class="o_hotel_stat o_hotel_stat_link"
+                                 title="Voir les réservations à venir"
+                                 t-on-click="() => this.openTile('hotel.reservation', 'upcoming', 'Réservations à venir')">
+                                <div class="o_hotel_stat_value"><t t-out="this.state.data.upcoming_count"/></div>
+                                <div class="o_hotel_stat_label">Réservations à venir</div>
+                            </div>
+                            <div class="o_hotel_stat">
+                                <div class="o_hotel_stat_value"><t t-out="this.state.data.total_rooms"/></div>
+                                <div class="o_hotel_stat_label">Chambres au total</div>
                             </div>
                         </div>
                         <h3 class="mt-3">Arrivées du jour</h3>
@@ -183,6 +212,37 @@
                                 </tr>
                                 <tr t-if="!this.state.data.arrivals_list.length">
                                     <td class="text-muted">Aucune arrivée prévue aujourd'hui</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h3 class="mt-3">Départs du jour</h3>
+                        <table class="o_hotel_mini_table">
+                            <tbody>
+                                <tr t-foreach="this.state.data.departures_list" t-as="dep" t-key="dep.id"
+                                    class="o_clickable" t-on-click="() => this.openReservation(dep.id)">
+                                    <td><i class="oi me-1" data-icon="logout"/><t t-out="dep.partner"/></td>
+                                    <td class="text-muted small"><t t-out="dep.rooms"/></td>
+                                    <td class="text-end small" t-att-class="dep.due > 0 ? 'text-danger' : 'text-success'">
+                                        <t t-if="dep.due > 0">Reste <t t-out="this.formatAmount(dep.due)"/></t>
+                                        <t t-else="">Soldé</t>
+                                    </td>
+                                </tr>
+                                <tr t-if="!this.state.data.departures_list.length">
+                                    <td class="text-muted">Aucun départ prévu aujourd'hui</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h3 class="mt-3">Prochaines arrivées</h3>
+                        <table class="o_hotel_mini_table">
+                            <tbody>
+                                <tr t-foreach="this.state.data.upcoming_list" t-as="up" t-key="up.id"
+                                    class="o_clickable" t-on-click="() => this.openReservation(up.id)">
+                                    <td><t t-out="up.checkin"/></td>
+                                    <td><t t-out="up.partner"/></td>
+                                    <td class="text-muted small"><t t-out="up.rooms"/></td>
+                                </tr>
+                                <tr t-if="!this.state.data.upcoming_list.length">
+                                    <td class="text-muted">Aucune réservation à venir</td>
                                 </tr>
                             </tbody>
                         </table>

@@ -13,7 +13,13 @@ class HotelRateSeason(models.Model):
     room_type_id = fields.Many2one(
         'hotel.room.type', string="Type de chambre",
         help="Laisser vide pour appliquer à tous les types de chambres.")
-    price = fields.Monetary(string="Prix / nuit", required=True, currency_field='currency_id')
+    price = fields.Monetary(
+        string="Prix chambre / nuit", required=True, currency_field='currency_id',
+        help="Prix d'une nuit en chambre entière pendant la période.")
+    bed_price = fields.Monetary(
+        string="Prix lit / nuit", currency_field='currency_id',
+        help="Prix d'une nuit pour UN lit pendant la période.\n"
+             "Laisser à 0 pour garder le prix lit habituel de la chambre.")
     currency_id = fields.Many2one(
         'res.currency', default=lambda self: self.env.company.currency_id)
     active = fields.Boolean(default=True)

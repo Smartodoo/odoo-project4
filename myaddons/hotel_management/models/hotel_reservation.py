@@ -1,3 +1,7 @@
+from datetime import timedelta
+
+from markupsafe import Markup
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 
@@ -6,11 +10,41 @@ class HotelReservation(models.Model):
     _name = 'hotel.reservation'
     _description = "Réservation"
     _order = 'checkin desc, id desc'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(
         string="Référence", required=True, copy=False, readonly=True,
         default=lambda self: _('Nouveau'))
+    user_id = fields.Many2one(
+        'res.users', string="Responsable", tracking=True,
+        default=lambda self: self.env.user,
+        help="Employé de la réception qui suit la réservation : il reçoit les "
+             "alertes (arrivée, départ, paiement en retard).")
+    service_ids = fields.One2many(
+        'hotel.reservation.service', 'reservation_id',
+        string="Consommations & services", copy=False)
+    # Remise sur le séjour (cahier des charges §5)
+    discount_type = fields.Selection([
+        ('percent', 'Pourcentage'),
+        ('amount', 'Montant'),
+    ], string="Type de remise", default='percent', required=True)
+    discount_value = fields.Float(
+        string="Remise", digits=(16, 2),
+        help="Pourcentage (0-100) ou montant, selon le type de remise. "
+             "Proposée automatiquement à partir de la remise du client.")
+    amount_rooms = fields.Monetary(
+        string="Hébergement", compute='_compute_amounts', store=True)
+    amount_services = fields.Monetary(
+        string="Montant consommations", compute='_compute_amounts', store=True)
+    amount_gross = fields.Monetary(
+        string="Montant avant remise", compute='_compute_amounts', store=True)
+    amount_discount = fields.Monetary(
+        string="Montant de la remise", compute='_compute_amounts', store=True)
+    amount_untaxed = fields.Monetary(
+        string="Total HT", compute='_compute_amounts', store=True)
+    amount_tax = fields.Monetary(
+        string="Taxes", compute='_compute_amounts', store=True)
+
     partner_id = fields.Many2one(
         'res.partner', string="Client", required=True, tracking=True)
     # Coordonnées et pièce d'identité du client, modifiables depuis la réservation
@@ -30,11 +64,21 @@ class HotelReservation(models.Model):
         related='partner_id.hotel_id_number', readonly=False)
     partner_birthdate = fields.Date(
         related='partner_id.hotel_birthdate', readonly=False)
+    partner_id_document = fields.Binary(
+        related='partner_id.hotel_id_document', readonly=False,
+        string="Scan pièce d'identité")
+    partner_id_document_name = fields.Char(
+        related='partner_id.hotel_id_document_name', readonly=False)
+    deposit_requested = fields.Monetary(
+        string="Acompte demandé", compute='_compute_deposit_requested',
+        help="Acompte demandé au client (pourcentage défini dans les paramètres).")
     checkin = fields.Date(
         string="Arrivée", required=True, tracking=True,
         default=fields.Date.context_today)
     checkout = fields.Date(string="Départ", required=True, tracking=True)
-    nights = fields.Integer(string="Nuits", compute='_compute_nights', store=True)
+    nights = fields.Integer(
+        string="Nuits", compute='_compute_nights', store=True, aggregator='avg',
+        help="Nombre de nuits. Dans les analyses : durée moyenne des séjours.")
     adults = fields.Integer(string="Adultes", default=1)
     children = fields.Integer(string="Enfants", default=0)
     guest_count = fields.Integer(
@@ -111,11 +155,133 @@ class HotelReservation(models.Model):
         for rec in self:
             rec.guest_count = (rec.adults or 0) + (rec.children or 0)
 
-    @api.depends('line_ids.price_subtotal')
+    @api.depends('amount_total', 'company_id.hotel_deposit_percent')
+    def _compute_deposit_requested(self):
+        for rec in self:
+            pct = rec.company_id.hotel_deposit_percent or 0.0
+            amount = rec.amount_total * pct / 100.0
+            rec.deposit_requested = rec.currency_id.round(amount) if rec.currency_id else amount
+
+    def _hotel_priced_items(self):
+        """[(produit, libellé, quantité, prix unitaire, montant)] du séjour :
+        une ligne par chambre (produit « Nuitée ») et une par consommation."""
+        self.ensure_one()
+        night = self.env['product.product']._hotel_night_product()
+        items = []
+        for line in self.line_ids:
+            items.append((night, line._invoice_label(), line.nights or 1,
+                          line.price_unit, line.price_subtotal))
+        for service in self.service_ids:
+            items.append((service.product_id, service.name, service.quantity,
+                          service.price_unit, service.price_subtotal))
+        return items
+
+    def _hotel_taxes(self, product):
+        self.ensure_one()
+        if not product:
+            return self.env['account.tax']
+        return product.sudo().taxes_id._filter_taxes_by_company(self.company_id)
+
+    def _hotel_discount_amount(self, gross):
+        self.ensure_one()
+        value = max(self.discount_value or 0.0, 0.0)
+        if self.discount_type == 'percent':
+            discount = gross * min(value, 100.0) / 100.0
+        else:
+            discount = min(value, gross)
+        return self.currency_id.round(discount) if self.currency_id else discount
+
+    def _hotel_document_lines(self):
+        """Lignes du séjour telles qu'elles figurent sur la facture :
+        [(produit, libellé, quantité, prix unitaire, taxes)] — une par chambre,
+        une par consommation, puis une ligne « Remise » (négative) par groupe
+        de taxes, au prorata. Le total de la réservation et celui de la
+        facture sont ainsi calculés exactement de la même façon."""
+        self.ensure_one()
+        lines = []
+        groups = {}
+        for product, label, qty, price, amount in self._hotel_priced_items():
+            taxes = self._hotel_taxes(product)
+            lines.append((product, label, qty, price, taxes))
+            key = tuple(sorted(taxes.ids))
+            groups.setdefault(key, [taxes, 0.0])[1] += amount
+        gross = sum(amount for _taxes, amount in groups.values())
+        discount = self._hotel_discount_amount(gross) if gross else 0.0
+        if discount:
+            if self.discount_type == 'percent':
+                label = _("Remise %s %%", ('%g' % self.discount_value))
+            else:
+                label = _("Remise")
+            remaining = discount
+            items = [g for g in groups.values() if g[1]]
+            for index, (taxes, amount) in enumerate(items):
+                if index == len(items) - 1:
+                    share = remaining
+                else:
+                    share = discount * amount / gross
+                    share = self.currency_id.round(share) if self.currency_id else share
+                remaining -= share
+                if share:
+                    lines.append((False, label, 1.0, -share, taxes))
+        return lines
+
+    @api.depends('line_ids.price_subtotal', 'service_ids.price_subtotal',
+                 'service_ids.product_id', 'discount_type', 'discount_value')
     def _compute_amounts(self):
         for rec in self:
-            rec.amount_total = sum(rec.line_ids.mapped('price_subtotal'))
+            rooms = sum(rec.line_ids.mapped('price_subtotal'))
+            services = sum(rec.service_ids.mapped('price_subtotal'))
+            untaxed = total = 0.0
+            # Taxes ligne par ligne, comme sur la facture (arrondi par ligne)
+            for product, _label, qty, price, taxes in rec._hotel_document_lines():
+                amount = qty * price
+                if taxes:
+                    res = taxes.compute_all(
+                        price, currency=rec.currency_id, quantity=qty,
+                        product=product or None, partner=rec.partner_id)
+                    untaxed += res['total_excluded']
+                    total += res['total_included']
+                else:
+                    amount = rec.currency_id.round(amount) if rec.currency_id else amount
+                    untaxed += amount
+                    total += amount
+            rec.amount_rooms = rooms
+            rec.amount_services = services
+            rec.amount_gross = rooms + services
+            rec.amount_discount = rec._hotel_discount_amount(rooms + services) \
+                if rooms + services else 0.0
+            rec.amount_untaxed = untaxed
+            rec.amount_tax = total - untaxed
+            rec.amount_total = total
             rec.room_count = len(rec.line_ids)
+
+    @api.constrains('discount_type', 'discount_value')
+    def _check_discount(self):
+        for rec in self:
+            if rec.discount_value < 0:
+                raise ValidationError(_("La remise ne peut pas être négative."))
+            if rec.discount_type == 'percent' and rec.discount_value > 100:
+                raise ValidationError(_("Une remise en pourcentage ne peut pas dépasser 100 %."))
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id_hotel(self):
+        """Remise et tarifs spéciaux du client appliqués à la réservation."""
+        if self.partner_id and self.partner_id.hotel_discount and not self.discount_value:
+            self.discount_type = 'percent'
+            self.discount_value = self.partner_id.hotel_discount
+        for line in self.line_ids:
+            line._apply_price()
+
+    @api.onchange('checkin', 'checkout')
+    def _onchange_dates_reprice(self):
+        """Nouvelles dates : prix recalculés (tarifs saisonniers nuit par nuit)."""
+        for line in self.line_ids:
+            line._apply_price()
+
+    def _compute_access_url(self):
+        super()._compute_access_url()
+        for rec in self:
+            rec.access_url = '/my/reservation/%s' % rec.id
 
     @api.depends('line_ids.booking_type', 'line_ids.bed_ids',
                  'line_ids.room_id.capacity')
@@ -180,7 +346,7 @@ class HotelReservation(models.Model):
     def action_register_hotel_payment(self):
         """Ouvre la fenêtre « Encaisser » (acompte ou paiement)."""
         self.ensure_one()
-        if self.state == 'cancel':
+        if self.state == 'cancel' and not self.env.context.get('hotel_refund'):
             raise UserError(_("Impossible d'encaisser sur une réservation annulée."))
         if not self.partner_id:
             raise UserError(_("Renseignez le client avant d'encaisser."))
@@ -192,6 +358,16 @@ class HotelReservation(models.Model):
             'target': 'new',
             'context': {'default_reservation_id': self.id},
         }
+
+    def action_refund_hotel_payment(self):
+        """Ouvre la fenêtre de remboursement (paiement sortant)."""
+        self.ensure_one()
+        if self.amount_paid <= 0:
+            raise UserError(_("Aucun montant encaissé à rembourser sur %s.", self.name))
+        action = self.with_context(hotel_refund=True).action_register_hotel_payment()
+        action['name'] = _("Rembourser — %s", self.name)
+        action['context'] = dict(action['context'], hotel_refund=True)
+        return action
 
     def action_view_payments(self):
         self.ensure_one()
@@ -225,8 +401,7 @@ class HotelReservation(models.Model):
                 raise ValidationError(_(
                     "Le nombre d'enfants ne peut pas être négatif."))
 
-    @api.constrains('state', 'checkin', 'checkout', 'line_ids',
-                    'line_ids.room_id', 'line_ids.bed_ids', 'adults', 'children')
+    @api.constrains('state', 'checkin', 'checkout', 'line_ids', 'adults', 'children')
     def _check_booking_integrity(self):
         """Toute modification d'une réservation déjà confirmée ou enregistrée
         est revalidée : places suffisantes et aucune surréservation. Sans cela,
@@ -272,31 +447,7 @@ class HotelReservation(models.Model):
                 "avant d'en créer une nouvelle.",
                 name=self.name,
                 inv=', '.join(existing.mapped('display_name'))))
-        income = self._get_income_account()
-        if not income:
-            raise UserError(_("Aucun compte de produits configuré dans la comptabilité."))
-        move_lines = []
-        for line in self.line_ids:
-            if line.booking_type == 'bed' and line.bed_ids:
-                label = _("Chambre %s — lit(s) %s — %s nuit(s)") % (
-                    line.room_id.name,
-                    ', '.join(line.bed_ids.mapped('name')), line.nights)
-            else:
-                label = _("Chambre %s — chambre entière — %s nuit(s)") % (
-                    line.room_id.name, line.nights)
-            move_lines.append((0, 0, {
-                'name': label,
-                'quantity': line.nights or 1,
-                'price_unit': line.price_unit,
-                'account_id': income.id,
-            }))
-        move = self.env['account.move'].sudo().create({
-            'move_type': 'out_invoice',
-            'partner_id': self.partner_id.id,
-            'invoice_origin': self.name,
-            'hotel_reservation_id': self.id,
-            'invoice_line_ids': move_lines,
-        })
+        move = self._hotel_create_invoice()
         return {
             'type': 'ir.actions.act_window',
             'name': _("Facture"),
@@ -305,6 +456,34 @@ class HotelReservation(models.Model):
             'view_mode': 'form',
             'target': 'current',
         }
+
+    def _hotel_create_invoice(self):
+        """Facture client du séjour (cahier des charges §7) : une ligne par
+        chambre (produit « Nuitée » × nuits) et par consommation / service,
+        puis la remise du séjour (ligne négative), taxes des produits."""
+        self.ensure_one()
+        income = self._get_income_account()
+        move_lines = []
+        for product, label, qty, price, taxes in self._hotel_document_lines():
+            vals = {
+                'name': label,
+                'quantity': qty,
+                'price_unit': price,
+                'tax_ids': [(6, 0, taxes.ids)],
+            }
+            if product:
+                vals['product_id'] = product.id
+            elif income:
+                vals['account_id'] = income.id
+            move_lines.append((0, 0, vals))
+        return self.env['account.move'].sudo().create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_id.id,
+            'invoice_origin': self.name,
+            'invoice_date': fields.Date.context_today(self),
+            'hotel_reservation_id': self.id,
+            'invoice_line_ids': move_lines,
+        })
 
     def action_view_invoices(self):
         self.ensure_one()
@@ -370,7 +549,15 @@ class HotelReservation(models.Model):
             if vals.get('name', _('Nouveau')) == _('Nouveau'):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'hotel.reservation') or _('Nouveau')
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        for rec in records:
+            source = dict(self._fields['source'].selection).get(rec.source, '')
+            rec._hotel_notify_managers(_(
+                "Nouvelle réservation %(name)s (%(source)s) : %(partner)s, "
+                "du %(ci)s au %(co)s.",
+                name=rec.name, source=source, partner=rec.partner_id.display_name,
+                ci=rec.checkin, co=rec.checkout))
+        return records
 
     def action_confirm(self):
         for rec in self:
@@ -415,9 +602,76 @@ class HotelReservation(models.Model):
                     'cleaning_type': 'checkout',
                     'state': 'todo',
                 })
+            # Facturation automatique au départ (paramètre de la société) :
+            # facture validée, acomptes déduits par lettrage.
+            if rec.company_id.hotel_auto_invoice and rec.amount_total > 0 \
+                    and not rec.invoice_ids.filtered(lambda m: m.state != 'cancel'):
+                invoice = rec._hotel_create_invoice()
+                invoice.action_post()
+                rec.message_post(body=_(
+                    "Facture %s générée automatiquement au départ.", invoice.name))
 
     def action_cancel(self):
+        for rec in self:
+            if rec.state == 'checkout':
+                raise UserError(_(
+                    "La réservation %s est terminée et ne peut plus être annulée.",
+                    rec.name))
         self.write({'state': 'cancel'})
+        for rec in self:
+            rec._hotel_notify_managers(_(
+                "Réservation annulée : %(name)s — %(partner)s (%(ci)s → %(co)s).",
+                name=rec.name, partner=rec.partner_id.display_name,
+                ci=rec.checkin, co=rec.checkout))
+
+    # ------------------------------------------------------------------
+    # Notifications et alertes (cahier des charges §18)
+    # ------------------------------------------------------------------
+    def _hotel_notify_managers(self, body):
+        """Notifie (boîte de réception Odoo) les responsables de l'auberge."""
+        group = self.env.ref('hotel_management.group_hotel_manager',
+                             raise_if_not_found=False)
+        partners = group.sudo().all_user_ids.filtered('active').partner_id \
+            if group else self.env['res.partner']
+        for rec in self:
+            rec.sudo().message_post(
+                body=body, partner_ids=partners.ids,
+                message_type='comment', subtype_xmlid='mail.mt_note')
+
+    def _hotel_schedule_alert(self, summary, note, deadline=None):
+        """Activité « à faire » pour le responsable de la réservation, sans
+        doublon (même résumé encore ouvert)."""
+        for rec in self:
+            if rec.activity_ids.filtered(lambda a: a.summary == summary):
+                continue
+            rec.sudo().activity_schedule(
+                'mail.mail_activity_data_todo',
+                date_deadline=deadline or fields.Date.context_today(rec),
+                summary=summary, note=note,
+                user_id=(rec.user_id or rec.create_uid or self.env.user).id)
+
+    @api.model
+    def _cron_hotel_alerts(self):
+        """Tâche planifiée quotidienne : arrivées et départs prévus, paiements
+        en retard, stock minimum."""
+        today = fields.Date.context_today(self)
+        arrivals = self.search([('state', '=', 'confirmed'), ('checkin', '=', today)])
+        arrivals._hotel_schedule_alert(
+            _("Arrivée prévue aujourd'hui"),
+            _("Préparer l'accueil du client et vérifier la chambre."))
+        departures = self.search([('state', '=', 'checkin'), ('checkout', '=', today)])
+        departures._hotel_schedule_alert(
+            _("Départ prévu aujourd'hui"),
+            _("Ajouter les consommations, encaisser le solde et faire sortir le client."))
+        late = self.search([
+            ('state', 'in', ('checkin', 'checkout')),
+            ('checkout', '<', today),
+            ('amount_due', '>', 0),
+        ])
+        late._hotel_schedule_alert(
+            _("Paiement en retard"),
+            _("Le séjour est terminé mais un reste à payer subsiste."))
+        self.env['product.product']._hotel_check_stock_alerts()
 
     def action_draft(self):
         self.write({'state': 'draft'})
@@ -491,6 +745,33 @@ class HotelReservation(models.Model):
         month_reservations = len(month_res)
         month_revenue = sum(month_res.mapped('amount_total'))
 
+        # Réservations à venir, encaissements et impayés (cahier des charges §15)
+        upcoming = self.search([
+            ('state', 'in', ('draft', 'confirmed')), ('checkin', '>', today)],
+            order='checkin asc')
+        upcoming_list = [{
+            'id': r.id, 'name': r.name, 'partner': r.partner_id.display_name,
+            'checkin': fields.Date.to_string(r.checkin),
+            'rooms': ', '.join(r.line_ids.mapped('room_id.name')) or '—',
+        } for r in upcoming[:8]]
+        month_end = (month_start + timedelta(days=32)).replace(day=1)
+        month_payments = self.env['account.payment'].sudo().search([
+            ('hotel_reservation_id', '!=', False),
+            ('state', 'in', ('paid', 'reconciled')),
+            ('date', '>=', month_start), ('date', '<', month_end),
+        ])
+        month_collected = sum(month_payments.mapped('amount_company_currency_signed'))
+        unpaid_res = self.search([
+            ('state', 'in', ('checkin', 'checkout')), ('amount_due', '>', 0)])
+        unpaid_total = sum(unpaid_res.mapped('amount_due'))
+        departures = self.search([
+            ('checkout', '=', today), ('state', '=', 'checkin')], limit=10)
+        departures_list = [{
+            'id': r.id, 'name': r.name, 'partner': r.partner_id.display_name,
+            'rooms': ', '.join(r.line_ids.mapped('room_id.name')) or '—',
+            'due': r.amount_due,
+        } for r in departures]
+
         recent = self.search([], limit=8)
         recent_reservations = [{
             'id': r.id,
@@ -547,6 +828,8 @@ class HotelReservation(models.Model):
                 ('checkout', '=', today),
                 ('state', 'in', ('checkin', 'checkout'))]).ids,
             'month_reservations': month_res.ids,
+            'upcoming': upcoming.ids,
+            'unpaid': unpaid_res.ids,
         }
 
         symbol = self.env.company.currency_id.symbol or ''
@@ -573,6 +856,12 @@ class HotelReservation(models.Model):
             'departures_today': departures_today,
             'month_reservations': month_reservations,
             'month_revenue': month_revenue,
+            'month_collected': month_collected,
+            'upcoming_count': len(upcoming),
+            'upcoming_list': upcoming_list,
+            'departures_list': departures_list,
+            'unpaid_total': unpaid_total,
+            'unpaid_count': len(unpaid_res),
             'currency_symbol': symbol,
             'recent_reservations': recent_reservations,
             'arrivals_list': arrivals_list,
@@ -638,10 +927,26 @@ class HotelReservationLine(models.Model):
             line.available_bed_ids = avail | line.bed_ids
 
     def _apply_price(self):
+        """Prix / nuit de la ligne : tarif spécial du client, sinon tarif
+        saisonnier nuit par nuit, sinon prix de la chambre (ou du lit × nb lits)."""
+        if not self.room_id:
+            return
+        resa = self.reservation_id
+        unit = self.room_id._get_stay_unit_price(
+            resa.checkin, resa.checkout, self.booking_type, resa.partner_id)
         if self.booking_type == 'bed':
-            self.price_unit = len(self.bed_ids) * self.room_id.bed_price
-        elif self.room_id:
-            self.price_unit = self.room_id.room_price
+            self.price_unit = len(self.bed_ids) * unit
+        else:
+            self.price_unit = unit
+
+    def _invoice_label(self):
+        self.ensure_one()
+        if self.booking_type == 'bed' and self.bed_ids:
+            return _("Chambre %(room)s — lit(s) %(beds)s — %(nights)s nuit(s)",
+                     room=self.room_id.name, beds=', '.join(self.bed_ids.mapped('name')),
+                     nights=self.nights)
+        return _("Chambre %(room)s — chambre entière — %(nights)s nuit(s)",
+                 room=self.room_id.name, nights=self.nights)
 
     def _apply_booking_type(self):
         """Aligne les lits de la ligne sur le « Type de location » de la

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import fields, http
 from odoo.http import request
+from odoo.tools import consteq
 
 
 class HotelWebsite(http.Controller):
@@ -212,16 +213,18 @@ class HotelWebsite(http.Controller):
                 'name': name, 'email': email, 'phone': phone,
             })
 
+        # Prix : tarif spécial client, sinon tarifs saisonniers nuit par nuit
+        unit = room._get_stay_unit_price(ci, co, booking_type, partner)
         if booking_type == 'bed' and beds:
             line_vals = {
                 'room_id': room.id,
                 'bed_ids': [(6, 0, beds.ids)],
-                'price_unit': len(beds) * room.bed_price,
+                'price_unit': len(beds) * unit,
             }
         else:
             line_vals = {
                 'room_id': room.id,
-                'price_unit': room.room_price,
+                'price_unit': unit,
             }
 
         reservation = request.env['hotel.reservation'].sudo().create({
@@ -245,14 +248,19 @@ class HotelWebsite(http.Controller):
         except Exception:
             pass
 
-        return request.redirect('/hotel/booking/confirmation/%s' % reservation.id)
+        token = reservation._portal_ensure_token()
+        return request.redirect('/hotel/booking/confirmation/%s?access_token=%s'
+                                % (reservation.id, token))
 
     @http.route(['/hotel/booking/confirmation/<int:reservation_id>'],
                 type='http', auth='public', website=True, sitemap=False)
-    def hotel_booking_confirmation(self, reservation_id, **kw):
+    def hotel_booking_confirmation(self, reservation_id, access_token=None, **kw):
         reservation = request.env['hotel.reservation'].sudo().browse(
             reservation_id).exists()
-        if not reservation:
+        # Jeton obligatoire : sans lui, n'importe qui pourrait afficher les
+        # réservations des autres clients en changeant le numéro dans l'URL.
+        if not reservation or not access_token or not consteq(
+                reservation.access_token or '', access_token):
             return request.redirect('/hotel/rooms')
         return request.render('hotel_management.booking_confirmation_page', {
             'reservation': reservation,

@@ -19,10 +19,71 @@ class ResPartner(models.Model):
     hotel_id_number = fields.Char(string="N° de pièce d'identité")
     hotel_birthdate = fields.Date(string="Date de naissance")
 
+    hotel_id_document = fields.Binary(
+        string="Scan de la pièce d'identité", attachment=True,
+        help="Photo ou scan de la pièce d'identité (enregistrée au check-in).")
+    hotel_id_document_name = fields.Char(string="Nom du fichier pièce d'identité")
+    hotel_note = fields.Text(string="Observations (Auberge)")
+
+    # Conditions tarifaires du client (cahier des charges §5)
+    hotel_discount = fields.Float(
+        string="Remise client (%)", digits=(5, 2),
+        help="Remise en pourcentage appliquée par défaut à ses réservations.")
+    hotel_special_room_price = fields.Monetary(
+        string="Tarif spécial chambre / nuit", currency_field='hotel_currency_id',
+        help="Si renseigné, remplace le prix normal (et saisonnier) d'une nuit "
+             "en chambre entière pour ce client.")
+    hotel_special_bed_price = fields.Monetary(
+        string="Tarif spécial lit / nuit", currency_field='hotel_currency_id',
+        help="Si renseigné, remplace le prix normal (et saisonnier) d'une nuit "
+             "pour un lit, pour ce client.")
+    hotel_currency_id = fields.Many2one(
+        'res.currency', compute='_compute_hotel_currency_id')
+
     hotel_reservation_ids = fields.One2many(
         'hotel.reservation', 'partner_id', string="Réservations")
     hotel_reservation_count = fields.Integer(
         string="Nb réservations", compute='_compute_hotel_reservation_count')
+    hotel_payment_count = fields.Integer(
+        string="Nb paiements auberge", compute='_compute_hotel_payment_count')
+    hotel_amount_due = fields.Monetary(
+        string="Impayé auberge", currency_field='hotel_currency_id',
+        compute='_compute_hotel_payment_count')
+
+    _hotel_discount_range = models.Constraint(
+        'CHECK(hotel_discount >= 0 AND hotel_discount <= 100)',
+        "La remise client doit être comprise entre 0 et 100 %.",
+    )
+
+    def _compute_hotel_currency_id(self):
+        for partner in self:
+            partner.hotel_currency_id = self.env.company.currency_id
+
+    def _compute_hotel_payment_count(self):
+        Payment = self.env['account.payment'].sudo()
+        Reservation = self.env['hotel.reservation'].sudo()
+        for partner in self:
+            if not partner.id:
+                partner.hotel_payment_count = 0
+                partner.hotel_amount_due = 0.0
+                continue
+            partner.hotel_payment_count = Payment.search_count([
+                ('hotel_reservation_id.partner_id', '=', partner.id)])
+            partner.hotel_amount_due = sum(Reservation.search([
+                ('partner_id', '=', partner.id),
+                ('state', 'in', ('checkin', 'checkout')),
+            ]).mapped('amount_due'))
+
+    def action_view_hotel_payments(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': "Paiements — %s" % self.display_name,
+            'res_model': 'account.payment',
+            'view_mode': 'list,form',
+            'domain': [('hotel_reservation_id.partner_id', '=', self.id)],
+            'context': {'create': False},
+        }
 
     @api.model
     def _hotel_full_name(self, last_name, first_name):

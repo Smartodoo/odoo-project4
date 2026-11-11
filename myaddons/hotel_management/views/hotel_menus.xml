@@ -8,19 +8,80 @@
               parent="menu_hotel_root" action="action_hotel_dashboard"
               sequence="1"/>
 
-    <!-- Menu du haut « Chambres » : tableau d'occupation. Réservations, ménage
-         et travaux se gèrent DEPUIS la fiche d'une chambre (boutons en haut). -->
+    <!-- Planning graphique chambres / lits × jours -->
+    <menuitem id="menu_hotel_planning" name="Planning"
+              parent="menu_hotel_root" action="action_hotel_planning"
+              sequence="5"/>
+
+    <!-- Réservations -->
+    <menuitem id="menu_hotel_reservations_top" name="Réservations"
+              parent="menu_hotel_root" sequence="10"
+              groups="hotel_management.group_hotel_user"/>
+    <menuitem id="menu_hotel_reservation" name="Réservations"
+              parent="menu_hotel_reservations_top" action="action_hotel_reservation"
+              sequence="1"/>
+    <menuitem id="menu_hotel_clients" name="Clients"
+              parent="menu_hotel_reservations_top" action="base.action_partner_form"
+              sequence="10"/>
+    <menuitem id="menu_hotel_services_sold" name="Consommations vendues"
+              parent="menu_hotel_reservations_top" action="action_hotel_reservation_service"
+              sequence="20"/>
+
+    <!-- Menu « Chambres » : tableau d'occupation. Réservations, ménage et
+         travaux se gèrent aussi DEPUIS la fiche d'une chambre (boutons en haut). -->
     <menuitem id="menu_hotel_room" name="Chambres"
               parent="menu_hotel_root" action="action_hotel_room"
               sequence="20"/>
 
-    <menuitem id="menu_hotel_staff" name="Personnel"
-              parent="menu_hotel_root" action="action_hotel_staff"
-              sequence="60"/>
+    <!-- Ménage & travaux -->
+    <menuitem id="menu_hotel_operations" name="Ménage"
+              parent="menu_hotel_root" sequence="30"/>
+    <menuitem id="menu_hotel_housekeeping" name="Tâches de ménage"
+              parent="menu_hotel_operations" action="action_hotel_housekeeping"
+              sequence="1"/>
+    <menuitem id="menu_hotel_maintenance" name="Travaux &amp; maintenance"
+              parent="menu_hotel_operations" action="action_hotel_maintenance"
+              sequence="10"/>
+
+    <!-- Personnel -->
+    <menuitem id="menu_hotel_staff_root" name="Personnel"
+              parent="menu_hotel_root" sequence="60"/>
+    <menuitem id="menu_hotel_staff" name="Agents de l'auberge"
+              parent="menu_hotel_staff_root" action="action_hotel_staff"
+              sequence="1"/>
+    <menuitem id="menu_hotel_employees" name="Employés (contrats, services)"
+              parent="menu_hotel_staff_root" action="hr.open_view_employee_list_my"
+              sequence="10" groups="hr.group_hr_user"/>
+    <menuitem id="menu_hotel_attendance" name="Présences / absences"
+              parent="menu_hotel_staff_root" action="hr_attendance.hr_attendance_action"
+              sequence="20" groups="hr_attendance.group_hr_attendance_officer"/>
+    <menuitem id="menu_hotel_leaves" name="Congés"
+              parent="menu_hotel_staff_root" action="hr_holidays.hr_leave_action_action_approve_department"
+              sequence="30" groups="hr_holidays.group_hr_holidays_user"/>
+
+    <!-- Rapports & statistiques -->
+    <menuitem id="menu_hotel_reporting" name="Rapports"
+              parent="menu_hotel_root" sequence="80"
+              groups="hotel_management.group_hotel_manager"/>
+    <menuitem id="menu_hotel_revenue" name="Chiffre d'affaires"
+              parent="menu_hotel_reporting" action="action_hotel_revenue_report"
+              sequence="1"/>
+    <menuitem id="menu_hotel_revenue_bed" name="CA par lit"
+              parent="menu_hotel_reporting" action="action_hotel_revenue_by_bed"
+              sequence="5"/>
+    <menuitem id="menu_hotel_revenue_source" name="Performance par source"
+              parent="menu_hotel_reporting" action="action_hotel_revenue_by_source"
+              sequence="10"/>
+    <menuitem id="menu_hotel_activity_report" name="Rapport d'activité (PDF)"
+              parent="menu_hotel_reporting" action="action_hotel_activity_report_wizard"
+              sequence="20"/>
 
     <menuitem id="menu_hotel_config" name="Configuration"
               parent="menu_hotel_root" sequence="90"
               groups="hotel_management.group_hotel_manager"/>
+    <menuitem id="menu_hotel_settings" name="Paramètres"
+              parent="menu_hotel_config" action="action_hotel_config_settings"
+              sequence="1"/>
     <menuitem id="menu_hotel_room_config" name="Ajouter chambres"
               parent="menu_hotel_config" action="action_hotel_room_config"
               sequence="5"/>
@@ -33,4 +94,7 @@
     <menuitem id="menu_hotel_rate_season" name="Tarifs saisonniers"
               parent="menu_hotel_config" action="action_hotel_rate_season"
               sequence="40"/>
+    <menuitem id="menu_hotel_service_products" name="Consommations &amp; services"
+              parent="menu_hotel_config" action="action_hotel_service_products"
+              sequence="50"/>
 </odoo>

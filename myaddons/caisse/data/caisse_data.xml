@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="seq_caisse_session" model="ir.sequence">
+        <field name="name">Session de caisse</field>
+        <field name="code">caisse.session</field>
+        <field name="prefix">CAISSE/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

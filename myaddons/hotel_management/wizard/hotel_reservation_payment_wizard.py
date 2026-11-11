@@ -50,14 +50,21 @@ class HotelReservationPaymentWizard(models.TransientModel):
     @api.depends('reservation_id')
     def _compute_payment_kind(self):
         for wiz in self:
+            if self.env.context.get('hotel_refund'):
+                wiz.payment_kind = 'refund'
+                continue
             has_invoice = wiz.reservation_id.sudo().invoice_ids.filtered(
                 lambda m: m.move_type == 'out_invoice' and m.state == 'posted')
             wiz.payment_kind = 'payment' if has_invoice else 'deposit'
 
-    @api.depends('reservation_id')
+    @api.depends('reservation_id', 'payment_kind')
     def _compute_amount(self):
         for wiz in self:
-            wiz.amount = max(wiz.reservation_id.amount_due, 0.0)
+            if wiz.payment_kind == 'refund':
+                # Trop-perçu remboursable par défaut
+                wiz.amount = max(-wiz.reservation_id.amount_due, 0.0)
+            else:
+                wiz.amount = max(wiz.reservation_id.amount_due, 0.0)
 
     @api.depends('payment_mode', 'company_id')
     def _compute_payment_method_line_id(self):
@@ -87,12 +94,20 @@ class HotelReservationPaymentWizard(models.TransientModel):
         self.ensure_one()
         reservation = self.reservation_id
         rounding = self.currency_id.rounding or 0.01
-        if reservation.state == 'cancel':
+        if reservation.state == 'cancel' and self.payment_kind != 'refund':
             raise UserError(_("Impossible d'encaisser sur une réservation annulée."))
+        is_refund = self.payment_kind == 'refund'
         if float_compare(self.amount, 0.0, precision_rounding=rounding) <= 0:
             raise UserError(_("Le montant doit être supérieur à zéro."))
-        if float_compare(self.amount, reservation.amount_due,
-                         precision_rounding=rounding) > 0:
+        if is_refund:
+            if float_compare(self.amount, reservation.amount_paid,
+                             precision_rounding=rounding) > 0:
+                raise UserError(_(
+                    "Le remboursement (%(amount)s) dépasse ce que le client a "
+                    "payé (%(paid)s).",
+                    amount=self.amount, paid=reservation.amount_paid))
+        elif float_compare(self.amount, reservation.amount_due,
+                           precision_rounding=rounding) > 0:
             raise UserError(_(
                 "Le montant (%(amount)s) dépasse le reste à payer (%(due)s).\n"
                 "Corrigez le montant : le trop-perçu n'est pas accepté.",
@@ -102,21 +117,29 @@ class HotelReservationPaymentWizard(models.TransientModel):
                 "Aucun journal n'est configuré pour le mode « %s ».\n"
                 "Vérifiez la configuration comptable (journaux Espèces / Banque).",
                 dict(HOTEL_PAYMENT_MODES)[self.payment_mode]))
-        if self.payment_mode == 'cheque' and not self.cheque_reference:
+        if self.payment_mode == 'cheque' and not self.cheque_reference and not is_refund:
             raise UserError(_("Indiquez le numéro du chèque."))
+        journal = self.payment_method_line_id.journal_id
+        method_line = self.payment_method_line_id
+        if is_refund:
+            method_line = self.env['account.journal']._hotel_get_outbound_method_line(journal)
+            if not method_line:
+                raise UserError(_(
+                    "Le journal %s n'a pas de mode de paiement sortant pour "
+                    "rembourser.", journal.display_name))
 
         # sudo : la réception encaisse sans avoir les droits comptables ;
         # le paiement reste tracé au nom de l'utilisateur dans le chatter.
         Payment = self.env['account.payment'].sudo()
         vals = {
-            'payment_type': 'inbound',
+            'payment_type': 'outbound' if is_refund else 'inbound',
             'partner_type': 'customer',
             'partner_id': reservation.partner_id.commercial_partner_id.id,
             'amount': self.amount,
             'currency_id': self.currency_id.id,
             'date': self.date,
-            'journal_id': self.payment_method_line_id.journal_id.id,
-            'payment_method_line_id': self.payment_method_line_id.id,
+            'journal_id': journal.id,
+            'payment_method_line_id': method_line.id,
             'memo': self._get_payment_ref(),  # Odoo 18+: ref -> memo
             'hotel_reservation_id': reservation.id,
             'hotel_payment_kind': self.payment_kind,

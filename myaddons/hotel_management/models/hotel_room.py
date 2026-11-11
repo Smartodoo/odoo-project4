@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from markupsafe import Markup, escape
 
 from odoo import _, api, fields, models
@@ -39,10 +41,15 @@ class HotelRoom(models.Model):
     maintenance = fields.Boolean(
         string="Indisponible", compute='_compute_maintenance', store=True,
         help="Chambre en maintenance ou hors service : non vendable.")
+    # Cycle ménage (cahier des charges §14) :
+    # À nettoyer -> En nettoyage -> Nettoyée -> Contrôlée ; À réparer si un
+    # problème est signalé pendant le ménage.
     housekeeping_status = fields.Selection([
-        ('clean', 'Propre'),
         ('dirty', 'À nettoyer'),
-        ('inprogress', 'Nettoyage en cours'),
+        ('inprogress', 'En nettoyage'),
+        ('clean', 'Nettoyée'),
+        ('inspected', 'Contrôlée'),
+        ('to_repair', 'À réparer'),
     ], string="État ménage", default='clean', required=True, tracking=True)
 
     # Mode de location : chambre privée, dortoir (au lit) ou mixte
@@ -356,8 +363,8 @@ class HotelRoom(models.Model):
                                else 'maintenance')
             elif not lines:
                 # Le ménage est signalé mais ne bloque pas la vente
-                room.status = ('cleaning' if room.housekeeping_status != 'clean'
-                               else 'available')
+                room.status = ('cleaning' if room.housekeeping_status
+                               not in ('clean', 'inspected') else 'available')
             elif whole or (beds and len(taken) >= len(beds)) or not beds:
                 checked_in = lines.filtered(lambda l: l.state == 'checkin')
                 room.status = 'occupied' if checked_in else 'reserved'
@@ -437,20 +444,52 @@ class HotelRoom(models.Model):
             return self.env['hotel.bed']
         return self.available_beds(checkin, checkout, ignore_reservation)
 
-    def _get_price_for_date(self, day):
-        """Prix/nuit applicable : tarif saisonnier prioritaire (spécifique au type,
-        sinon global), à défaut le prix de la chambre ou de son type."""
+    def _get_season(self, day):
+        """Tarif saisonnier actif le jour donné : celui du type de chambre en
+        priorité, sinon un tarif global (sans type)."""
         self.ensure_one()
-        fallback = self.price or self.room_type_id.list_price
-        if not day:
-            return fallback
-        Season = self.env['hotel.rate.season']
-        base = [('date_start', '<=', day), ('date_end', '>=', day), ('active', '=', True)]
+        Season = self.env['hotel.rate.season'].sudo()
+        base = [('date_start', '<=', day), ('date_end', '>=', day),
+                ('active', '=', True), ('company_id', 'in', (self.company_id.id, False))]
         season = Season.search(
             base + [('room_type_id', '=', self.room_type_id.id)], limit=1)
-        if not season:
-            season = Season.search(base + [('room_type_id', '=', False)], limit=1)
-        return season.price if season else fallback
+        return season or Season.search(base + [('room_type_id', '=', False)], limit=1)
+
+    def _get_night_price(self, day, booking_type='room', partner=False):
+        """Prix d'UNE nuit : chambre entière, ou un seul lit (booking_type='bed').
+        Priorité (cahier des charges §5) :
+          1. tarif spécial du client,
+          2. tarif spécial de la période (tarif saisonnier),
+          3. prix de la chambre."""
+        self.ensure_one()
+        is_bed = booking_type == 'bed'
+        if partner:
+            special = (partner.hotel_special_bed_price if is_bed
+                       else partner.hotel_special_room_price)
+            if special:
+                return special
+        if day:
+            season = self._get_season(day)
+            season_price = season.bed_price if is_bed else season.price
+            if season and season_price:
+                return season_price
+        return self.bed_price if is_bed else self.room_price
+
+    def _get_stay_unit_price(self, checkin, checkout, booking_type='room', partner=False):
+        """Prix moyen par nuit sur [checkin, checkout[ (les nuits d'un séjour à
+        cheval sur deux périodes tarifaires sont prises chacune à leur prix)."""
+        self.ensure_one()
+        if not (checkin and checkout and checkout > checkin):
+            return self._get_night_price(checkin, booking_type, partner)
+        nights = (checkout - checkin).days
+        total = sum(
+            self._get_night_price(checkin + timedelta(days=n), booking_type, partner)
+            for n in range(nights))
+        return self.currency_id.round(total / nights) if self.currency_id else total / nights
+
+    def _get_price_for_date(self, day):
+        """Compatibilité : prix chambre entière d'une nuit."""
+        return self._get_night_price(day, 'room')
 
     @api.model
     def get_available_rooms(self, checkin, checkout, guests=1):

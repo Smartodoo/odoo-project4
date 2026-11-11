@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 
 
 class HotelMaintenanceRequest(models.Model):
@@ -60,7 +60,27 @@ class HotelMaintenanceRequest(models.Model):
         requests = super().create(vals_list)
         for rec in requests:
             rec._sync_room_maintenance(rec.room_id)
+        requests._notify_new_request()
         return requests
+
+    def _notify_new_request(self):
+        """Alerte « Chambre en maintenance » (cahier des charges §18) :
+        responsables notifiés, activité pour le technicien affecté."""
+        group = self.env.ref('hotel_management.group_hotel_manager',
+                             raise_if_not_found=False)
+        partners = group.sudo().all_user_ids.filtered('active').partner_id             if group else self.env['res.partner']
+        for rec in self:
+            room = rec.room_id.name or '-'
+            rec.sudo().message_post(
+                body=_("Nouvelle demande de travaux : %(name)s (chambre %(room)s).",
+                       name=rec.name, room=room),
+                partner_ids=partners.ids, subtype_xmlid='mail.mt_note')
+            if rec.staff_id.user_id:
+                rec.sudo().activity_schedule(
+                    'mail.mail_activity_data_todo',
+                    summary=_("Intervention chambre %s", room),
+                    note=rec.description or rec.name,
+                    user_id=rec.staff_id.user_id.id)
 
     def write(self, vals):
         rooms = self.mapped('room_id')
@@ -81,6 +101,9 @@ class HotelMaintenanceRequest(models.Model):
             rec.state = 'done'
             rec.done_date = fields.Date.context_today(rec)
             rec._sync_room_maintenance(rec.room_id)
+            # Après réparation, la chambre doit être nettoyée avant d'être revendue
+            if rec.room_id.housekeeping_status == 'to_repair':
+                rec.room_id.housekeeping_status = 'dirty'
 
     def action_cancel(self):
         for rec in self:

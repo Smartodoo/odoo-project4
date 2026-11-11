@@ -20,7 +20,7 @@
                         <field name="payment_kind" widget="radio" options="{'horizontal': true}"/>
                         <field name="payment_mode" widget="radio"/>
                         <field name="cheque_reference" invisible="payment_mode != 'cheque'"
-                               required="payment_mode == 'cheque'"/>
+                               required="payment_mode == 'cheque' and payment_kind != 'refund'"/>
                     </group>
                     <group>
                         <field name="amount" widget="monetary"/>
@@ -31,12 +31,15 @@
                         <field name="memo" placeholder="Optionnel"/>
                     </group>
                 </group>
+                <div class="text-muted small" invisible="payment_kind != 'refund'">
+                    Le remboursement crée un paiement sortant ; il est déduit du montant « Payé » de la réservation.
+                </div>
                 <div class="text-muted small" invisible="payment_kind != 'deposit'">
                     <i class="oi oi-filled me-1" data-icon="info" title="Info"/>
                     L'acompte sera déduit automatiquement de la facture à sa validation.
                 </div>
                 <footer>
-                    <button name="action_confirm" string="Encaisser" type="object"
+                    <button name="action_confirm" string="Valider" type="object"
                             class="btn-primary" data-hotkey="q"/>
                     <button string="Annuler" special="cancel" class="btn-secondary" data-hotkey="x"/>
                 </footer>
