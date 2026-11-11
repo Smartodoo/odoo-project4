@@ -40,6 +40,7 @@ Gestion d'auberge (PMS) — cahier des charges complet
         'views/hotel_reservation_views.xml',
         'views/res_partner_views.xml',
         'views/hotel_operations_views.xml',
+        'views/hotel_kanban_views.xml',
         'views/hotel_dashboard_views.xml',
         'views/hotel_report_views.xml',
         'views/hotel_menus.xml',
@@ -55,6 +56,7 @@ Gestion d'auberge (PMS) — cahier des charges complet
         'web.assets_backend': [
             'hotel_management/static/src/scss/hotel_statusbar.scss',
             'hotel_management/static/src/room/hotel_room.scss',
+            'hotel_management/static/src/scss/hotel_kanban.scss',
             'hotel_management/static/src/dashboard/hotel_dashboard.scss',
             'hotel_management/static/src/dashboard/hotel_dashboard.js',
             'hotel_management/static/src/dashboard/hotel_dashboard.xml',

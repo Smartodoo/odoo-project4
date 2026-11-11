@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ================= RÉSERVATIONS : colonnes par état ================= -->
+    <record id="view_hotel_reservation_kanban" model="ir.ui.view">
+        <field name="name">hotel.reservation.kanban</field>
+        <field name="model">hotel.reservation</field>
+        <field name="arch" type="xml">
+            <kanban class="o_hotel_kanban" default_group_by="state" quick_create="0"
+                    group_create="0" group_delete="0" group_edit="0" sample="1">
+                <field name="state"/>
+                <field name="currency_id"/>
+                <field name="amount_due"/>
+                <field name="amount_total"/>
+                <field name="room_count"/>
+                <progressbar field="state"
+                             colors='{"confirmed": "info", "checkin": "success", "cancel": "danger"}'/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="o_hotel_kcard o_hotel_kcard_#{record.state.raw_value}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <field name="name" class="fw-bold"/>
+                                <field name="source" class="badge text-bg-light"/>
+                            </div>
+                            <field name="partner_id" class="fs-6"/>
+                            <div class="text-muted small">
+                                <i class="oi me-1" data-icon="calendar_today" title="Séjour"/>
+                                <field name="checkin"/> → <field name="checkout"/>
+                                (<field name="nights"/> nuit(s))
+                            </div>
+                            <div class="small">
+                                <i class="oi me-1" data-icon="bed" title="Chambres"/>
+                                <t t-out="record.room_count.raw_value"/> chambre(s) ·
+                                <field name="guest_count"/> pers.
+                            </div>
+                            <footer class="mt-1">
+                                <div class="d-flex align-items-center gap-2">
+                                    <field name="user_id" widget="many2one_avatar_user"/>
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                </div>
+                                <div class="ms-auto text-end">
+                                    <field name="amount_total" widget="monetary" class="fw-bold"/>
+                                    <div t-if="record.amount_due.raw_value &gt; 0 and record.amount_total.raw_value"
+                                         class="small text-danger">
+                                        Reste <field name="amount_due" widget="monetary"/>
+                                    </div>
+                                    <div t-elif="record.amount_total.raw_value" class="small text-success">Soldé</div>
+                                </div>
+                            </footer>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ================= MÉNAGE : tableau de l'équipe ================= -->
+    <record id="view_hotel_housekeeping_kanban" model="ir.ui.view">
+        <field name="name">hotel.housekeeping.kanban</field>
+        <field name="model">hotel.housekeeping</field>
+        <field name="arch" type="xml">
+            <kanban class="o_hotel_kanban" default_group_by="state" quick_create="0"
+                    group_create="0" group_delete="0" group_edit="0" sample="1">
+                <field name="state"/>
+                <field name="cleaning_type"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="o_hotel_kcard o_hotel_kcard_hk_#{record.state.raw_value}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="fs-5 fw-bold">
+                                    <i class="oi me-1" data-icon="key" title="Chambre"/><field name="room_id"/>
+                                </span>
+                                <field name="cleaning_type" class="badge text-bg-light"/>
+                            </div>
+                            <div class="text-muted small">
+                                <field name="name"/> · <field name="scheduled_date"/>
+                            </div>
+                            <div class="small" t-if="record.reservation_id.raw_value">
+                                Séjour <field name="reservation_id"/>
+                            </div>
+                            <footer class="mt-2">
+                                <field name="staff_id" class="small"/>
+                                <field name="activity_ids" widget="kanban_activity"/>
+                                <div class="ms-auto">
+                                    <button name="action_start" type="object" string="Démarrer"
+                                            class="btn btn-sm btn-primary" invisible="state != 'todo'"/>
+                                    <button name="action_done" type="object" string="Terminer"
+                                            class="btn btn-sm btn-success" invisible="state != 'inprogress'"/>
+                                    <button name="action_inspect" type="object" string="Contrôler"
+                                            class="btn btn-sm btn-secondary" invisible="state != 'done'"
+                                            groups="hotel_management.group_hotel_manager"/>
+                                </div>
+                            </footer>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ================= TRAVAUX : par état, priorité visible ================= -->
+    <record id="view_hotel_maintenance_kanban" model="ir.ui.view">
+        <field name="name">hotel.maintenance.request.kanban</field>
+        <field name="model">hotel.maintenance.request</field>
+        <field name="arch" type="xml">
+            <kanban class="o_hotel_kanban" default_group_by="state" quick_create="0"
+                    group_create="0" group_delete="0" group_edit="0" sample="1">
+                <field name="state"/>
+                <field name="priority"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="o_hotel_kcard o_hotel_kcard_prio_#{record.priority.raw_value}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <field name="name" class="fw-bold"/>
+                                <field name="priority" widget="priority"/>
+                            </div>
+                            <div class="small">
+                                <i class="oi me-1" data-icon="key" title="Chambre"/><field name="room_id"/>
+                                · <field name="category"/>
+                            </div>
+                            <div class="text-muted small"><field name="request_date"/></div>
+                            <footer class="mt-1">
+                                <field name="staff_id" class="small"/>
+                                <field name="activity_ids" widget="kanban_activity"/>
+                                <field name="cost" widget="monetary" class="ms-auto small"
+                                       invisible="not cost"/>
+                            </footer>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ================= PERSONNEL : fiches avec photo ================= -->
+    <record id="view_hotel_staff_kanban" model="ir.ui.view">
+        <field name="name">hotel.staff.kanban</field>
+        <field name="model">hotel.staff</field>
+        <field name="arch" type="xml">
+            <kanban class="o_hotel_kanban" sample="1">
+                <field name="id"/>
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside class="o_kanban_aside_full me-2">
+                            <field name="image" widget="image" class="o_hotel_staff_photo"
+                                   options="{'img_class': 'object-fit-cover'}"/>
+                        </aside>
+                        <main class="ms-1">
+                            <field name="name" class="fw-bold fs-6"/>
+                            <field name="role" class="badge text-bg-light"/>
+                            <div class="small text-muted" t-if="record.department_id.raw_value">
+                                <field name="department_id"/>
+                            </div>
+                            <div class="small" t-if="record.phone.raw_value">
+                                <i class="oi me-1" data-icon="call" title="Téléphone"/><field name="phone"/>
+                            </div>
+                            <div class="small" t-if="record.email.raw_value">
+                                <i class="oi me-1" data-icon="mail" title="E-mail"/><field name="email"/>
+                            </div>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>

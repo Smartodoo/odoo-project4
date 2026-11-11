@@ -81,7 +81,7 @@
     <record id="action_hotel_staff" model="ir.actions.act_window">
         <field name="name">Personnel</field>
         <field name="res_model">hotel.staff</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="view_hotel_staff_search"/>
     </record>
 
@@ -170,6 +170,9 @@
             <search>
                 <field name="room_id"/>
                 <field name="staff_id"/>
+                <filter name="active_tasks" string="En cours de traitement"
+                        domain="[('state', 'in', ('todo', 'inprogress', 'done', 'to_repair'))]"/>
+                <separator/>
                 <filter name="todo" string="À nettoyer" domain="[('state', '=', 'todo')]"/>
                 <filter name="inprogress" string="En nettoyage" domain="[('state', '=', 'inprogress')]"/>
                 <filter name="done" string="Nettoyées (à contrôler)" domain="[('state', '=', 'done')]"/>
@@ -191,9 +194,9 @@
     <record id="action_hotel_housekeeping" model="ir.actions.act_window">
         <field name="name">Ménage</field>
         <field name="res_model">hotel.housekeeping</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="view_hotel_housekeeping_search"/>
-        <field name="context">{'search_default_todo': 1}</field>
+        <field name="context">{'search_default_active_tasks': 1}</field>
     </record>
 
     <!-- ================= MAINTENANCE / TRAVAUX ================= -->
@@ -292,7 +295,7 @@
     <record id="action_hotel_maintenance" model="ir.actions.act_window">
         <field name="name">Travaux &amp; Maintenance</field>
         <field name="res_model">hotel.maintenance.request</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="view_hotel_maintenance_search"/>
         <field name="context">{'search_default_open': 1}</field>
     </record>

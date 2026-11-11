@@ -62,3 +62,19 @@ class TestHotelUi(HttpCase):
                 "console.log('test successful')",
                 ready="!!document.querySelector('.o_action_manager .o_view_controller')",
                 login='admin')
+
+    def test_kanban_views_render(self):
+        """Vues kanban : réservations, ménage, travaux, personnel."""
+        for action in ('hotel_management.action_hotel_housekeeping',
+                       'hotel_management.action_hotel_maintenance',
+                       'hotel_management.action_hotel_staff'):
+            self.browser_js(
+                '/odoo/action-%s' % action,
+                "console.log('test successful')",
+                ready="!!document.querySelector('.o_kanban_renderer')",
+                login='admin')
+        self.browser_js(
+            '/odoo/action-hotel_management.action_hotel_reservation?view_type=kanban',
+            "console.log('test successful')",
+            ready="!!document.querySelector('.o_kanban_renderer')",
+            login='admin')

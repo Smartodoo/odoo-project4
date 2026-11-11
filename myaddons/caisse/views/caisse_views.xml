@@ -126,14 +126,87 @@
                 <filter name="open" string="Ouvertes" domain="[('state', '=', 'open')]"/>
                 <filter name="closed" string="Fermées" domain="[('state', '=', 'closed')]"/>
                 <filter name="date_open" string="Date d'ouverture" date="date_open"/>
+                <filter name="mine" string="Mes caisses" domain="[('user_id', '=', uid)]"/>
+                <group>
+                    <filter name="group_user" string="Caissier" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
+                    <filter name="group_month" string="Mois" context="{'group_by': 'date_open:month'}"/>
+                </group>
             </search>
+        </field>
+    </record>
+
+    <record id="view_caisse_session_kanban" model="ir.ui.view">
+        <field name="name">caisse.session.kanban</field>
+        <field name="model">caisse.session</field>
+        <field name="arch" type="xml">
+            <kanban class="o_caisse_kanban" sample="1">
+                <field name="state"/>
+                <field name="currency_id"/>
+                <field name="difference"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="o_caisse_card o_caisse_card_#{record.state.raw_value}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <field name="name" class="fw-bold fs-5"/>
+                                <field name="state" widget="badge"
+                                       decoration-success="state == 'open'"
+                                       decoration-muted="state == 'closed'"/>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 text-muted small mt-1">
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                                <field name="date_open"/>
+                            </div>
+                            <div class="o_caisse_figures mt-2">
+                                <div>
+                                    <span class="o_caisse_label">Fond de caisse</span>
+                                    <field name="opening_balance" widget="monetary"/>
+                                </div>
+                                <div>
+                                    <span class="o_caisse_label">Encaissé</span>
+                                    <field name="total_collected" widget="monetary" class="text-success"/>
+                                </div>
+                                <div>
+                                    <span class="o_caisse_label">Dépensé</span>
+                                    <field name="total_spent" widget="monetary" class="text-danger"/>
+                                </div>
+                                <div>
+                                    <span class="o_caisse_label">Solde théorique</span>
+                                    <field name="theoretical_balance" widget="monetary" class="fw-bold"/>
+                                </div>
+                            </div>
+                            <div t-if="record.state.raw_value == 'closed'"
+                                 t-attf-class="o_caisse_gap mt-2 #{record.difference.raw_value &lt; 0 ? 'text-danger' : (record.difference.raw_value &gt; 0 ? 'text-warning' : 'text-success')}">
+                                Écart : <field name="difference" widget="monetary"/>
+                            </div>
+                            <footer t-if="record.state.raw_value == 'open'" class="mt-2">
+                                <button name="action_close" type="object" class="btn btn-sm btn-primary"
+                                        confirm="Fermer la caisse ? Vérifiez d'abord le montant des espèces comptées.">
+                                    Fermer la caisse
+                                </button>
+                            </footer>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_caisse_session_graph" model="ir.ui.view">
+        <field name="name">caisse.session.graph</field>
+        <field name="model">caisse.session</field>
+        <field name="arch" type="xml">
+            <graph string="Fonds de caisse" type="bar" sample="1">
+                <field name="date_open" interval="day"/>
+                <field name="opening_balance" type="measure"/>
+            </graph>
         </field>
     </record>
 
     <record id="action_caisse_session" model="ir.actions.act_window">
         <field name="name">Sessions de caisse</field>
         <field name="res_model">caisse.session</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="view_caisse_session_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Ouvrez la caisse</p>
@@ -218,10 +291,64 @@
         </field>
     </record>
 
+    <record id="view_caisse_move_kanban" model="ir.ui.view">
+        <field name="name">caisse.move.kanban</field>
+        <field name="model">caisse.move</field>
+        <field name="arch" type="xml">
+            <kanban class="o_caisse_kanban" default_group_by="move_type" sample="1" quick_create="0">
+                <field name="move_type"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="o_caisse_move o_caisse_move_#{record.move_type.raw_value}">
+                            <div class="d-flex justify-content-between">
+                                <field name="reason" class="fw-bold"/>
+                                <field name="amount" widget="monetary" class="fw-bold"/>
+                            </div>
+                            <div class="text-muted small">
+                                <field name="date"/> · <field name="session_id"/>
+                            </div>
+                            <div class="small" t-if="record.partner_id.raw_value">
+                                <i class="oi me-1" data-icon="person" title="Tiers"/><field name="partner_id"/>
+                            </div>
+                            <div class="small text-muted" t-if="record.reference.raw_value">
+                                Pièce : <field name="reference"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_caisse_move_pivot" model="ir.ui.view">
+        <field name="name">caisse.move.pivot</field>
+        <field name="model">caisse.move</field>
+        <field name="arch" type="xml">
+            <pivot string="Mouvements de caisse" sample="1">
+                <field name="move_type" type="row"/>
+                <field name="date" interval="month" type="col"/>
+                <field name="amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_caisse_move_graph" model="ir.ui.view">
+        <field name="name">caisse.move.graph</field>
+        <field name="model">caisse.move</field>
+        <field name="arch" type="xml">
+            <graph string="Mouvements de caisse" type="bar" stacked="1" sample="1">
+                <field name="date" interval="day"/>
+                <field name="move_type"/>
+                <field name="amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
     <record id="action_caisse_move" model="ir.actions.act_window">
         <field name="name">Journal de caisse</field>
         <field name="res_model">caisse.move</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">list,kanban,pivot,graph,form</field>
         <field name="search_view_id" ref="view_caisse_move_search"/>
     </record>
 

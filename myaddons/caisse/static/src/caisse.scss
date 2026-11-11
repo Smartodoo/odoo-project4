@@ -1,0 +1,43 @@
+.o_caisse_kanban {
+    .o_caisse_card {
+        border-left: 4px solid $o-gray-400;
+        padding-left: 8px;
+        width: 100%;
+
+        &.o_caisse_card_open {
+            border-left-color: #198754;
+        }
+    }
+
+    .o_caisse_figures {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 12px;
+
+        > div {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+
+    .o_caisse_label {
+        font-size: 0.72rem;
+        color: $o-gray-600;
+        text-transform: uppercase;
+    }
+
+    .o_caisse_gap {
+        font-weight: 600;
+    }
+
+    .o_caisse_move {
+        border-left: 4px solid $o-gray-400;
+        padding-left: 8px;
+        width: 100%;
+
+        &.o_caisse_move_in { border-left-color: #198754; }
+        &.o_caisse_move_out { border-left-color: #fd7e14; }
+        &.o_caisse_move_expense { border-left-color: #dc3545; }
+        &.o_caisse_move_transfer { border-left-color: #0d6efd; }
+    }
+}

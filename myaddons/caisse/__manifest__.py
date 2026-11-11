@@ -23,6 +23,11 @@ Gestion de caisse (cahier des charges §9)
         'report/caisse_report.xml',
         'views/caisse_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'caisse/static/src/caisse.scss',
+        ],
+    },
     'application': True,
     'installable': True,
 }

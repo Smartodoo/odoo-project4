@@ -1,0 +1,38 @@
+// Cartes kanban de l'auberge : liseré coloré à gauche selon l'état / la priorité
+.o_hotel_kanban {
+    .o_hotel_kcard {
+        width: 100%;
+        border-left: 4px solid $o-gray-300;
+        padding-left: 8px;
+
+        footer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    }
+
+    // Réservations
+    .o_hotel_kcard_confirmed { border-left-color: #3b82f6; }
+    .o_hotel_kcard_checkin { border-left-color: #198754; }
+    .o_hotel_kcard_checkout { border-left-color: #8c959f; }
+    .o_hotel_kcard_cancel { border-left-color: #dc3545; opacity: 0.75; }
+
+    // Ménage
+    .o_hotel_kcard_hk_todo { border-left-color: #fd7e14; }
+    .o_hotel_kcard_hk_inprogress { border-left-color: #0dcaf0; }
+    .o_hotel_kcard_hk_done { border-left-color: #198754; }
+    .o_hotel_kcard_hk_inspected { border-left-color: #146c43; }
+    .o_hotel_kcard_hk_to_repair { border-left-color: #dc3545; }
+
+    // Travaux (priorité)
+    .o_hotel_kcard_prio_2 { border-left-color: #fd7e14; }
+    .o_hotel_kcard_prio_3 { border-left-color: #dc3545; }
+
+    // Personnel
+    .o_hotel_staff_photo img {
+        width: 64px;
+        height: 64px;
+        border-radius: 8px;
+    }
+}
