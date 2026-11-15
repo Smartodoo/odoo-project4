@@ -7,6 +7,15 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <!-- Saisie rapide d'un mouvement (caisse ouverte) -->
+                    <button name="action_new_in" string="Entrée" type="object" icon="add_circle"
+                            class="btn-success" invisible="state != 'open' or not id"/>
+                    <button name="action_new_expense" string="Dépense" type="object" icon="receipt_long"
+                            class="btn-danger" invisible="state != 'open' or not id"/>
+                    <button name="action_new_out" string="Sortie" type="object" icon="remove_circle"
+                            invisible="state != 'open' or not id"/>
+                    <button name="action_new_transfer" string="Transfert" type="object" icon="swap_horiz"
+                            invisible="state != 'open' or not id"/>
                     <button name="action_close" string="Fermer la caisse" type="object"
                             class="btn-primary" invisible="state != 'open' or not id"
                             confirm="Fermer la caisse ? Vérifiez d'abord le montant des espèces comptées."/>
@@ -18,8 +27,54 @@
                     <field name="state" widget="statusbar" class="o_hotel_statusbar"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_journal" type="object"
+                                class="oe_stat_button" icon="list_alt" invisible="not id">
+                            <field name="journal_count" widget="statinfo" string="Journal"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <!-- Résumé de la caisse : fond + encaissé - dépensé = solde théorique -->
+                    <div class="o_caisse_summary" invisible="not id">
+                        <div class="o_caisse_sum_item">
+                            <span class="o_caisse_sum_label">Fond de caisse</span>
+                            <field name="opening_balance" widget="monetary" readonly="1" class="o_caisse_sum_value"/>
+                        </div>
+                        <div class="o_caisse_sum_op">+</div>
+                        <div class="o_caisse_sum_item o_caisse_sum_in">
+                            <span class="o_caisse_sum_label">Encaissé</span>
+                            <field name="total_collected" widget="monetary" class="o_caisse_sum_value"/>
+                            <span class="o_caisse_sum_hint">
+                                clients <field name="total_cash_payments" widget="monetary" class="oe_inline"/>
+                                · entrées <field name="total_in" widget="monetary" class="oe_inline"/>
+                            </span>
+                        </div>
+                        <div class="o_caisse_sum_op">−</div>
+                        <div class="o_caisse_sum_item o_caisse_sum_out">
+                            <span class="o_caisse_sum_label">Dépensé</span>
+                            <field name="total_spent" widget="monetary" class="o_caisse_sum_value"/>
+                            <span class="o_caisse_sum_hint">
+                                achats <field name="total_supplier_payments" widget="monetary" class="oe_inline"/>
+                                · dépenses et sorties <field name="total_out" widget="monetary" class="oe_inline"/>
+                            </span>
+                        </div>
+                        <div class="o_caisse_sum_op">=</div>
+                        <div class="o_caisse_sum_item o_caisse_sum_theo">
+                            <span class="o_caisse_sum_label">Solde théorique</span>
+                            <field name="theoretical_balance" widget="monetary" class="o_caisse_sum_value"/>
+                            <span class="o_caisse_sum_hint">espèces qui doivent être dans la caisse</span>
+                        </div>
+                        <div class="o_caisse_sum_item o_caisse_sum_gap" invisible="state != 'closed'">
+                            <span class="o_caisse_sum_label">Écart (compté − théorique)</span>
+                            <field name="difference" widget="monetary" class="o_caisse_sum_value"
+                                   decoration-danger="difference &lt; 0" decoration-success="difference == 0"
+                                   decoration-warning="difference &gt; 0"/>
+                            <span class="o_caisse_sum_hint">
+                                compté <field name="closing_balance" widget="monetary" class="oe_inline" readonly="1"/>
+                            </span>
+                        </div>
                     </div>
                     <group>
                         <group string="Session">
@@ -60,7 +115,7 @@
                             </field>
                         </page>
                         <page string="Paiements clients en espèces" name="payments">
-                            <field name="payment_ids" readonly="1">
+                            <field name="customer_payment_ids" readonly="1">
                                 <list>
                                     <field name="date"/>
                                     <field name="name"/>
@@ -71,6 +126,22 @@
                                     <field name="state" widget="badge"/>
                                 </list>
                             </field>
+                        </page>
+                        <page string="Achats fournisseurs" name="supplier_payments">
+                            <field name="supplier_payment_ids" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                    <field name="partner_id" string="Fournisseur"/>
+                                    <field name="memo"/>
+                                    <field name="amount_company_currency_signed" string="Montant" sum="Total"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                            <div class="text-muted small">
+                                Paiements fournisseurs en espèces de la société (bouton « Payer » d'une
+                                facture fournisseur, journal Espèces) : l'argent sort de cette caisse.
+                            </div>
                         </page>
                         <page string="Paiements par mode" name="by_mode">
                             <group>
@@ -346,21 +417,167 @@
     </record>
 
     <record id="action_caisse_move" model="ir.actions.act_window">
-        <field name="name">Journal de caisse</field>
+        <field name="name">Entrées et dépenses</field>
         <field name="res_model">caisse.move</field>
         <field name="view_mode">list,kanban,pivot,graph,form</field>
         <field name="search_view_id" ref="view_caisse_move_search"/>
     </record>
 
+    <!-- Saisie rapide d'un mouvement depuis la caisse (fenêtre) -->
+    <record id="view_caisse_move_form_quick" model="ir.ui.view">
+        <field name="name">caisse.move.form.quick</field>
+        <field name="model">caisse.move</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="session_id" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+                <group>
+                    <group>
+                        <field name="move_type" widget="radio" options="{'horizontal': true}"/>
+                        <field name="amount" widget="monetary" class="fs-4 fw-bold"/>
+                        <field name="reason" placeholder="ex : achat produits ménage, appoint monnaie…"/>
+                    </group>
+                    <group>
+                        <field name="partner_id" placeholder="Fournisseur, banque… (optionnel)"/>
+                        <field name="reference" placeholder="N° de reçu / facture"/>
+                        <field name="destination" invisible="move_type != 'transfer'"
+                               placeholder="Banque, coffre…"/>
+                        <field name="attachment" filename="attachment_name"/>
+                        <field name="attachment_name" invisible="1"/>
+                    </group>
+                </group>
+                <footer>
+                    <button string="Enregistrer" special="save" class="btn-primary" data-hotkey="q"/>
+                    <button string="Annuler" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================= JOURNAL DE CAISSE UNIFIÉ ================= -->
+    <record id="view_caisse_journal_list" model="ir.ui.view">
+        <field name="name">caisse.journal.list</field>
+        <field name="model">caisse.journal</field>
+        <field name="arch" type="xml">
+            <list string="Journal de caisse" create="0" edit="0" delete="0"
+                  decoration-success="kind in ('payment', 'in', 'purchase_refund')"
+                  decoration-danger="kind in ('expense', 'out', 'refund', 'purchase')"
+                  decoration-info="kind == 'transfer'">
+                <field name="date"/>
+                <field name="session_id" optional="show"/>
+                <field name="kind" widget="badge"
+                       decoration-success="kind in ('payment', 'in', 'purchase_refund')"
+                       decoration-danger="kind in ('expense', 'out', 'refund', 'purchase')"
+                       decoration-info="kind == 'transfer'"/>
+                <field name="label"/>
+                <field name="partner_id" optional="show"/>
+                <field name="reservation_id" optional="show"/>
+                <field name="reference" optional="hide"/>
+                <field name="has_attachment" string="Justif." optional="show"/>
+                <field name="amount_in" widget="monetary" sum="Total entrées"/>
+                <field name="amount_out" widget="monetary" sum="Total sorties"/>
+                <field name="amount" widget="monetary" sum="Solde" optional="show"/>
+                <field name="user_id" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+                <button name="action_open_source" type="object" icon="open_in_new"
+                        title="Ouvrir l'opération"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_caisse_journal_search" model="ir.ui.view">
+        <field name="name">caisse.journal.search</field>
+        <field name="model">caisse.journal</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="label"/>
+                <field name="partner_id"/>
+                <field name="session_id"/>
+                <field name="reservation_id"/>
+                <filter name="ins" string="Entrées d'argent"
+                        domain="[('kind', 'in', ('payment', 'in', 'purchase_refund'))]"/>
+                <filter name="outs" string="Sorties d'argent"
+                        domain="[('kind', 'in', ('refund', 'out', 'expense', 'transfer', 'purchase'))]"/>
+                <filter name="purchases" string="Achats fournisseurs"
+                        domain="[('kind', 'in', ('purchase', 'purchase_refund'))]"/>
+                <separator/>
+                <filter name="expenses" string="Dépenses" domain="[('kind', '=', 'expense')]"/>
+                <filter name="no_proof" string="Sans justificatif"
+                        domain="[('move_id', '!=', False), ('kind', '!=', 'in'), ('has_attachment', '=', False)]"/>
+                <separator/>
+                <filter name="today" string="Aujourd'hui"
+                        domain="[('day', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="day" string="Date" date="day"/>
+                <filter name="open_session" string="Caisse ouverte"
+                        domain="[('session_id.state', '=', 'open')]"/>
+                <group>
+                    <filter name="group_day" string="Jour" context="{'group_by': 'day:day'}"/>
+                    <filter name="group_kind" string="Opération" context="{'group_by': 'kind'}"/>
+                    <filter name="group_session" string="Caisse" context="{'group_by': 'session_id'}"/>
+                    <filter name="group_user" string="Saisi par" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_caisse_journal_pivot" model="ir.ui.view">
+        <field name="name">caisse.journal.pivot</field>
+        <field name="model">caisse.journal</field>
+        <field name="arch" type="xml">
+            <pivot string="Journal de caisse" sample="1">
+                <field name="kind" type="row"/>
+                <field name="day" interval="month" type="col"/>
+                <field name="amount_in" type="measure"/>
+                <field name="amount_out" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_caisse_journal_graph" model="ir.ui.view">
+        <field name="name">caisse.journal.graph</field>
+        <field name="model">caisse.journal</field>
+        <field name="arch" type="xml">
+            <graph string="Entrées et sorties de caisse" type="bar" stacked="1" sample="1">
+                <field name="day" interval="day"/>
+                <field name="kind"/>
+                <field name="amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_caisse_journal" model="ir.actions.act_window">
+        <field name="name">Journal de caisse</field>
+        <field name="res_model">caisse.journal</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_caisse_journal_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune opération de caisse</p>
+            <p>Tout l'argent qui entre dans la caisse ou en sort : paiements clients en espèces,
+               entrées, sorties, dépenses et transferts.</p>
+        </field>
+    </record>
+
+    <!-- ================= TABLEAU DE BORD ================= -->
+    <record id="action_caisse_dashboard" model="ir.actions.client">
+        <field name="name">Tableau de bord caisse</field>
+        <field name="tag">caisse_dashboard</field>
+    </record>
+
     <!-- Application « Caisse » -->
     <menuitem id="menu_caisse_root" name="Caisse"
               web_icon="caisse,static/description/icon.png"
+              action="action_caisse_dashboard"
               sequence="25" groups="caisse.group_caisse_user"/>
+    <menuitem id="menu_caisse_dashboard" name="Tableau de bord"
+              parent="menu_caisse_root" action="action_caisse_dashboard" sequence="0"/>
     <menuitem id="menu_caisse_current" name="Caisse du jour"
               parent="menu_caisse_root" action="action_caisse_current" sequence="1"/>
     <menuitem id="menu_caisse_sessions" name="Sessions de caisse"
               parent="menu_caisse_root" action="action_caisse_session" sequence="10"/>
-    <menuitem id="menu_caisse_moves" name="Journal de caisse"
+    <menuitem id="menu_caisse_journal" name="Journal de caisse"
+              parent="menu_caisse_root" action="action_caisse_journal" sequence="15"/>
+    <menuitem id="menu_caisse_moves" name="Entrées et dépenses"
               parent="menu_caisse_root" action="action_caisse_move" sequence="20"/>
 
     <!-- Fenêtre « Encaisser » de la réservation : caisse utilisée -->

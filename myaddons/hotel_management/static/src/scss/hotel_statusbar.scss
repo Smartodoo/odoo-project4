@@ -7,8 +7,11 @@
 // Ne s'applique qu'aux champs portant la classe `o_hotel_statusbar`.
 // =============================================================================
 
+// Odoo 20 : chaque étape est enveloppée dans .o_arrow_button_wrap (d'où le
+// descendant « » et non « > ») ; la flèche est dessinée par clip-path sur le
+// bouton lui-même, donc colorer son fond suffit.
 .o_field_statusbar.o_hotel_statusbar > .o_statusbar_status
-    > .o_arrow_button.o_arrow_button_current:not(.d-none) {
+    .o_arrow_button.o_arrow_button_current:not(.d-none) {
     --sb-accent: #495057;
 
     // Réservation
@@ -24,8 +27,9 @@
     &[data-value="new"]            { --sb-accent: #f08c00; }
     &[data-value="inprogress"]     { --sb-accent: #1c7ed6; }
     &[data-value="done"]           { --sb-accent: #2f9e44; }
-    // Chambre
+    // Chambre / lit
     &[data-value="available"]      { --sb-accent: #2f9e44; }
+    &[data-value="free"]           { --sb-accent: #2f9e44; }
     &[data-value="reserved"]       { --sb-accent: #1c7ed6; }
     &[data-value="partial"]        { --sb-accent: #f08c00; }
     &[data-value="occupied"]       { --sb-accent: #e03131; }

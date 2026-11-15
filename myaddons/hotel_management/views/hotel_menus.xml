@@ -8,11 +8,6 @@
               parent="menu_hotel_root" action="action_hotel_dashboard"
               sequence="1"/>
 
-    <!-- Planning graphique chambres / lits × jours -->
-    <menuitem id="menu_hotel_planning" name="Planning"
-              parent="menu_hotel_root" action="action_hotel_planning"
-              sequence="5"/>
-
     <!-- Réservations -->
     <menuitem id="menu_hotel_reservations_top" name="Réservations"
               parent="menu_hotel_root" sequence="10"
@@ -32,6 +27,10 @@
     <menuitem id="menu_hotel_room" name="Chambres"
               parent="menu_hotel_root" action="action_hotel_room"
               sequence="20"/>
+    <!-- Lits : numéro, chambre, prix, état (cahier des charges §2) -->
+    <menuitem id="menu_hotel_bed" name="Lits"
+              parent="menu_hotel_root" action="action_hotel_bed"
+              sequence="25"/>
 
     <!-- Ménage & travaux -->
     <menuitem id="menu_hotel_operations" name="Ménage"
@@ -94,6 +93,9 @@
     <menuitem id="menu_hotel_rate_season" name="Tarifs saisonniers"
               parent="menu_hotel_config" action="action_hotel_rate_season"
               sequence="40"/>
+    <menuitem id="menu_hotel_partner_rates" name="Tarifs clients"
+              parent="menu_hotel_config" action="action_hotel_partner_rates"
+              sequence="45"/>
     <menuitem id="menu_hotel_service_products" name="Consommations &amp; services"
               parent="menu_hotel_config" action="action_hotel_service_products"
               sequence="50"/>

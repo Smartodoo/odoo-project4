@@ -29,6 +29,19 @@
     .o_hotel_kcard_prio_2 { border-left-color: #fd7e14; }
     .o_hotel_kcard_prio_3 { border-left-color: #dc3545; }
 
+    // Lits (mêmes couleurs que le planning)
+    .o_hotel_kcard_bed_free { border-left-color: #059669; }
+    .o_hotel_kcard_bed_reserved { border-left-color: #1d4ed8; }
+    .o_hotel_kcard_bed_occupied { border-left-color: #b91c1c; }
+    .o_hotel_kcard_bed_maintenance,
+    .o_hotel_kcard_bed_out_of_service { border-left-color: #6b7280; opacity: 0.8; }
+
+    .o_hotel_bed_badge_free { background: #d1fae5; color: #065f46; }
+    .o_hotel_bed_badge_reserved { background: #dbeafe; color: #1e3a8a; }
+    .o_hotel_bed_badge_occupied { background: #fee2e2; color: #7f1d1d; }
+    .o_hotel_bed_badge_maintenance,
+    .o_hotel_bed_badge_out_of_service { background: #e5e7eb; color: #374151; }
+
     // Personnel
     .o_hotel_staff_photo img {
         width: 64px;

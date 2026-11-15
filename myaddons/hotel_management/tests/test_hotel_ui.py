@@ -24,6 +24,80 @@ class TestHotelUi(HttpCase):
             ready="!!document.querySelector('.o_hotel_dashboard .o_hotel_blocks')",
             login='admin')
 
+    def test_bed_kanban_renders(self):
+        self.browser_js(
+            '/odoo/action-hotel_management.action_hotel_bed',
+            "console.log('test successful')",
+            ready="!!document.querySelector('.o_hotel_kanban .o_hotel_kcard')",
+            login='admin')
+
+    def test_bed_form_statusbar(self):
+        bed = self.env['hotel.bed'].search([], limit=1)
+        if not bed:
+            self.skipTest("Aucun lit dans la base")
+        self.browser_js(
+            '/odoo/action-hotel_management.action_hotel_bed/%s' % bed.id,
+            "console.log('test successful')",
+            ready="!!document.querySelector('.o_form_view .o_hotel_status .o_arrow_button_current')",
+            login='admin')
+
+    def test_bed_statusbar_current_is_colored(self):
+        """L'état actuel du lit est bien coloré (pas le gris/blanc natif)."""
+        bed = self.env['hotel.bed'].search([], limit=1)
+        if not bed:
+            self.skipTest("Aucun lit dans la base")
+        self.browser_js(
+            '/odoo/action-hotel_management.action_hotel_bed/%s' % bed.id,
+            """
+            const btn = document.querySelector('.o_hotel_statusbar .o_arrow_button_current');
+            const bg = getComputedStyle(btn).backgroundColor;
+            const color = getComputedStyle(btn).color;
+            if (['rgba(0, 0, 0, 0)', 'rgb(255, 255, 255)'].includes(bg) || color !== 'rgb(255, 255, 255)') {
+                console.error('Etat actuel non coloré : fond ' + bg + ', texte ' + color);
+            } else {
+                console.log('test successful');
+            }
+            """,
+            ready="!!document.querySelector('.o_hotel_statusbar .o_arrow_button_current')",
+            login='admin')
+
+    def test_partner_rates_editable(self):
+        """Configuration > Tarifs clients : la liste s'affiche et le tarif
+        spécial saisi est celui utilisé pour le prix de la nuit."""
+        partner = self.env['res.partner'].create({
+            'name': 'Client Tarif Test', 'hotel_special_room_price': 2500})
+        self.browser_js(
+            '/odoo/action-hotel_management.action_hotel_partner_rates',
+            "console.log('test successful')",
+            ready="[...document.querySelectorAll('.o_list_view .o_data_row')]"
+                  ".some(r => r.innerText.includes('Client Tarif Test'))",
+            login='admin')
+        room = self.env['hotel.room'].search([], limit=1)
+        if room:
+            self.assertEqual(room._get_night_price(False, 'room', partner), 2500)
+
+    def test_encaisser_dialog_opens(self):
+        """La fenêtre « Encaisser » s'ouvre (régression : le thème modifiait
+        les props du formulaire en dialogue, ce qui plantait sous Odoo 20)."""
+        resa = self.env['hotel.reservation'].search(
+            [('state', 'not in', ('cancel', 'draft'))], limit=50).filtered(
+            lambda r: r.amount_due > 0 and r.partner_id)[:1]
+        if not resa:
+            self.skipTest("Aucune réservation avec un reste à payer")
+        self.browser_js(
+            '/odoo/action-hotel_management.action_hotel_reservation/%s' % resa.id,
+            """
+            document.querySelector("button[name='action_register_hotel_payment']").click();
+            const t = setInterval(() => {
+                if (document.querySelector(".modal button[name='action_confirm']")) {
+                    clearInterval(t);
+                    console.log('test successful');
+                }
+            }, 200);
+            """,
+            ready="!!document.querySelector(\"button[name='action_register_hotel_payment']\")",
+            login='admin')
+
     def test_website_booking(self):
         """Réservation en ligne : prix calculé, confirmation protégée par jeton."""
         from datetime import timedelta
@@ -64,17 +138,13 @@ class TestHotelUi(HttpCase):
                 login='admin')
 
     def test_kanban_views_render(self):
-        """Vues kanban : réservations, ménage, travaux, personnel."""
-        for action in ('hotel_management.action_hotel_housekeeping',
-                       'hotel_management.action_hotel_maintenance',
-                       'hotel_management.action_hotel_staff'):
-            self.browser_js(
-                '/odoo/action-%s' % action,
-                "console.log('test successful')",
-                ready="!!document.querySelector('.o_kanban_renderer')",
-                login='admin')
-        self.browser_js(
-            '/odoo/action-hotel_management.action_hotel_reservation?view_type=kanban',
-            "console.log('test successful')",
-            ready="!!document.querySelector('.o_kanban_renderer')",
-            login='admin')
+        """Vues kanban : réservations, ménage, travaux, personnel (cartes affichées)."""
+        room = self.env['hotel.room'].search([], limit=1)
+        self.env['hotel.housekeeping'].create({'room_id': room.id})
+        self.env['hotel.maintenance.request'].create({'name': 'Test kanban', 'room_id': room.id})
+        self.env['hotel.staff'].create({'name': 'Agent kanban'})
+        for url in ('/odoo/action-hotel_management.action_hotel_housekeeping',
+                    '/odoo/action-hotel_management.action_hotel_maintenance',
+                    '/odoo/action-hotel_management.action_hotel_staff',
+                    '/odoo/action-hotel_management.action_hotel_reservation?view_type=kanban'):
+            self.browser_js(url, "setTimeout(() => { const n = document.querySelectorAll('.o_hotel_kanban .o_kanban_record:not(.o_kanban_ghost)').length; if (n) { console.log('test successful'); } else { console.error('Aucune carte kanban affichée'); } }, 5000)", login='admin')

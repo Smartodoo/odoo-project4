@@ -55,6 +55,7 @@
                 <span class="o_hp_legend_item"><span class="o_hp_swatch o_hp_bar_checkout"/>Parti</span>
                 <span class="o_hp_legend_item"><span class="o_hp_swatch o_hp_bar_draft"/>Brouillon</span>
                 <span class="o_hp_legend_item"><span class="o_hp_swatch o_hp_swatch_unavail"/>Maintenance / hors service</span>
+                <span class="o_hp_legend_item"><span class="o_hp_swatch o_hp_swatch_today"/>Aujourd'hui</span>
                 <span class="o_hp_legend_hint">Cliquez sur une case vide pour créer une réservation, sur une barre pour l'ouvrir.</span>
             </div>
 

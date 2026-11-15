@@ -45,12 +45,23 @@ class CaisseSession(models.Model):
     note = fields.Text(string="Observations")
 
     payment_ids = fields.One2many(
-        'account.payment', 'caisse_session_id', string="Paiements clients")
+        'account.payment', 'caisse_session_id', string="Paiements en espèces",
+        help="Tous les paiements en espèces rattachés à la caisse (clients et fournisseurs).")
+    customer_payment_ids = fields.One2many(
+        'account.payment', 'caisse_session_id', string="Paiements clients",
+        domain=[('partner_type', '=', 'customer')])
+    supplier_payment_ids = fields.One2many(
+        'account.payment', 'caisse_session_id', string="Achats / paiements fournisseurs",
+        domain=[('partner_type', '=', 'supplier')])
     move_ids = fields.One2many(
         'caisse.move', 'session_id', string="Mouvements de caisse")
 
     total_cash_payments = fields.Monetary(
         string="Paiements clients (espèces)", compute='_compute_totals')
+    total_supplier_payments = fields.Monetary(
+        string="Achats fournisseurs (espèces)", compute='_compute_totals',
+        help="Paiements fournisseurs en espèces sortis de la caisse "
+             "(remboursements fournisseurs déduits).")
     total_in = fields.Monetary(string="Entrées", compute='_compute_totals')
     total_out = fields.Monetary(
         string="Sorties, dépenses et transferts", compute='_compute_totals')
@@ -59,7 +70,7 @@ class CaisseSession(models.Model):
         help="Paiements clients en espèces + entrées diverses.")
     total_spent = fields.Monetary(
         string="Total dépensé", compute='_compute_totals',
-        help="Sorties + dépenses + transferts.")
+        help="Achats fournisseurs + sorties + dépenses + transferts.")
     theoretical_balance = fields.Monetary(
         string="Solde théorique", compute='_compute_totals',
         help="Fond de caisse + total encaissé - total dépensé.")
@@ -83,23 +94,30 @@ class CaisseSession(models.Model):
         return payments.filtered(lambda p: p.state in ('paid', 'reconciled'))
 
     @api.depends('opening_balance', 'closing_balance', 'payment_ids.state',
+                 'payment_ids.partner_type',
                  'payment_ids.amount_company_currency_signed', 'move_ids.amount',
                  'move_ids.move_type', 'date_open', 'date_close')
     def _compute_totals(self):
         Payment = self.env['account.payment'].sudo()
         for rec in self:
-            cash = sum(rec._valid_payments(rec.sudo().payment_ids).mapped(
+            valid = rec._valid_payments(rec.sudo().payment_ids)
+            cash = sum(valid.filtered(lambda p: p.partner_type != 'supplier').mapped(
+                'amount_company_currency_signed'))
+            # Paiement fournisseur : montant signé négatif (sortie) -> positif ici
+            supplier = -sum(valid.filtered(lambda p: p.partner_type == 'supplier').mapped(
                 'amount_company_currency_signed'))
             moves_in = sum(rec.move_ids.filtered(
                 lambda m: m.move_type == 'in').mapped('amount'))
             moves_out = sum(rec.move_ids.filtered(
                 lambda m: m.move_type != 'in').mapped('amount'))
             rec.total_cash_payments = cash
+            rec.total_supplier_payments = supplier
             rec.total_in = moves_in
             rec.total_out = moves_out
             rec.total_collected = cash + moves_in
-            rec.total_spent = moves_out
-            rec.theoretical_balance = rec.opening_balance + cash + moves_in - moves_out
+            rec.total_spent = moves_out + supplier
+            rec.theoretical_balance = (rec.opening_balance + cash + moves_in
+                                       - moves_out - supplier)
             rec.difference = (rec.closing_balance - rec.theoretical_balance
                               if rec.state == 'closed' else 0.0)
             # Paiements par mode encaissés pendant la session (rapport de caisse)
@@ -113,7 +131,8 @@ class CaisseSession(models.Model):
             if rec.date_close:
                 domain.append(('date', '<=', fields.Date.to_date(rec.date_close)))
             period = Payment.search(domain) if rec.id else Payment
-            period |= rec.sudo().payment_ids
+            # Encaissements clients uniquement (les achats ne sont pas des recettes)
+            period |= rec.sudo().payment_ids.filtered(lambda p: p.partner_type != 'supplier')
             rec.period_payment_ids = period
             by_mode = {}
             for payment in rec._valid_payments(period):
@@ -177,6 +196,208 @@ class CaisseSession(models.Model):
         company = company or self.env.company
         return self.sudo().search([
             ('state', '=', 'open'), ('company_id', '=', company.id)], limit=1)
+
+    # ------------------------------------------------------------------
+    # Saisie rapide et accès au journal (formulaire de session)
+    # ------------------------------------------------------------------
+    journal_count = fields.Integer(
+        string="Opérations", compute='_compute_journal_count')
+
+    def _compute_journal_count(self):
+        data = self.env['caisse.journal'].sudo()._read_group(
+            [('session_id', 'in', self.ids)], ['session_id'], ['__count'])
+        counts = {session.id: count for session, count in data}
+        for rec in self:
+            rec.journal_count = counts.get(rec.id, 0)
+
+    def _action_new_move(self, move_type):
+        self.ensure_one()
+        if self.state != 'open':
+            raise UserError(_("La caisse %s est fermée.", self.name))
+        label = dict(CASH_MOVE_TYPES)[move_type]
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("%(type)s — %(caisse)s", type=label, caisse=self.name),
+            'res_model': 'caisse.move',
+            'view_mode': 'form',
+            'views': [(self.env.ref('caisse.view_caisse_move_form_quick').id, 'form')],
+            'target': 'new',
+            'context': {
+                'default_session_id': self.id,
+                'default_move_type': move_type,
+            },
+        }
+
+    def action_new_in(self):
+        return self._action_new_move('in')
+
+    def action_new_expense(self):
+        return self._action_new_move('expense')
+
+    def action_new_out(self):
+        return self._action_new_move('out')
+
+    def action_new_transfer(self):
+        return self._action_new_move('transfer')
+
+    def action_view_journal(self):
+        self.ensure_one()
+        action = self.env['ir.actions.act_window']._for_xml_id('caisse.action_caisse_journal')
+        action['domain'] = [('session_id', '=', self.id)]
+        action['context'] = {'search_default_group_kind': 0}
+        action['name'] = _("Journal — %s", self.name)
+        return action
+
+    # ------------------------------------------------------------------
+    # Tableau de bord du responsable
+    # ------------------------------------------------------------------
+    @api.model
+    def get_dashboard_data(self):
+        """Tout ce que le responsable doit voir d'un coup d'œil (cf. action
+        client « caisse_dashboard »)."""
+        company = self.env.company
+        currency = company.currency_id
+        Session = self.sudo()
+        Journal = self.env['caisse.journal'].sudo()
+        Payment = self.env['account.payment'].sudo()
+        today = fields.Date.context_today(self)
+        month_start = today.replace(day=1)
+        modes = dict(HOTEL_PAYMENT_MODES)
+
+        def rnd(value):
+            return currency.round(value or 0.0)
+
+        # --- Caisse ouverte -------------------------------------------------
+        current = Session._get_open_session(company)
+        current_data = False
+        if current:
+            current_data = {
+                'id': current.id,
+                'name': current.name,
+                'user': current.user_id.name,
+                'date_open': fields.Datetime.to_string(
+                    fields.Datetime.context_timestamp(self, current.date_open)),
+                'opening': rnd(current.opening_balance),
+                'cash_payments': rnd(current.total_cash_payments),
+                'supplier_payments': rnd(current.total_supplier_payments),
+                'moves_out': rnd(current.total_out),
+                'moves_in': rnd(current.total_in),
+                'collected': rnd(current.total_collected),
+                'spent': rnd(current.total_spent),
+                'theoretical': rnd(current.theoretical_balance),
+                'by_mode': [{'label': label, 'amount': rnd(amount)}
+                            for label, amount in current.payments_by_mode()],
+                'nb_ops': current.journal_count,
+            }
+
+        # --- Encaissements du jour, tous modes (paiements de l'auberge) -----
+        today_payments = Payment.search([
+            ('hotel_reservation_id', '!=', False),
+            ('company_id', '=', company.id),
+            ('state', 'in', ('paid', 'reconciled')),
+            ('date', '=', today),
+        ])
+        today_by_mode = dict.fromkeys(modes, 0.0)
+        for payment in today_payments:
+            if payment.hotel_payment_mode in today_by_mode:
+                today_by_mode[payment.hotel_payment_mode] += payment.amount_company_currency_signed
+        today_spent = sum(Journal.search([
+            ('company_id', '=', company.id), ('day', '=', today),
+            ('kind', 'in', ('out', 'expense', 'transfer', 'purchase')),
+        ]).mapped('amount_out'))
+
+        # --- Mois en cours ----------------------------------------------------
+        month_lines = Journal.search([
+            ('company_id', '=', company.id), ('day', '>=', month_start)])
+        month_by_kind = {}
+        for line in month_lines:
+            month_by_kind[line.kind] = month_by_kind.get(line.kind, 0.0) + abs(line.amount)
+        month_sessions = Session.search([
+            ('company_id', '=', company.id), ('date_open', '>=', month_start)])
+        closed = month_sessions.filtered(lambda s: s.state == 'closed')
+        gap_sessions = closed.filtered(
+            lambda s: not currency.is_zero(s.difference))
+
+        # --- 7 derniers jours (espèces entrées / sorties) ---------------------
+        days = []
+        for offset in range(6, -1, -1):
+            day = fields.Date.subtract(today, days=offset)
+            lines = Journal.search([('company_id', '=', company.id), ('day', '=', day)])
+            days.append({
+                'day': fields.Date.to_string(day),
+                'label': day.strftime('%d/%m'),
+                'in': rnd(sum(lines.mapped('amount_in'))),
+                'out': rnd(sum(lines.mapped('amount_out'))),
+            })
+        max_day = max([max(d['in'], d['out']) for d in days] + [1])
+
+        # --- Dernières opérations et dernières caisses fermées --------------
+        kinds = dict(self.env['caisse.journal']._fields['kind'].selection)
+        recent = [{
+            'id': line.id,
+            'date': fields.Datetime.to_string(
+                fields.Datetime.context_timestamp(self, line.date)) if line.date else '',
+            'kind': line.kind,
+            'kind_label': kinds.get(line.kind, ''),
+            'label': line.label or '',
+            'partner': line.partner_id.display_name or '',
+            'amount': rnd(line.amount),
+            'session': line.session_id.name or '',
+            'has_attachment': line.has_attachment,
+        } for line in Journal.search([('company_id', '=', company.id)], limit=10)]
+
+        last_closed = [{
+            'id': s.id,
+            'name': s.name,
+            'user': s.user_id.name,
+            'date_close': fields.Datetime.to_string(
+                fields.Datetime.context_timestamp(self, s.date_close)) if s.date_close else '',
+            'theoretical': rnd(s.theoretical_balance),
+            'counted': rnd(s.closing_balance),
+            'difference': rnd(s.difference),
+        } for s in Session.search([
+            ('company_id', '=', company.id), ('state', '=', 'closed')],
+            order='date_close desc', limit=5)]
+
+        missing_proof = self.env['caisse.move'].sudo().search_count([
+            ('company_id', '=', company.id),
+            ('move_type', '!=', 'in'),
+            ('attachment', '=', False),
+            ('date', '>=', fields.Datetime.to_datetime(month_start)),
+        ])
+
+        return {
+            'currency_symbol': currency.symbol or '',
+            'is_manager': self.env.user.has_group('caisse.group_caisse_manager'),
+            'current': current_data,
+            'today': {
+                'by_mode': [{'mode': m, 'label': modes[m], 'amount': rnd(today_by_mode[m])}
+                            for m in modes],
+                'total': rnd(sum(today_by_mode.values())),
+                'spent': rnd(today_spent),
+            },
+            'month': {
+                'label': today.strftime('%m/%Y'),
+                'start': fields.Date.to_string(month_start),
+                'payments': rnd(month_by_kind.get('payment', 0.0)),
+                'refunds': rnd(month_by_kind.get('refund', 0.0)),
+                'in': rnd(month_by_kind.get('in', 0.0)),
+                'expense': rnd(month_by_kind.get('expense', 0.0)),
+                'out': rnd(month_by_kind.get('out', 0.0)),
+                'transfer': rnd(month_by_kind.get('transfer', 0.0)),
+                'purchase': rnd(month_by_kind.get('purchase', 0.0)
+                                - month_by_kind.get('purchase_refund', 0.0)),
+                'sessions': len(month_sessions),
+                'gap_sessions': len(gap_sessions),
+                'gap_session_ids': gap_sessions.ids,
+                'gap_total': rnd(sum(closed.mapped('difference'))),
+                'missing_proof': missing_proof,
+            },
+            'days': days,
+            'max_day': max_day,
+            'recent': recent,
+            'last_closed': last_closed,
+        }
 
     @api.model
     def action_open_current(self):

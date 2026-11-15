@@ -116,9 +116,17 @@ class AccountPaymentRegister(models.TransientModel):
     def _create_payments(self):
         payments = super()._create_payments()
         # Ajoute l'ordre d'achat ou de vente si fourni
+        # purchase_order_id n'existe sur account.payment que si le module
+        # Purchase_custom est installé : sinon, l'écrire fait planter « Payer ».
+        has_po_field = 'purchase_order_id' in payments._fields
         for payment in payments:
-            payment.sale_order_id = self.sale_order_id.id
-            payment.purchase_order_id = self.purchase_order_id.id
+            vals = {}
+            if self.sale_order_id:
+                vals['sale_order_id'] = self.sale_order_id.id
+            if has_po_field and self.purchase_order_id:
+                vals['purchase_order_id'] = self.purchase_order_id.id
+            if vals:
+                payment.write(vals)
         return payments
 
 

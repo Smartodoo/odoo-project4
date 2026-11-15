@@ -65,4 +65,58 @@
             </xpath>
         </field>
     </record>
+
+    <!-- ===== Configuration > Tarifs clients : remises et tarifs spéciaux ===== -->
+    <record id="view_partner_hotel_rates_list" model="ir.ui.view">
+        <field name="name">res.partner.hotel.rates.list</field>
+        <field name="model">res.partner</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <!-- create="0" : on règle les conditions de clients existants
+                 (évite de créer un doublon en tapant un nom déjà connu). -->
+            <list string="Tarifs clients" editable="bottom" create="0" delete="0">
+                <field name="name" readonly="1"/>
+                <field name="phone" readonly="1" optional="show"/>
+                <field name="hotel_discount" string="Remise (%)"/>
+                <field name="hotel_special_room_price" widget="monetary"
+                       string="Tarif spécial chambre / nuit"/>
+                <field name="hotel_special_bed_price" widget="monetary"
+                       string="Tarif spécial lit / nuit"/>
+                <field name="hotel_currency_id" column_invisible="1"/>
+                <field name="hotel_reservation_count" string="Séjours" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_partner_hotel_rates_search" model="ir.ui.view">
+        <field name="name">res.partner.hotel.rates.search</field>
+        <field name="model">res.partner</field>
+        <field name="priority">90</field>
+        <field name="arch" type="xml">
+            <search string="Tarifs clients">
+                <field name="name" string="Client"
+                       filter_domain="['|', '|', ('complete_name', 'ilike', self), ('phone', 'ilike', self), ('email', 'ilike', self)]"/>
+                <filter name="with_conditions" string="Avec conditions"
+                        domain="['|', '|', ('hotel_discount', '&gt;', 0), ('hotel_special_room_price', '&gt;', 0), ('hotel_special_bed_price', '&gt;', 0)]"/>
+                <filter name="hotel_clients" string="Clients de l'auberge"
+                        domain="[('hotel_reservation_ids', '!=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hotel_partner_rates" model="ir.actions.act_window">
+        <field name="name">Tarifs clients</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_partner_hotel_rates_list"/>
+        <field name="search_view_id" ref="view_partner_hotel_rates_search"/>
+        <field name="domain">[('is_company', '=', False)]</field>
+        <field name="context">{'search_default_with_conditions': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucun client n'a de tarif spécial</p>
+            <p>Retirez le filtre « Avec conditions », cherchez le client, puis saisissez
+               sa remise ou ses tarifs spéciaux directement dans la ligne.
+               Le tarif spécial passe avant le tarif saisonnier et le prix normal.</p>
+        </field>
+    </record>
 </odoo>

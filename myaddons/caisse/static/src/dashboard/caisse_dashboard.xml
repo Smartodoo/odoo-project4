@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="caisse.Dashboard">
+        <div class="o_caisse_dashboard">
+            <t t-if="this.state.loading and !this.state.data">
+                <div class="o_cd_loading">
+                    <i class="oi oi-spin oi-2x" data-icon="progress_activity"/>
+                    <div>Chargement…</div>
+                </div>
+            </t>
+            <t t-elif="this.state.data">
+                <t t-set="d" t-value="this.data"/>
+                <div class="o_cd_header">
+                    <h1><i class="oi me-2" data-icon="point_of_sale"/>Caisse — Tableau de bord</h1>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light" t-on-click="() => this.openJournal([], 'Journal de caisse')">
+                            <i class="oi me-1" data-icon="list_alt"/>Journal
+                        </button>
+                        <button class="btn btn-light" t-on-click="() => this.loadData()">
+                            <i class="oi me-1" data-icon="refresh"/>Actualiser
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== Ligne 1 : caisse ouverte + aujourd'hui ===== -->
+                <div class="o_cd_row o_cd_row_top">
+                    <section class="o_cd_card o_cd_current" t-if="d.current">
+                        <div class="o_cd_card_head">
+                            <div>
+                                <span class="badge text-bg-success me-2">Ouverte</span>
+                                <a href="#" class="fw-bold fs-5" t-on-click.prevent="() => this.openSession(d.current.id)">
+                                    <t t-out="d.current.name"/>
+                                </a>
+                                <div class="text-muted small">
+                                    Caissier : <t t-out="d.current.user"/> · ouverte le <t t-out="this.fmtDate(d.current.date_open)"/>
+                                    · <t t-out="d.current.nb_ops"/> opération(s)
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" t-on-click="() => this.openSession(d.current.id)"
+                                    title="Ouvrir la caisse pour compter les espèces et la fermer">
+                                <i class="oi me-1" data-icon="lock"/>Compter et fermer
+                            </button>
+                        </div>
+                        <div class="o_cd_formula">
+                            <div class="o_cd_fitem">
+                                <span class="o_cd_flabel">Fond de caisse</span>
+                                <span class="o_cd_fvalue"><t t-out="this.fmt(d.current.opening)"/></span>
+                            </div>
+                            <div class="o_cd_fop">+</div>
+                            <div class="o_cd_fitem o_cd_fin">
+                                <span class="o_cd_flabel">Encaissé</span>
+                                <span class="o_cd_fvalue"><t t-out="this.fmt(d.current.collected)"/></span>
+                                <span class="o_cd_fhint">clients <t t-out="this.fmt(d.current.cash_payments)"/> · entrées <t t-out="this.fmt(d.current.moves_in)"/></span>
+                            </div>
+                            <div class="o_cd_fop">−</div>
+                            <div class="o_cd_fitem o_cd_fout">
+                                <span class="o_cd_flabel">Dépensé</span>
+                                <span class="o_cd_fvalue"><t t-out="this.fmt(d.current.spent)"/></span>
+                                <span class="o_cd_fhint">achats <t t-out="this.fmt(d.current.supplier_payments)"/> · dépenses et sorties <t t-out="this.fmt(d.current.moves_out)"/></span>
+                            </div>
+                            <div class="o_cd_fop">=</div>
+                            <div class="o_cd_fitem o_cd_ftheo">
+                                <span class="o_cd_flabel">Doit être en caisse</span>
+                                <span class="o_cd_fvalue"><t t-out="this.fmt(d.current.theoretical)"/></span>
+                            </div>
+                        </div>
+                        <div class="o_cd_actions">
+                            <button class="btn btn-success" t-on-click="() => this.quickMove('action_new_in')">
+                                <i class="oi me-1" data-icon="add_circle"/>Entrée
+                            </button>
+                            <button class="btn btn-danger" t-on-click="() => this.quickMove('action_new_expense')">
+                                <i class="oi me-1" data-icon="receipt_long"/>Dépense
+                            </button>
+                            <button class="btn btn-light" t-on-click="() => this.quickMove('action_new_out')">
+                                <i class="oi me-1" data-icon="remove_circle"/>Sortie
+                            </button>
+                            <button class="btn btn-light" t-on-click="() => this.quickMove('action_new_transfer')">
+                                <i class="oi me-1" data-icon="swap_horiz"/>Transfert
+                            </button>
+                        </div>
+                    </section>
+                    <section class="o_cd_card o_cd_current o_cd_closed" t-else="">
+                        <div class="o_cd_empty">
+                            <i class="oi oi-2x mb-2" data-icon="lock"/>
+                            <div class="fs-5 fw-bold">Aucune caisse ouverte</div>
+                            <div class="text-muted mb-3">Les paiements en espèces sont refusés tant qu'aucune caisse n'est ouverte.</div>
+                            <button class="btn btn-primary" t-on-click="() => this.openCurrent()">
+                                <i class="oi me-1" data-icon="lock_open"/>Ouvrir la caisse
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="o_cd_card o_cd_today">
+                        <h3>Encaissé aujourd'hui <span class="text-muted fw-normal">(tous modes)</span></h3>
+                        <div class="o_cd_modes">
+                            <t t-foreach="d.today.by_mode" t-as="m" t-key="m.mode">
+                                <div t-attf-class="o_cd_mode o_cd_mode_{{m.mode}}"
+                                     t-on-click="() => this.openTodayPayments(m.mode, m.label)">
+                                    <span class="o_cd_mode_label"><t t-out="m.label"/></span>
+                                    <span class="o_cd_mode_value"><t t-out="this.fmt(m.amount)"/></span>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="o_cd_today_foot">
+                            <div class="o_cd_link" t-on-click="() => this.openTodayPayments(false, false)">
+                                Total encaissé : <b><t t-out="this.fmt(d.today.total)"/></b>
+                            </div>
+                            <div class="o_cd_link text-danger"
+                                 t-on-click="() => this.openToday(['expense', 'out', 'transfer', 'purchase'], 'Sorties du jour')">
+                                Sorti de la caisse : <b><t t-out="this.fmt(d.today.spent)"/></b>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ===== Ligne 2 : mois en cours + 7 derniers jours ===== -->
+                <div class="o_cd_row">
+                    <section class="o_cd_card">
+                        <h3>Ce mois-ci <span class="text-muted fw-normal">(<t t-out="d.month.label"/>)</span></h3>
+                        <div class="o_cd_tiles">
+                            <div class="o_cd_tile o_cd_in" t-on-click="() => this.openMonth(['payment'], 'Paiements clients du mois')">
+                                <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.payments)"/></span>
+                                <span class="o_cd_tile_label">Paiements clients (espèces)</span>
+                            </div>
+                            <div class="o_cd_tile o_cd_in" t-on-click="() => this.openMonth(['in'], 'Entrées du mois')">
+                                <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.in)"/></span>
+                                <span class="o_cd_tile_label">Entrées diverses</span>
+                            </div>
+                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['purchase', 'purchase_refund'], 'Achats fournisseurs du mois')">
+                                <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.purchase)"/></span>
+                                <span class="o_cd_tile_label">Achats fournisseurs (espèces)</span>
+                            </div>
+                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['expense'], 'Dépenses du mois')">
+                                <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.expense)"/></span>
+                                <span class="o_cd_tile_label">Dépenses</span>
+                            </div>
+                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['out', 'refund'], 'Sorties et remboursements du mois')">
+                                <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.out + d.month.refunds)"/></span>
+                                <span class="o_cd_tile_label">Sorties et remboursements</span>
+                            </div>
+                            <div class="o_cd_tile o_cd_transfer" t-on-click="() => this.openMonth(['transfer'], 'Transferts du mois')">
+                                <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.transfer)"/></span>
+                                <span class="o_cd_tile_label">Transferts (banque, coffre…)</span>
+                            </div>
+                        </div>
+                        <div class="o_cd_alerts">
+                            <div t-attf-class="o_cd_alert {{d.month.gap_sessions ? 'o_cd_alert_bad' : 'o_cd_alert_ok'}}"
+                                 t-on-click="() => d.month.gap_sessions ? this.openSessions([['id', 'in', d.month.gap_session_ids]], 'Caisses avec écart') : this.openSessions([], 'Sessions de caisse')">
+                                <i class="oi me-2" t-att-data-icon="d.month.gap_sessions ? 'warning' : 'check_circle'"/>
+                                <t t-if="d.month.gap_sessions">
+                                    <b><t t-out="d.month.gap_sessions"/></b> caisse(s) avec écart sur <t t-out="d.month.sessions"/> ;
+                                    écart cumulé <b t-att-class="this.gapClass(d.month.gap_total)"><t t-out="this.fmtSigned(d.month.gap_total)"/></b>
+                                </t>
+                                <t t-else="">Aucun écart de caisse ce mois-ci (<t t-out="d.month.sessions"/> session(s))</t>
+                            </div>
+                            <div t-attf-class="o_cd_alert {{d.month.missing_proof ? 'o_cd_alert_warn' : 'o_cd_alert_ok'}}"
+                                 t-on-click="() => this.openMissingProof()">
+                                <i class="oi me-2" t-att-data-icon="d.month.missing_proof ? 'attach_file' : 'check_circle'"/>
+                                <t t-if="d.month.missing_proof">
+                                    <b><t t-out="d.month.missing_proof"/></b> sortie(s) sans justificatif joint
+                                </t>
+                                <t t-else="">Toutes les sorties ont un justificatif</t>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="o_cd_card">
+                        <h3>7 derniers jours <span class="text-muted fw-normal">(espèces)</span></h3>
+                        <div class="o_cd_chart">
+                            <t t-foreach="d.days" t-as="day" t-key="day.day">
+                                <div class="o_cd_chart_col" t-on-click="() => this.openDay(day.day)"
+                                     t-att-title="day.label + ' — entré ' + this.fmt(day.in) + ', sorti ' + this.fmt(day.out)">
+                                    <div class="o_cd_chart_bars">
+                                        <div class="o_cd_bar o_cd_bar_in" t-att-style="this.barHeight(day.in)"/>
+                                        <div class="o_cd_bar o_cd_bar_out" t-att-style="this.barHeight(day.out)"/>
+                                    </div>
+                                    <div class="o_cd_chart_label"><t t-out="day.label"/></div>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="o_cd_legend">
+                            <span><span class="o_cd_sw o_cd_bar_in"/>Entré</span>
+                            <span><span class="o_cd_sw o_cd_bar_out"/>Sorti</span>
+                            <span class="text-muted">Cliquez sur un jour pour voir son détail.</span>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ===== Ligne 3 : dernières opérations + dernières fermetures ===== -->
+                <div class="o_cd_row">
+                    <section class="o_cd_card">
+                        <div class="o_cd_card_head">
+                            <h3>Dernières opérations</h3>
+                            <a href="#" class="small" t-on-click.prevent="() => this.openJournal([], 'Journal de caisse')">Tout voir</a>
+                        </div>
+                        <table class="table table-sm table-hover o_cd_table" t-if="d.recent.length">
+                            <tbody>
+                                <tr t-foreach="d.recent" t-as="op" t-key="op.id" t-on-click="() => this.openJournalLine(op.id)">
+                                    <td class="text-muted text-nowrap"><t t-out="this.fmtDate(op.date)"/></td>
+                                    <td><span t-attf-class="o_cd_kind {{this.kindClass(op.kind)}}"><t t-out="op.kind_label"/></span></td>
+                                    <td>
+                                        <t t-out="op.label"/>
+                                        <div class="small text-muted" t-if="op.partner"><t t-out="op.partner"/></div>
+                                    </td>
+                                    <td class="text-end text-nowrap fw-bold" t-att-class="op.amount &lt; 0 ? 'text-danger' : 'text-success'">
+                                        <t t-out="this.fmtSigned(op.amount)"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="text-muted" t-else="">Aucune opération pour le moment.</div>
+                    </section>
+
+                    <section class="o_cd_card">
+                        <div class="o_cd_card_head">
+                            <h3>Dernières caisses fermées</h3>
+                            <a href="#" class="small" t-on-click.prevent="() => this.openSessions([], 'Sessions de caisse')">Toutes les sessions</a>
+                        </div>
+                        <table class="table table-sm table-hover o_cd_table" t-if="d.last_closed.length">
+                            <thead>
+                                <tr>
+                                    <th>Caisse</th>
+                                    <th class="text-end">Théorique</th>
+                                    <th class="text-end">Compté</th>
+                                    <th class="text-end">Écart</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="d.last_closed" t-as="s" t-key="s.id" t-on-click="() => this.openSession(s.id)">
+                                    <td>
+                                        <b><t t-out="s.name"/></b>
+                                        <div class="small text-muted"><t t-out="s.user"/> · <t t-out="this.fmtDate(s.date_close)"/></div>
+                                    </td>
+                                    <td class="text-end text-nowrap"><t t-out="this.fmt(s.theoretical)"/></td>
+                                    <td class="text-end text-nowrap"><t t-out="this.fmt(s.counted)"/></td>
+                                    <td t-attf-class="text-end text-nowrap fw-bold {{this.gapClass(s.difference)}}">
+                                        <t t-out="this.fmtSigned(s.difference)"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="text-muted" t-else="">Aucune caisse fermée pour le moment.</div>
+                    </section>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

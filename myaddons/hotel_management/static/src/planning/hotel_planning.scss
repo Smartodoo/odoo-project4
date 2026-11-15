@@ -56,13 +56,19 @@
 
     .o_hp_swatch {
         display: inline-block;
-        width: 18px;
-        height: 12px;
+        width: 24px;
+        height: 14px;
         border-radius: 3px;
+        box-sizing: border-box;
     }
 
     .o_hp_swatch_unavail {
-        background: repeating-linear-gradient(45deg, #e9ecef, #e9ecef 4px, #ced4da 4px, #ced4da 8px);
+        background: repeating-linear-gradient(45deg, #f3f4f6, #f3f4f6 4px, #d1d5db 4px, #d1d5db 8px);
+    }
+
+    .o_hp_swatch_today {
+        background: #ecfdf5;
+        border: 2px solid #059669;
     }
 
     .o_hp_scroll {
@@ -149,15 +155,29 @@
     }
 
     .o_hp_weekend {
-        background: rgba(0, 0, 0, 0.025);
+        background: #f3f4f6;
     }
 
+    // Aujourd'hui : colonne encadrée en vert (ne se confond avec aucune barre)
     .o_hp_today {
-        background: rgba(255, 193, 7, 0.14);
+        background: #ecfdf5;
+        box-shadow: inset 2px 0 0 #059669, inset -2px 0 0 #059669;
+    }
+
+    .o_hp_head .o_hp_today {
+        background: #059669;
+
+        .o_hp_wd, .o_hp_dn {
+            color: #fff;
+        }
     }
 
     .o_hp_unavailable .o_hp_track {
-        background: repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(0, 0, 0, 0.05) 6px, rgba(0, 0, 0, 0.05) 12px);
+        background: repeating-linear-gradient(45deg, #f3f4f6, #f3f4f6 6px, #d1d5db 6px, #d1d5db 12px);
+    }
+
+    .o_hp_unavailable .o_hp_label {
+        color: $o-gray-600;
     }
 
     .o_hp_bar {
@@ -169,9 +189,10 @@
         align-items: center;
         overflow: hidden;
         cursor: pointer;
-        font-size: 0.78rem;
+        font-size: 0.8rem;
+        font-weight: 600;
         color: #fff;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 
         &:hover {
             filter: brightness(1.08);
@@ -184,13 +205,26 @@
         text-overflow: ellipsis;
     }
 
-    .o_hp_bar_confirmed { background: #3b82f6; }
-    .o_hp_bar_checkin { background: #dc3545; }
-    .o_hp_bar_checkout { background: #8c959f; }
+    // Couleurs franches, texte toujours lisible (contraste ≥ 4.5:1) et
+    // un liseré gauche plus foncé pour distinguer les barres côte à côte.
+    .o_hp_bar_confirmed {
+        background: #1d4ed8;            // bleu : réservée
+        border-left: 4px solid #1e3a8a;
+    }
+    .o_hp_bar_checkin {
+        background: #b91c1c;            // rouge : client présent (chambre occupée)
+        border-left: 4px solid #7f1d1d;
+    }
+    .o_hp_bar_checkout {
+        background: #e5e7eb;            // gris clair : séjour terminé
+        color: #374151;
+        border-left: 4px solid #6b7280;
+        box-shadow: none;
+    }
     .o_hp_bar_draft {
-        background: #fff;
-        color: #1d4ed8;
-        border: 1px dashed #3b82f6;
+        background: #fef3c7;            // ambre : brouillon, à confirmer
+        color: #78350f;
+        border: 2px dashed #d97706;
         box-shadow: none;
     }
 

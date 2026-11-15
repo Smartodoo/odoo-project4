@@ -41,3 +41,52 @@
         &.o_caisse_move_transfer { border-left-color: #0d6efd; }
     }
 }
+
+// Formulaire de session : résumé « fond + encaissé − dépensé = solde théorique »
+.o_form_view .o_caisse_summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+    margin: 4px 0 18px;
+
+    .o_caisse_sum_item {
+        flex: 1 1 140px;
+        display: flex;
+        flex-direction: column;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid #e3e6ea;
+        border-left: 4px solid #adb5bd;
+        background: #f8f9fa;
+    }
+    .o_caisse_sum_in { border-left-color: #2f9e44; background: #ebfbee; }
+    .o_caisse_sum_out { border-left-color: #e03131; background: #fff5f5; }
+    .o_caisse_sum_theo {
+        border-color: #212529;
+        background: #212529;
+        color: #fff;
+        .o_caisse_sum_label, .o_caisse_sum_hint { color: #ced4da; }
+    }
+    .o_caisse_sum_gap { border-left-color: #1c7ed6; }
+    .o_caisse_sum_op {
+        align-self: center;
+        font-size: 22px;
+        font-weight: 700;
+        color: #adb5bd;
+    }
+    .o_caisse_sum_label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #6c757d;
+    }
+    .o_caisse_sum_value {
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .o_caisse_sum_hint {
+        font-size: 12px;
+        color: #6c757d;
+    }
+}

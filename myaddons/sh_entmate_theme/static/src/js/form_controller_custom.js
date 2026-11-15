@@ -13,11 +13,10 @@ patch(FormController.prototype, {
 
      async setup() {
         super.setup();
-        if (this.footerArchInfo) {
-            // If dialogue box then need to give edit permission
-            this.props.preventEdit = false
-        }
-        else if (session.sh_disable_auto_edit_model){
+        // Odoo 20 : les props sont en lecture seule ; l'ancien
+        // « this.props.preventEdit = false » faisait planter toutes les
+        // fenêtres (Encaisser, Payer…). Les dialogues sont déjà éditables.
+        if (!this.footerArchInfo && session.sh_disable_auto_edit_model) {
             this.model.config.mode = 'readonly';
         }
         },

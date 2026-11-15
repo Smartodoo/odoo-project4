@@ -25,6 +25,12 @@
         <field name="model">hotel.bed</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <!-- Statut calculé (réservations / travaux de la chambre),
+                         même présentation que la fiche chambre -->
+                    <field name="status" widget="statusbar" class="o_hotel_statusbar o_hotel_status"
+                           statusbar_visible="free,reserved,occupied,maintenance,out_of_service"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <label for="name"/>
@@ -34,6 +40,7 @@
                         <group>
                             <field name="room_id"/>
                             <field name="room_type_id" readonly="1"/>
+                            <field name="current_guest_id" invisible="not current_guest_id"/>
                         </group>
                         <group>
                             <field name="price" widget="monetary"/>
@@ -43,6 +50,48 @@
                     </group>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <!-- Cartes des lits, regroupées par chambre (liseré coloré selon l'état) -->
+    <record id="view_hotel_bed_kanban" model="ir.ui.view">
+        <field name="name">hotel.bed.kanban</field>
+        <field name="model">hotel.bed</field>
+        <field name="arch" type="xml">
+            <kanban class="o_hotel_kanban" quick_create="0"
+                    group_create="0" group_delete="0" group_edit="0" sample="1">
+                <field name="status"/>
+                <field name="currency_id"/>
+                <field name="current_guest_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="o_hotel_kcard o_hotel_kcard_bed_#{record.status.raw_value}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span class="fw-bold">
+                                    <i class="oi me-1" data-icon="bed" title="Lit"/><field name="name"/>
+                                </span>
+                                <span t-attf-class="badge rounded-pill o_hotel_bed_badge_#{record.status.raw_value}">
+                                    <field name="status"/>
+                                </span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="oi me-1" data-icon="key" title="Chambre"/>
+                                <field name="room_id"/> · <field name="room_type_id"/>
+                            </div>
+                            <div t-if="record.current_guest_id.raw_value" class="small">
+                                <i class="oi oi-filled me-1" data-icon="person" title="Client"/>
+                                <field name="current_guest_id"/>
+                            </div>
+                            <footer class="mt-1">
+                                <div class="ms-auto text-end">
+                                    <field name="price" widget="monetary" class="fw-bold"/>
+                                    <small class="text-muted"> / nuit</small>
+                                </div>
+                            </footer>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 
@@ -65,8 +114,13 @@
     <record id="action_hotel_bed" model="ir.actions.act_window">
         <field name="name">Lits</field>
         <field name="res_model">hotel.bed</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="view_hotel_bed_search"/>
+        <field name="context">{'search_default_group_room': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucun lit pour le moment</p>
+            <p>Ajoutez un lit en choisissant sa chambre ; la référence et le prix sont proposés automatiquement.</p>
+        </field>
     </record>
 
     <!-- Configuration > Nombre de lits : liste des chambres, puis lits de la chambre -->

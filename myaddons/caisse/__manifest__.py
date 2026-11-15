@@ -9,11 +9,12 @@ Gestion de caisse (cahier des charges §9)
   * Entrées, sorties, dépenses et transferts justifiés (pièce jointe)
   * Journal de caisse, total encaissé / dépensé, solde, paiements par mode, écart
   * Impression de l'état de caisse
+  * Tableau de bord du responsable et journal de caisse unifié
 """,
     'author': "SmartOdoo",
     'website': "https://smartodoo.com",
     'category': 'Accounting',
-    'version': '20.0.1.0.0',
+    'version': '20.0.1.1.0',
     'license': 'LGPL-3',
     'depends': ['hotel_management'],
     'data': [
@@ -26,6 +27,9 @@ Gestion de caisse (cahier des charges §9)
     'assets': {
         'web.assets_backend': [
             'caisse/static/src/caisse.scss',
+            'caisse/static/src/dashboard/caisse_dashboard.scss',
+            'caisse/static/src/dashboard/caisse_dashboard.js',
+            'caisse/static/src/dashboard/caisse_dashboard.xml',
         ],
     },
     'application': True,
