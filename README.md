@@ -19,7 +19,6 @@ La dernière version Odoo 17 est conservée dans la branche **`odoo17`**.
 | Module | Rôle |
 |---|---|
 | `hotel_management` | Auberge : chambres, lits, réservations, paiements, ménage, travaux, site de réservation |
-| `rental_management` | Gestion locative immobilière |
 | `custom_project` | Projets / sous-traitants / situations |
 | `Purchase_custom` | Achats et versements fournisseurs |
 | `HR_customization` | Personnalisations contacts / RH |
