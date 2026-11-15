@@ -38,7 +38,7 @@ class HotelPlanning(models.AbstractModel):
             last = min((line.checkout - start).days, days)  # exclusif
             return first, last
 
-        def booking(line):
+        def booking(line, beds=None):
             first, last = span(line)
             return {
                 'line_id': line.id,
@@ -54,8 +54,17 @@ class HotelPlanning(models.AbstractModel):
                 'checkin': fields.Date.to_string(line.checkin),
                 'checkout': fields.Date.to_string(line.checkout),
                 'booking_type': line.booking_type,
-                'beds': ', '.join(line.bed_ids.mapped('name')),
+                'beds': ', '.join((beds or line.bed_ids).mapped('name')),
             }
+
+        def merged(room_lines):
+            """Location au lit = une ligne par lit : sur la ligne de la chambre,
+            les lits d'une même réservation forment une seule barre."""
+            result = []
+            for resa in room_lines.reservation_id:
+                resa_lines = room_lines.filtered(lambda l: l.reservation_id == resa)
+                result.append(booking(resa_lines[0], resa_lines.bed_ids))
+            return result
 
         # Compteurs par jour : une chambre / un lit est « occupé » une nuit
         # donnée si une réservation active (confirmée ou client présent) la couvre.
@@ -125,7 +134,7 @@ class HotelPlanning(models.AbstractModel):
                     room.housekeeping_status, ''),
                 'unavailable': room.maintenance,
                 'bed_count': len(beds),
-                'bookings': [] if bed_rows else [booking(l) for l in room_lines],
+                'bookings': [] if bed_rows else merged(room_lines),
                 'beds': bed_rows,
             })
 

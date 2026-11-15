@@ -23,6 +23,14 @@
                                 <label>Personnes</label>
                                 <input type="number" name="guests" min="1" t-att-value="guests"/>
                             </div>
+                            <div class="o_hotel_search_field">
+                                <label>Type de location</label>
+                                <select name="booking_type">
+                                    <option value="" t-att-selected="not booking_type">Tout</option>
+                                    <option value="room" t-att-selected="booking_type == 'room'">Chambre entière</option>
+                                    <option value="bed" t-att-selected="booking_type == 'bed'">Lit en dortoir</option>
+                                </select>
+                            </div>
                             <div class="o_hotel_search_field o_hotel_search_btn">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="oi me-1" data-icon="search"/>Rechercher
@@ -33,6 +41,22 @@
                 </section>
 
                 <div class="container my-4">
+                    <!-- Choix bien visible : chambre entière ou lit en dortoir -->
+                    <t t-set="type_qs" t-value="'checkin=%s&amp;checkout=%s&amp;guests=%s' % (checkin or '', checkout or '', guests)"/>
+                    <div class="o_hotel_type_tabs nav nav-pills mb-3">
+                        <a t-attf-href="/hotel/rooms?#{type_qs}"
+                           t-attf-class="nav-link #{'active' if not booking_type else ''}">
+                            <i class="oi me-1" data-icon="apps"/>Toutes
+                        </a>
+                        <a t-attf-href="/hotel/rooms?#{type_qs}&amp;booking_type=room"
+                           t-attf-class="nav-link #{'active' if booking_type == 'room' else ''}">
+                            <i class="oi me-1" data-icon="home"/>Chambre entière
+                        </a>
+                        <a t-attf-href="/hotel/rooms?#{type_qs}&amp;booking_type=bed"
+                           t-attf-class="nav-link #{'active' if booking_type == 'bed' else ''}">
+                            <i class="oi me-1" data-icon="bed"/>Lit en dortoir
+                        </a>
+                    </div>
                     <t t-if="error">
                         <div class="alert alert-warning" t-out="error"/>
                     </t>
@@ -41,6 +65,11 @@
                         <h2 class="mb-3">Chambres disponibles
                             <small class="text-muted">du <t t-out="checkin"/> au <t t-out="checkout"/></small>
                         </h2>
+                        <div t-if="booking_type == 'bed' and available_rooms and any(offers[r.id].get('partial') for r in available_rooms)"
+                             class="alert alert-info o_hotel_partial_hint">
+                            <i class="oi me-1" data-icon="bed"/>
+                            Nous vous proposons d'abord les lits encore libres des chambres déjà partagées.
+                        </div>
                         <t t-if="available_rooms">
                             <div class="row">
                                 <t t-foreach="available_rooms" t-as="room">
@@ -83,7 +112,7 @@
     <template id="room_card" name="Carte chambre">
         <div class="col-lg-4 col-md-6 mb-4">
             <div class="o_hotel_room_web_card">
-                <a t-attf-href="/hotel/room/#{room.id}?checkin=#{checkin}&amp;checkout=#{checkout}&amp;guests=#{guests}"
+                <a t-attf-href="/hotel/room/#{room.id}?checkin=#{checkin}&amp;checkout=#{checkout}&amp;guests=#{guests}&amp;booking_type=#{booking_type or ''}"
                    class="o_hotel_room_img">
                     <t t-if="room.image">
                         <img t-attf-src="/web/image/hotel.room/#{room.id}/image"
@@ -120,10 +149,13 @@
                     <t t-set="offer" t-value="offers and offers.get(room.id)"/>
                     <div class="o_hotel_offer mb-2">
                         <t t-if="offer">
-                            <span t-if="offer['whole']" class="o_hotel_offer_tag o_hotel_offer_ok">
+                            <span t-if="offer['whole'] and booking_type != 'bed'" class="o_hotel_offer_tag o_hotel_offer_ok">
                                 <i class="oi me-1" data-icon="check"/>Chambre entière
                             </span>
-                            <span t-if="offer['beds']" class="o_hotel_offer_tag o_hotel_offer_beds">
+                            <span t-if="offer.get('partial')" class="o_hotel_offer_tag o_hotel_offer_beds">
+                                <i class="oi me-1" data-icon="group"/>Chambre partagée
+                            </span>
+                            <span t-if="offer['beds'] and booking_type != 'room'" class="o_hotel_offer_tag o_hotel_offer_beds">
                                 <i class="oi me-1" data-icon="bed"/><t t-out="len(offer['beds'])"/> lit(s) libre(s)
                                 dès <span t-out="offer['bed_price_min']"
                                           t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
@@ -147,7 +179,7 @@
                             </span>
                         </t>
                     </div>
-                    <a t-attf-href="/hotel/room/#{room.id}?checkin=#{checkin}&amp;checkout=#{checkout}&amp;guests=#{guests}"
+                    <a t-attf-href="/hotel/room/#{room.id}?checkin=#{checkin}&amp;checkout=#{checkout}&amp;guests=#{guests}&amp;booking_type=#{booking_type or ''}"
                        class="btn btn-primary btn-sm w-100">
                         Voir &amp; réserver
                     </a>
@@ -245,8 +277,10 @@
                                         <input type="number" class="form-control" name="guests"
                                                min="1" t-att-max="room.capacity" t-att-value="guests"/>
                                     </div>
-                                    <t t-set="show_room" t-value="room.rental_mode != 'bed'"/>
-                                    <t t-set="show_beds" t-value="room.rental_mode != 'room' and beds_info"/>
+                                    <!-- Le type choisi dans la recherche (par chambre / par lit)
+                                         limite le formulaire à cette seule option. -->
+                                    <t t-set="show_room" t-value="room.rental_mode != 'bed' and booking_type != 'bed'"/>
+                                    <t t-set="show_beds" t-value="room.rental_mode != 'room' and beds_info and booking_type != 'room'"/>
                                     <t t-set="room_ok" t-value="show_room and whole_available != False"/>
                                     <t t-if="show_room and show_beds">
                                         <hr/>

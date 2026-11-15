@@ -27,6 +27,7 @@ class HotelWebsite(http.Controller):
             guests = max(int(kw.get('guests') or 1), 1)
         except ValueError:
             guests = 1
+        booking_type = self._booking_type(kw)
 
         ci = self._parse_date(checkin)
         co = self._parse_date(checkout)
@@ -34,22 +35,38 @@ class HotelWebsite(http.Controller):
         dates_selected = False
         available_rooms = Room.browse()
         occupied_rooms = Room.browse()
-        rooms = Room.search([('website_published', '=', True)])
+        published = [('website_published', '=', True)]
+        rooms = Room.search(published)
+        # Le type de location choisi filtre les chambres proposées
+        if booking_type == 'bed':
+            rooms = rooms.filtered(lambda r: r.rental_mode != 'room' and r.bed_count)
+        elif booking_type == 'room':
+            rooms = rooms.filtered(lambda r: r.rental_mode != 'bed')
         offers = {}
 
         if checkin or checkout:
             if ci and co and co > ci:
                 dates_selected = True
-                avail_ids, occ_ids = [], []
                 for r in rooms:
-                    offer = r.get_offer(ci, co, guests)
-                    offers[r.id] = offer
-                    if offer['bookable']:
-                        avail_ids.append(r.id)
-                    else:
-                        occ_ids.append(r.id)
-                available_rooms = Room.browse(avail_ids)
-                occupied_rooms = Room.browse(occ_ids)
+                    offers[r.id] = r.get_offer(ci, co, guests)
+                if not booking_type:
+                    available_rooms = rooms.filtered(lambda r: offers[r.id]['bookable'])
+                    occupied_rooms = rooms - available_rooms
+                elif booking_type == 'room':
+                    # Par chambre : uniquement les chambres libres en entier
+                    available_rooms = rooms.filtered(lambda r: offers[r.id]['whole'])
+                    occupied_rooms = rooms - available_rooms
+                else:
+                    # Par lit : d'abord les chambres partiellement réservées
+                    # (assez de lits libres) ; à défaut, les chambres libres.
+                    offer = Room._hotel_bed_offer(ci, co, domain=published)
+                    fits = [(room, partial) for room, free, partial in offer
+                            if room in rooms and len(free) >= guests]
+                    partial_rooms = Room.browse([r.id for r, p in fits if p])
+                    available_rooms = partial_rooms or Room.browse([r.id for r, p in fits])
+                    for room in available_rooms:
+                        offers[room.id]['partial'] = room in partial_rooms
+                    occupied_rooms = rooms - Room.browse([r.id for r, p in fits])
             else:
                 error = "Veuillez saisir des dates valides (le départ doit suivre l'arrivée)."
 
@@ -62,10 +79,17 @@ class HotelWebsite(http.Controller):
             'checkin': checkin,
             'checkout': checkout,
             'guests': guests,
+            'booking_type': booking_type,
             'error': error,
             'today': self._today_str(),
         }
         return request.render('hotel_management.rooms_page', values)
+
+    def _booking_type(self, kw):
+        """Type de location demandé : 'room' (chambre entière), 'bed' (lit en
+        dortoir) ou '' (tout afficher, par défaut)."""
+        value = kw.get('booking_type')
+        return value if value in ('room', 'bed') else ''
 
     def _room_detail_values(self, room, checkin, checkout, guests, **extra):
         """Valeurs du template détail : dispo chambre entière + par lit."""
@@ -90,6 +114,7 @@ class HotelWebsite(http.Controller):
             'checkin': checkin,
             'checkout': checkout,
             'guests': guests,
+            'booking_type': '',
             'available': available,
             'whole_available': whole_available,
             'whole_price': room._get_whole_room_price(ci) if room else 0.0,
@@ -116,7 +141,9 @@ class HotelWebsite(http.Controller):
             guests = max(int(kw.get('guests') or 1), 1)
         except ValueError:
             guests = 1
-        values = self._room_detail_values(room, checkin, checkout, guests)
+        values = self._room_detail_values(
+            room, checkin, checkout, guests,
+            booking_type=kw.get('booking_type') if kw.get('booking_type') in ('room', 'bed') else '')
         return request.render('hotel_management.room_detail_page', values)
 
     @http.route(['/hotel/booking/submit'], type='http', auth='public',
@@ -198,7 +225,8 @@ class HotelWebsite(http.Controller):
         if errors:
             values = self._room_detail_values(
                 room, post.get('checkin') or '', post.get('checkout') or '',
-                guests, errors=errors, name=name, email=email, phone=phone)
+                guests, errors=errors, name=name, email=email, phone=phone,
+                booking_type=post.get('booking_type') or '')
             return request.render('hotel_management.room_detail_page', values)
 
         # Client : utilisateur connecté, sinon existant par e-mail, sinon création
@@ -216,16 +244,11 @@ class HotelWebsite(http.Controller):
         # Prix : tarif spécial client, sinon tarifs saisonniers nuit par nuit
         unit = room._get_stay_unit_price(ci, co, booking_type, partner)
         if booking_type == 'bed' and beds:
-            line_vals = {
-                'room_id': room.id,
-                'bed_ids': [(6, 0, beds.ids)],
-                'price_unit': len(beds) * unit,
-            }
+            # Par lit : une ligne par lit (la chambre est déduite du lit)
+            lines = [(0, 0, {'room_id': room.id, 'bed_id': bed.id, 'price_unit': unit})
+                     for bed in beds]
         else:
-            line_vals = {
-                'room_id': room.id,
-                'price_unit': unit,
-            }
+            lines = [(0, 0, {'room_id': room.id, 'price_unit': unit})]
 
         reservation = request.env['hotel.reservation'].sudo().create({
             'partner_id': partner.id,
@@ -235,7 +258,7 @@ class HotelWebsite(http.Controller):
             'source': 'website',
             'booking_type': booking_type,
             'note': note,
-            'line_ids': [(0, 0, line_vals)],
+            'line_ids': lines,
         })
         try:
             reservation.action_confirm()

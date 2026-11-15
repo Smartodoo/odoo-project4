@@ -347,7 +347,9 @@ class HotelRoom(models.Model):
             room.current_guest_id = current.partner_id
             room.current_guest_ids = lines.mapped('partner_id')
             room.current_booking_type = current.booking_type if current else False
-            room.current_rental_amount = current.price_unit if current else 0.0
+            # Par lit, une ligne par lit : montant = total des lits du séjour
+            room.current_rental_amount = sum(lines.filtered(
+                lambda l: l.reservation_id == current.reservation_id).mapped('price_unit'))                 if current else 0.0
             room.beds_free_count = len(beds) - len(taken)
             room.bed_availability = (
                 "%s / %s lits libres" % (room.beds_free_count, len(beds))
@@ -443,6 +445,57 @@ class HotelRoom(models.Model):
         if self.rental_mode == 'room':
             return self.env['hotel.bed']
         return self.available_beds(checkin, checkout, ignore_reservation)
+
+    # ------------------------------------------------------------------
+    # Proposition des chambres / lits à la réservation (back-office et site)
+    # ------------------------------------------------------------------
+    @api.model
+    def _hotel_whole_free_rooms(self, checkin, checkout, ignore_reservation=False,
+                                domain=None):
+        """Location « par chambre » : seules les chambres libres en entier
+        (aucun lit loué, pas en maintenance) sur la période."""
+        rooms = self.search((domain or []) + [
+            ('maintenance', '=', False), ('rental_mode', '!=', 'bed')])
+        if not (checkin and checkout and checkout > checkin):
+            return rooms
+        return rooms.filtered(
+            lambda r: r.can_book_whole_room(checkin, checkout, ignore_reservation))
+
+    @api.model
+    def _hotel_bed_offer(self, checkin, checkout, ignore_reservation=False,
+                         taken_beds=None, domain=None):
+        """Location « par lit » : lits libres de chaque chambre, et chambres
+        « partiellement réservées » (des lits pris, d'autres encore libres).
+        `taken_beds` = lits déjà choisis dans la réservation en cours (ils
+        comptent comme pris). Renvoie [(chambre, lits libres, partielle)]."""
+        taken_beds = taken_beds or self.env['hotel.bed']
+        rooms = self.search((domain or []) + [
+            ('maintenance', '=', False), ('rental_mode', '!=', 'room')])
+        dated = checkin and checkout and checkout > checkin
+        offer = []
+        for room in rooms:
+            beds = room.bed_ids.filtered('active')
+            if not beds:
+                continue
+            free = (room.bookable_beds(checkin, checkout, ignore_reservation)
+                    if dated else beds) - taken_beds
+            if free:
+                offer.append((room, free, free != beds))
+        return offer
+
+    @api.model
+    def _hotel_proposed_beds(self, checkin, checkout, ignore_reservation=False,
+                             taken_beds=None):
+        """Lits proposés à la réservation au lit : d'abord ceux des chambres
+        partiellement réservées ; s'il n'y en a aucune, ceux des chambres
+        entièrement libres."""
+        offer = self._hotel_bed_offer(checkin, checkout, ignore_reservation, taken_beds)
+        partial = [free for room, free, is_partial in offer if is_partial]
+        chosen = partial or [free for room, free, is_partial in offer]
+        beds = self.env['hotel.bed']
+        for free in chosen:
+            beds |= free
+        return beds
 
     def _get_season(self, day):
         """Tarif saisonnier actif le jour donné : celui du type de chambre en

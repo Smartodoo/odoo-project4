@@ -16,7 +16,7 @@ Gestion d'auberge (PMS) — cahier des charges complet
     'author': "SmartOdoo",
     'website': "https://smartodoo.com",
     'category': 'Services/Hotel',
-    'version': '20.0.2.0.0',
+    'version': '20.0.2.1.0',
     'license': 'LGPL-3',
     'depends': ['mail', 'web', 'contacts', 'website', 'portal', 'account',
                 'hr', 'hr_attendance', 'hr_holidays'],

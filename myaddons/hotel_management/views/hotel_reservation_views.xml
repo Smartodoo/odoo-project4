@@ -129,17 +129,17 @@
                         </span>
                     </div>
                     <notebook>
-                        <page string="Chambres" name="rooms">
+                        <!-- Par chambre : on choisit des chambres entièrement libres,
+                             tous leurs lits sont réservés d'office. -->
+                        <page string="Chambres" name="rooms" invisible="booking_type == 'bed'">
+                            <field name="proposed_room_ids" invisible="1"/>
                             <field name="line_ids">
                                 <list editable="bottom">
-                                    <field name="room_id"/>
                                     <field name="booking_type" column_invisible="1"/>
-                                    <field name="available_bed_ids" column_invisible="1"/>
-                                    <field name="bed_ids" widget="many2many_tags"
-                                           domain="[('id', 'in', available_bed_ids)]"
-                                           options="{'no_create': True, 'no_open': True}"
-                                           readonly="booking_type == 'room'"
-                                           required="booking_type == 'bed'"/>
+                                    <field name="room_id" options="{'no_create': True}"
+                                           domain="[('id', 'in', parent.proposed_room_ids)]"/>
+                                    <field name="bed_ids" widget="many2many_tags" string="Lits (tous)"
+                                           readonly="1" force_save="1"/>
                                     <field name="room_type_id" readonly="1"/>
                                     <field name="nights" readonly="1"/>
                                     <field name="price_unit" widget="monetary"/>
@@ -147,6 +147,48 @@
                                     <field name="currency_id" column_invisible="1"/>
                                 </list>
                             </field>
+                        </page>
+                        <!-- Par lit : on choisit les lits un par un (d'abord ceux des
+                             chambres partiellement réservées), la chambre est déduite. -->
+                        <page string="Lits" name="beds" invisible="booking_type == 'room'">
+                            <field name="proposed_bed_ids" invisible="1"/>
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="booking_type" column_invisible="1"/>
+                                    <field name="bed_ids" column_invisible="1" force_save="1"/>
+                                    <field name="bed_id" required="1" options="{'no_create': True}"
+                                           domain="[('id', 'in', parent.proposed_bed_ids)]"/>
+                                    <field name="room_id" readonly="1" force_save="1"/>
+                                    <field name="room_type_id" readonly="1"/>
+                                    <field name="nights" readonly="1"/>
+                                    <field name="price_unit" widget="monetary" string="Prix / nuit"/>
+                                    <field name="price_subtotal" widget="monetary" readonly="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Consommations &amp; services" name="services">
+                            <field name="service_ids" readonly="state == 'cancel'">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="product_id" options="{'no_create': True}"/>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit" widget="monetary"/>
+                                    <field name="price_subtotal" widget="monetary" sum="Total"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <div class="text-muted small">
+                                Ajoutez ici les consommations et services du client (petit-déjeuner,
+                                repas, boissons, blanchisserie…). Ils sont ajoutés à la facture du séjour.
+                                Pour proposer un nouvel article, cochez « Consommation / service Auberge » sur sa fiche.
+                            </div>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note" placeholder="Remarques, demandes particulières…"/>
+                        </page>
+                    </notebook>
                             <group>
                                 <group string="Remise" name="discount">
                                     <label for="discount_value" string="Remise"/>
@@ -173,29 +215,6 @@
                                 <field name="currency_id" invisible="1"/>
                                 </group>
                             </group>
-                        </page>
-                        <page string="Consommations &amp; services" name="services">
-                            <field name="service_ids" readonly="state == 'cancel'">
-                                <list editable="bottom">
-                                    <field name="date"/>
-                                    <field name="product_id" options="{'no_create': True}"/>
-                                    <field name="name"/>
-                                    <field name="quantity"/>
-                                    <field name="price_unit" widget="monetary"/>
-                                    <field name="price_subtotal" widget="monetary" sum="Total"/>
-                                    <field name="currency_id" column_invisible="1"/>
-                                </list>
-                            </field>
-                            <div class="text-muted small">
-                                Ajoutez ici les consommations et services du client (petit-déjeuner,
-                                repas, boissons, blanchisserie…). Ils sont ajoutés à la facture du séjour.
-                                Pour proposer un nouvel article, cochez « Consommation / service Auberge » sur sa fiche.
-                            </div>
-                        </page>
-                        <page string="Notes" name="notes">
-                            <field name="note" placeholder="Remarques, demandes particulières…"/>
-                        </page>
-                    </notebook>
                 </sheet>
                 <chatter/>
             </form>
