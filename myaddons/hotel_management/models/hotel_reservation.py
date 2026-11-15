@@ -273,10 +273,8 @@ class HotelReservation(models.Model):
 
     @api.onchange('partner_id')
     def _onchange_partner_id_hotel(self):
-        """Remise et tarifs spéciaux du client appliqués à la réservation."""
-        if self.partner_id and self.partner_id.hotel_discount and not self.discount_value:
-            self.discount_type = 'percent'
-            self.discount_value = self.partner_id.hotel_discount
+        """Tarifs spéciaux du client appliqués à la réservation (la remise,
+        elle, se saisit sur la réservation)."""
         for line in self.line_ids:
             line._apply_price()
 
@@ -430,14 +428,27 @@ class HotelReservation(models.Model):
         Room = self.env['hotel.room']
         for rec in self:
             origin = rec._origin if rec._origin else False
+            checkin, checkout = rec._proposal_period()
             if rec.booking_type == 'room':
                 rec.proposed_room_ids = Room._hotel_whole_free_rooms(
-                    rec.checkin, rec.checkout, origin) - rec.line_ids.room_id
+                    checkin, checkout, origin) - rec.line_ids.room_id
                 rec.proposed_bed_ids = False
             else:
                 rec.proposed_room_ids = False
                 rec.proposed_bed_ids = Room._hotel_proposed_beds(
-                    rec.checkin, rec.checkout, origin, rec.line_ids.bed_ids)
+                    checkin, checkout, origin, rec.line_ids.bed_ids)
+
+    def _proposal_period(self):
+        """Période servant à filtrer les propositions. Dates incomplètes
+        (ex. nouvelle réservation : départ pas encore saisi) : au moins une
+        nuit à partir de l'arrivée (ou d'aujourd'hui), pour ne jamais
+        proposer une chambre ou un lit déjà réservé."""
+        self.ensure_one()
+        checkin = self.checkin or fields.Date.context_today(self)
+        checkout = self.checkout
+        if not checkout or checkout <= checkin:
+            checkout = checkin + timedelta(days=1)
+        return checkin, checkout
 
     @api.onchange('booking_type')
     def _onchange_booking_type(self):
@@ -541,14 +552,40 @@ class HotelReservation(models.Model):
                        ('move_type', 'in', ('out_invoice', 'out_refund'))],
         }
 
-    def action_send_confirmation(self):
-        self.ensure_one()
+    def _send_confirmation_mails(self):
+        """Envoie l'e-mail de confirmation ; renvoie (envoyées, sans e-mail)."""
         template = self.env.ref(
             'hotel_management.mail_template_reservation_confirmation',
             raise_if_not_found=False)
-        if template and self.partner_id.email:
-            template.sudo().send_mail(self.id, force_send=False)
-        return True
+        if not template:
+            raise UserError(_("Le modèle d'e-mail de confirmation est introuvable."))
+        sent = self.filtered(lambda r: r.partner_id.email)
+        for rec in sent:
+            template.sudo().send_mail(rec.id, force_send=False)
+        return sent, self - sent
+
+    def _confirmation_notification(self, sent, no_email):
+        lines = []
+        if sent:
+            lines.append(_("Confirmation envoyée : %s", ', '.join(sent.mapped('name'))))
+        if no_email:
+            lines.append(_("Client sans e-mail (non envoyé) : %s",
+                           ', '.join(no_email.mapped('name'))))
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Envoi des confirmations"),
+                'message': '\n'.join(lines),
+                'type': 'success' if sent and not no_email else 'warning',
+                'sticky': bool(no_email),
+            },
+        }
+
+    def action_send_confirmation(self):
+        """Bouton « Envoyer confirmation » de la fiche réservation."""
+        sent, no_email = self._send_confirmation_mails()
+        return self._confirmation_notification(sent, no_email)
 
     @api.constrains('checkin', 'checkout')
     def _check_dates(self):

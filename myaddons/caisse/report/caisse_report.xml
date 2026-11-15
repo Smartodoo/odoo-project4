@@ -30,6 +30,7 @@
                                     <tr><td>Total encaissé</td><td class="text-end"><span t-field="o.total_collected"/></td></tr>
                                     <tr><td>Total dépensé</td><td class="text-end"><span t-field="o.total_spent"/></td></tr>
                                     <tr t-if="o.total_supplier_payments"><td class="ps-4 text-muted">dont achats fournisseurs</td><td class="text-end text-muted"><span t-field="o.total_supplier_payments"/></td></tr>
+                                    <tr t-if="o.total_expense_notes"><td class="ps-4 text-muted">dont notes de frais</td><td class="text-end text-muted"><span t-field="o.total_expense_notes"/></td></tr>
                                     <tr class="fw-bold"><td>Solde théorique</td><td class="text-end"><span t-field="o.theoretical_balance"/></td></tr>
                                     <tr t-if="o.state == 'closed'"><td>Espèces comptées</td><td class="text-end"><span t-field="o.closing_balance"/></td></tr>
                                     <tr t-if="o.state == 'closed'" class="fw-bold"><td>Écart de caisse</td><td class="text-end"><span t-field="o.difference"/></td></tr>
@@ -42,7 +43,8 @@
                             <tbody>
                                 <tr t-foreach="o.sudo().payment_ids.filtered(lambda p: p.state in ('paid', 'reconciled'))" t-as="p">
                                     <td><span t-field="p.date"/></td>
-                                    <td t-if="p.partner_type == 'supplier'">Achat fournisseur</td>
+                                    <td t-if="p.caisse_kind == 'expense_note'">Note de frais</td>
+                                    <td t-elif="p.partner_type == 'supplier'">Achat fournisseur</td>
                                     <td t-else="">Paiement client (<span t-field="p.hotel_payment_kind"/>)</td>
                                     <td><t t-out="p.partner_id.name"/> — <t t-out="p.hotel_reservation_id.name or p.memo or ''"/></td>
                                     <td t-out="p.name"/>

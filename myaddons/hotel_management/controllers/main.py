@@ -20,7 +20,7 @@ class HotelWebsite(http.Controller):
     @http.route(['/hotel', '/hotel/rooms'], type='http', auth='public',
                 website=True, sitemap=True)
     def hotel_rooms(self, **kw):
-        Room = request.env['hotel.room'].sudo()
+        Room = request.env['hotel.room'].sudo().with_context(hotel_include_draft=True)
         checkin = kw.get('checkin') or ''
         checkout = kw.get('checkout') or ''
         try:
@@ -132,7 +132,7 @@ class HotelWebsite(http.Controller):
     @http.route(['/hotel/room/<model("hotel.room"):room>'], type='http',
                 auth='public', website=True, sitemap=False)
     def hotel_room_detail(self, room, **kw):
-        room = room.sudo()
+        room = room.sudo().with_context(hotel_include_draft=True)
         if not room.website_published:
             return request.redirect('/hotel/rooms')
         checkin = kw.get('checkin') or ''

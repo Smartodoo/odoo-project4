@@ -14,7 +14,8 @@
         <field name="name">Caissier</field>
         <field name="sequence">10</field>
         <field name="privilege_id" ref="privilege_caisse"/>
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <!-- Le caissier consulte les paiements rattachés à sa caisse -->
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('account.group_account_invoice'))]"/>
         <field name="comment">Ouvre et ferme la caisse, saisit les mouvements.</field>
     </record>
 

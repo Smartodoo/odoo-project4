@@ -1,15 +1,33 @@
-from odoo import fields, models, tools
+from odoo import _, api, fields, models, tools
+from odoo.exceptions import UserError
 
 JOURNAL_KINDS = [
     ('payment', 'Paiement client'),
     ('refund', 'Remboursement client'),
-    ('purchase', 'Achat / paiement fournisseur'),
+    ('purchase', 'Achat fournisseur'),
     ('purchase_refund', 'Remboursement fournisseur'),
+    ('expense_note', 'Note de frais'),
     ('in', 'Entrée'),
     ('out', 'Sortie'),
-    ('expense', 'Dépense'),
+    ('expense', 'Dépense (saisie libre)'),
     ('transfer', 'Transfert'),
 ]
+
+# Classement du menu Caisse (cahier des charges) :
+#   Entrées  : paiements des réservations, entrées saisies (fond de départ…),
+#              remboursements reçus des fournisseurs ;
+#   Dépenses : notes de frais et achats ;
+#   Sorties  : remboursements clients, sorties et transferts.
+JOURNAL_CATEGORIES = [
+    ('in', 'Entrée'),
+    ('expense', 'Dépense'),
+    ('out', 'Sortie'),
+]
+KIND_CATEGORY = {
+    'payment': 'in', 'in': 'in', 'purchase_refund': 'in',
+    'expense_note': 'expense', 'purchase': 'expense', 'expense': 'expense',
+    'refund': 'out', 'out': 'out', 'transfer': 'out',
+}
 
 
 class CaisseJournal(models.Model):
@@ -26,7 +44,8 @@ class CaisseJournal(models.Model):
     # avant toute lecture du journal (sinon une opération juste saisie manque).
     _depends = {
         'account.payment': [
-            'caisse_session_id', 'state', 'date', 'payment_type', 'partner_type', 'memo', 'name',
+            'caisse_session_id', 'caisse_kind', 'state', 'date', 'payment_type',
+            'partner_type', 'memo', 'name',
             'partner_id', 'hotel_reservation_id', 'amount_company_currency_signed',
             'company_id', 'create_uid',
         ],
@@ -40,6 +59,7 @@ class CaisseJournal(models.Model):
     day = fields.Date(string="Jour", readonly=True)
     session_id = fields.Many2one('caisse.session', string="Caisse", readonly=True)
     kind = fields.Selection(JOURNAL_KINDS, string="Opération", readonly=True)
+    category = fields.Selection(JOURNAL_CATEGORIES, string="Catégorie", readonly=True)
     label = fields.Char(string="Libellé", readonly=True)
     partner_id = fields.Many2one('res.partner', string="Client / tiers", readonly=True)
     reservation_id = fields.Many2one(
@@ -65,12 +85,8 @@ class CaisseJournal(models.Model):
                     COALESCE(p.create_date, p.date::timestamp) AS date,
                     p.date AS day,
                     p.caisse_session_id AS session_id,
-                    CASE
-                        WHEN p.partner_type = 'supplier' AND p.payment_type = 'outbound' THEN 'purchase'
-                        WHEN p.partner_type = 'supplier' THEN 'purchase_refund'
-                        WHEN p.payment_type = 'outbound' THEN 'refund'
-                        ELSE 'payment'
-                    END AS kind,
+                    p.kind,
+                    CASE p.kind WHEN 'payment' THEN 'in' WHEN 'in' THEN 'in' WHEN 'purchase_refund' THEN 'in' WHEN 'expense_note' THEN 'expense' WHEN 'purchase' THEN 'expense' WHEN 'expense' THEN 'expense' ELSE 'out' END AS category,
                     COALESCE(NULLIF(p.memo, ''), p.name) AS label,
                     p.partner_id,
                     p.hotel_reservation_id AS reservation_id,
@@ -84,7 +100,15 @@ class CaisseJournal(models.Model):
                     p.id AS payment_id,
                     NULL::integer AS move_id,
                     FALSE AS has_attachment
-                FROM account_payment p
+                FROM (
+                    SELECT pay.*, COALESCE(pay.caisse_kind, CASE
+                        WHEN pay.partner_type = 'supplier' AND pay.payment_type = 'outbound' THEN 'purchase'
+                        WHEN pay.partner_type = 'supplier' THEN 'purchase_refund'
+                        WHEN pay.payment_type = 'outbound' THEN 'refund'
+                        ELSE 'payment'
+                    END) AS kind
+                    FROM account_payment pay
+                ) p
                 JOIN res_company c ON c.id = p.company_id
                 WHERE p.caisse_session_id IS NOT NULL
                   AND p.state IN ('paid', 'reconciled')
@@ -95,6 +119,7 @@ class CaisseJournal(models.Model):
                     m.date::date AS day,
                     m.session_id,
                     m.move_type AS kind,
+                    CASE m.move_type WHEN 'payment' THEN 'in' WHEN 'in' THEN 'in' WHEN 'purchase_refund' THEN 'in' WHEN 'expense_note' THEN 'expense' WHEN 'purchase' THEN 'expense' WHEN 'expense' THEN 'expense' ELSE 'out' END AS category,
                     m.reason AS label,
                     m.partner_id,
                     NULL::integer AS reservation_id,
@@ -118,9 +143,13 @@ class CaisseJournal(models.Model):
         """)
 
     def action_open_source(self):
-        """Ouvre le paiement ou le mouvement d'origine."""
+        """Ouvre l'opération d'origine : note de frais, facture d'achat,
+        paiement ou mouvement de caisse."""
         self.ensure_one()
-        record = self.payment_id or self.move_id
+        payment = self.payment_id.sudo()
+        record = (payment.expense_ids or payment.reconciled_bill_ids.expense_ids
+                  or payment.reconciled_bill_ids[:1]).sudo(False) if payment else False
+        record = record or self.payment_id or self.move_id
         return {
             'type': 'ir.actions.act_window',
             'res_model': record._name,
@@ -128,3 +157,25 @@ class CaisseJournal(models.Model):
             'views': [(False, 'form')],
             'target': 'current',
         }
+
+    # ------------------------------------------------------------------
+    # Boutons « Nouveau » des menus Entrées et Sorties (les notes de frais
+    # et les achats se créent dans leurs applications, pas dans la caisse)
+    # ------------------------------------------------------------------
+    @api.model
+    def _caisse_open_session(self):
+        session = self.env['caisse.session']._get_open_session()
+        if not session:
+            raise UserError(_(
+                "Aucune caisse n'est ouverte : ouvrez la caisse du jour "
+                "(menu Caisse du jour) avant d'enregistrer une opération."))
+        return session
+
+    def action_caisse_new_in(self):
+        return self._caisse_open_session().action_new_in()
+
+    def action_caisse_new_out(self):
+        return self._caisse_open_session().action_new_out()
+
+    def action_caisse_new_transfer(self):
+        return self._caisse_open_session().action_new_transfer()

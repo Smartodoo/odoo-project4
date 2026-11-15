@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Achat : bouton « Créer la facture » (Odoo 20 ne propose plus, sur la
+         fiche, que « Upload Bill » avec un fichier à téléverser) et bouton
+         « Encaisser » (comme sur la réservation) : la facture fournisseur est
+         payée ; en espèces, l'argent sort de la caisse. -->
+    <record id="purchase_order_form_caisse" model="ir.ui.view">
+        <field name="name">purchase.order.form.caisse</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/widget[@name='purchase_file_uploader']" position="before">
+                <button name="action_create_invoice" type="object" string="Créer la facture"
+                        class="btn-primary" data-hotkey="w"
+                        invisible="state != 'purchase' or invoice_status != 'to invoice'"
+                        help="Crée la facture fournisseur de cet achat (quantités à facturer)."/>
+                <button name="action_caisse_pay" type="object" string="Encaisser"
+                        class="btn-primary" icon="payments"
+                        groups="caisse.group_caisse_user"
+                        invisible="state != 'purchase' or caisse_amount_due &lt;= 0"
+                        help="Payer le fournisseur (espèces, carte, virement, chèque). La facture est créée et validée si besoin."/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Fenêtre « Encaisser » de l'achat -->
+    <record id="view_caisse_purchase_payment_wizard_form" model="ir.ui.view">
+        <field name="name">caisse.purchase.payment.wizard.form</field>
+        <field name="model">caisse.purchase.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Encaisser">
+                <field name="order_id" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="company_id" invisible="1"/>
+                <div class="alert alert-info d-flex flex-wrap gap-4 mb-3" role="status">
+                    <div>Total achat : <strong><field name="amount_total" class="oe_inline"/></strong></div>
+                    <div>Déjà payé : <strong><field name="amount_paid" class="oe_inline"/></strong></div>
+                    <div>Reste à payer : <strong><field name="amount_due" class="oe_inline"/></strong></div>
+                </div>
+                <div class="alert alert-warning" role="alert"
+                     invisible="payment_mode != 'cash' or caisse_session_id">
+                    Aucune caisse n'est ouverte : ouvrez la caisse (Caisse &gt; Caisse du jour) pour payer en espèces.
+                </div>
+                <group>
+                    <group>
+                        <field name="partner_id" readonly="1"/>
+                        <field name="payment_mode" widget="radio"/>
+                        <field name="cheque_reference" invisible="payment_mode != 'cheque'"
+                               required="payment_mode == 'cheque'"/>
+                        <field name="caisse_session_id" invisible="payment_mode != 'cash' or not caisse_session_id"/>
+                    </group>
+                    <group>
+                        <field name="amount" widget="monetary"/>
+                        <field name="date"/>
+                        <field name="journal_id" readonly="1"/>
+                        <field name="memo" placeholder="Optionnel"/>
+                    </group>
+                </group>
+                <div class="text-muted small">
+                    La facture fournisseur est créée et validée automatiquement si besoin.
+                    En espèces, le paiement apparaît dans Caisse &gt; Dépenses &gt; Achats.
+                </div>
+                <footer>
+                    <button name="action_confirm" string="Valider" type="object"
+                            class="btn-primary" data-hotkey="q"/>
+                    <button string="Annuler" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

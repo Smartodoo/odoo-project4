@@ -10,8 +10,6 @@
                     <!-- Saisie rapide d'un mouvement (caisse ouverte) -->
                     <button name="action_new_in" string="Entrée" type="object" icon="add_circle"
                             class="btn-success" invisible="state != 'open' or not id"/>
-                    <button name="action_new_expense" string="Dépense" type="object" icon="receipt_long"
-                            class="btn-danger" invisible="state != 'open' or not id"/>
                     <button name="action_new_out" string="Sortie" type="object" icon="remove_circle"
                             invisible="state != 'open' or not id"/>
                     <button name="action_new_transfer" string="Transfert" type="object" icon="swap_horiz"
@@ -56,8 +54,9 @@
                             <span class="o_caisse_sum_label">Dépensé</span>
                             <field name="total_spent" widget="monetary" class="o_caisse_sum_value"/>
                             <span class="o_caisse_sum_hint">
-                                achats <field name="total_supplier_payments" widget="monetary" class="oe_inline"/>
-                                · dépenses et sorties <field name="total_out" widget="monetary" class="oe_inline"/>
+                                notes de frais <field name="total_expense_notes" widget="monetary" class="oe_inline"/>
+                                · achats <field name="total_supplier_payments" widget="monetary" class="oe_inline"/>
+                                · sorties <field name="total_out" widget="monetary" class="oe_inline"/>
                             </span>
                         </div>
                         <div class="o_caisse_sum_op">=</div>
@@ -97,10 +96,12 @@
                     </group>
                     <notebook>
                         <page string="Mouvements de caisse" name="moves">
+                            <!-- Ajout uniquement par les boutons Entrée / Dépense /
+                                 Sortie / Transfert : le type est imposé, jamais choisi. -->
                             <field name="move_ids" readonly="state != 'open'">
-                                <list editable="bottom">
+                                <list editable="bottom" create="0">
                                     <field name="date"/>
-                                    <field name="move_type"/>
+                                    <field name="move_type" readonly="1"/>
                                     <field name="reason"/>
                                     <field name="partner_id" optional="show"/>
                                     <field name="reference" optional="show"/>
@@ -141,6 +142,22 @@
                             <div class="text-muted small">
                                 Paiements fournisseurs en espèces de la société (bouton « Payer » d'une
                                 facture fournisseur, journal Espèces) : l'argent sort de cette caisse.
+                            </div>
+                        </page>
+                        <page string="Notes de frais" name="expense_notes">
+                            <field name="expense_note_payment_ids" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                    <field name="memo" string="Note de frais"/>
+                                    <field name="partner_id" string="Bénéficiaire"/>
+                                    <field name="amount_company_currency_signed" string="Montant" sum="Total"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                            <div class="text-muted small">
+                                Notes de frais payées en espèces (payées par la société, ou remboursées
+                                à l'employé) : l'argent sort de cette caisse.
                             </div>
                         </page>
                         <page string="Paiements par mode" name="by_mode">
@@ -301,7 +318,7 @@
             <list>
                 <field name="date"/>
                 <field name="session_id"/>
-                <field name="move_type"/>
+                <field name="move_type" column_invisible="context.get('default_move_type')"/>
                 <field name="reason"/>
                 <field name="partner_id"/>
                 <field name="reference"/>
@@ -318,17 +335,24 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
+                    <div class="alert alert-warning mb-3" role="alert" invisible="session_id">
+                        Aucune caisse n'est ouverte : ouvrez d'abord la caisse du jour
+                        (menu Caisse du jour) pour pouvoir enregistrer ce mouvement.
+                    </div>
                     <group>
                         <group>
                             <field name="session_id" options="{'no_create': True}"/>
                             <field name="date"/>
-                            <field name="move_type"/>
+                            <!-- Type imposé par le menu (Entrées, Dépenses, Sorties,
+                                 Transferts) : il n'est jamais choisi sur la fiche. -->
+                            <field name="move_type" invisible="1"/>
                             <field name="amount" widget="monetary"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
                         <group>
                             <field name="reason"/>
-                            <field name="partner_id"/>
+                            <field name="partner_id" string="Bénéficiaire / tiers"
+                                   required="move_type == 'out'"/>
                             <field name="reference"/>
                             <field name="destination" invisible="move_type != 'transfer'"/>
                             <field name="attachment" filename="attachment_name"/>
@@ -366,7 +390,7 @@
         <field name="name">caisse.move.kanban</field>
         <field name="model">caisse.move</field>
         <field name="arch" type="xml">
-            <kanban class="o_caisse_kanban" default_group_by="move_type" sample="1" quick_create="0">
+            <kanban class="o_caisse_kanban" sample="1" quick_create="0">
                 <field name="move_type"/>
                 <field name="currency_id"/>
                 <templates>
@@ -416,13 +440,6 @@
         </field>
     </record>
 
-    <record id="action_caisse_move" model="ir.actions.act_window">
-        <field name="name">Entrées et dépenses</field>
-        <field name="res_model">caisse.move</field>
-        <field name="view_mode">list,kanban,pivot,graph,form</field>
-        <field name="search_view_id" ref="view_caisse_move_search"/>
-    </record>
-
     <!-- Saisie rapide d'un mouvement depuis la caisse (fenêtre) -->
     <record id="view_caisse_move_form_quick" model="ir.ui.view">
         <field name="name">caisse.move.form.quick</field>
@@ -434,12 +451,14 @@
                 <field name="currency_id" invisible="1"/>
                 <group>
                     <group>
-                        <field name="move_type" widget="radio" options="{'horizontal': true}"/>
+                        <field name="move_type" invisible="1"/>
                         <field name="amount" widget="monetary" class="fs-4 fw-bold"/>
                         <field name="reason" placeholder="ex : achat produits ménage, appoint monnaie…"/>
                     </group>
                     <group>
-                        <field name="partner_id" placeholder="Fournisseur, banque… (optionnel)"/>
+                        <field name="partner_id" string="Bénéficiaire / tiers"
+                               required="move_type == 'out'"
+                               placeholder="À qui l'argent est remis (obligatoire pour une sortie)"/>
                         <field name="reference" placeholder="N° de reçu / facture"/>
                         <field name="destination" invisible="move_type != 'transfer'"
                                placeholder="Banque, coffre…"/>
@@ -461,15 +480,28 @@
         <field name="model">caisse.journal</field>
         <field name="arch" type="xml">
             <list string="Journal de caisse" create="0" edit="0" delete="0"
-                  decoration-success="kind in ('payment', 'in', 'purchase_refund')"
-                  decoration-danger="kind in ('expense', 'out', 'refund', 'purchase')"
-                  decoration-info="kind == 'transfer'">
+                  decoration-success="category == 'in'"
+                  decoration-danger="category == 'expense'"
+                  decoration-warning="category == 'out'">
+                <!-- Boutons « Nouveau » selon le menu ouvert (Entrées / Dépenses / Sorties) -->
+                <header>
+                    <button name="action_caisse_new_in" type="object" string="Nouvelle entrée"
+                            class="btn-primary" display="always"
+                            invisible="context.get('caisse_menu') != 'in'"/>
+                    <button name="action_caisse_new_out" type="object" string="Nouvelle sortie"
+                            class="btn-primary" display="always"
+                            invisible="context.get('caisse_menu') != 'out'"/>
+                    <button name="action_caisse_new_transfer" type="object" string="Nouveau transfert"
+                            display="always"
+                            invisible="context.get('caisse_menu') != 'out'"/>
+                </header>
+                <field name="category" column_invisible="1"/>
                 <field name="date"/>
                 <field name="session_id" optional="show"/>
                 <field name="kind" widget="badge"
-                       decoration-success="kind in ('payment', 'in', 'purchase_refund')"
-                       decoration-danger="kind in ('expense', 'out', 'refund', 'purchase')"
-                       decoration-info="kind == 'transfer'"/>
+                       decoration-success="category == 'in'"
+                       decoration-danger="category == 'expense'"
+                       decoration-warning="category == 'out'"/>
                 <field name="label"/>
                 <field name="partner_id" optional="show"/>
                 <field name="reservation_id" optional="show"/>
@@ -495,14 +527,14 @@
                 <field name="partner_id"/>
                 <field name="session_id"/>
                 <field name="reservation_id"/>
-                <filter name="ins" string="Entrées d'argent"
-                        domain="[('kind', 'in', ('payment', 'in', 'purchase_refund'))]"/>
-                <filter name="outs" string="Sorties d'argent"
-                        domain="[('kind', 'in', ('refund', 'out', 'expense', 'transfer', 'purchase'))]"/>
+                <filter name="ins" string="Entrées" domain="[('category', '=', 'in')]"/>
+                <filter name="expenses" string="Dépenses" domain="[('category', '=', 'expense')]"/>
+                <filter name="outs" string="Sorties" domain="[('category', '=', 'out')]"/>
+                <separator/>
+                <filter name="expense_notes" string="Notes de frais"
+                        domain="[('kind', 'in', ('expense_note', 'expense'))]"/>
                 <filter name="purchases" string="Achats fournisseurs"
                         domain="[('kind', 'in', ('purchase', 'purchase_refund'))]"/>
-                <separator/>
-                <filter name="expenses" string="Dépenses" domain="[('kind', '=', 'expense')]"/>
                 <filter name="no_proof" string="Sans justificatif"
                         domain="[('move_id', '!=', False), ('kind', '!=', 'in'), ('has_attachment', '=', False)]"/>
                 <separator/>
@@ -513,6 +545,7 @@
                         domain="[('session_id.state', '=', 'open')]"/>
                 <group>
                     <filter name="group_day" string="Jour" context="{'group_by': 'day:day'}"/>
+                    <filter name="group_category" string="Catégorie" context="{'group_by': 'category'}"/>
                     <filter name="group_kind" string="Opération" context="{'group_by': 'kind'}"/>
                     <filter name="group_session" string="Caisse" context="{'group_by': 'session_id'}"/>
                     <filter name="group_user" string="Saisi par" context="{'group_by': 'user_id'}"/>
@@ -558,6 +591,73 @@
         </field>
     </record>
 
+
+    <!-- Menus Entrées / Dépenses (notes de frais, achats) / Sorties -->
+    <record id="action_caisse_entrees" model="ir.actions.act_window">
+        <field name="name">Entrées</field>
+        <field name="res_model">caisse.journal</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_caisse_journal_search"/>
+        <field name="domain">[('category', '=', 'in')]</field>
+        <field name="context">{'caisse_menu': 'in'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune entrée d'argent</p>
+            <p>Paiements des réservations en espèces, et entrées saisies à la main (par exemple l'argent déjà présent dans la caisse au démarrage).</p>
+        </field>
+    </record>
+    <record id="action_caisse_depenses" model="ir.actions.act_window">
+        <field name="name">Dépenses</field>
+        <field name="res_model">caisse.journal</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_caisse_journal_search"/>
+        <field name="domain">[('category', '=', 'expense')]</field>
+        <field name="context">{'caisse_menu': 'expense'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune dépense</p>
+            <p>Notes de frais et achats payés en espèces : chaque paiement validé apparaît ici.</p>
+        </field>
+    </record>
+    <record id="action_caisse_notes_frais" model="ir.actions.act_window">
+        <field name="name">Notes de frais</field>
+        <field name="res_model">caisse.journal</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_caisse_journal_search"/>
+        <field name="domain">[('kind', 'in', ('expense_note', 'expense'))]</field>
+        <field name="context">{'caisse_menu': 'expense_note'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune note de frais payée en espèces</p>
+            <p>Les notes de frais se créent dans l'application Notes de frais.
+               Payée par la société en espèces (journal Espèces), une note sort de la caisse
+               dès sa validation ; un remboursement d'employé payé en espèces aussi.</p>
+        </field>
+    </record>
+    <record id="action_caisse_achats" model="ir.actions.act_window">
+        <field name="name">Achats</field>
+        <field name="res_model">caisse.journal</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_caisse_journal_search"/>
+        <field name="domain">[('kind', 'in', ('purchase', 'purchase_refund'))]</field>
+        <field name="context">{'caisse_menu': 'purchase'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucun achat payé en espèces</p>
+            <p>Les achats se créent dans l'application Achats. Quand leur facture fournisseur
+               est payée en espèces (bouton « Payer », journal Espèces), le paiement sort de
+               la caisse et apparaît ici.</p>
+        </field>
+    </record>
+    <record id="action_caisse_sorties" model="ir.actions.act_window">
+        <field name="name">Sorties</field>
+        <field name="res_model">caisse.journal</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="search_view_id" ref="view_caisse_journal_search"/>
+        <field name="domain">[('category', '=', 'out')]</field>
+        <field name="context">{'caisse_menu': 'out'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune sortie d'argent</p>
+            <p>Remboursements des clients, argent remis à quelqu'un (avance, retrait…) et transferts vers la banque ou le coffre.</p>
+        </field>
+    </record>
+
     <!-- ================= TABLEAU DE BORD ================= -->
     <record id="action_caisse_dashboard" model="ir.actions.client">
         <field name="name">Tableau de bord caisse</field>
@@ -577,8 +677,18 @@
               parent="menu_caisse_root" action="action_caisse_session" sequence="10"/>
     <menuitem id="menu_caisse_journal" name="Journal de caisse"
               parent="menu_caisse_root" action="action_caisse_journal" sequence="15"/>
-    <menuitem id="menu_caisse_moves" name="Entrées et dépenses"
-              parent="menu_caisse_root" action="action_caisse_move" sequence="20"/>
+    <menuitem id="menu_caisse_entrees" name="Entrées"
+              parent="menu_caisse_root" action="action_caisse_entrees" sequence="5"/>
+    <menuitem id="menu_caisse_depenses" name="Dépenses"
+              parent="menu_caisse_root" sequence="6"/>
+    <menuitem id="menu_caisse_depenses_all" name="Toutes les dépenses"
+              parent="menu_caisse_depenses" action="action_caisse_depenses" sequence="1"/>
+    <menuitem id="menu_caisse_notes_frais" name="Notes de frais"
+              parent="menu_caisse_depenses" action="action_caisse_notes_frais" sequence="2"/>
+    <menuitem id="menu_caisse_achats" name="Achats"
+              parent="menu_caisse_depenses" action="action_caisse_achats" sequence="3"/>
+    <menuitem id="menu_caisse_sorties" name="Sorties"
+              parent="menu_caisse_root" action="action_caisse_sorties" sequence="7"/>
 
     <!-- Fenêtre « Encaisser » de la réservation : caisse utilisée -->
     <record id="view_hotel_reservation_payment_wizard_form_caisse" model="ir.ui.view">

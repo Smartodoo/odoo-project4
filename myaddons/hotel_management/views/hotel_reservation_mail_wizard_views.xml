@@ -5,8 +5,13 @@
         <field name="model">hotel.reservation.mail.wizard</field>
         <field name="arch" type="xml">
             <form string="Envoyer mail">
+                <div class="alert alert-warning" role="alert" invisible="not skipped_info">
+                    <field name="skipped_info" nolabel="1"/>
+                </div>
                 <group>
                     <field name="reservation_id" invisible="1"/>
+                    <field name="reservation_ids" widget="many2many_tags"
+                           invisible="reservation_id"/>
                     <field name="email_to" widget="email" placeholder="destinataire@exemple.com"/>
                     <field name="subject"/>
                 </group>

@@ -12,8 +12,7 @@ class TestCaisseUi(HttpCase):
         session = self.env['caisse.session']._get_open_session()             or self.env['caisse.session'].create({'opening_balance': 1000})
         self.env['caisse.move'].create({
             'session_id': session.id, 'move_type': 'expense', 'amount': 200, 'reason': 'Test'})
-        for url in ('/odoo/action-caisse.action_caisse_session',
-                    '/odoo/action-caisse.action_caisse_move?view_type=kanban'):
+        for url in ('/odoo/action-caisse.action_caisse_session',):
             self.browser_js(
                 url, "setTimeout(() => { const n = document.querySelectorAll('.o_caisse_card, .o_caisse_move').length; if (n) { console.log('test successful'); } else { console.error('Aucune carte kanban affichée'); } }, 5000)",
                 login='admin')
@@ -48,7 +47,7 @@ class TestCaisseUi(HttpCase):
         self.browser_js(
             '/odoo/action-caisse.action_caisse_dashboard',
             """
-            document.querySelector('.o_cd_actions .btn-danger').click();
+            document.querySelector('.o_cd_actions .btn-success').click();
             const t = setInterval(() => {
                 if (document.querySelector(".modal .o_field_widget[name='amount']")) {
                     clearInterval(t);
@@ -56,7 +55,7 @@ class TestCaisseUi(HttpCase):
                 }
             }, 200);
             """,
-            ready="!!document.querySelector('.o_cd_actions .btn-danger')",
+            ready="!!document.querySelector('.o_cd_actions .btn-success')",
             login='admin')
 
     def test_session_form_and_journal_render(self):
@@ -65,7 +64,7 @@ class TestCaisseUi(HttpCase):
             '/odoo/action-caisse.action_caisse_session/%s' % session.id,
             "console.log('test successful')",
             ready="!!document.querySelector('.o_caisse_summary .o_caisse_sum_theo')"
-                  " && !!document.querySelector(\"button[name='action_new_expense']\")",
+                  " && !!document.querySelector(\"button[name='action_new_in']\")",
             login='admin')
         self.browser_js(
             '/odoo/action-caisse.action_caisse_journal',

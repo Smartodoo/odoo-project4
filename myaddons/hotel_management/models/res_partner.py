@@ -26,9 +26,6 @@ class ResPartner(models.Model):
     hotel_note = fields.Text(string="Observations (Auberge)")
 
     # Conditions tarifaires du client (cahier des charges §5)
-    hotel_discount = fields.Float(
-        string="Remise client (%)", digits=(5, 2),
-        help="Remise en pourcentage appliquée par défaut à ses réservations.")
     hotel_special_room_price = fields.Monetary(
         string="Tarif spécial chambre / nuit", currency_field='hotel_currency_id',
         help="Si renseigné, remplace le prix normal (et saisonnier) d'une nuit "
@@ -49,11 +46,6 @@ class ResPartner(models.Model):
     hotel_amount_due = fields.Monetary(
         string="Impayé auberge", currency_field='hotel_currency_id',
         compute='_compute_hotel_payment_count')
-
-    _hotel_discount_range = models.Constraint(
-        'CHECK(hotel_discount >= 0 AND hotel_discount <= 100)',
-        "La remise client doit être comprise entre 0 et 100 %.",
-    )
 
     def _compute_hotel_currency_id(self):
         for partner in self:

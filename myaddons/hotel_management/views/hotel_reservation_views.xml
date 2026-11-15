@@ -228,6 +228,11 @@
             <list decoration-info="state == 'confirmed'"
                   decoration-success="state == 'checkin'"
                   decoration-muted="state in ('checkout', 'cancel')">
+                <!-- « Envoyer mail » sur les réservations cochées (état Enregistrée) -->
+                <header>
+                    <button name="%(hotel_management.action_hotel_reservation_mail_wizard)d"
+                            type="action" string="Envoyer mail" icon="mail"/>
+                </header>
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="checkin"/>

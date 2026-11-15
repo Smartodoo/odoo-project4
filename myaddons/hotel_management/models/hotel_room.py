@@ -454,6 +454,7 @@ class HotelRoom(models.Model):
                                 domain=None):
         """Location « par chambre » : seules les chambres libres en entier
         (aucun lit loué, pas en maintenance) sur la période."""
+        self = self.with_context(hotel_include_draft=True)
         rooms = self.search((domain or []) + [
             ('maintenance', '=', False), ('rental_mode', '!=', 'bed')])
         if not (checkin and checkout and checkout > checkin):
@@ -468,6 +469,7 @@ class HotelRoom(models.Model):
         « partiellement réservées » (des lits pris, d'autres encore libres).
         `taken_beds` = lits déjà choisis dans la réservation en cours (ils
         comptent comme pris). Renvoie [(chambre, lits libres, partielle)]."""
+        self = self.with_context(hotel_include_draft=True)
         taken_beds = taken_beds or self.env['hotel.bed']
         rooms = self.search((domain or []) + [
             ('maintenance', '=', False), ('rental_mode', '!=', 'room')])
@@ -571,6 +573,14 @@ class HotelRoom(models.Model):
             'bookable': whole or beds_ok,
         }
 
+    def _hotel_blocking_states(self):
+        """États de réservation qui occupent une chambre / un lit. Pour les
+        propositions (contexte `hotel_include_draft`), une réservation en
+        brouillon compte aussi : ce qui est déjà pris n'est plus proposé."""
+        if self.env.context.get('hotel_include_draft'):
+            return ('draft', 'confirmed', 'checkin')
+        return ('confirmed', 'checkin')
+
     def is_available(self, checkin, checkout, ignore_reservation=False):
         """Renvoie True si la chambre est libre sur la période [checkin, checkout[."""
         self.ensure_one()
@@ -578,7 +588,7 @@ class HotelRoom(models.Model):
             return False
         domain = [
             ('room_id', '=', self.id),
-            ('state', 'in', ('confirmed', 'checkin')),
+            ('state', 'in', self._hotel_blocking_states()),
             ('checkin', '<', checkout),
             ('checkout', '>', checkin),
         ]

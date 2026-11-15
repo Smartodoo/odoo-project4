@@ -121,8 +121,8 @@ class TestCaisse(TransactionCase):
         self.assertEqual(len(data['days']), 7)
 
         # Saisie rapide depuis la caisse : type et caisse pré-remplis
-        action = session.action_new_expense()
-        self.assertEqual(action['context']['default_move_type'], 'expense')
+        action = session.action_new_out()
+        self.assertEqual(action['context']['default_move_type'], 'out')
         self.assertEqual(action['context']['default_session_id'], session.id)
         session.closing_balance = 3600
         session.action_close()

@@ -34,7 +34,6 @@
                             <field name="hotel_id_document_name" invisible="1"/>
                         </group>
                         <group string="Conditions tarifaires">
-                            <field name="hotel_discount"/>
                             <field name="hotel_special_room_price" widget="monetary"/>
                             <field name="hotel_special_bed_price" widget="monetary"/>
                             <field name="hotel_currency_id" invisible="1"/>
@@ -77,7 +76,6 @@
             <list string="Tarifs clients" editable="bottom" create="0" delete="0">
                 <field name="name" readonly="1"/>
                 <field name="phone" readonly="1" optional="show"/>
-                <field name="hotel_discount" string="Remise (%)"/>
                 <field name="hotel_special_room_price" widget="monetary"
                        string="Tarif spécial chambre / nuit"/>
                 <field name="hotel_special_bed_price" widget="monetary"
@@ -97,7 +95,7 @@
                 <field name="name" string="Client"
                        filter_domain="['|', '|', ('complete_name', 'ilike', self), ('phone', 'ilike', self), ('email', 'ilike', self)]"/>
                 <filter name="with_conditions" string="Avec conditions"
-                        domain="['|', '|', ('hotel_discount', '&gt;', 0), ('hotel_special_room_price', '&gt;', 0), ('hotel_special_bed_price', '&gt;', 0)]"/>
+                        domain="['|', ('hotel_special_room_price', '&gt;', 0), ('hotel_special_bed_price', '&gt;', 0)]"/>
                 <filter name="hotel_clients" string="Clients de l'auberge"
                         domain="[('hotel_reservation_ids', '!=', False)]"/>
             </search>

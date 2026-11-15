@@ -51,8 +51,11 @@ class CaisseSession(models.Model):
         'account.payment', 'caisse_session_id', string="Paiements clients",
         domain=[('partner_type', '=', 'customer')])
     supplier_payment_ids = fields.One2many(
-        'account.payment', 'caisse_session_id', string="Achats / paiements fournisseurs",
-        domain=[('partner_type', '=', 'supplier')])
+        'account.payment', 'caisse_session_id', string="Achats fournisseurs",
+        domain=[('partner_type', '=', 'supplier'), ('caisse_kind', '!=', 'expense_note')])
+    expense_note_payment_ids = fields.One2many(
+        'account.payment', 'caisse_session_id', string="Notes de frais",
+        domain=[('caisse_kind', '=', 'expense_note')])
     move_ids = fields.One2many(
         'caisse.move', 'session_id', string="Mouvements de caisse")
 
@@ -62,6 +65,10 @@ class CaisseSession(models.Model):
         string="Achats fournisseurs (espèces)", compute='_compute_totals',
         help="Paiements fournisseurs en espèces sortis de la caisse "
              "(remboursements fournisseurs déduits).")
+    total_expense_notes = fields.Monetary(
+        string="Notes de frais (espèces)", compute='_compute_totals',
+        help="Notes de frais payées en espèces par la caisse (payées par la "
+             "société ou remboursées à l'employé).")
     total_in = fields.Monetary(string="Entrées", compute='_compute_totals')
     total_out = fields.Monetary(
         string="Sorties, dépenses et transferts", compute='_compute_totals')
@@ -70,7 +77,7 @@ class CaisseSession(models.Model):
         help="Paiements clients en espèces + entrées diverses.")
     total_spent = fields.Monetary(
         string="Total dépensé", compute='_compute_totals',
-        help="Achats fournisseurs + sorties + dépenses + transferts.")
+        help="Notes de frais + achats fournisseurs + sorties + transferts.")
     theoretical_balance = fields.Monetary(
         string="Solde théorique", compute='_compute_totals',
         help="Fond de caisse + total encaissé - total dépensé.")
@@ -94,7 +101,7 @@ class CaisseSession(models.Model):
         return payments.filtered(lambda p: p.state in ('paid', 'reconciled'))
 
     @api.depends('opening_balance', 'closing_balance', 'payment_ids.state',
-                 'payment_ids.partner_type',
+                 'payment_ids.partner_type', 'payment_ids.caisse_kind',
                  'payment_ids.amount_company_currency_signed', 'move_ids.amount',
                  'move_ids.move_type', 'date_open', 'date_close')
     def _compute_totals(self):
@@ -104,20 +111,23 @@ class CaisseSession(models.Model):
             cash = sum(valid.filtered(lambda p: p.partner_type != 'supplier').mapped(
                 'amount_company_currency_signed'))
             # Paiement fournisseur : montant signé négatif (sortie) -> positif ici
-            supplier = -sum(valid.filtered(lambda p: p.partner_type == 'supplier').mapped(
-                'amount_company_currency_signed'))
+            notes = valid.filtered(lambda p: p.caisse_kind == 'expense_note')
+            expense_notes = -sum(notes.mapped('amount_company_currency_signed'))
+            supplier = -sum((valid - notes).filtered(
+                lambda p: p.partner_type == 'supplier').mapped('amount_company_currency_signed'))
             moves_in = sum(rec.move_ids.filtered(
                 lambda m: m.move_type == 'in').mapped('amount'))
             moves_out = sum(rec.move_ids.filtered(
                 lambda m: m.move_type != 'in').mapped('amount'))
             rec.total_cash_payments = cash
             rec.total_supplier_payments = supplier
+            rec.total_expense_notes = expense_notes
             rec.total_in = moves_in
             rec.total_out = moves_out
             rec.total_collected = cash + moves_in
-            rec.total_spent = moves_out + supplier
+            rec.total_spent = moves_out + supplier + expense_notes
             rec.theoretical_balance = (rec.opening_balance + cash + moves_in
-                                       - moves_out - supplier)
+                                       - moves_out - supplier - expense_notes)
             rec.difference = (rec.closing_balance - rec.theoretical_balance
                               if rec.state == 'closed' else 0.0)
             # Paiements par mode encaissés pendant la session (rapport de caisse)
@@ -132,7 +142,8 @@ class CaisseSession(models.Model):
                 domain.append(('date', '<=', fields.Date.to_date(rec.date_close)))
             period = Payment.search(domain) if rec.id else Payment
             # Encaissements clients uniquement (les achats ne sont pas des recettes)
-            period |= rec.sudo().payment_ids.filtered(lambda p: p.partner_type != 'supplier')
+            period |= rec.sudo().payment_ids.filtered(
+                lambda p: p.partner_type != 'supplier' and p.caisse_kind != 'expense_note')
             rec.period_payment_ids = period
             by_mode = {}
             for payment in rec._valid_payments(period):
@@ -231,9 +242,6 @@ class CaisseSession(models.Model):
     def action_new_in(self):
         return self._action_new_move('in')
 
-    def action_new_expense(self):
-        return self._action_new_move('expense')
-
     def action_new_out(self):
         return self._action_new_move('out')
 
@@ -280,6 +288,7 @@ class CaisseSession(models.Model):
                 'opening': rnd(current.opening_balance),
                 'cash_payments': rnd(current.total_cash_payments),
                 'supplier_payments': rnd(current.total_supplier_payments),
+                'expense_notes': rnd(current.total_expense_notes),
                 'moves_out': rnd(current.total_out),
                 'moves_in': rnd(current.total_in),
                 'collected': rnd(current.total_collected),
@@ -303,15 +312,18 @@ class CaisseSession(models.Model):
                 today_by_mode[payment.hotel_payment_mode] += payment.amount_company_currency_signed
         today_spent = sum(Journal.search([
             ('company_id', '=', company.id), ('day', '=', today),
-            ('kind', 'in', ('out', 'expense', 'transfer', 'purchase')),
+            ('category', 'in', ('expense', 'out')),
         ]).mapped('amount_out'))
 
         # --- Mois en cours ----------------------------------------------------
         month_lines = Journal.search([
             ('company_id', '=', company.id), ('day', '>=', month_start)])
         month_by_kind = {}
+        month_by_category = {}
         for line in month_lines:
             month_by_kind[line.kind] = month_by_kind.get(line.kind, 0.0) + abs(line.amount)
+            month_by_category[line.category] = (
+                month_by_category.get(line.category, 0.0) + abs(line.amount))
         month_sessions = Session.search([
             ('company_id', '=', company.id), ('date_open', '>=', month_start)])
         closed = month_sessions.filtered(lambda s: s.state == 'closed')
@@ -382,7 +394,12 @@ class CaisseSession(models.Model):
                 'payments': rnd(month_by_kind.get('payment', 0.0)),
                 'refunds': rnd(month_by_kind.get('refund', 0.0)),
                 'in': rnd(month_by_kind.get('in', 0.0)),
-                'expense': rnd(month_by_kind.get('expense', 0.0)),
+                # Dépenses = notes de frais (+ anciennes dépenses saisies) et achats
+                'expense': rnd(month_by_kind.get('expense', 0.0)
+                               + month_by_kind.get('expense_note', 0.0)),
+                'total_in': rnd(month_by_category.get('in', 0.0)),
+                'total_expense': rnd(month_by_category.get('expense', 0.0)),
+                'total_out': rnd(month_by_category.get('out', 0.0)),
                 'out': rnd(month_by_kind.get('out', 0.0)),
                 'transfer': rnd(month_by_kind.get('transfer', 0.0)),
                 'purchase': rnd(month_by_kind.get('purchase', 0.0)
@@ -457,6 +474,14 @@ class CaisseMove(models.Model):
             if rec.amount <= 0:
                 raise ValidationError(_("Le montant d'un mouvement de caisse doit être positif."))
 
+    @api.constrains('move_type', 'partner_id')
+    def _check_out_beneficiary(self):
+        for rec in self:
+            if rec.move_type == 'out' and not rec.partner_id:
+                raise ValidationError(_(
+                    "Une sortie d'argent doit indiquer à qui l'argent a été remis "
+                    "(champ « Bénéficiaire »)."))
+
     @api.constrains('session_id', 'amount', 'move_type')
     def _check_session_open(self):
         for rec in self:
@@ -464,6 +489,27 @@ class CaisseMove(models.Model):
                 raise ValidationError(_(
                     "La caisse %s est fermée : impossible d'y enregistrer un mouvement.",
                     rec.session_id.name))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('session_id'):
+                session = self.env['caisse.session']._get_open_session()
+                if not session:
+                    raise UserError(_(
+                        "Aucune caisse n'est ouverte : ouvrez la caisse du jour "
+                        "(menu Caisse > Caisse du jour) avant d'enregistrer une "
+                        "entrée, une dépense, une sortie ou un transfert."))
+                vals['session_id'] = session.id
+        return super().create(vals_list)
+
+    def write(self, vals):
+        # Le type est fixé à la création (menu ou bouton) : il ne change jamais.
+        if 'move_type' in vals and any(m.move_type != vals['move_type'] for m in self):
+            raise UserError(_(
+                "Le type d'un mouvement de caisse ne peut pas être modifié : "
+                "supprimez-le et saisissez-le depuis le bon menu."))
+        return super().write(vals)
 
     @api.ondelete(at_uninstall=False)
     def _unlink_only_open(self):

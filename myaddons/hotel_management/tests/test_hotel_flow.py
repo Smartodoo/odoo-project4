@@ -114,9 +114,10 @@ class TestHotelFlow(TransactionCase):
         self.assertEqual(row['bookings'][0]['end'], 3)
         self.assertEqual(data['days'][0]['rooms_busy'] >= 1, True)
 
-    def test_partner_discount_onchange(self):
-        self.partner.hotel_discount = 15
+    def test_partner_has_no_discount(self):
+        """La remise se saisit sur la réservation, plus sur la fiche client."""
+        self.assertNotIn('hotel_discount', self.env['res.partner']._fields)
         with Form(self.env['hotel.reservation']) as form:
             form.partner_id = self.partner
             form.checkout = self.today + timedelta(days=1)
-            self.assertEqual(form.discount_value, 15)
+            self.assertEqual(form.discount_value, 0)

@@ -17,7 +17,10 @@
                 <group>
                     <group>
                         <field name="partner_id" readonly="1"/>
-                        <field name="payment_kind" widget="radio" options="{'horizontal': true}"/>
+                        <field name="payment_kind" invisible="1"/>
+                        <field name="encaisse_kind" widget="radio" options="{'horizontal': true}"
+                               invisible="payment_kind == 'refund'"
+                               required="payment_kind != 'refund'"/>
                         <field name="payment_mode" widget="radio"/>
                         <field name="cheque_reference" invisible="payment_mode != 'cheque'"
                                required="payment_mode == 'cheque' and payment_kind != 'refund'"/>

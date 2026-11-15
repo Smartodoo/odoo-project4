@@ -26,6 +26,13 @@ class HotelReservationPaymentWizard(models.TransientModel):
         compute='_compute_payment_kind', store=True, readonly=False, precompute=True,
         help="Acompte : versé avant la facture, il sera déduit automatiquement "
              "de la facture.\nPaiement : règlement du séjour (ou du solde).")
+    # Choix proposé dans « Encaisser » : acompte ou paiement seulement ; le
+    # remboursement a son propre bouton (« Rembourser »).
+    encaisse_kind = fields.Selection(
+        [('deposit', 'Acompte'), ('payment', 'Paiement')], string="Type",
+        compute='_compute_encaisse_kind', inverse='_inverse_encaisse_kind',
+        help="Acompte : versé avant la facture, il sera déduit automatiquement "
+             "de la facture.\nPaiement : règlement du séjour (ou du solde).")
     payment_mode = fields.Selection(
         HOTEL_PAYMENT_MODES, string="Mode de paiement", required=True,
         default='cash')
@@ -56,6 +63,16 @@ class HotelReservationPaymentWizard(models.TransientModel):
             has_invoice = wiz.reservation_id.sudo().invoice_ids.filtered(
                 lambda m: m.move_type == 'out_invoice' and m.state == 'posted')
             wiz.payment_kind = 'payment' if has_invoice else 'deposit'
+
+    @api.depends('payment_kind')
+    def _compute_encaisse_kind(self):
+        for wiz in self:
+            wiz.encaisse_kind = wiz.payment_kind if wiz.payment_kind != 'refund' else False
+
+    def _inverse_encaisse_kind(self):
+        for wiz in self:
+            if wiz.payment_kind != 'refund' and wiz.encaisse_kind:
+                wiz.payment_kind = wiz.encaisse_kind
 
     @api.depends('reservation_id', 'payment_kind')
     def _compute_amount(self):

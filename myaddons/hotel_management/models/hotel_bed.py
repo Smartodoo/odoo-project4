@@ -113,7 +113,7 @@ class HotelBed(models.Model):
             return False
         domain = [
             ('room_id', '=', self.room_id.id),
-            ('state', 'in', ('confirmed', 'checkin')),
+            ('state', 'in', self.room_id._hotel_blocking_states()),
             ('checkin', '<', checkout),
             ('checkout', '>', checkin),
         ]

@@ -56,7 +56,7 @@
                             <div class="o_cd_fitem o_cd_fout">
                                 <span class="o_cd_flabel">Dépensé</span>
                                 <span class="o_cd_fvalue"><t t-out="this.fmt(d.current.spent)"/></span>
-                                <span class="o_cd_fhint">achats <t t-out="this.fmt(d.current.supplier_payments)"/> · dépenses et sorties <t t-out="this.fmt(d.current.moves_out)"/></span>
+                                <span class="o_cd_fhint">notes de frais <t t-out="this.fmt(d.current.expense_notes)"/> · achats <t t-out="this.fmt(d.current.supplier_payments)"/> · sorties <t t-out="this.fmt(d.current.moves_out)"/></span>
                             </div>
                             <div class="o_cd_fop">=</div>
                             <div class="o_cd_fitem o_cd_ftheo">
@@ -67,9 +67,6 @@
                         <div class="o_cd_actions">
                             <button class="btn btn-success" t-on-click="() => this.quickMove('action_new_in')">
                                 <i class="oi me-1" data-icon="add_circle"/>Entrée
-                            </button>
-                            <button class="btn btn-danger" t-on-click="() => this.quickMove('action_new_expense')">
-                                <i class="oi me-1" data-icon="receipt_long"/>Dépense
                             </button>
                             <button class="btn btn-light" t-on-click="() => this.quickMove('action_new_out')">
                                 <i class="oi me-1" data-icon="remove_circle"/>Sortie
@@ -106,7 +103,7 @@
                                 Total encaissé : <b><t t-out="this.fmt(d.today.total)"/></b>
                             </div>
                             <div class="o_cd_link text-danger"
-                                 t-on-click="() => this.openToday(['expense', 'out', 'transfer', 'purchase'], 'Sorties du jour')">
+                                 t-on-click="() => this.openToday(['expense_note', 'expense', 'purchase', 'refund', 'out', 'transfer'], 'Dépenses et sorties du jour')">
                                 Sorti de la caisse : <b><t t-out="this.fmt(d.today.spent)"/></b>
                             </div>
                         </div>
@@ -130,9 +127,9 @@
                                 <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.purchase)"/></span>
                                 <span class="o_cd_tile_label">Achats fournisseurs (espèces)</span>
                             </div>
-                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['expense'], 'Dépenses du mois')">
+                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['expense_note', 'expense'], 'Notes de frais du mois')">
                                 <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.expense)"/></span>
-                                <span class="o_cd_tile_label">Dépenses</span>
+                                <span class="o_cd_tile_label">Notes de frais (espèces)</span>
                             </div>
                             <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['out', 'refund'], 'Sorties et remboursements du mois')">
                                 <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.out + d.month.refunds)"/></span>

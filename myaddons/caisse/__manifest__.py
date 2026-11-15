@@ -14,15 +14,16 @@ Gestion de caisse (cahier des charges §9)
     'author': "SmartOdoo",
     'website': "https://smartodoo.com",
     'category': 'Accounting',
-    'version': '20.0.1.1.0',
+    'version': '20.0.1.6.0',
     'license': 'LGPL-3',
-    'depends': ['hotel_management'],
+    'depends': ['hotel_management', 'hr_expense', 'purchase'],
     'data': [
         'security/caisse_security.xml',
         'security/ir.access.csv',
         'data/caisse_data.xml',
         'report/caisse_report.xml',
         'views/caisse_views.xml',
+        'views/purchase_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
