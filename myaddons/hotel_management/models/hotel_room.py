@@ -1,8 +1,9 @@
+import re
 from datetime import timedelta
 
 from markupsafe import Markup, escape
 
-from odoo import _, api, fields, models
+from odoo import Command, _, api, fields, models
 
 
 class HotelRoom(models.Model):
@@ -171,7 +172,29 @@ class HotelRoom(models.Model):
             if 'rental_mode' not in vals and vals.get('room_type_id'):
                 vals['rental_mode'] = self.env['hotel.room.type'].browse(
                     vals['room_type_id']).rental_mode
-        return super().create(vals_list)
+        rooms = super().create(vals_list)
+        if not self.env.context.get('hotel_no_auto_beds'):
+            rooms._create_missing_beds()
+        return rooms
+
+    def _create_missing_beds(self):
+        """Crée automatiquement les lits manquants jusqu'à la capacité de la
+        chambre, nommés <chambre>-L<n> (référence modifiable ensuite)."""
+        bed_vals = []
+        for room in self:
+            existing = room.with_context(active_test=False).bed_ids
+            existing.filtered(lambda b: not b.price).price = room._default_bed_price()
+            missing = (room.capacity or 0) - len(room.bed_ids)
+            if missing <= 0:
+                continue
+            taken = set(existing.mapped('name'))
+            price = room._default_bed_price()
+            for _i in range(missing):
+                name = room._next_bed_reference(taken)
+                taken.add(name)
+                bed_vals.append({'room_id': room.id, 'name': name, 'price': price})
+        if bed_vals:
+            self.env['hotel.bed'].create(bed_vals)
 
     def action_set_out_of_service(self):
         """Fermer durablement la chambre (statut « Hors service »)."""
@@ -215,6 +238,24 @@ class HotelRoom(models.Model):
             taken.add(bed.name)
             if not bed.price:
                 bed.price = self._default_bed_price()
+
+    @api.onchange('capacity', 'name')
+    def _onchange_auto_beds(self):
+        """Nouvelle chambre : pré-remplit l'onglet « Lits » avec un lit par place
+        (<chambre>-L<n>). Les lits renommés à la main sont conservés."""
+        if self._origin.id or not self.name:
+            return
+        auto = re.compile(r'.+-L\d+$')
+        custom = self.bed_ids.filtered(lambda b: not auto.match(b.name or ''))
+        price = self._default_bed_price()
+        commands = [Command.clear()] + [
+            Command.create({'name': b.name, 'price': b.price or price}) for b in custom]
+        taken = set(custom.mapped('name'))
+        for _i in range(max((self.capacity or 0) - len(custom), 0)):
+            name = self._next_bed_reference(taken)
+            taken.add(name)
+            commands.append(Command.create({'name': name, 'price': price}))
+        self.bed_ids = commands
 
     @api.onchange('bed_ids')
     def _onchange_bed_ids_reference(self):

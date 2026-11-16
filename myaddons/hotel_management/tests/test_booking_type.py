@@ -19,8 +19,6 @@ class BookingTypeCommon:
                 'name': name, 'room_type_id': rtype.id, 'capacity': beds,
                 'room_price': 4000, 'bed_price': 1000, 'rental_mode': mode,
                 'website_published': True})
-            cls.env['hotel.bed'].create([
-                {'room_id': r.id, 'name': '%s-L%s' % (name, n)} for n in range(1, beds + 1)])
             return r
 
         cls.room_a = room('BT-A', 4)

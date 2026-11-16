@@ -23,8 +23,6 @@ class TestReceptionRules(TransactionCase):
         cls.dorm = cls.env['hotel.room'].create({
             'name': 'RR-D', 'room_type_id': rtype.id, 'capacity': 3,
             'bed_price': 1000, 'rental_mode': 'bed'})
-        cls.env['hotel.bed'].create([
-            {'room_id': cls.dorm.id, 'name': 'RR-D-L%s' % n} for n in (1, 2, 3)])
         cls.partner = cls.env['res.partner'].create({
             'name': 'Client règles', 'email': 'regles@example.com',
             'hotel_birthdate': '1990-01-01'})
