@@ -72,3 +72,19 @@ class TestAutoBeds(TransactionCase):
             self.assertEqual(len(f.bed_ids), 3)
         self.assertEqual(sorted(room.bed_ids.mapped('name')),
                          ['AB-101-L1', 'AB-101-L2', 'AB-101-L3'])
+
+    def test_rename_room_renames_beds(self):
+        room = self._room(capacity=3)
+        room.bed_ids.filtered(lambda b: b.name == 'AB-101-L3').name = 'Lit fenêtre'
+        room.bed_ids.filtered(lambda b: b.name == 'AB-101-L2').active = False
+        room.name = 'AB-105'
+        names = room.with_context(active_test=False).bed_ids.mapped('name')
+        self.assertEqual(sorted(names), ['AB-105-L1', 'AB-105-L2', 'Lit fenêtre'])
+
+    def test_rename_room_form(self):
+        from odoo.tests import Form
+        room = self._room(capacity=2)
+        with Form(room, view='hotel_management.view_hotel_room_config_form') as f:
+            f.name = 'AB-110'
+            self.assertEqual(len(f.bed_ids), 2)
+        self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-110-L1', 'AB-110-L2'])

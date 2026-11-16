@@ -178,10 +178,26 @@ class HotelRoom(models.Model):
         return rooms
 
     def write(self, vals):
+        old_names = {room.id: room.name for room in self} if 'name' in vals else {}
         res = super().write(vals)
+        if old_names:
+            self._rename_beds(old_names)
         if 'capacity' in vals and not self.env.context.get('hotel_no_auto_beds'):
             self._create_missing_beds()
         return res
+
+    def _rename_beds(self, old_names):
+        """Chambre renommée : <ancien>-L<n> devient <nouveau>-L<n>. Les lits
+        nommés à la main ne sont pas modifiés."""
+        for room in self:
+            old = old_names.get(room.id)
+            if not old or old == room.name:
+                continue
+            pattern = re.compile(r'^%s-L(\d+)$' % re.escape(old))
+            for bed in room.with_context(active_test=False).bed_ids:
+                match = pattern.match(bed.name or '')
+                if match:
+                    bed.name = "%s-L%s" % (room.name, match.group(1))
 
     def _onchange_topup_beds(self):
         """Chambre existante : ajuste les lits non encore enregistrés à la capacité
