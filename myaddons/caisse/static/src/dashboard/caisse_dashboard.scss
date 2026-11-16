@@ -254,11 +254,64 @@
         &.o_cd_alert_warn { background: #fff4e0; color: #7a4100; }
     }
 
-    // --- 7 derniers jours -------------------------------------------------
+    // --- Choix de la période ----------------------------------------------
+    .o_cd_period {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 16px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(20, 20, 50, 0.08);
+    }
+
+    .o_cd_period_title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .o_cd_presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .o_cd_range {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+
+        label {
+            margin: 0;
+            color: var(--cd-muted);
+        }
+
+        input {
+            width: 150px;
+        }
+    }
+
+    .o_cd_period_error {
+        flex-basis: 100%;
+        text-align: right;
+    }
+
+    // --- Graphique entrées / sorties de la période ------------------------
     .o_cd_chart {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
         gap: 8px;
+
+        &.o_cd_chart_dense {
+            gap: 2px;
+
+            .o_cd_bar { width: 45%; }
+        }
         height: 170px;
         align-items: end;
         border-bottom: 1px solid #dee2e6;

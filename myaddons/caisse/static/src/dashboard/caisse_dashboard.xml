@@ -110,32 +110,61 @@
                     </section>
                 </div>
 
-                <!-- ===== Ligne 2 : mois en cours + 7 derniers jours ===== -->
+                <!-- ===== Choix de la période des statistiques ===== -->
+                <div class="o_cd_period">
+                    <div class="o_cd_period_title">
+                        <i class="oi me-2" data-icon="date_range"/>Statistiques de la période
+                    </div>
+                    <div class="o_cd_presets">
+                        <t t-foreach="this.presets" t-as="p" t-key="p[0]">
+                            <button t-attf-class="btn btn-sm {{this.state.preset === p[0] ? 'btn-primary' : 'btn-light'}}"
+                                    t-on-click="() => this.applyPreset(p[0])">
+                                <t t-out="p[1]"/>
+                            </button>
+                        </t>
+                    </div>
+                    <div class="o_cd_range">
+                        <label>Du</label>
+                        <input type="date" class="form-control form-control-sm"
+                               t-att-value="this.state.dateFrom"
+                               t-on-change="(ev) => this.onDateChange('dateFrom', ev)"/>
+                        <label>au</label>
+                        <input type="date" class="form-control form-control-sm"
+                               t-att-value="this.state.dateTo"
+                               t-on-change="(ev) => this.onDateChange('dateTo', ev)"/>
+                        <i t-if="this.state.loading" class="oi oi-spin ms-1" data-icon="progress_activity"/>
+                    </div>
+                    <div class="o_cd_period_error text-danger small" t-if="this.state.periodError">
+                        <t t-out="this.state.periodError"/>
+                    </div>
+                </div>
+
+                <!-- ===== Ligne 2 : période choisie + graphique ===== -->
                 <div class="o_cd_row">
                     <section class="o_cd_card">
-                        <h3>Ce mois-ci <span class="text-muted fw-normal">(<t t-out="d.month.label"/>)</span></h3>
+                        <h3>Sur la période <span class="text-muted fw-normal">(<t t-out="d.month.label"/>)</span></h3>
                         <div class="o_cd_tiles">
-                            <div class="o_cd_tile o_cd_in" t-on-click="() => this.openMonth(['payment'], 'Paiements clients du mois')">
+                            <div class="o_cd_tile o_cd_in" t-on-click="() => this.openMonth(['payment'], 'Paiements clients')">
                                 <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.payments)"/></span>
                                 <span class="o_cd_tile_label">Paiements clients (espèces)</span>
                             </div>
-                            <div class="o_cd_tile o_cd_in" t-on-click="() => this.openMonth(['in'], 'Entrées du mois')">
+                            <div class="o_cd_tile o_cd_in" t-on-click="() => this.openMonth(['in'], 'Entrées')">
                                 <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.in)"/></span>
                                 <span class="o_cd_tile_label">Entrées diverses</span>
                             </div>
-                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['purchase', 'purchase_refund'], 'Achats fournisseurs du mois')">
+                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['purchase', 'purchase_refund'], 'Achats fournisseurs')">
                                 <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.purchase)"/></span>
                                 <span class="o_cd_tile_label">Achats fournisseurs (espèces)</span>
                             </div>
-                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['expense_note', 'expense'], 'Notes de frais du mois')">
+                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['expense_note', 'expense'], 'Notes de frais')">
                                 <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.expense)"/></span>
                                 <span class="o_cd_tile_label">Notes de frais (espèces)</span>
                             </div>
-                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['out', 'refund'], 'Sorties et remboursements du mois')">
+                            <div class="o_cd_tile o_cd_out" t-on-click="() => this.openMonth(['out', 'refund'], 'Sorties et remboursements')">
                                 <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.out + d.month.refunds)"/></span>
                                 <span class="o_cd_tile_label">Sorties et remboursements</span>
                             </div>
-                            <div class="o_cd_tile o_cd_transfer" t-on-click="() => this.openMonth(['transfer'], 'Transferts du mois')">
+                            <div class="o_cd_tile o_cd_transfer" t-on-click="() => this.openMonth(['transfer'], 'Transferts')">
                                 <span class="o_cd_tile_value"><t t-out="this.fmt(d.month.transfer)"/></span>
                                 <span class="o_cd_tile_label">Transferts (banque, coffre…)</span>
                             </div>
@@ -148,7 +177,7 @@
                                     <b><t t-out="d.month.gap_sessions"/></b> caisse(s) avec écart sur <t t-out="d.month.sessions"/> ;
                                     écart cumulé <b t-att-class="this.gapClass(d.month.gap_total)"><t t-out="this.fmtSigned(d.month.gap_total)"/></b>
                                 </t>
-                                <t t-else="">Aucun écart de caisse ce mois-ci (<t t-out="d.month.sessions"/> session(s))</t>
+                                <t t-else="">Aucun écart de caisse sur la période (<t t-out="d.month.sessions"/> session(s))</t>
                             </div>
                             <div t-attf-class="o_cd_alert {{d.month.missing_proof ? 'o_cd_alert_warn' : 'o_cd_alert_ok'}}"
                                  t-on-click="() => this.openMissingProof()">
@@ -162,23 +191,26 @@
                     </section>
 
                     <section class="o_cd_card">
-                        <h3>7 derniers jours <span class="text-muted fw-normal">(espèces)</span></h3>
-                        <div class="o_cd_chart">
+                        <h3>Entrées / sorties <span class="text-muted fw-normal">(espèces, par <t t-out="d.month.by_month ? 'mois' : 'jour'"/>)</span></h3>
+                        <div t-attf-class="o_cd_chart {{d.days.length > 12 ? 'o_cd_chart_dense' : ''}}">
                             <t t-foreach="d.days" t-as="day" t-key="day.day">
-                                <div class="o_cd_chart_col" t-on-click="() => this.openDay(day.day)"
+                                <div class="o_cd_chart_col" t-on-click="() => this.openDay(day)"
                                      t-att-title="day.label + ' — entré ' + this.fmt(day.in) + ', sorti ' + this.fmt(day.out)">
                                     <div class="o_cd_chart_bars">
                                         <div class="o_cd_bar o_cd_bar_in" t-att-style="this.barHeight(day.in)"/>
                                         <div class="o_cd_bar o_cd_bar_out" t-att-style="this.barHeight(day.out)"/>
                                     </div>
-                                    <div class="o_cd_chart_label"><t t-out="day.label"/></div>
+                                    <div class="o_cd_chart_label">
+                                        <t t-if="d.days.length &lt;= 12 or day_index % 5 === 0 or day_last" t-out="day.label"/>
+                                        <t t-else="">&#160;</t>
+                                    </div>
                                 </div>
                             </t>
                         </div>
                         <div class="o_cd_legend">
                             <span><span class="o_cd_sw o_cd_bar_in"/>Entré</span>
                             <span><span class="o_cd_sw o_cd_bar_out"/>Sorti</span>
-                            <span class="text-muted">Cliquez sur un jour pour voir son détail.</span>
+                            <span class="text-muted">Cliquez sur une colonne pour voir son détail.</span>
                         </div>
                     </section>
                 </div>

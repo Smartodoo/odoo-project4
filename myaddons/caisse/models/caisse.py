@@ -260,16 +260,22 @@ class CaisseSession(models.Model):
     # Tableau de bord du responsable
     # ------------------------------------------------------------------
     @api.model
-    def get_dashboard_data(self):
+    def get_dashboard_data(self, date_from=None, date_to=None):
         """Tout ce que le responsable doit voir d'un coup d'œil (cf. action
-        client « caisse_dashboard »)."""
+        client « caisse_dashboard »).
+        date_from / date_to (« AAAA-MM-JJ », inclus) : période des statistiques
+        (tuiles, alertes, graphique). Par défaut : du 1er du mois à aujourd'hui.
+        La caisse ouverte et « Encaissé aujourd'hui » restent sur le jour même."""
         company = self.env.company
         currency = company.currency_id
         Session = self.sudo()
         Journal = self.env['caisse.journal'].sudo()
         Payment = self.env['account.payment'].sudo()
         today = fields.Date.context_today(self)
-        month_start = today.replace(day=1)
+        date_from = fields.Date.to_date(date_from) or today.replace(day=1)
+        date_to = fields.Date.to_date(date_to) or today
+        if date_from > date_to:
+            date_from, date_to = date_to, date_from
         modes = dict(HOTEL_PAYMENT_MODES)
 
         def rnd(value):
@@ -315,32 +321,52 @@ class CaisseSession(models.Model):
             ('category', 'in', ('expense', 'out')),
         ]).mapped('amount_out'))
 
-        # --- Mois en cours ----------------------------------------------------
+        # --- Période choisie --------------------------------------------------
         month_lines = Journal.search([
-            ('company_id', '=', company.id), ('day', '>=', month_start)])
+            ('company_id', '=', company.id),
+            ('day', '>=', date_from), ('day', '<=', date_to)])
         month_by_kind = {}
         month_by_category = {}
         for line in month_lines:
             month_by_kind[line.kind] = month_by_kind.get(line.kind, 0.0) + abs(line.amount)
             month_by_category[line.category] = (
                 month_by_category.get(line.category, 0.0) + abs(line.amount))
+        dt_from = fields.Datetime.to_datetime(date_from)
+        dt_to = fields.Datetime.to_datetime(fields.Date.add(date_to, days=1))
         month_sessions = Session.search([
-            ('company_id', '=', company.id), ('date_open', '>=', month_start)])
+            ('company_id', '=', company.id),
+            ('date_open', '>=', dt_from), ('date_open', '<', dt_to)])
         closed = month_sessions.filtered(lambda s: s.state == 'closed')
         gap_sessions = closed.filtered(
             lambda s: not currency.is_zero(s.difference))
 
-        # --- 7 derniers jours (espèces entrées / sorties) ---------------------
-        days = []
-        for offset in range(6, -1, -1):
-            day = fields.Date.subtract(today, days=offset)
-            lines = Journal.search([('company_id', '=', company.id), ('day', '=', day)])
-            days.append({
-                'day': fields.Date.to_string(day),
-                'label': day.strftime('%d/%m'),
-                'in': rnd(sum(lines.mapped('amount_in'))),
-                'out': rnd(sum(lines.mapped('amount_out'))),
-            })
+        # --- Graphique de la période (espèces entrées / sorties) --------------
+        # par jour jusqu'à 31 jours, sinon par mois
+        nb_days = (date_to - date_from).days + 1
+        by_month = nb_days > 31
+        buckets = {}
+        if by_month:
+            cursor = date_from.replace(day=1)
+            while cursor <= date_to:
+                buckets[cursor] = {
+                    'day': fields.Date.to_string(max(cursor, date_from)),
+                    'day_to': fields.Date.to_string(min(
+                        fields.Date.end_of(cursor, 'month'), date_to)),
+                    'label': cursor.strftime('%m/%Y'), 'in': 0.0, 'out': 0.0}
+                cursor = fields.Date.add(cursor, months=1)
+        else:
+            for offset in range(nb_days):
+                day = fields.Date.add(date_from, days=offset)
+                buckets[day] = {
+                    'day': fields.Date.to_string(day), 'day_to': fields.Date.to_string(day),
+                    'label': day.strftime('%d/%m'), 'in': 0.0, 'out': 0.0}
+        for line in month_lines:
+            key = line.day.replace(day=1) if by_month else line.day
+            if key in buckets:
+                buckets[key]['in'] += line.amount_in
+                buckets[key]['out'] += line.amount_out
+        days = [dict(b, **{'in': rnd(b['in']), 'out': rnd(b['out'])})
+                for _k, b in sorted(buckets.items())]
         max_day = max([max(d['in'], d['out']) for d in days] + [1])
 
         # --- Dernières opérations et dernières caisses fermées --------------
@@ -375,7 +401,7 @@ class CaisseSession(models.Model):
             ('company_id', '=', company.id),
             ('move_type', '!=', 'in'),
             ('attachment', '=', False),
-            ('date', '>=', fields.Datetime.to_datetime(month_start)),
+            ('date', '>=', dt_from), ('date', '<', dt_to),
         ])
 
         return {
@@ -389,8 +415,10 @@ class CaisseSession(models.Model):
                 'spent': rnd(today_spent),
             },
             'month': {
-                'label': today.strftime('%m/%Y'),
-                'start': fields.Date.to_string(month_start),
+                'label': date_from.strftime('%d/%m/%Y') + ' – ' + date_to.strftime('%d/%m/%Y'),
+                'start': fields.Date.to_string(date_from),
+                'end': fields.Date.to_string(date_to),
+                'by_month': by_month,
                 'payments': rnd(month_by_kind.get('payment', 0.0)),
                 'refunds': rnd(month_by_kind.get('refund', 0.0)),
                 'in': rnd(month_by_kind.get('in', 0.0)),
@@ -410,6 +438,7 @@ class CaisseSession(models.Model):
                 'gap_total': rnd(sum(closed.mapped('difference'))),
                 'missing_proof': missing_proof,
             },
+            'today_iso': fields.Date.to_string(today),
             'days': days,
             'max_day': max_day,
             'recent': recent,

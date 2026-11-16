@@ -14,14 +14,91 @@ export class CaisseDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.state = proxy({ data: null, loading: true });
+        this.state = proxy({
+            data: null,
+            loading: true,
+            preset: "month",
+            dateFrom: "",
+            dateTo: "",
+            periodError: "",
+        });
+        this.applyPreset("month", false);
         onWillStart(() => this.loadData());
     }
 
     async loadData() {
         this.state.loading = true;
-        this.state.data = await this.orm.call("caisse.session", "get_dashboard_data", []);
+        this.state.data = await this.orm.call("caisse.session", "get_dashboard_data", [], {
+            date_from: this.state.dateFrom || false,
+            date_to: this.state.dateTo || false,
+        });
         this.state.loading = false;
+    }
+
+    // ------------------------------------------------------------------
+    // Période des statistiques
+    // ------------------------------------------------------------------
+    static PRESETS = [
+        ["today", "Aujourd'hui"],
+        ["7days", "7 derniers jours"],
+        ["month", "Ce mois"],
+        ["last_month", "Mois dernier"],
+        ["year", "Cette année"],
+    ];
+
+    get presets() {
+        return CaisseDashboard.PRESETS;
+    }
+
+    isoDate(date) {
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    applyPreset(preset, reload = true) {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = today.getMonth();
+        let from = today;
+        let to = today;
+        if (preset === "7days") {
+            from = new Date(y, m, today.getDate() - 6);
+        } else if (preset === "month") {
+            from = new Date(y, m, 1);
+        } else if (preset === "last_month") {
+            from = new Date(y, m - 1, 1);
+            to = new Date(y, m, 0);
+        } else if (preset === "year") {
+            from = new Date(y, 0, 1);
+        }
+        this.state.preset = preset;
+        this.state.dateFrom = this.isoDate(from);
+        this.state.dateTo = this.isoDate(to);
+        this.state.periodError = "";
+        if (reload) {
+            this.loadData();
+        }
+    }
+
+    onDateChange(field, ev) {
+        this.state[field] = ev.target.value;
+        this.state.preset = "custom";
+        const { dateFrom, dateTo } = this.state;
+        if (!dateFrom || !dateTo) {
+            this.state.periodError = "Choisissez les deux dates.";
+            return;
+        }
+        if (dateFrom > dateTo) {
+            this.state.periodError = "La date « du » doit être avant la date « au ».";
+            return;
+        }
+        this.state.periodError = "";
+        this.loadData();
+    }
+
+    periodDomain(field = "day") {
+        const p = this.data.month || {};
+        return [[field, ">=", p.start], [field, "<=", p.end]];
     }
 
     get data() {
@@ -122,7 +199,7 @@ export class CaisseDashboard extends Component {
     }
 
     openToday(kinds, name) {
-        const domain = [["day", "=", this.todayIso()]];
+        const domain = [["day", "=", this.data.today_iso]];
         if (kinds) {
             domain.push(["kind", "in", kinds]);
         }
@@ -130,21 +207,29 @@ export class CaisseDashboard extends Component {
     }
 
     openMonth(kinds, name) {
-        const domain = [["day", ">=", this.data.month.start]];
+        const domain = this.periodDomain();
         if (kinds) {
             domain.push(["kind", "in", kinds]);
         }
-        this.openJournal(domain, name);
+        this.openJournal(domain, `${name} (${this.data.month.label})`);
     }
 
-    openDay(day) {
-        this.openJournal([["day", "=", day]], `Journal du ${day.split("-").reverse().join("/")}`);
+    openDay(bucket) {
+        const fr = (iso) => iso.split("-").reverse().join("/");
+        if (bucket.day === bucket.day_to) {
+            this.openJournal([["day", "=", bucket.day]], `Journal du ${fr(bucket.day)}`);
+        } else {
+            this.openJournal(
+                [["day", ">=", bucket.day], ["day", "<=", bucket.day_to]],
+                `Journal du ${fr(bucket.day)} au ${fr(bucket.day_to)}`
+            );
+        }
     }
 
     openTodayPayments(mode, label) {
         const domain = [
             ["hotel_reservation_id", "!=", false],
-            ["date", "=", this.todayIso()],
+            ["date", "=", this.data.today_iso],
             ["state", "in", ["paid", "reconciled"]],
         ];
         if (mode) {
@@ -169,16 +254,13 @@ export class CaisseDashboard extends Component {
                 ["move_type", "!=", "in"],
                 ["attachment", "=", false],
                 ["date", ">=", this.data.month.start + " 00:00:00"],
+                ["date", "<=", this.data.month.end + " 23:59:59"],
             ],
             views: [[false, "list"], [false, "form"]],
             target: "current",
         });
     }
 
-    todayIso() {
-        const days = this.data.days || [];
-        return days.length ? days[days.length - 1].day : "";
-    }
 }
 
 CaisseDashboard.template = "caisse.Dashboard";

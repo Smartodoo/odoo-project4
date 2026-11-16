@@ -118,7 +118,31 @@ class TestCaisse(TransactionCase):
         self.assertEqual(data['current']['spent'], 400)
         self.assertGreaterEqual(data['month']['expense'], 400)
         self.assertGreaterEqual(data['month']['missing_proof'], 1)  # dépense sans justificatif
-        self.assertEqual(len(data['days']), 7)
+        # période par défaut : du 1er du mois à aujourd'hui, un point par jour
+        today = fields.Date.context_today(session)
+        self.assertEqual(len(data['days']), today.day)
+        self.assertEqual(data['month']['start'], fields.Date.to_string(today.replace(day=1)))
+        self.assertEqual(data['month']['end'], fields.Date.to_string(today))
+        # période choisie : du jour seulement
+        day_data = self.env['caisse.session'].get_dashboard_data(
+            fields.Date.to_string(today), fields.Date.to_string(today))
+        self.assertEqual(len(day_data['days']), 1)
+        self.assertGreaterEqual(day_data['month']['expense'], 400)
+        self.assertGreaterEqual(day_data['days'][0]['in'], 3000)
+        # période passée sans opération : tout à 0
+        old_data = self.env['caisse.session'].get_dashboard_data('2001-01-01', '2001-01-31')
+        self.assertEqual(old_data['month']['expense'], 0)
+        self.assertEqual(old_data['month']['missing_proof'], 0)
+        # dates inversées : remises dans l'ordre
+        self.assertEqual(self.env['caisse.session'].get_dashboard_data(
+            '2001-01-31', '2001-01-01')['month']['start'], '2001-01-01')
+        # plus de 31 jours : un point par mois
+        year_data = self.env['caisse.session'].get_dashboard_data('2001-01-15', '2001-04-10')
+        self.assertTrue(year_data['month']['by_month'])
+        self.assertEqual([d['label'] for d in year_data['days']],
+                         ['01/2001', '02/2001', '03/2001', '04/2001'])
+        self.assertEqual(year_data['days'][0]['day'], '2001-01-15')
+        self.assertEqual(year_data['days'][-1]['day_to'], '2001-04-10')
 
         # Saisie rapide depuis la caisse : type et caisse pré-remplis
         action = session.action_new_out()
