@@ -50,3 +50,25 @@ class TestAutoBeds(TransactionCase):
         room = f.record
         self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-202-L1', 'Lit porte'])
         self.assertEqual(set(room.bed_ids.mapped('price')), {2000})
+
+    def test_capacity_increase_adds_beds(self):
+        room = self._room(capacity=2)
+        room.bed_ids.filtered(lambda b: b.name == 'AB-101-L2').name = 'Lit fenêtre'
+        room.capacity = 4
+        self.assertEqual(sorted(room.bed_ids.mapped('name')),
+                         ['AB-101-L1', 'AB-101-L2', 'AB-101-L3', 'Lit fenêtre'])
+        # baisse de capacité : aucun lit supprimé automatiquement
+        room.capacity = 3
+        self.assertEqual(len(room.bed_ids), 4)
+
+    def test_capacity_increase_form(self):
+        from odoo.tests import Form
+        room = self._room(capacity=2)
+        view = 'hotel_management.view_hotel_room_config_form'
+        with Form(room, view=view) as f:
+            f.capacity = 5
+            self.assertEqual(len(f.bed_ids), 5)
+            f.capacity = 3
+            self.assertEqual(len(f.bed_ids), 3)
+        self.assertEqual(sorted(room.bed_ids.mapped('name')),
+                         ['AB-101-L1', 'AB-101-L2', 'AB-101-L3'])

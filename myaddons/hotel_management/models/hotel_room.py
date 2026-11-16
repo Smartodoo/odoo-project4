@@ -177,9 +177,38 @@ class HotelRoom(models.Model):
             rooms._create_missing_beds()
         return rooms
 
+    def write(self, vals):
+        res = super().write(vals)
+        if 'capacity' in vals and not self.env.context.get('hotel_no_auto_beds'):
+            self._create_missing_beds()
+        return res
+
+    def _onchange_topup_beds(self):
+        """Chambre existante : ajuste les lits non encore enregistrés à la capacité
+        (ajout de <chambre>-L<n>, ou retrait des lignes ajoutées en trop)."""
+        capacity = self.capacity or 0
+        new_beds = self.bed_ids.filtered(lambda b: not b._origin)
+        extra = len(self.bed_ids) - capacity
+        if extra > 0 and new_beds:
+            self.bed_ids -= new_beds[-extra:]
+        elif extra < 0:
+            taken = set(self.env['hotel.bed'].with_context(active_test=False).search(
+                [('room_id', '=', self._origin.id)]).mapped('name'))
+            taken |= set(self.bed_ids.mapped('name'))
+            price = self._default_bed_price()
+            commands = []
+            for _i in range(-extra):
+                name = self._next_bed_reference(taken)
+                taken.add(name)
+                commands.append(Command.create({'name': name, 'price': price}))
+            self.bed_ids = commands
+
     def _create_missing_beds(self):
         """Crée automatiquement les lits manquants jusqu'à la capacité de la
         chambre, nommés <chambre>-L<n> (référence modifiable ensuite)."""
+        # renommages de lits encore en attente : à écrire avant les INSERT
+        # (contrainte unique(name, room_id)).
+        self.env['hotel.bed'].flush_model(['name', 'room_id'])
         bed_vals = []
         for room in self:
             existing = room.with_context(active_test=False).bed_ids
@@ -242,8 +271,12 @@ class HotelRoom(models.Model):
     @api.onchange('capacity', 'name')
     def _onchange_auto_beds(self):
         """Nouvelle chambre : pré-remplit l'onglet « Lits » avec un lit par place
-        (<chambre>-L<n>). Les lits renommés à la main sont conservés."""
-        if self._origin.id or not self.name:
+        (<chambre>-L<n>). Les lits renommés à la main sont conservés.
+        Chambre existante : une hausse de capacité ajoute les lits manquants."""
+        if not self.name:
+            return
+        if self._origin.id:
+            self._onchange_topup_beds()
             return
         auto = re.compile(r'.+-L\d+$')
         custom = self.bed_ids.filtered(lambda b: not auto.match(b.name or ''))
