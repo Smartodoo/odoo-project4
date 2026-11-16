@@ -132,6 +132,7 @@
     .o_hotel_offer_tag {
         display: inline-flex;
         align-items: center;
+        gap: .3em;  // en flex, l'espace « dès <prix> » est supprimé : on le recrée
         padding: 3px 10px;
         border-radius: 20px;
         font-size: 12px;
