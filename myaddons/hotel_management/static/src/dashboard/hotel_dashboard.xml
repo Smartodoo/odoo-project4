@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <t t-name="hotel_management.Dashboard">
         <div class="o_hotel_dashboard">
-            <t t-if="this.state.loading">
+            <t t-if="this.state.loading and !this.state.data">
                 <div class="o_hotel_loading">
                     <i class="oi oi-spin oi-2x" data-icon="progress_activity"/>
                     <div>Chargement du tableau de bord…</div>
@@ -120,6 +120,35 @@
                     </section>
                 </div>
 
+                <!-- Choix de la période du bloc « Sur la période » -->
+                <div class="o_hotel_period">
+                    <div class="o_hotel_period_title">
+                        <i class="oi me-2" data-icon="date_range"/>Statistiques de la période
+                    </div>
+                    <div class="o_hotel_presets">
+                        <t t-foreach="this.presets" t-as="p" t-key="p[0]">
+                            <button t-attf-class="btn btn-sm {{this.state.preset === p[0] ? 'btn-primary' : 'btn-light'}}"
+                                    t-on-click="() => this.applyPreset(p[0])">
+                                <t t-out="p[1]"/>
+                            </button>
+                        </t>
+                    </div>
+                    <div class="o_hotel_range">
+                        <label>Du</label>
+                        <input type="date" class="form-control form-control-sm"
+                               t-att-value="this.state.dateFrom"
+                               t-on-change="(ev) => this.onDateChange('dateFrom', ev)"/>
+                        <label>au</label>
+                        <input type="date" class="form-control form-control-sm"
+                               t-att-value="this.state.dateTo"
+                               t-on-change="(ev) => this.onDateChange('dateTo', ev)"/>
+                        <i t-if="this.state.loading" class="oi oi-spin ms-1" data-icon="progress_activity"/>
+                    </div>
+                    <div class="o_hotel_period_error text-danger small" t-if="this.state.periodError">
+                        <t t-out="this.state.periodError"/>
+                    </div>
+                </div>
+
                 <div class="o_hotel_grid">
                     <!-- Taux d'occupation -->
                     <div class="o_hotel_card">
@@ -163,15 +192,15 @@
                         </table>
                     </div>
 
-                    <!-- Statistiques du mois -->
+                    <!-- Statistiques de la période choisie -->
                     <div class="o_hotel_card">
-                        <h3>Ce mois-ci</h3>
+                        <h3>Sur la période <span class="text-muted fw-normal small">(<t t-out="this.periodLabel"/>)</span></h3>
                         <div class="o_hotel_stat_row">
                             <div class="o_hotel_stat o_hotel_stat_link"
-                                 title="Voir les réservations du mois"
-                                 t-on-click="() => this.openTile('hotel.reservation', 'month_reservations', 'Réservations du mois')">
+                                 title="Voir les réservations dont l'arrivée tombe dans la période"
+                                 t-on-click="() => this.openTile('hotel.reservation', 'month_reservations', 'Réservations (' + this.periodLabel + ')')">
                                 <div class="o_hotel_stat_value"><t t-out="this.state.data.month_reservations"/></div>
-                                <div class="o_hotel_stat_label">Réservations</div>
+                                <div class="o_hotel_stat_label">Réservations (arrivées)</div>
                             </div>
                             <div class="o_hotel_stat">
                                 <div class="o_hotel_stat_value"><t t-out="this.formatAmount(this.state.data.month_revenue)"/></div>
@@ -179,10 +208,31 @@
                             </div>
                         </div>
                         <div class="o_hotel_stat_row mt-2">
-                            <div class="o_hotel_stat">
+                            <div class="o_hotel_stat o_hotel_stat_link"
+                                 title="Voir les paiements reçus sur la période"
+                                 t-on-click="() => this.openPeriodPayments()">
                                 <div class="o_hotel_stat_value"><t t-out="this.formatAmount(this.state.data.month_collected)"/></div>
                                 <div class="o_hotel_stat_label">Encaissements</div>
                             </div>
+                            <div class="o_hotel_stat"
+                                 title="Places x nuits vendues sur la période (réservations non annulées)">
+                                <div class="o_hotel_stat_value"><t t-out="this.state.data.period.nights"/></div>
+                                <div class="o_hotel_stat_label">Nuitées vendues</div>
+                            </div>
+                        </div>
+                        <div class="o_hotel_stat_row mt-2">
+                            <div class="o_hotel_stat"
+                                 t-att-title="'Nuitées vendues / (lits x ' + this.state.data.period.days + ' nuit(s))'">
+                                <div class="o_hotel_stat_value"><t t-out="this.state.data.period.bed_rate"/>%</div>
+                                <div class="o_hotel_stat_label">Occupation moyenne des lits</div>
+                            </div>
+                            <div class="o_hotel_stat">
+                                <div class="o_hotel_stat_value"><t t-out="this.state.data.period.days"/></div>
+                                <div class="o_hotel_stat_label">Nuit(s) dans la période</div>
+                            </div>
+                        </div>
+                        <h3 class="mt-3">En ce moment</h3>
+                        <div class="o_hotel_stat_row">
                             <div class="o_hotel_stat o_hotel_stat_link"
                                  title="Voir les réservations impayées"
                                  t-on-click="() => this.openTile('hotel.reservation', 'unpaid', 'Impayés')">

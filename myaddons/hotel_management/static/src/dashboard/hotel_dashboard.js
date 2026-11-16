@@ -8,18 +8,107 @@ export class HotelDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.state = proxy({ data: null, loading: true });
+        this.state = proxy({
+            data: null,
+            loading: true,
+            preset: "month",
+            dateFrom: "",
+            dateTo: "",
+            periodError: "",
+        });
+        this.applyPreset("month", false);
         onWillStart(() => this.loadData());
     }
 
     async loadData() {
         this.state.loading = true;
-        this.state.data = await this.orm.call(
-            "hotel.reservation",
-            "get_dashboard_data",
-            []
-        );
+        this.state.data = await this.orm.call("hotel.reservation", "get_dashboard_data", [], {
+            date_from: this.state.dateFrom || false,
+            date_to: this.state.dateTo || false,
+        });
         this.state.loading = false;
+    }
+
+    // ------------------------------------------------------------------
+    // Période du bloc « Sur la période »
+    // ------------------------------------------------------------------
+    static PRESETS = [
+        ["today", "Aujourd'hui"],
+        ["7days", "7 derniers jours"],
+        ["month", "Ce mois"],
+        ["last_month", "Mois dernier"],
+        ["year", "Cette année"],
+    ];
+
+    get presets() {
+        return HotelDashboard.PRESETS;
+    }
+
+    isoDate(date) {
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    applyPreset(preset, reload = true) {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = today.getMonth();
+        let from = today;
+        let to = today;
+        if (preset === "7days") {
+            from = new Date(y, m, today.getDate() - 6);
+        } else if (preset === "month") {
+            from = new Date(y, m, 1);
+        } else if (preset === "last_month") {
+            from = new Date(y, m - 1, 1);
+            to = new Date(y, m, 0);
+        } else if (preset === "year") {
+            from = new Date(y, 0, 1);
+        }
+        this.state.preset = preset;
+        this.state.dateFrom = this.isoDate(from);
+        this.state.dateTo = this.isoDate(to);
+        this.state.periodError = "";
+        if (reload) {
+            this.loadData();
+        }
+    }
+
+    onDateChange(field, ev) {
+        this.state[field] = ev.target.value;
+        this.state.preset = "custom";
+        const { dateFrom, dateTo } = this.state;
+        if (!dateFrom || !dateTo) {
+            this.state.periodError = "Choisissez les deux dates.";
+            return;
+        }
+        if (dateFrom > dateTo) {
+            this.state.periodError = "La date « du » doit être avant la date « au ».";
+            return;
+        }
+        this.state.periodError = "";
+        this.loadData();
+    }
+
+    get periodLabel() {
+        return (this.state.data && this.state.data.period && this.state.data.period.label) || "";
+    }
+
+    openPeriodPayments() {
+        const p = this.state.data.period;
+        this.action.doAction({
+            type: "ir.actions.act_window",
+            name: `Encaissements (${p.label})`,
+            res_model: "account.payment",
+            domain: [
+                ["hotel_reservation_id", "!=", false],
+                ["state", "in", ["paid", "reconciled"]],
+                ["date", ">=", p.start],
+                ["date", "<=", p.end],
+            ],
+            views: [[false, "list"], [false, "form"]],
+            target: "current",
+        });
     }
 
     formatAmount(value) {

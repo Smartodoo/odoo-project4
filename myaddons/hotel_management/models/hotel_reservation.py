@@ -783,9 +783,17 @@ class HotelReservation(models.Model):
                     name=rec.name))
 
     @api.model
-    def get_dashboard_data(self):
-        """Données agrégées pour le tableau de bord hôtelier."""
+    def get_dashboard_data(self, date_from=None, date_to=None):
+        """Données agrégées pour le tableau de bord hôtelier.
+        date_from / date_to (« AAAA-MM-JJ », inclus) : période du bloc « Sur la
+        période » (réservations, CA, encaissements, nuitées, occupation moyenne).
+        Par défaut : du 1er du mois à aujourd'hui. Les autres indicateurs
+        (chambres, clients présents, arrivées / départs…) restent en temps réel."""
         today = fields.Date.context_today(self)
+        date_from = fields.Date.to_date(date_from) or today.replace(day=1)
+        date_to = fields.Date.to_date(date_to) or today
+        if date_from > date_to:
+            date_from, date_to = date_to, date_from
         Room = self.env['hotel.room']
         Line = self.env['hotel.reservation.line']
 
@@ -809,6 +817,7 @@ class HotelReservation(models.Model):
         free_beds = sum(r.beds_free_count for r in sellable)
         bed_occupancy_rate = round(
             ((total_beds - free_beds) / total_beds) * 100, 1) if total_beds else 0.0
+        all_active_beds = sum(len(r.bed_ids.filtered('active')) for r in rooms)
 
         occ_lines = Line.search([
             ('state', '=', 'checkin'),
@@ -825,11 +834,25 @@ class HotelReservation(models.Model):
         departures_today = self.search_count([
             ('checkout', '=', today), ('state', 'in', ('checkin', 'checkout'))])
 
-        month_start = today.replace(day=1)
+        # --- Période choisie : réservations dont l'arrivée tombe dans la période
         month_res = self.search([
-            ('state', '!=', 'cancel'), ('checkin', '>=', month_start)])
+            ('state', '!=', 'cancel'),
+            ('checkin', '>=', date_from), ('checkin', '<=', date_to)])
         month_reservations = len(month_res)
         month_revenue = sum(month_res.mapped('amount_total'))
+
+        # Nuitées vendues sur la période (place x nuit, une nuit = du jour d au
+        # lendemain) et occupation moyenne des lits.
+        period_end = fields.Date.add(date_to, days=1)
+        period_days = (period_end - date_from).days
+        night_lines = Line.search([
+            ('state', '!=', 'cancel'),
+            ('checkin', '<', period_end), ('checkout', '>', date_from)])
+        period_nights = 0
+        for line in night_lines:
+            nights = (min(line.checkout, period_end) - max(line.checkin, date_from)).days
+            if nights > 0:
+                period_nights += nights * line._get_places()
 
         # Réservations à venir, encaissements et impayés (cahier des charges §15)
         upcoming = self.search([
@@ -840,11 +863,10 @@ class HotelReservation(models.Model):
             'checkin': fields.Date.to_string(r.checkin),
             'rooms': ', '.join(r.line_ids.mapped('room_id.name')) or '—',
         } for r in upcoming[:8]]
-        month_end = (month_start + timedelta(days=32)).replace(day=1)
         month_payments = self.env['account.payment'].sudo().search([
             ('hotel_reservation_id', '!=', False),
             ('state', 'in', ('paid', 'reconciled')),
-            ('date', '>=', month_start), ('date', '<', month_end),
+            ('date', '>=', date_from), ('date', '<=', date_to),
         ])
         month_collected = sum(month_payments.mapped('amount_company_currency_signed'))
         unpaid_res = self.search([
@@ -943,6 +965,16 @@ class HotelReservation(models.Model):
             'month_reservations': month_reservations,
             'month_revenue': month_revenue,
             'month_collected': month_collected,
+            'period': {
+                'start': fields.Date.to_string(date_from),
+                'end': fields.Date.to_string(date_to),
+                'label': date_from.strftime('%d/%m/%Y') + ' – ' + date_to.strftime('%d/%m/%Y'),
+                'days': period_days,
+                'nights': period_nights,
+                'capacity': all_active_beds * period_days,
+                'bed_rate': round(period_nights / (all_active_beds * period_days) * 100, 1)
+                if all_active_beds and period_days else 0.0,
+            },
             'upcoming_count': len(upcoming),
             'upcoming_list': upcoming_list,
             'departures_list': departures_list,
