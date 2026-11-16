@@ -151,23 +151,25 @@ class TestBookingTypeWebsite(BookingTypeCommon, HttpCase):
     def test_rooms_page_by_type(self):
         self._book_bed(self.room_a.bed_ids[0])
         self._book_room(self.room_d)
-        # Par défaut (sans type choisi) : chambres ET dortoirs, onglets visibles
+        # Sans type choisi : pas de résultats, le client doit choisir
         default = self.url_open('/hotel/rooms?checkin=%s&checkout=%s&guests=1'
                                 % (self.ci, self.co)).text
+        self.assertIn('Choisissez le type de location', default)
         self.assertIn('Lit en dortoir', default)
-        self.assertIn('Chambre BT-A', self._available_part(default))
-        self.assertIn('Chambre BT-C', self._available_part(default))
+        self.assertNotIn('Chambres disponibles', default)
         self.assertIn('Chambre BT-B', self.url_open('/hotel/rooms').text)
         by_room = self._available_part(self._rooms_page('room'))
         self.assertIn('Chambre BT-C', by_room)
         self.assertNotIn('Chambre BT-D', by_room)   # déjà réservée
         self.assertNotIn('Chambre BT-A', by_room)   # dortoir
         by_bed = self._available_part(self._rooms_page('bed'))
-        self.assertIn('Chambre BT-A', by_bed)       # partielle proposée d'abord
-        self.assertNotIn('Chambre BT-B', by_bed)
+        # la chambre partagée d'abord, puis les chambres entièrement libres
+        self.assertIn('Chambre BT-A', by_bed)
+        self.assertIn('Chambre BT-B', by_bed)
+        self.assertLess(by_bed.index('Chambre BT-A'), by_bed.index('Chambre BT-B'))
         self.assertNotIn('Chambre BT-C', by_bed)
-        self.assertIn('chambres déjà partagées', by_bed)
-        # 4 personnes : A n'a plus que 3 lits -> chambres libres proposées
+        self.assertIn('chambres partagées', by_bed)
+        # trop de voyageurs pour les lits libres de A -> A n'est plus proposée
         self.assertNotIn('Chambre BT-A', self._available_part(self._rooms_page('bed', 4)))
 
     def test_website_bed_booking_one_line_per_bed(self):

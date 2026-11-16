@@ -25,8 +25,8 @@
                             </div>
                             <div class="o_hotel_search_field">
                                 <label>Type de location</label>
-                                <select name="booking_type">
-                                    <option value="" t-att-selected="not booking_type">Tout</option>
+                                <select name="booking_type" required="required">
+                                    <option value="" disabled="disabled" t-att-selected="not booking_type">Choisir…</option>
                                     <option value="room" t-att-selected="booking_type == 'room'">Chambre entière</option>
                                     <option value="bed" t-att-selected="booking_type == 'bed'">Lit en dortoir</option>
                                 </select>
@@ -44,10 +44,6 @@
                     <!-- Choix bien visible : chambre entière ou lit en dortoir -->
                     <t t-set="type_qs" t-value="'checkin=%s&amp;checkout=%s&amp;guests=%s' % (checkin or '', checkout or '', guests)"/>
                     <div class="o_hotel_type_tabs nav nav-pills mb-3">
-                        <a t-attf-href="/hotel/rooms?#{type_qs}"
-                           t-attf-class="nav-link #{'active' if not booking_type else ''}">
-                            <i class="oi me-1" data-icon="apps"/>Toutes
-                        </a>
                         <a t-attf-href="/hotel/rooms?#{type_qs}&amp;booking_type=room"
                            t-attf-class="nav-link #{'active' if booking_type == 'room' else ''}">
                             <i class="oi me-1" data-icon="home"/>Chambre entière
@@ -65,10 +61,18 @@
                         <h2 class="mb-3">Chambres disponibles
                             <small class="text-muted">du <t t-out="checkin"/> au <t t-out="checkout"/></small>
                         </h2>
-                        <div t-if="booking_type == 'bed' and available_rooms and any(offers[r.id].get('partial') for r in available_rooms)"
-                             class="alert alert-info o_hotel_partial_hint">
-                            <i class="oi me-1" data-icon="bed"/>
-                            Nous vous proposons d'abord les lits encore libres des chambres déjà partagées.
+                        <div t-if="available_rooms" class="alert alert-info o_hotel_partial_hint">
+                            <t t-if="booking_type == 'bed'">
+                                <i class="oi me-1" data-icon="bed"/>
+                                Pour <t t-out="guests"/> voyageur(s) : d'abord les chambres partagées ayant juste
+                                le nombre de lits libres qu'il vous faut, puis celles qui en ont davantage,
+                                puis les chambres entièrement libres.
+                            </t>
+                            <t t-else="">
+                                <i class="oi me-1" data-icon="home"/>
+                                Pour <t t-out="guests"/> voyageur(s) : d'abord les chambres de votre taille,
+                                puis les chambres plus grandes.
+                            </t>
                         </div>
                         <t t-if="available_rooms">
                             <div class="row">
@@ -151,6 +155,10 @@
                         <t t-if="offer">
                             <span t-if="offer['whole'] and booking_type != 'bed'" class="o_hotel_offer_tag o_hotel_offer_ok">
                                 <i class="oi me-1" data-icon="check"/>Chambre entière
+                            </span>
+                            <span t-if="booking_type == 'bed' and offer.get('free_count') == guests or booking_type == 'room' and offer['whole'] and room.capacity == guests"
+                                  class="o_hotel_offer_tag o_hotel_offer_ok">
+                                <i class="oi me-1" data-icon="verified"/>Idéal pour <t t-out="guests"/> voyageur(s)
                             </span>
                             <span t-if="offer.get('partial')" class="o_hotel_offer_tag o_hotel_offer_beds">
                                 <i class="oi me-1" data-icon="group"/>Chambre partagée

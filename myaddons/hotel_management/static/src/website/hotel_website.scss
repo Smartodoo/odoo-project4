@@ -1188,10 +1188,25 @@ footer#bottom.o_footer {
         font-size: 15px;
         .oi { color: $ah-gold-2; margin-right: 6px; }
     }
+    // Type de location (obligatoire) : pastilles cliquables
     .ah_search_types {
         display: inline-flex;
+        flex-wrap: wrap;
         gap: 8px;
-        > span {
+        label {
+            position: relative;
+            margin: 0;
+            cursor: pointer;
+        }
+        // bouton radio masqué visuellement mais focusable / validable
+        input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            margin: 0;
+            cursor: pointer;
+        }
+        label > span {
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -1202,7 +1217,17 @@ footer#bottom.o_footer {
             color: $ah-on-dark-soft;
             font-size: 13px;
             font-weight: 500;
+            transition: background .15s, color .15s, border-color .15s;
             .oi { color: $ah-gold-2; }
+        }
+        label:hover > span { border-color: $ah-gold-2; }
+        input:focus-visible + span { outline: 2px solid $ah-gold-2; outline-offset: 2px; }
+        input:checked + span {
+            background: $ah-gold;
+            border-color: $ah-gold;
+            color: $ah-ink;
+            font-weight: 600;
+            .oi { color: $ah-ink; }
         }
     }
 
@@ -1249,7 +1274,7 @@ footer#bottom.o_footer {
         .ah_trust { gap: 10px; margin: 24px 0 26px; li { max-width: none; } }
         .ah_mark { white-space: normal; }
         .ah_search_panel { padding: 10px; border-radius: 26px; }
-        .ah_search_types { display: none; }
+        .ah_search_head { flex-wrap: wrap; gap: 8px; }
     }
 
     @keyframes ah-pulse {

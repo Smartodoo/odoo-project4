@@ -50,23 +50,30 @@ class HotelWebsite(http.Controller):
                 for r in rooms:
                     offers[r.id] = r.get_offer(ci, co, guests)
                 if not booking_type:
-                    available_rooms = rooms.filtered(lambda r: offers[r.id]['bookable'])
-                    occupied_rooms = rooms - available_rooms
+                    error = ("Choisissez le type de location (chambre entière ou lit "
+                             "en dortoir) pour voir les disponibilités.")
+                    dates_selected = False
                 elif booking_type == 'room':
-                    # Par chambre : uniquement les chambres libres en entier
-                    available_rooms = rooms.filtered(lambda r: offers[r.id]['whole'])
+                    # Par chambre : chambres libres en entier pouvant accueillir
+                    # le groupe, de la capacité la plus proche à la plus grande.
+                    fits = rooms.filtered(lambda r: offers[r.id]['whole'])
+                    available_rooms = fits.sorted(
+                        lambda r: (r.capacity, r.room_price, r.name or ''))
                     occupied_rooms = rooms - available_rooms
                 else:
-                    # Par lit : d'abord les chambres partiellement réservées
-                    # (assez de lits libres) ; à défaut, les chambres libres.
+                    # Par lit : d'abord les chambres déjà partagées, du nombre de
+                    # lits libres le plus proche du nombre de voyageurs au plus
+                    # grand ; puis les chambres entièrement vides (même ordre).
                     offer = Room._hotel_bed_offer(ci, co, domain=published)
-                    fits = [(room, partial) for room, free, partial in offer
+                    fits = [(room, free, partial) for room, free, partial in offer
                             if room in rooms and len(free) >= guests]
-                    partial_rooms = Room.browse([r.id for r, p in fits if p])
-                    available_rooms = partial_rooms or Room.browse([r.id for r, p in fits])
-                    for room in available_rooms:
-                        offers[room.id]['partial'] = room in partial_rooms
-                    occupied_rooms = rooms - Room.browse([r.id for r, p in fits])
+                    fits.sort(key=lambda f: (not f[2], len(f[1]), f[0].bed_price,
+                                             f[0].name or ''))
+                    available_rooms = Room.browse([room.id for room, _f, _p in fits])
+                    for room, free, partial in fits:
+                        offers[room.id]['partial'] = partial
+                        offers[room.id]['free_count'] = len(free)
+                    occupied_rooms = rooms - available_rooms
             else:
                 error = "Veuillez saisir des dates valides (le départ doit suivre l'arrivée)."
 
@@ -86,8 +93,9 @@ class HotelWebsite(http.Controller):
         return request.render('hotel_management.rooms_page', values)
 
     def _booking_type(self, kw):
-        """Type de location demandé : 'room' (chambre entière), 'bed' (lit en
-        dortoir) ou '' (tout afficher, par défaut)."""
+        """Type de location demandé : 'room' (chambre entière) ou 'bed' (lit en
+        dortoir). Obligatoire pour une recherche avec dates ; '' = pas encore
+        choisi (catalogue sans dates)."""
         value = kw.get('booking_type')
         return value if value in ('room', 'bed') else ''
 
