@@ -159,8 +159,6 @@ class HotelRoom(models.Model):
                 self.price = self.room_type_id.list_price
             if not self.room_price:
                 self.room_price = self.room_type_id.list_price
-            if not self.bed_price:
-                self.bed_price = self.room_type_id.list_price
             if not self.capacity:
                 self.capacity = self.room_type_id.default_capacity
             self.rental_mode = self.room_type_id.rental_mode
@@ -176,6 +174,9 @@ class HotelRoom(models.Model):
         rooms = super().create(vals_list)
         if not self.env.context.get('hotel_no_auto_beds'):
             rooms._create_missing_beds()
+        for room, vals in zip(rooms, vals_list):
+            if vals.get('bed_price'):
+                room._sync_bed_prices()
         return rooms
 
     def write(self, vals):
@@ -186,7 +187,21 @@ class HotelRoom(models.Model):
         if 'capacity' in vals and not self.env.context.get('hotel_no_auto_beds'):
             self._create_missing_beds()
             self._remove_extra_beds()
+        if 'bed_price' in vals:
+            self._sync_bed_prices()
         return res
+
+    def _sync_bed_prices(self):
+        """Le « Prix lit » de la chambre fait foi : il est recopié sur tous ses
+        lits (actifs et archivés)."""
+        for room in self:
+            beds = room.with_context(active_test=False).bed_ids
+            beds.filtered(lambda b: b.price != room.bed_price).write({'price': room.bed_price})
+
+    @api.onchange('bed_price')
+    def _onchange_bed_price(self):
+        for bed in self.bed_ids:
+            bed.price = self.bed_price
 
     def _rename_beds(self, old_names):
         """Chambre renommée : <ancien>-L<n> devient <nouveau>-L<n>. Les lits
@@ -315,7 +330,7 @@ class HotelRoom(models.Model):
 
     def _default_bed_price(self):
         self.ensure_one()
-        return self.bed_price or self.room_type_id.list_price
+        return self.bed_price or 0.0
 
     def _number_new_beds(self, beds):
         """Numérote les nouveaux lits d'un formulaire : plusieurs lignes ajoutées

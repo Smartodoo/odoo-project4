@@ -50,7 +50,44 @@ class TestAutoBeds(TransactionCase):
             self.assertEqual(len(f.bed_ids), 2)
         room = f.record
         self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-202-L1', 'Lit porte'])
-        self.assertEqual(set(room.bed_ids.mapped('price')), {2000})
+        # pas de prix lit saisi : les lits restent à 0 (pas de repli sur le prix du type)
+        self.assertEqual(room.bed_price, 0)
+        self.assertEqual(set(room.bed_ids.mapped('price')), {0})
+
+    def test_form_creation_with_bed_price(self):
+        from odoo.tests import Form
+        view = 'hotel_management.view_hotel_room_config_form'
+        with Form(self.env['hotel.room'], view=view) as f:
+            f.room_type_id = self.rtype
+            f.name = 'AB-303'
+            f.capacity = 3
+            f.bed_price = 1800  # saisi après la génération des lits
+        self.assertEqual(set(f.record.bed_ids.mapped('price')), {1800})
+
+    def test_no_bed_price_gives_zero(self):
+        room = self._room(bed_price=0)
+        self.assertEqual(set(room.bed_ids.mapped('price')), {0})
+
+    def test_bed_price_change_updates_beds(self):
+        room = self._room(capacity=3)
+        room.bed_ids[0].price = 999  # prix modifié à la main sur un lit
+        archived = room.bed_ids[1]
+        archived.active = False
+        room.bed_price = 2500
+        beds = room.with_context(active_test=False).bed_ids
+        self.assertEqual(set(beds.mapped('price')), {2500})
+        self.assertIn(archived, beds)
+        # les lits ajoutés ensuite prennent aussi le nouveau prix
+        room.capacity = 4
+        self.assertEqual(set(room.bed_ids.mapped('price')), {2500})
+
+    def test_bed_price_change_form(self):
+        from odoo.tests import Form
+        room = self._room(capacity=2)
+        view = 'hotel_management.view_hotel_room_config_form'
+        with Form(room, view=view) as f:
+            f.bed_price = 3000
+        self.assertEqual(set(room.bed_ids.mapped('price')), {3000})
 
     def test_capacity_increase_adds_beds(self):
         room = self._room(capacity=2)
