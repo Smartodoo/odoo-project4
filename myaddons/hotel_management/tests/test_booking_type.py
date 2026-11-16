@@ -21,7 +21,7 @@ class BookingTypeCommon:
                 'website_published': True})
             return r
 
-        cls.room_a = room('BT-A', 4)
+        cls.room_a = room('BT-A', 3)
         cls.room_b = room('BT-B', 2)
         cls.room_c = room('BT-C', 2, mode='room')
         cls.room_d = room('BT-D', 2, mode='room')
@@ -105,7 +105,7 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
                 line.bed_id = bed
                 self.assertEqual(line.room_id, self.room_a)
         resa = form.save()
-        self.assertEqual(len(resa.line_ids), 3)
+        self.assertEqual(len(resa.line_ids), len(self.room_a.bed_ids) - 1)
         self.assertEqual(resa.line_ids.room_id, self.room_a)
         # A est pleine : plus de chambre partielle -> chambres libres proposées
         self.assertTrue(self.room_b.bed_ids <= resa.proposed_bed_ids)

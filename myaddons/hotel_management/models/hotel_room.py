@@ -4,7 +4,10 @@ from datetime import timedelta
 from markupsafe import Markup, escape
 
 from odoo import Command, _, api, fields, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+
+# Capacité maximale d'une chambre (nombre de places / lits)
+MAX_ROOM_CAPACITY = 3
 
 
 class HotelRoom(models.Model):
@@ -147,6 +150,15 @@ class HotelRoom(models.Model):
         'CHECK(capacity > 0)',
         "La capacit\u00e9 d'une chambre doit \u00eatre d'au moins 1 personne.",
     )
+    @api.constrains('capacity')
+    def _check_capacity_max(self):
+        for room in self:
+            if room.capacity > MAX_ROOM_CAPACITY:
+                raise ValidationError(_(
+                    "La chambre %(room)s ne peut pas dépasser %(max)s places "
+                    "(capacité saisie : %(capacity)s).",
+                    room=room.name, max=MAX_ROOM_CAPACITY, capacity=room.capacity))
+
     _prices_non_negative = models.Constraint(
         'CHECK(price >= 0 AND room_price >= 0 AND bed_price >= 0)',
         "Les prix d'une chambre (chambre enti\u00e8re, lit) ne peuvent pas \u00eatre n\u00e9gatifs.",

@@ -1,4 +1,7 @@
-from odoo import api, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+
+from .hotel_room import MAX_ROOM_CAPACITY
 
 
 class HotelRoomType(models.Model):
@@ -29,6 +32,14 @@ class HotelRoomType(models.Model):
         'CHECK(default_capacity > 0)',
         "La capacit\u00e9 par d\u00e9faut d'un type de chambre doit \u00eatre d'au moins 1 personne.",
     )
+    @api.constrains('default_capacity')
+    def _check_default_capacity_max(self):
+        for rtype in self:
+            if rtype.default_capacity > MAX_ROOM_CAPACITY:
+                raise ValidationError(_(
+                    "Le type %(type)s ne peut pas dépasser %(max)s places par chambre.",
+                    type=rtype.name, max=MAX_ROOM_CAPACITY))
+
     _list_price_non_negative = models.Constraint(
         'CHECK(list_price >= 0)',
         "Le prix d'un type de chambre ne peut pas \u00eatre n\u00e9gatif.",

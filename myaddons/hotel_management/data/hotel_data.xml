@@ -55,7 +55,7 @@
             <field name="sequence">1</field>
             <field name="rental_mode">bed</field>
             <field name="list_price">2000</field>
-            <field name="default_capacity">6</field>
+            <field name="default_capacity">3</field>
             <field name="description">Un dortoir pensé pour les familles : chacun son lit, tous réunis dans la même chambre, à petit prix.</field>
             <field name="amenity_ids" eval="[(6, 0, [ref('amenity_wifi'), ref('amenity_ac')])]"/>
         </record>
@@ -65,7 +65,7 @@
             <field name="sequence">2</field>
             <field name="rental_mode">bed</field>
             <field name="list_price">2000</field>
-            <field name="default_capacity">6</field>
+            <field name="default_capacity">3</field>
             <field name="description">Un dortoir réservé aux femmes, calme et rassurant, pour voyager seule en toute sérénité.</field>
             <field name="amenity_ids" eval="[(6, 0, [ref('amenity_wifi'), ref('amenity_ac')])]"/>
         </record>
@@ -85,7 +85,7 @@
             <field name="sequence">4</field>
             <field name="rental_mode">bed</field>
             <field name="list_price">10000</field>
-            <field name="default_capacity">4</field>
+            <field name="default_capacity">3</field>
             <field name="description">Une grande chambre pour partager le séjour en famille, avec un lit pour chacun.</field>
             <field name="amenity_ids" eval="[(6, 0, [ref('amenity_wifi'), ref('amenity_ac'), ref('amenity_tv'), ref('amenity_balcony')])]"/>
         </record>
@@ -95,7 +95,7 @@
             <field name="name">101</field>
             <field name="room_type_id" ref="room_type_single"/>
             <field name="floor">1</field>
-            <field name="capacity">6</field>
+            <field name="capacity">3</field>
             <field name="price">2000</field>
             <field name="amenity_ids" eval="[(6, 0, [ref('amenity_wifi'), ref('amenity_ac'), ref('amenity_tv')])]"/>
         </record>
@@ -103,7 +103,7 @@
             <field name="name">102</field>
             <field name="room_type_id" ref="room_type_single"/>
             <field name="floor">1</field>
-            <field name="capacity">6</field>
+            <field name="capacity">3</field>
             <field name="price">2000</field>
             <field name="amenity_ids" eval="[(6, 0, [ref('amenity_wifi'), ref('amenity_ac'), ref('amenity_tv')])]"/>
         </record>
@@ -127,7 +127,7 @@
             <field name="name">202</field>
             <field name="room_type_id" ref="room_type_family"/>
             <field name="floor">2</field>
-            <field name="capacity">4</field>
+            <field name="capacity">3</field>
             <field name="price">10000</field>
             <field name="amenity_ids" eval="[(6, 0, [ref('amenity_wifi'), ref('amenity_ac'), ref('amenity_tv'), ref('amenity_balcony')])]"/>
         </record>
@@ -135,7 +135,7 @@
             <field name="name">301</field>
             <field name="room_type_id" ref="room_type_suite"/>
             <field name="floor">3</field>
-            <field name="capacity">6</field>
+            <field name="capacity">3</field>
             <field name="price">2000</field>
             <field name="amenity_ids" eval="[(6, 0, [ref('amenity_wifi'), ref('amenity_ac'), ref('amenity_tv'), ref('amenity_minibar'), ref('amenity_balcony'), ref('amenity_bathtub'), ref('amenity_safe')])]"/>
         </record>

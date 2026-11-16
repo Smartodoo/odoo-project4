@@ -69,7 +69,7 @@ class TestAutoBeds(TransactionCase):
         self.assertEqual(set(room.bed_ids.mapped('price')), {0})
 
     def test_bed_price_change_updates_beds(self):
-        room = self._room(capacity=3)
+        room = self._room(capacity=2)
         room.bed_ids[0].price = 999  # prix modifié à la main sur un lit
         archived = room.bed_ids[1]
         archived.active = False
@@ -78,7 +78,7 @@ class TestAutoBeds(TransactionCase):
         self.assertEqual(set(beds.mapped('price')), {2500})
         self.assertIn(archived, beds)
         # les lits ajoutés ensuite prennent aussi le nouveau prix
-        room.capacity = 4
+        room.capacity = 3
         self.assertEqual(set(room.bed_ids.mapped('price')), {2500})
 
     def test_bed_price_change_form(self):
@@ -90,23 +90,23 @@ class TestAutoBeds(TransactionCase):
         self.assertEqual(set(room.bed_ids.mapped('price')), {3000})
 
     def test_capacity_increase_adds_beds(self):
-        room = self._room(capacity=2)
-        room.bed_ids.filtered(lambda b: b.name == 'AB-101-L2').name = 'Lit fenêtre'
-        room.capacity = 4
+        room = self._room(capacity=1)
+        room.bed_ids.filtered(lambda b: b.name == 'AB-101-L1').name = 'Lit fenêtre'
+        room.capacity = 3
         self.assertEqual(sorted(room.bed_ids.mapped('name')),
-                         ['AB-101-L1', 'AB-101-L2', 'AB-101-L3', 'Lit fenêtre'])
+                         ['AB-101-L1', 'AB-101-L2', 'Lit fenêtre'])
 
     def test_capacity_increase_form(self):
         from odoo.tests import Form
-        room = self._room(capacity=2)
+        room = self._room(capacity=1)
         view = 'hotel_management.view_hotel_room_config_form'
         with Form(room, view=view) as f:
-            f.capacity = 5
-            self.assertEqual(len(f.bed_ids), 5)
             f.capacity = 3
             self.assertEqual(len(f.bed_ids), 3)
+            f.capacity = 2
+            self.assertEqual(len(f.bed_ids), 2)
         self.assertEqual(sorted(room.bed_ids.mapped('name')),
-                         ['AB-101-L1', 'AB-101-L2', 'AB-101-L3'])
+                         ['AB-101-L1', 'AB-101-L2'])
 
     def test_rename_room_renames_beds(self):
         room = self._room(capacity=3)
@@ -136,26 +136,35 @@ class TestAutoBeds(TransactionCase):
         return resa
 
     def test_capacity_decrease_removes_beds(self):
-        room = self._room(capacity=5, rental_mode='bed')
-        room.capacity = 3
-        self.assertEqual(sorted(room.bed_ids.mapped('name')),
-                         ['AB-101-L1', 'AB-101-L2', 'AB-101-L3'])
+        room = self._room(capacity=3, rental_mode='bed')
+        room.capacity = 1
+        self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-101-L1'])
         self.assertFalse(self.env['hotel.bed'].with_context(active_test=False).search(
             [('room_id', '=', room.id), ('active', '=', False)]))
 
     def test_capacity_decrease_keeps_history_and_busy(self):
-        room = self._room(capacity=4, rental_mode='bed')
+        room = self._room(capacity=3, rental_mode='bed')
         beds = {b.name: b for b in room.bed_ids}
-        old = self._book(beds['AB-101-L4'], -10)
+        old = self._book(beds['AB-101-L3'], -10)
         old.state = 'checkout'
-        self._book(beds['AB-101-L3'], 5)            # réservation à venir
+        self._book(beds['AB-101-L2'], 5)            # réservation à venir
         room.capacity = 2
-        # L4 (historique) archivé, L2 (libre) supprimé, L3 (à venir) gardé
-        self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-101-L1', 'AB-101-L3'])
-        self.assertFalse(beds['AB-101-L4'].active)
-        self.assertFalse(beds['AB-101-L2'].exists())
-        # L1 et L3 pris (à venir) : impossible de descendre à 1
+        # L3 (historique) archivé, L2 (à venir) gardé
+        self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-101-L1', 'AB-101-L2'])
+        self.assertFalse(beds['AB-101-L3'].active)
+        self.assertTrue(beds['AB-101-L3'].exists())
+        # L1 et L2 pris (à venir) : impossible de descendre à 1
         self._book(beds['AB-101-L1'], 20)
         with self.assertRaises(UserError):
             room.capacity = 1
         self.assertEqual(len(room.bed_ids), 2)
+
+    def test_capacity_max_3(self):
+        from odoo.exceptions import ValidationError
+        with self.assertRaises(ValidationError):
+            self._room(name='AB-MAX', capacity=4)
+        room = self._room(capacity=3)
+        with self.assertRaises(ValidationError):
+            room.capacity = 4
+        with self.assertRaises(ValidationError):
+            self.env['hotel.room.type'].create({'name': 'Trop grand', 'default_capacity': 4})
