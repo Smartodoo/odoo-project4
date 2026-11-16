@@ -103,11 +103,12 @@ class TestCaisse(TransactionCase):
             'session_id': session.id, 'move_type': 'expense', 'amount': 400,
             'reason': 'Ampoules'})
         lines = self.env['caisse.journal'].search([('session_id', '=', session.id)])
-        self.assertEqual(sorted(lines.mapped('kind')), ['expense', 'payment'])
-        self.assertEqual(sum(lines.mapped('amount_in')), 3000)
+        # le fond de caisse (1000) apparaît dans le journal comme « Fond de caisse »
+        self.assertEqual(sorted(lines.mapped('kind')), ['expense', 'float', 'payment'])
+        self.assertEqual(sum(lines.mapped('amount_in')), 3000 + 1000)
         self.assertEqual(sum(lines.mapped('amount_out')), 400)
-        self.assertEqual(sum(lines.mapped('amount')), session.theoretical_balance - 1000)
-        self.assertEqual(session.journal_count, 2)
+        self.assertEqual(sum(lines.mapped('amount')), session.theoretical_balance)
+        self.assertEqual(session.journal_count, 3)
         # Ouverture de l'opération d'origine depuis le journal
         expense_line = lines.filtered(lambda l: l.kind == 'expense')
         self.assertEqual(expense_line.action_open_source()['res_model'], 'caisse.move')

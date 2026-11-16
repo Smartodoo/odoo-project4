@@ -7,6 +7,7 @@ JOURNAL_KINDS = [
     ('purchase', 'Achat fournisseur'),
     ('purchase_refund', 'Remboursement fournisseur'),
     ('expense_note', 'Note de frais'),
+    ('float', 'Fond de caisse'),
     ('in', 'Entrée'),
     ('out', 'Sortie'),
     ('expense', 'Dépense (saisie libre)'),
@@ -24,7 +25,7 @@ JOURNAL_CATEGORIES = [
     ('out', 'Sortie'),
 ]
 KIND_CATEGORY = {
-    'payment': 'in', 'in': 'in', 'purchase_refund': 'in',
+    'payment': 'in', 'in': 'in', 'float': 'in', 'purchase_refund': 'in',
     'expense_note': 'expense', 'purchase': 'expense', 'expense': 'expense',
     'refund': 'out', 'out': 'out', 'transfer': 'out',
 }
@@ -50,7 +51,7 @@ class CaisseJournal(models.Model):
             'company_id', 'create_uid',
         ],
         'caisse.move': [
-            'date', 'session_id', 'move_type', 'reason', 'partner_id', 'reference',
+            'date', 'session_id', 'move_type', 'in_kind', 'reason', 'partner_id', 'reference',
             'amount', 'signed_amount', 'user_id', 'company_id', 'attachment',
         ],
     }
@@ -118,7 +119,7 @@ class CaisseJournal(models.Model):
                     m.date,
                     m.date::date AS day,
                     m.session_id,
-                    m.move_type AS kind,
+                    CASE WHEN m.move_type = 'in' AND m.in_kind = 'float' THEN 'float' ELSE m.move_type END AS kind,
                     CASE m.move_type WHEN 'payment' THEN 'in' WHEN 'in' THEN 'in' WHEN 'purchase_refund' THEN 'in' WHEN 'expense_note' THEN 'expense' WHEN 'purchase' THEN 'expense' WHEN 'expense' THEN 'expense' ELSE 'out' END AS category,
                     m.reason AS label,
                     m.partner_id,

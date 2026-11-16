@@ -137,7 +137,7 @@ export class CaisseDashboard extends Component {
     }
 
     kindClass(kind) {
-        if (["payment", "in", "purchase_refund"].includes(kind)) {
+        if (["payment", "in", "float", "purchase_refund"].includes(kind)) {
             return "o_cd_in";
         }
         return kind === "transfer" ? "o_cd_transfer" : "o_cd_out";

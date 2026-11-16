@@ -10,6 +10,13 @@ CASH_MOVE_TYPES = [
     ('transfer', 'Transfert'),
 ]
 
+# Nature d'une entrée : le fond de caisse n'est pas une recette, il alimente le
+# champ « Fond de caisse » de la session et n'est pas compté dans « Encaissé ».
+CASH_IN_KINDS = [
+    ('float', 'Fond de caisse'),
+    ('other', 'Autre entrée'),
+]
+
 
 class CaisseSession(models.Model):
     """Session de caisse (cahier des charges §9) : ouverture avec
@@ -37,8 +44,10 @@ class CaisseSession(models.Model):
         string="Ouverture", required=True, default=fields.Datetime.now, readonly=True)
     date_close = fields.Datetime(string="Fermeture", readonly=True, copy=False)
     opening_balance = fields.Monetary(
-        string="Fond de caisse (ouverture)", tracking=True,
-        help="Espèces présentes dans la caisse à l'ouverture.")
+        string="Fond de caisse", tracking=True, readonly=True,
+        compute='_compute_opening_balance', store=True,
+        help="Espèces de départ de la caisse : somme des entrées « Fond de caisse » "
+             "de la session (bouton Entrée > Fond de caisse).")
     closing_balance = fields.Monetary(
         string="Espèces comptées (fermeture)", tracking=True, copy=False,
         help="Montant réellement compté dans la caisse à la fermeture.")
@@ -97,6 +106,47 @@ class CaisseSession(models.Model):
         "Une caisse est déjà ouverte : fermez-la avant d'en ouvrir une nouvelle.",
     )
 
+    @api.depends('move_ids.amount', 'move_ids.move_type', 'move_ids.in_kind')
+    def _compute_opening_balance(self):
+        for rec in self:
+            rec.opening_balance = sum(rec.move_ids.filtered('is_float').mapped('amount'))
+
+    def _set_opening_balance(self, amount):
+        """Compatibilité (code / import) : un fond indiqué sur la session devient
+        une entrée « Fond de caisse ». Ensuite, le fond se modifie uniquement par
+        ses entrées (bouton Entrée)."""
+        for rec in self:
+            floats = rec.move_ids.filtered('is_float')
+            current = sum(floats.mapped('amount'))
+            if rec.currency_id.compare_amounts(amount or 0.0, current) == 0:
+                continue
+            if floats or (amount or 0.0) < 0:
+                raise UserError(_(
+                    "Le fond de caisse se modifie par ses entrées : bouton « Entrée » > "
+                    "« Fond de caisse » (ou modifiez / supprimez l'entrée existante)."))
+            self.env['caisse.move'].create({
+                'session_id': rec.id, 'move_type': 'in', 'in_kind': 'float',
+                'amount': amount, 'reason': _("Fond de caisse"),
+            })
+
+    def write(self, vals):
+        if 'opening_balance' in vals:
+            vals = dict(vals)
+            amount = vals.pop('opening_balance')
+            res = super().write(vals) if vals else True
+            self._set_opening_balance(amount)
+            return res
+        return super().write(vals)
+
+    @api.model
+    def _last_closing_amount(self, company=None):
+        """Espèces comptées à la dernière fermeture (proposées comme fond)."""
+        company = company or self.env.company
+        last = self.sudo().search([
+            ('company_id', '=', company.id), ('state', '=', 'closed')],
+            order='date_close desc, id desc', limit=1)
+        return last.closing_balance
+
     def _valid_payments(self, payments):
         return payments.filtered(lambda p: p.state in ('paid', 'reconciled'))
 
@@ -115,8 +165,9 @@ class CaisseSession(models.Model):
             expense_notes = -sum(notes.mapped('amount_company_currency_signed'))
             supplier = -sum((valid - notes).filtered(
                 lambda p: p.partner_type == 'supplier').mapped('amount_company_currency_signed'))
+            # Entrées hors fond de caisse (le fond est compté à part)
             moves_in = sum(rec.move_ids.filtered(
-                lambda m: m.move_type == 'in').mapped('amount'))
+                lambda m: m.move_type == 'in' and not m.is_float).mapped('amount'))
             moves_out = sum(rec.move_ids.filtered(
                 lambda m: m.move_type != 'in').mapped('amount'))
             rec.total_cash_payments = cash
@@ -169,7 +220,15 @@ class CaisseSession(models.Model):
             if vals.get('name', _('Nouveau')) == _('Nouveau'):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'caisse.session') or _('Nouveau')
-        return super().create(vals_list)
+        openings = [vals.pop('opening_balance', 0.0) for vals in vals_list]
+        # une fermeture encore en attente doit être écrite avant l'INSERT
+        # (index « une seule caisse ouverte par société »)
+        self.flush_model(['state'])
+        sessions = super().create(vals_list)
+        for session, amount in zip(sessions, openings):
+            if amount:
+                session._set_opening_balance(amount)
+        return sessions
 
     @api.constrains('opening_balance', 'closing_balance')
     def _check_balances(self):
@@ -363,7 +422,9 @@ class CaisseSession(models.Model):
         for line in month_lines:
             key = line.day.replace(day=1) if by_month else line.day
             if key in buckets:
-                buckets[key]['in'] += line.amount_in
+                # le fond de caisse n'est pas une recette
+                if line.kind != 'float':
+                    buckets[key]['in'] += line.amount_in
                 buckets[key]['out'] += line.amount_out
         days = [dict(b, **{'in': rnd(b['in']), 'out': rnd(b['out'])})
                 for _k, b in sorted(buckets.items())]
@@ -476,6 +537,13 @@ class CaisseMove(models.Model):
     date = fields.Datetime(string="Date", required=True, default=fields.Datetime.now)
     move_type = fields.Selection(
         CASH_MOVE_TYPES, string="Type", required=True, default='expense')
+    in_kind = fields.Selection(
+        CASH_IN_KINDS, string="Nature de l'entrée", default='other',
+        help="Fond de caisse : espèces de départ (alimente le champ « Fond de "
+             "caisse », n'est pas une recette). Autre entrée : apport, "
+             "remboursement reçu…")
+    is_float = fields.Boolean(
+        string="Fond de caisse", compute='_compute_is_float', store=True)
     amount = fields.Monetary(string="Montant", required=True)
     signed_amount = fields.Monetary(
         string="Montant signé", compute='_compute_signed_amount', store=True)
@@ -491,6 +559,26 @@ class CaisseMove(models.Model):
         'res.users', string="Saisi par", default=lambda self: self.env.user, readonly=True)
     company_id = fields.Many2one(related='session_id.company_id', store=True)
     currency_id = fields.Many2one(related='session_id.currency_id')
+
+    @api.depends('move_type', 'in_kind')
+    def _compute_is_float(self):
+        for rec in self:
+            rec.is_float = rec.move_type == 'in' and rec.in_kind == 'float'
+
+    @api.onchange('in_kind')
+    def _onchange_in_kind(self):
+        """Fond de caisse : montant proposé = espèces comptées à la dernière
+        fermeture (modifiable), justification remplie."""
+        if self.move_type != 'in':
+            return
+        if self.in_kind == 'float':
+            if not self.amount:
+                self.amount = self.env['caisse.session']._last_closing_amount(
+                    self.session_id.company_id or self.env.company)
+            if not self.reason:
+                self.reason = _("Fond de caisse")
+        elif self.reason == _("Fond de caisse"):
+            self.reason = False
 
     @api.depends('amount', 'move_type')
     def _compute_signed_amount(self):
@@ -538,6 +626,11 @@ class CaisseMove(models.Model):
             raise UserError(_(
                 "Le type d'un mouvement de caisse ne peut pas être modifié : "
                 "supprimez-le et saisissez-le depuis le bon menu."))
+        if 'in_kind' in vals and any(
+                m.move_type == 'in' and m.in_kind != vals['in_kind'] for m in self):
+            raise UserError(_(
+                "La nature d'une entrée (fond de caisse / autre entrée) ne peut pas "
+                "être modifiée : supprimez l'entrée et saisissez-la à nouveau."))
         return super().write(vals)
 
     @api.ondelete(at_uninstall=False)

@@ -44,7 +44,7 @@ class TestCaisseMoves(TransactionCase):
         lines = self.env['caisse.journal'].search([('session_id', '=', session.id)])
         self.assertEqual(
             {(l.kind, l.category) for l in lines},
-            {('in', 'in'), ('out', 'out'), ('transfer', 'out')})
+            {('float', 'in'), ('in', 'in'), ('out', 'out'), ('transfer', 'out')})
         # Correction et suppression possibles tant que la caisse est ouverte
         moves[1].amount = 100
         self.assertEqual(session.theoretical_balance, before + 500 - 100 - 200)

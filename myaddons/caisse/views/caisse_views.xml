@@ -84,7 +84,8 @@
                             <field name="currency_id" invisible="1"/>
                         </group>
                         <group string="Soldes">
-                            <field name="opening_balance" widget="monetary" readonly="state != 'open'"/>
+                            <field name="opening_balance" widget="monetary"
+                                   help="Somme des entrées « Fond de caisse » : bouton Entrée &gt; Fond de caisse."/>
                             <field name="total_collected" widget="monetary"/>
                             <field name="total_spent" widget="monetary"/>
                             <field name="theoretical_balance" widget="monetary" class="fw-bold"/>
@@ -102,6 +103,8 @@
                                 <list editable="bottom" create="0">
                                     <field name="date"/>
                                     <field name="move_type" readonly="1"/>
+                                    <field name="in_kind" readonly="1" optional="show"
+                                           invisible="move_type != 'in'"/>
                                     <field name="reason"/>
                                     <field name="partner_id" optional="show"/>
                                     <field name="reference" optional="show"/>
@@ -374,6 +377,7 @@
                 <field name="session_id"/>
                 <field name="partner_id"/>
                 <filter name="in" string="Entrées" domain="[('move_type', '=', 'in')]"/>
+                <filter name="float" string="Fonds de caisse" domain="[('is_float', '=', True)]"/>
                 <filter name="out" string="Sorties" domain="[('move_type', '=', 'out')]"/>
                 <filter name="expense" string="Dépenses" domain="[('move_type', '=', 'expense')]"/>
                 <filter name="transfer" string="Transferts" domain="[('move_type', '=', 'transfer')]"/>
@@ -449,6 +453,16 @@
             <form>
                 <field name="session_id" invisible="1"/>
                 <field name="currency_id" invisible="1"/>
+                <div class="mb-3" invisible="move_type != 'in'">
+                    <label for="in_kind" class="fw-bold me-3"/>
+                    <field name="in_kind" widget="radio" options="{'horizontal': true}"
+                           required="move_type == 'in'"/>
+                    <div class="text-muted small" invisible="in_kind != 'float'">
+                        Espèces de départ de la caisse : le montant proposé est celui compté à la
+                        dernière fermeture. Il alimente le « Fond de caisse » et n'est pas compté
+                        dans « Encaissé ».
+                    </div>
+                </div>
                 <group>
                     <group>
                         <field name="move_type" invisible="1"/>
@@ -528,6 +542,7 @@
                 <field name="session_id"/>
                 <field name="reservation_id"/>
                 <filter name="ins" string="Entrées" domain="[('category', '=', 'in')]"/>
+                <filter name="floats" string="Fonds de caisse" domain="[('kind', '=', 'float')]"/>
                 <filter name="expenses" string="Dépenses" domain="[('category', '=', 'expense')]"/>
                 <filter name="outs" string="Sorties" domain="[('category', '=', 'out')]"/>
                 <separator/>

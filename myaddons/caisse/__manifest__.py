@@ -14,7 +14,7 @@ Gestion de caisse (cahier des charges §9)
     'author': "SmartOdoo",
     'website': "https://smartodoo.com",
     'category': 'Accounting',
-    'version': '20.0.1.6.0',
+    'version': '20.0.1.7.0',
     'license': 'LGPL-3',
     'depends': ['hotel_management', 'hr_expense', 'purchase'],
     'data': [
