@@ -1,3 +1,4 @@
+from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
 
@@ -57,9 +58,6 @@ class TestAutoBeds(TransactionCase):
         room.capacity = 4
         self.assertEqual(sorted(room.bed_ids.mapped('name')),
                          ['AB-101-L1', 'AB-101-L2', 'AB-101-L3', 'Lit fenêtre'])
-        # baisse de capacité : aucun lit supprimé automatiquement
-        room.capacity = 3
-        self.assertEqual(len(room.bed_ids), 4)
 
     def test_capacity_increase_form(self):
         from odoo.tests import Form
@@ -88,3 +86,39 @@ class TestAutoBeds(TransactionCase):
             f.name = 'AB-110'
             self.assertEqual(len(f.bed_ids), 2)
         self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-110-L1', 'AB-110-L2'])
+
+    def _book(self, bed, days_from_today):
+        from datetime import timedelta
+        from odoo import fields as f
+        ci = f.Date.today() + timedelta(days=days_from_today)
+        partner = self.env['res.partner'].create({'name': 'Client lits', 'hotel_birthdate': '1990-01-01'})
+        resa = self.env['hotel.reservation'].create({
+            'partner_id': partner.id, 'checkin': ci, 'checkout': ci + timedelta(days=2),
+            'booking_type': 'bed', 'line_ids': [(0, 0, {'bed_id': bed.id})]})
+        resa.action_confirm()
+        return resa
+
+    def test_capacity_decrease_removes_beds(self):
+        room = self._room(capacity=5, rental_mode='bed')
+        room.capacity = 3
+        self.assertEqual(sorted(room.bed_ids.mapped('name')),
+                         ['AB-101-L1', 'AB-101-L2', 'AB-101-L3'])
+        self.assertFalse(self.env['hotel.bed'].with_context(active_test=False).search(
+            [('room_id', '=', room.id), ('active', '=', False)]))
+
+    def test_capacity_decrease_keeps_history_and_busy(self):
+        room = self._room(capacity=4, rental_mode='bed')
+        beds = {b.name: b for b in room.bed_ids}
+        old = self._book(beds['AB-101-L4'], -10)
+        old.state = 'checkout'
+        self._book(beds['AB-101-L3'], 5)            # réservation à venir
+        room.capacity = 2
+        # L4 (historique) archivé, L2 (libre) supprimé, L3 (à venir) gardé
+        self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-101-L1', 'AB-101-L3'])
+        self.assertFalse(beds['AB-101-L4'].active)
+        self.assertFalse(beds['AB-101-L2'].exists())
+        # L1 et L3 pris (à venir) : impossible de descendre à 1
+        self._book(beds['AB-101-L1'], 20)
+        with self.assertRaises(UserError):
+            room.capacity = 1
+        self.assertEqual(len(room.bed_ids), 2)

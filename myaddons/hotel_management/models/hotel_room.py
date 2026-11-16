@@ -4,6 +4,7 @@ from datetime import timedelta
 from markupsafe import Markup, escape
 
 from odoo import Command, _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class HotelRoom(models.Model):
@@ -184,6 +185,7 @@ class HotelRoom(models.Model):
             self._rename_beds(old_names)
         if 'capacity' in vals and not self.env.context.get('hotel_no_auto_beds'):
             self._create_missing_beds()
+            self._remove_extra_beds()
         return res
 
     def _rename_beds(self, old_names):
@@ -199,14 +201,59 @@ class HotelRoom(models.Model):
                 if match:
                     bed.name = "%s-L%s" % (room.name, match.group(1))
 
+    @staticmethod
+    def _bed_number(bed):
+        match = re.search(r'-L(\d+)$', bed.name or '')
+        return int(match.group(1)) if match else 0
+
+    def _remove_extra_beds(self):
+        """Baisse de capacité : retire les lits actifs en trop, en commençant par
+        les numéros les plus élevés. Lit jamais réservé -> supprimé ; lit présent
+        seulement dans des réservations passées / annulées -> archivé (historique
+        conservé). Lit pris par une réservation en cours ou à venir -> refus."""
+        today = fields.Date.context_today(self)
+        Line = self.env['hotel.reservation.line']
+        for room in self:
+            beds = room.bed_ids
+            extra = len(beds) - (room.capacity or 0)
+            if extra <= 0:
+                continue
+            lines = Line.search([('bed_ids', 'in', beds.ids)])
+            busy = lines.filtered(
+                lambda l: l.state in ('draft', 'confirmed', 'checkin')
+                and l.checkout and l.checkout > today).bed_ids & beds
+            used = lines.bed_ids & beds
+            candidates = (beds - busy).sorted(
+                lambda b: (-self._bed_number(b), -b.id))
+            if len(candidates) < extra:
+                raise UserError(_(
+                    "Impossible de ramener la chambre %(room)s à %(capacity)s place(s) : "
+                    "les lits %(beds)s sont pris par des réservations en cours ou à venir.\n\n"
+                    "Modifiez ou annulez ces réservations, ou gardez une capacité plus élevée.",
+                    room=room.name, capacity=room.capacity,
+                    beds=', '.join(busy.mapped('name'))))
+            to_remove = candidates[:extra]
+            (to_remove & used).write({'active': False})
+            (to_remove - used).unlink()
+
     def _onchange_topup_beds(self):
         """Chambre existante : ajuste les lits non encore enregistrés à la capacité
         (ajout de <chambre>-L<n>, ou retrait des lignes ajoutées en trop)."""
         capacity = self.capacity or 0
         new_beds = self.bed_ids.filtered(lambda b: not b._origin)
         extra = len(self.bed_ids) - capacity
-        if extra > 0 and new_beds:
-            self.bed_ids -= new_beds[-extra:]
+        if extra > 0:
+            if new_beds:
+                self.bed_ids -= new_beds[-extra:]
+            remaining = len(self.bed_ids) - capacity
+            if remaining > 0:
+                return {'warning': {
+                    'title': _("Baisse de capacité"),
+                    'message': _(
+                        "%(count)s lit(s) en trop seront retirés à l'enregistrement "
+                        "(numéros les plus élevés ; les lits ayant un historique de "
+                        "réservation sont archivés).", count=remaining),
+                }}
         elif extra < 0:
             taken = set(self.env['hotel.bed'].with_context(active_test=False).search(
                 [('room_id', '=', self._origin.id)]).mapped('name'))
@@ -292,8 +339,7 @@ class HotelRoom(models.Model):
         if not self.name:
             return
         if self._origin.id:
-            self._onchange_topup_beds()
-            return
+            return self._onchange_topup_beds()
         auto = re.compile(r'.+-L\d+$')
         custom = self.bed_ids.filtered(lambda b: not auto.match(b.name or ''))
         price = self._default_bed_price()
