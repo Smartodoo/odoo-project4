@@ -241,7 +241,9 @@
                                 <list editable="bottom">
                                     <field name="booking_type" column_invisible="1"/>
                                     <field name="bed_ids" column_invisible="1" force_save="1"/>
-                                    <field name="bed_id" required="1" options="{'no_create': True}"
+                                    <!-- Obligatoire seulement par lit : les lignes sont partagées avec
+                                         l'onglet « Chambres », où une ligne n'a pas de lit unique. -->
+                                    <field name="bed_id" required="booking_type == 'bed'" options="{'no_create': True}"
                                            domain="[('id', 'in', parent.proposed_bed_ids)]"
                                            context="{'hotel_proposal_order': parent.proposed_bed_order}"/>
                                     <field name="room_id" readonly="1" force_save="1"/>

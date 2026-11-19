@@ -188,6 +188,25 @@ class TestReservationForm(TransactionCase):
         reception = self.env.ref('hotel_management.group_hotel_user')
         self.assertIn(self.env.ref('base.group_partner_manager'), reception.all_implied_ids)
 
+    def test_room_booking_lines_valid_in_form(self):
+        """Par chambre : la ligne (sans lit unique) ne doit pas être bloquée par
+        le champ « Lit » de l'onglet Lits (lignes partagées entre les onglets) ;
+        le lit n'est obligatoire qu'en location par lit. Vérifié aussi dans le
+        navigateur (réservation par chambre enregistrée puis confirmée)."""
+        from lxml import etree
+        arch = etree.fromstring(self.env.ref('hotel_management.view_hotel_reservation_form').arch)
+        beds = arch.xpath("//page[@name='beds']//field[@name='bed_id']")
+        self.assertEqual(len(beds), 1)
+        self.assertEqual(beds[0].get('required'), "booking_type == 'bed'")
+        room = self.env['hotel.room'].create({
+            'name': 'RF-C1', 'room_type_id': self.type_other.id, 'capacity': 2,
+            'room_price': 3000, 'rental_mode': 'room'})
+        resa = self.env['hotel.reservation'].create({
+            'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+            'booking_type': 'room', 'line_ids': [(0, 0, {'room_id': room.id})]})
+        resa.action_confirm()
+        self.assertEqual(resa.state, 'confirmed')
+
 @tagged('post_install', '-at_install')
 class TestRoomCreation(TransactionCase):
     """Création des chambres : capacité du type, prix selon le mode de location."""
