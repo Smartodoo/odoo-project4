@@ -4,7 +4,7 @@
     <t t-name="sh.NavBar.AppsMenu" owl="1">
         
 
-            <Dropdown menuClass="'sh_appmenu_grid'" position="'bottom-start'" onStateChanged.bind="this.onAppsMenuStateChanged">
+            <Dropdown menuClass="'sh_appmenu_grid'" position="'bottom-start'" bottomSheet="false" onStateChanged.bind="this.onAppsMenuStateChanged">
                 <button type="button" class="full" id="app_toggle" title="Apps">
                     <i class="oi" data-icon="grid_view" />
                 </button>
@@ -60,7 +60,11 @@
         <xpath expr="//nav[hasclass('o_main_navbar')]" position="replace">
             <!-- Odoo 20 / Owl 3: component members must be accessed through `this.` in templates -->
             <nav class="o_main_navbar d-print-none" t-on-click="this.onNavBarDropdownItemClick" data-command-category="navbar">
-                <t t-call="sh.NavBar.AppsMenu" apps="this.menuService.getApps()"/>
+                <!-- Mobile (small screen): keep Odoo's core burger sidebar (current app
+                     sub-menus + "All Apps"); the theme's full-screen app grid does not fit
+                     inside the mobile bottom sheet. -->
+                <t t-if="this.ui.isSmall" t-call="web.NavBar.AppsMenu" apps="this.menuService.getApps()"/>
+                <t t-else="" t-call="sh.NavBar.AppsMenu" apps="this.menuService.getApps()"/>
 
                 <DropdownItem
                     t-if="this.currentApp"
