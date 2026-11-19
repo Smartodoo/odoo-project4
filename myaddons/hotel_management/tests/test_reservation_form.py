@@ -184,6 +184,10 @@ class TestReservationForm(TransactionCase):
         resa.write({'room_type_id': False, 'guest_count': 3})
         self.assertEqual(resa.guest_count, 3)
 
+    def test_reception_can_create_clients(self):
+        reception = self.env.ref('hotel_management.group_hotel_user')
+        self.assertIn(self.env.ref('base.group_partner_manager'), reception.all_implied_ids)
+
 @tagged('post_install', '-at_install')
 class TestRoomCreation(TransactionCase):
     """Création des chambres : capacité du type, prix selon le mode de location."""

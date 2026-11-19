@@ -25,7 +25,8 @@
         <field name="sequence">10</field>
         <field name="privilege_id" ref="privilege_module_category_hotel"/>
         <!-- Facturation : la réception édite et imprime la facture au départ -->
-        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('group_hotel_housekeeping')), (4, ref('account.group_account_invoice'))]"/>
+        <!-- La réception crée les clients depuis les réservations : droit « Création de contacts » -->
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('group_hotel_housekeeping')), (4, ref('account.group_account_invoice')), (4, ref('base.group_partner_manager'))]"/>
         <field name="comment">Réservations, check-in / check-out, factures et encaissements.</field>
     </record>
 

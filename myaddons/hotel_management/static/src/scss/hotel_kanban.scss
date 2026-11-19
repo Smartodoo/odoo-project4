@@ -61,3 +61,8 @@
         &.o_hotel_guest_child { border-left-color: #f0ad4e; }
     }
 }
+
+// Fenêtre « Personne du séjour » : pas de « Enregistrer & Créer »
+.modal:has(.o_hotel_guest_form) .o_form_button_save_new {
+    display: none !important;
+}
