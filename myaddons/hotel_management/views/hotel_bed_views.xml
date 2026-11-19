@@ -163,7 +163,7 @@
             <list string="Nombre de lits" create="0" delete="0">
                 <field name="name" string="Chambre"/>
                 <field name="room_type_id"/>
-                <field name="floor"/>
+                <field name="floor_id"/>
                 <field name="rental_mode"/>
                 <field name="bed_summary" string="Lits créés"/>
                 <field name="bed_availability" string="Disponibilité"/>
@@ -192,7 +192,7 @@
                     <group>
                         <group>
                             <field name="room_type_id" readonly="1"/>
-                            <field name="floor" readonly="1"/>
+                            <field name="floor_id" readonly="1"/>
                             <field name="rental_mode" readonly="1"/>
                             <field name="whole_room_price" widget="monetary"
                                    invisible="rental_mode == 'bed'"/>

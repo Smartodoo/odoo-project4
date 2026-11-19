@@ -25,7 +25,7 @@ class HotelPlanning(models.AbstractModel):
         end = start + timedelta(days=days)
         today = fields.Date.context_today(self)
 
-        rooms = self.env['hotel.room'].search([], order='floor, name')
+        rooms = self.env['hotel.room'].search([], order='floor_id, name')
         lines = self.env['hotel.reservation.line'].search([
             ('room_id', 'in', rooms.ids),
             ('state', 'in', ('draft', 'confirmed', 'checkin', 'checkout')),

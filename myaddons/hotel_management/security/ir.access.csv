@@ -49,3 +49,8 @@ access_hotel_customer_type_user,hotel.customer.type.user,hotel.customer.type,hot
 access_hotel_customer_type_manager,hotel.customer.type.manager,hotel.customer.type,hotel_management.group_hotel_manager,crud,
 access_hotel_reservation_guest_user,hotel.reservation.guest.user,hotel.reservation.guest,hotel_management.group_hotel_user,crud,
 access_hotel_reservation_guest_hk,hotel.reservation.guest.housekeeping,hotel.reservation.guest,hotel_management.group_hotel_housekeeping,r,
+access_hotel_floor_hk,hotel.floor.housekeeping,hotel.floor,hotel_management.group_hotel_housekeeping,r,
+access_hotel_floor_user,hotel.floor.user,hotel.floor,hotel_management.group_hotel_user,r,
+access_hotel_floor_manager,hotel.floor.manager,hotel.floor,hotel_management.group_hotel_manager,crud,
+access_hotel_floor_public,hotel.floor.public,hotel.floor,base.group_public,r,
+access_hotel_floor_portal,hotel.floor.portal,hotel.floor,base.group_portal,r,

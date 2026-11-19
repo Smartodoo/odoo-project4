@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_hotel_floor_list" model="ir.ui.view">
+        <field name="name">hotel.floor.list</field>
+        <field name="model">hotel.floor</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="room_count"/>
+                <button name="action_view_rooms" type="object" string="Chambres"
+                        icon="bed" invisible="not room_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_hotel_floor" model="ir.actions.act_window">
+        <field name="name">Étages</field>
+        <field name="res_model">hotel.floor</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Ajouter les étages de l'auberge</p>
+            <p>Ex. : Rez-de-chaussée, 1er étage, 2e étage… Chaque chambre est ensuite
+               rattachée à un étage.</p>
+        </field>
+    </record>
+</odoo>

@@ -7,7 +7,7 @@
             <list create="0">
                 <field name="name"/>
                 <field name="room_type_id"/>
-                <field name="floor"/>
+                <field name="floor_id"/>
                 <field name="capacity"/>
                 <field name="current_booking_type" string="Mode (résa en cours)" optional="show"/>
                 <field name="bed_count" optional="hide"/>
@@ -279,7 +279,7 @@
                             <group>
                                 <group>
                                     <field name="room_type_id" readonly="1"/>
-                                    <field name="floor" readonly="1"/>
+                                    <field name="floor_id" readonly="1"/>
                                     <field name="capacity" readonly="1"/>
                                 </group>
                                 <group>
@@ -307,7 +307,7 @@
             <search>
                 <field name="name"/>
                 <field name="room_type_id"/>
-                <field name="floor"/>
+                <field name="floor_id"/>
                 <filter name="mode_room" string="Chambres entières" domain="[('rental_mode', '=', 'room')]"/>
                 <filter name="mode_bed" string="Dortoirs (au lit)" domain="[('rental_mode', '=', 'bed')]"/>
                 <separator/>
@@ -320,7 +320,7 @@
                 <group>
                     <filter name="group_type" string="Type" context="{'group_by': 'room_type_id'}"/>
                     <filter name="group_mode" string="Mode (défaut)" context="{'group_by': 'rental_mode'}"/>
-                    <filter name="group_floor" string="Étage" context="{'group_by': 'floor'}"/>
+                    <filter name="group_floor" string="Étage" context="{'group_by': 'floor_id'}"/>
                     <filter name="group_technical" string="État technique" context="{'group_by': 'technical_state'}"/>
                     <filter name="group_housekeeping" string="État ménage" context="{'group_by': 'housekeeping_status'}"/>
                 </group>
@@ -346,7 +346,7 @@
             <list string="Chambres">
                 <field name="name"/>
                 <field name="room_type_id"/>
-                <field name="floor"/>
+                <field name="floor_id"/>
                 <field name="capacity"/>
                 <field name="rental_mode"/>
                 <field name="bed_summary" string="Lits créés"/>
@@ -384,7 +384,7 @@
                             <group>
                                 <group>
                                     <field name="room_type_id"/>
-                                    <field name="floor"/>
+                                    <field name="floor_id" options="{'no_create': True}"/>
                                     <field name="capacity" readonly="room_type_id" force_save="1"/>
                                     <field name="rental_mode"/>
                                 </group>

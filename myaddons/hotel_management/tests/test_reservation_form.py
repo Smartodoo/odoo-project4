@@ -233,3 +233,13 @@ class TestRoomCreation(TransactionCase):
         self.type_dorm.default_capacity = 2
         self.assertEqual(room.capacity, 2)
         self.assertEqual(len(room.bed_ids), 2)
+
+    def test_floor_model(self):
+        floor = self.env['hotel.floor'].create({'name': 'RC Rez-de-chaussée', 'sequence': 1})
+        room = self.env['hotel.room'].create({
+            'name': 'RC-9', 'room_type_id': self.type_room.id, 'floor_id': floor.id})
+        self.assertEqual(room.floor, 'RC Rez-de-chaussée')
+        self.assertEqual(floor.room_count, 1)
+        floor.name = 'RC RDC'
+        self.assertEqual(room.floor, 'RC RDC')
+        self.assertIn('floor_id', self.env['hotel.room']._fields)

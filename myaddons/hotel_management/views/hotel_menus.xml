@@ -84,6 +84,9 @@
     <menuitem id="menu_hotel_room_config" name="Ajouter chambres"
               parent="menu_hotel_config" action="action_hotel_room_config"
               sequence="5"/>
+    <menuitem id="menu_hotel_floor" name="Étages"
+              parent="menu_hotel_config" action="action_hotel_floor"
+              sequence="8"/>
     <menuitem id="menu_hotel_room_type" name="Types de chambres"
               parent="menu_hotel_config" action="action_hotel_room_type"
               sequence="10"/>

@@ -38,7 +38,11 @@ class HotelRoom(models.Model):
     name = fields.Char(string="Numéro / Nom", required=True, tracking=True)
     room_type_id = fields.Many2one(
         'hotel.room.type', string="Type", required=True, tracking=True)
-    floor = fields.Char(string="Étage")
+    floor_id = fields.Many2one(
+        'hotel.floor', string="Étage", ondelete='restrict', index=True,
+        help="Étages saisis dans Configuration > Étages.")
+    # Nom de l'étage (site web, planning, rapports, tri)
+    floor = fields.Char(related='floor_id.name', string="Étage (nom)", store=True)
     capacity = fields.Integer(string="Capacité", default=2)
     price = fields.Monetary(string="Prix / nuit", currency_field='currency_id')
     currency_id = fields.Many2one(

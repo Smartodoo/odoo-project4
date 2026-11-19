@@ -1,5 +1,6 @@
 from . import hotel_amenity
 from . import hotel_customer_type
+from . import hotel_floor
 from . import hotel_room_type
 from . import hotel_room
 from . import hotel_bed
