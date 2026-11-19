@@ -138,3 +138,27 @@ class TestReservationForm(TransactionCase):
         f.children = 2
         self.assertEqual(f.adults, 1)
         self.assertEqual(f.guest_count, 3)
+
+    def test_room_type_follows_booking_type(self):
+        Room = self.env['hotel.room']
+        type_private = self.env['hotel.room.type'].create({'name': 'RF Privée', 'rental_mode': 'room'})
+        Room.create({'name': 'RF-P1', 'room_type_id': type_private.id, 'capacity': 2,
+                     'room_price': 3000, 'rental_mode': 'room'})
+        Type = self.env['hotel.room.type']
+        domain = self.env['hotel.reservation']._fields['room_type_id'].domain
+        self.assertIn('booking_type', domain)
+        bed_types = Type.search([('room_ids.rental_mode', '=', 'bed')])
+        room_types = Type.search([('room_ids.rental_mode', '=', 'room')])
+        self.assertIn(self.type_dorm, bed_types)
+        self.assertNotIn(type_private, bed_types)
+        self.assertIn(type_private, room_types)
+        self.assertNotIn(self.type_dorm, room_types)
+        # Passage « par lit » -> « par chambre » : un type dortoir est vidé
+        f = Form(self.env['hotel.reservation'])
+        f.booking_type = 'bed'
+        f.room_type_id = self.type_dorm
+        f.booking_type = 'room'
+        self.assertFalse(f.room_type_id)
+        f.room_type_id = type_private
+        f.booking_type = 'room'
+        self.assertEqual(f.room_type_id, type_private)

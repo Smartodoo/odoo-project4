@@ -107,7 +107,10 @@ class HotelReservation(models.Model):
              "suivent automatiquement le nombre d'adultes et d'enfants.")
     room_type_id = fields.Many2one(
         'hotel.room.type', string="Type de chambre", tracking=True,
-        help="Si renseigné, seules les chambres / lits de ce type sont proposés.")
+        domain="[('room_ids.rental_mode', '=', booking_type)]",
+        help="Si renseigné, seules les chambres / lits de ce type sont proposés. "
+             "Seuls les types ayant des chambres louables selon le type de "
+             "location choisi (chambre entière ou au lit) sont proposés.")
     guest_count = fields.Integer(
         string="Personnes", default=1, required=True,
         help="Nombre total de personnes du séjour, enfants compris.")
@@ -597,7 +600,12 @@ class HotelReservation(models.Model):
     def _onchange_booking_type(self):
         """Changement de type de location : les lignes sont converties.
         Par chambre -> par lit : une ligne par lit de chaque chambre ;
-        par lit -> par chambre : une ligne par chambre (tous ses lits)."""
+        par lit -> par chambre : une ligne par chambre (tous ses lits).
+        Le type de chambre choisi est vidé s'il n'a aucune chambre louable
+        selon le nouveau type de location."""
+        if self.room_type_id and self.booking_type and not self.room_type_id.room_ids.filtered(
+                lambda r: r.rental_mode == self.booking_type):
+            self.room_type_id = False
         if not self.line_ids:
             return
         rooms = self.line_ids.room_id
