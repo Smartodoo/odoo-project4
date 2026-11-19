@@ -164,6 +164,26 @@ class TestReservationForm(TransactionCase):
         self.assertEqual(f.room_type_id, type_private)
 
 
+    def test_guests_above_room_type_capacity(self):
+        from odoo.exceptions import ValidationError
+        self.type_dorm.default_capacity = 2
+        vals = {'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+                'booking_type': 'bed', 'room_type_id': self.type_dorm.id, 'guest_count': 3}
+        with self.assertRaises(ValidationError) as err:
+            self.env['hotel.reservation'].create(vals)
+        self.assertIn('Changez le type de chambre', str(err.exception))
+        # Avertissement immédiat dans le formulaire
+        resa = self._new(guest_count=3)
+        warning = resa._onchange_room_type_capacity()
+        self.assertTrue(warning and 'RF Dortoir' in warning['warning']['message'])
+        # Dans la capacité, ou sans type : accepté
+        vals['guest_count'] = 2
+        resa = self.env['hotel.reservation'].create(vals)
+        with self.assertRaises(ValidationError):
+            resa.guest_count = 3
+        resa.write({'room_type_id': False, 'guest_count': 3})
+        self.assertEqual(resa.guest_count, 3)
+
 @tagged('post_install', '-at_install')
 class TestRoomCreation(TransactionCase):
     """Création des chambres : capacité du type, prix selon le mode de location."""
