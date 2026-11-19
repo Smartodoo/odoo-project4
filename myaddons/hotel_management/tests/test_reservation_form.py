@@ -204,3 +204,32 @@ class TestRoomCreation(TransactionCase):
             'name': 'RC-4', 'room_type_id': self.type_room.id, 'room_price': 5000})
         self.assertEqual(private.room_price, 5000)
         self.assertEqual(private.whole_room_price, 5000)
+
+    def test_capacity_readonly_and_price_from_type(self):
+        f = Form(self.env['hotel.room'], view='hotel_management.view_hotel_room_config_form')
+        f.name = 'RC-5'
+        f.room_type_id = self.type_room
+        self.assertEqual(f.room_price, 4000)
+        f.room_price = 4500  # prix modifiable
+        with self.assertRaises(AssertionError):
+            f.capacity = 2  # capacité non modifiable : celle du type
+        room = f.save()
+        self.assertEqual((room.capacity, room.room_price), (1, 4500))
+        # Dortoir : le prix du type devient le prix d'un lit
+        f = Form(self.env['hotel.room'], view='hotel_management.view_hotel_room_config_form')
+        f.name = 'RC-6'
+        f.room_type_id = self.type_dorm
+        self.assertEqual(f.bed_price, 1000)
+        dorm = f.save()
+        self.assertEqual(set(dorm.bed_ids.mapped('price')), {1000})
+        self.assertEqual(dorm.room_price, 3000)
+        # Création directe sans prix : prix du type
+        direct = self.env['hotel.room'].create({'name': 'RC-7', 'room_type_id': self.type_room.id})
+        self.assertEqual(direct.room_price, 4000)
+
+    def test_type_capacity_propagates(self):
+        room = self.env['hotel.room'].create({'name': 'RC-8', 'room_type_id': self.type_dorm.id})
+        self.assertEqual(len(room.bed_ids), 3)
+        self.type_dorm.default_capacity = 2
+        self.assertEqual(room.capacity, 2)
+        self.assertEqual(len(room.bed_ids), 2)

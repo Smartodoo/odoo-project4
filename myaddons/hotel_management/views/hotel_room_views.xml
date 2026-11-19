@@ -385,7 +385,7 @@
                                 <group>
                                     <field name="room_type_id"/>
                                     <field name="floor"/>
-                                    <field name="capacity"/>
+                                    <field name="capacity" readonly="room_type_id" force_save="1"/>
                                     <field name="rental_mode"/>
                                 </group>
                                 <group>

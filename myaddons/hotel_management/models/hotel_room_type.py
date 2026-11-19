@@ -12,7 +12,11 @@ class HotelRoomType(models.Model):
     name = fields.Char(string="Type", required=True, translate=True)
     sequence = fields.Integer(default=10)
     code = fields.Char(string="Code")
-    list_price = fields.Monetary(string="Prix / nuit", currency_field='currency_id')
+    list_price = fields.Monetary(
+        string="Prix / nuit", currency_field='currency_id',
+        help="Repris sur les nouvelles chambres de ce type (modifiable) :\n"
+             "- chambre entière : prix de la chambre par nuit ;\n"
+             "- au lit (dortoir) : prix d'UN lit par nuit (la chambre = somme des lits).")
     currency_id = fields.Many2one(
         'res.currency', default=lambda self: self.env.company.currency_id)
     default_capacity = fields.Integer(string="Capacité (personnes)", default=2)
@@ -44,6 +48,19 @@ class HotelRoomType(models.Model):
         'CHECK(list_price >= 0)',
         "Le prix d'un type de chambre ne peut pas \u00eatre n\u00e9gatif.",
     )
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'default_capacity' in vals:
+            # La capacité d'une chambre est celle de son type (non modifiable
+            # sur la chambre) : les chambres du type suivent (lits ajoutés ou
+            # retirés ; refus si un lit à retirer est réservé).
+            for rtype in self:
+                rooms = rtype.room_ids.filtered(
+                    lambda r, c=rtype.default_capacity: r.capacity != c)
+                if rooms:
+                    rooms.write({'capacity': rtype.default_capacity})
+        return res
 
     def _compute_room_count(self):
         groups = self.env['hotel.room']._read_group(

@@ -188,12 +188,18 @@ class HotelRoom(models.Model):
         if self.room_type_id:
             if not self.price:
                 self.price = self.room_type_id.list_price
-            if not self.room_price:
-                self.room_price = self.room_type_id.list_price
-            # La capacité de la chambre est celle du type choisi
+            # La capacité de la chambre est celle du type choisi (non modifiable
+            # sur la chambre) ; le prix du type est repris (modifiable) : prix
+            # de la chambre entière, ou prix d'un lit pour une location au lit.
             if self.room_type_id.default_capacity:
                 self.capacity = self.room_type_id.default_capacity
             self.rental_mode = self.room_type_id.rental_mode
+            if self.rental_mode == 'bed':
+                self.bed_price = self.room_type_id.list_price
+                for bed in self.bed_ids:
+                    bed.price = self.bed_price
+            else:
+                self.room_price = self.room_type_id.list_price
             if self.room_type_id.amenity_ids:
                 self.amenity_ids = [(6, 0, self.room_type_id.amenity_ids.ids)]
 
@@ -206,6 +212,9 @@ class HotelRoom(models.Model):
                     vals['rental_mode'] = rtype.rental_mode
                 if 'capacity' not in vals and rtype.default_capacity:
                     vals['capacity'] = rtype.default_capacity
+                price_field = 'bed_price' if vals['rental_mode'] == 'bed' else 'room_price'
+                if price_field not in vals:
+                    vals[price_field] = rtype.list_price
         rooms = super().create(vals_list)
         if not self.env.context.get('hotel_no_auto_beds'):
             rooms._create_missing_beds()
