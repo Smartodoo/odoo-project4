@@ -162,3 +162,45 @@ class TestReservationForm(TransactionCase):
         f.room_type_id = type_private
         f.booking_type = 'room'
         self.assertEqual(f.room_type_id, type_private)
+
+
+@tagged('post_install', '-at_install')
+class TestRoomCreation(TransactionCase):
+    """Création des chambres : capacité du type, prix selon le mode de location."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env = cls.env(user=cls.env.ref('base.user_admin'))
+        Type = cls.env['hotel.room.type']
+        cls.type_dorm = Type.create({'name': 'RC Dortoir', 'rental_mode': 'bed',
+                                     'default_capacity': 3, 'list_price': 1000})
+        cls.type_room = Type.create({'name': 'RC Privée', 'rental_mode': 'room',
+                                     'default_capacity': 1, 'list_price': 4000})
+
+    def test_capacity_from_type(self):
+        room = self.env['hotel.room'].create({'name': 'RC-1', 'room_type_id': self.type_dorm.id})
+        self.assertEqual(room.capacity, 3)
+        self.assertEqual(len(room.bed_ids), 3)
+        f = Form(self.env['hotel.room'], view='hotel_management.view_hotel_room_config_form')
+        f.name = 'RC-2'
+        f.room_type_id = self.type_room
+        self.assertEqual(f.capacity, 1)
+        f.room_type_id = self.type_dorm
+        self.assertEqual(f.capacity, 3)
+        self.assertEqual(f.rental_mode, 'bed')
+
+    def test_bed_room_price_is_sum_of_beds(self):
+        room = self.env['hotel.room'].create({
+            'name': 'RC-3', 'room_type_id': self.type_dorm.id, 'bed_price': 1500})
+        self.assertEqual(room.room_price, 4500)
+        self.assertEqual(room.whole_room_price, 4500)
+        room.bed_price = 1000
+        self.assertEqual(room.room_price, 3000)
+        room.capacity = 2
+        self.assertEqual(room.room_price, 2000)
+        # Chambre entière : le prix saisi reste
+        private = self.env['hotel.room'].create({
+            'name': 'RC-4', 'room_type_id': self.type_room.id, 'room_price': 5000})
+        self.assertEqual(private.room_price, 5000)
+        self.assertEqual(private.whole_room_price, 5000)

@@ -216,7 +216,8 @@
                                     <span class="o_hotel_kpi_icon"><i class="oi" data-icon="home" title="Chambre"/></span>
                                     <div class="o_hotel_kpi_titles">
                                         <div class="o_hotel_kpi_label">Chambre entière</div>
-                                        <div class="o_hotel_kpi_sub">Tarif de base</div>
+                                        <div class="o_hotel_kpi_sub" invisible="rental_mode == 'bed'">Tarif de base</div>
+                                        <div class="o_hotel_kpi_sub" invisible="rental_mode != 'bed'">Somme des lits</div>
                                     </div>
                                 </div>
                                 <div class="o_hotel_kpi_value">
@@ -225,7 +226,7 @@
                                 </div>
                             </div>
 
-                            <div class="o_hotel_kpi o_hotel_kpi_bed" invisible="not bed_count">
+                            <div class="o_hotel_kpi o_hotel_kpi_bed" invisible="not bed_count or rental_mode == 'room'">
                                 <div class="o_hotel_kpi_head">
                                     <span class="o_hotel_kpi_icon"><i class="oi" data-icon="bed" title="Lit"/></span>
                                     <div class="o_hotel_kpi_titles">
@@ -385,10 +386,18 @@
                                     <field name="room_type_id"/>
                                     <field name="floor"/>
                                     <field name="capacity"/>
+                                    <field name="rental_mode"/>
                                 </group>
                                 <group>
-                                    <field name="room_price" widget="monetary"/>
-                                    <field name="bed_price" widget="monetary"/>
+                                    <!-- Chambre entière : seul le prix de la chambre compte ;
+                                         au lit : prix d'un lit, la chambre = somme des lits. -->
+                                    <field name="room_price" widget="monetary"
+                                           invisible="rental_mode == 'bed'"/>
+                                    <field name="bed_price" widget="monetary"
+                                           invisible="rental_mode == 'room'"/>
+                                    <field name="whole_room_price" widget="monetary"
+                                           string="Prix chambre (somme des lits)"
+                                           invisible="rental_mode != 'bed'"/>
                                     <field name="currency_id" invisible="1"/>
                                 </group>
                             </group>

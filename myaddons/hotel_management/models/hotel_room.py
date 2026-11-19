@@ -190,7 +190,8 @@ class HotelRoom(models.Model):
                 self.price = self.room_type_id.list_price
             if not self.room_price:
                 self.room_price = self.room_type_id.list_price
-            if not self.capacity:
+            # La capacité de la chambre est celle du type choisi
+            if self.room_type_id.default_capacity:
                 self.capacity = self.room_type_id.default_capacity
             self.rental_mode = self.room_type_id.rental_mode
             if self.room_type_id.amenity_ids:
@@ -199,15 +200,19 @@ class HotelRoom(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if 'rental_mode' not in vals and vals.get('room_type_id'):
-                vals['rental_mode'] = self.env['hotel.room.type'].browse(
-                    vals['room_type_id']).rental_mode
+            if vals.get('room_type_id'):
+                rtype = self.env['hotel.room.type'].browse(vals['room_type_id'])
+                if 'rental_mode' not in vals:
+                    vals['rental_mode'] = rtype.rental_mode
+                if 'capacity' not in vals and rtype.default_capacity:
+                    vals['capacity'] = rtype.default_capacity
         rooms = super().create(vals_list)
         if not self.env.context.get('hotel_no_auto_beds'):
             rooms._create_missing_beds()
         for room, vals in zip(rooms, vals_list):
             if vals.get('bed_price'):
                 room._sync_bed_prices()
+        rooms._sync_bed_room_price()
         return rooms
 
     def write(self, vals):
@@ -220,7 +225,25 @@ class HotelRoom(models.Model):
             self._remove_extra_beds()
         if 'bed_price' in vals:
             self._sync_bed_prices()
+        if {'bed_price', 'capacity', 'rental_mode', 'bed_ids'} & set(vals):
+            self._sync_bed_room_price()
         return res
+
+    def _bed_rooms_total(self):
+        """Location au lit : prix de la chambre = somme des prix de ses lits actifs."""
+        self.ensure_one()
+        beds = self.bed_ids.filtered('active')
+        if beds:
+            return sum(beds.mapped('price'))
+        return (self.bed_price or 0.0) * (self.capacity or 0)
+
+    def _sync_bed_room_price(self):
+        """Chambres louées au lit : le « Prix chambre » enregistré suit la somme
+        des lits (pas de prix chambre à saisir pour ce mode)."""
+        for room in self.filtered(lambda r: r.rental_mode == 'bed'):
+            total = room._bed_rooms_total()
+            if room.room_price != total:
+                super(HotelRoom, room).write({'room_price': total})
 
     def _sync_bed_prices(self):
         """Le « Prix lit » de la chambre fait foi : il est recopié sur tous ses
@@ -480,10 +503,12 @@ class HotelRoom(models.Model):
         for room in self:
             room.maintenance = room.technical_state != 'in_service'
 
-    @api.depends('room_price', 'bed_price')
+    @api.depends('room_price', 'bed_price', 'rental_mode', 'capacity',
+                 'bed_ids.price', 'bed_ids.active')
     def _compute_whole_room_price(self):
         for room in self:
-            room.whole_room_price = room.room_price
+            room.whole_room_price = (room._bed_rooms_total() if room.rental_mode == 'bed'
+                                     else room.room_price)
             room.bed_price_min = room.bed_price
 
     def _get_whole_room_price(self, day):

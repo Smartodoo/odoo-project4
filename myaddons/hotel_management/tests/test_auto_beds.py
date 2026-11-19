@@ -9,7 +9,9 @@ class TestAutoBeds(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.rtype = cls.env['hotel.room.type'].create({'name': 'Type auto', 'list_price': 2000})
+        # Dortoir : le prix par lit n'est saisi que pour les chambres louées au lit
+        cls.rtype = cls.env['hotel.room.type'].create({
+            'name': 'Type auto', 'list_price': 2000, 'rental_mode': 'bed'})
 
     def _room(self, **vals):
         values = {'name': 'AB-101', 'room_type_id': self.rtype.id, 'capacity': 3,
