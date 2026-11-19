@@ -101,7 +101,7 @@
                         <button name="action_view_housekeeping" type="object"
                                 class="oe_stat_button" icon="wand_stars">
                             <field name="housekeeping_count" widget="statinfo"
-                                   string="Ménage"/>
+                                   string="Housekeeping"/>
                         </button>
                         <button name="action_view_maintenance" type="object"
                                 class="oe_stat_button" icon="build">
@@ -253,7 +253,7 @@
                             </div>
                             <div class="text-muted small mb-2">
                                 L'état des lits (libre / réservé / occupé) suit les réservations
-                                et les boutons Entrer / Sortir.
+                                et les boutons Check-in / Check-out.
                             </div>
                             <field name="bed_ids" readonly="1">
                                 <list create="0" delete="0">
@@ -262,6 +262,7 @@
                                     <field name="currency_id" column_invisible="1"/>
                                     <field name="status" widget="badge"
                                            decoration-success="status == 'free'"
+                                           decoration-warning="status == 'cleaning'"
                                            decoration-info="status == 'reserved'"
                                            decoration-danger="status == 'occupied'"
                                            decoration-muted="status in ('maintenance', 'out_of_service')"/>

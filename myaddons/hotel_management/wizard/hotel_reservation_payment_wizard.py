@@ -2,7 +2,10 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
 
-from ..models.account_payment import HOTEL_PAYMENT_KINDS, HOTEL_PAYMENT_MODES
+from ..models.account_payment import (
+    HOTEL_CARD_TYPES, HOTEL_PAYMENT_KINDS, HOTEL_PAYMENT_MODES,
+    hotel_check_card, hotel_format_expiry, hotel_mask_card_number,
+)
 
 
 class HotelReservationPaymentWizard(models.TransientModel):
@@ -51,7 +54,18 @@ class HotelReservationPaymentWizard(models.TransientModel):
         precompute=True)
     date = fields.Date(
         string="Date", required=True, default=fields.Date.context_today)
-    cheque_reference = fields.Char(string="N° de chèque")
+    cheque_reference = fields.Char(string="Numéro de chèque")
+    # Virement / chèque : banque émettrice
+    bank_name = fields.Char(string="Banque")
+    transfer_reference = fields.Char(string="Numéro de virement")
+    # Paiement par TPE : carte utilisée
+    card_type = fields.Selection(HOTEL_CARD_TYPES, string="Type de carte")
+    card_last_name = fields.Char(string="Nom")
+    card_first_name = fields.Char(string="Prénom")
+    card_number = fields.Char(
+        string="Numéro de la carte",
+        help="Seuls les 4 derniers chiffres sont conservés sur le paiement.")
+    card_expiry = fields.Char(string="Date d'expiration", help="Format MM/AA")
     memo = fields.Char(string="Mémo")
 
     @api.depends('reservation_id')
@@ -103,6 +117,15 @@ class HotelReservationPaymentWizard(models.TransientModel):
         parts = ["%s %s" % (kind, self.reservation_id.name)]
         if self.payment_mode == 'cheque' and self.cheque_reference:
             parts.append(_("Chèque n° %s", self.cheque_reference))
+        if self.payment_mode == 'transfer' and self.transfer_reference:
+            parts.append(_("Virement n° %s", self.transfer_reference))
+        if self.payment_mode in ('transfer', 'cheque') and self.bank_name:
+            parts.append(self.bank_name.strip())
+        if (self.payment_mode == 'card' and self.payment_kind != 'refund'
+                and self.card_type and self.card_number):
+            parts.append("%s %s" % (
+                dict(HOTEL_CARD_TYPES)[self.card_type],
+                hotel_mask_card_number(self.card_number)[-9:]))
         if self.memo:
             parts.append(self.memo)
         return " — ".join(parts)
@@ -134,8 +157,32 @@ class HotelReservationPaymentWizard(models.TransientModel):
                 "Aucun journal n'est configuré pour le mode « %s ».\n"
                 "Vérifiez la configuration comptable (journaux Espèces / Banque).",
                 dict(HOTEL_PAYMENT_MODES)[self.payment_mode]))
-        if self.payment_mode == 'cheque' and not self.cheque_reference and not is_refund:
-            raise UserError(_("Indiquez le numéro du chèque."))
+        if not is_refund and self.payment_mode in ('transfer', 'cheque'):
+            number_field, number_label = {
+                'transfer': ('transfer_reference', _("Numéro de virement")),
+                'cheque': ('cheque_reference', _("Numéro de chèque")),
+            }[self.payment_mode]
+            missing = [label for field, label in (
+                ('bank_name', _("Banque")), (number_field, number_label),
+            ) if not (self[field] or '').strip()]
+            if missing:
+                raise UserError(_(
+                    "Paiement par %(mode)s : renseignez %(fields)s.",
+                    mode=dict(HOTEL_PAYMENT_MODES)[self.payment_mode].lower(),
+                    fields=", ".join(missing)))
+        is_card = self.payment_mode == 'card' and not is_refund
+        if is_card:
+            missing = [label for field, label in (
+                ('card_type', _("Type de carte")),
+                ('card_last_name', _("Nom")),
+                ('card_first_name', _("Prénom")),
+                ('card_number', _("Numéro de la carte")),
+                ('card_expiry', _("Date d'expiration")),
+            ) if not self[field]]
+            if missing:
+                raise UserError(_(
+                    "Paiement par TPE : renseignez %s.", ", ".join(missing)))
+            hotel_check_card(self.card_number, self.card_expiry)
         journal = self.payment_method_line_id.journal_id
         method_line = self.payment_method_line_id
         if is_refund:
@@ -161,6 +208,20 @@ class HotelReservationPaymentWizard(models.TransientModel):
             'hotel_reservation_id': reservation.id,
             'hotel_payment_kind': self.payment_kind,
         }
+        if self.payment_mode in ('transfer', 'cheque'):
+            vals['hotel_bank_name'] = (self.bank_name or '').strip() or False
+            if self.payment_mode == 'transfer':
+                vals['hotel_transfer_number'] = (self.transfer_reference or '').strip() or False
+            else:
+                vals['hotel_cheque_number'] = (self.cheque_reference or '').strip() or False
+        if is_card:
+            vals.update({
+                'hotel_card_type': self.card_type,
+                'hotel_card_last_name': self.card_last_name.strip(),
+                'hotel_card_first_name': self.card_first_name.strip(),
+                'hotel_card_number': hotel_mask_card_number(self.card_number),
+                'hotel_card_expiry': hotel_format_expiry(self.card_expiry),
+            })
         # Champ du module payment_cheque_ref, s'il est installé
         if self.cheque_reference and 'cheque_reference' in Payment._fields:
             vals['cheque_reference'] = self.cheque_reference

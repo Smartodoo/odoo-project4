@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import Form, HttpCase, TransactionCase, tagged
 
 
@@ -55,8 +55,23 @@ class TestReceptionRules(TransactionCase):
             'reservation_id': resa.id, 'payment_mode': 'card', 'amount': 2000,
             'encaisse_kind': 'payment'})
         self.assertEqual(wizard.payment_kind, 'payment')
+        # TPE : les informations de la carte sont obligatoires
+        with self.assertRaises(UserError):
+            wizard.action_confirm()
+        wizard.write({'card_type': 'visa', 'card_last_name': 'Benali',
+                      'card_first_name': 'Amine', 'card_number': '4111 1111 1111 1234',
+                      'card_expiry': '01/20'})
+        with self.assertRaises(ValidationError):  # carte expirée
+            wizard.action_confirm()
+        wizard.card_expiry = '8/99'
         wizard.action_confirm()
         self.assertEqual(resa.amount_paid, 2000)
+        payment = resa.payment_ids.filtered(lambda p: p.payment_type == 'inbound')
+        self.assertEqual(payment.hotel_card_type, 'visa')
+        self.assertEqual(payment.hotel_card_number, '**** **** **** 1234')
+        self.assertEqual(payment.hotel_card_expiry, '08/99')
+        self.assertEqual(payment.hotel_card_last_name, 'Benali')
+
         ctx = resa.action_refund_hotel_payment()['context']
         refund = self.env['hotel.reservation.payment.wizard'].with_context(**ctx).create({
             'reservation_id': resa.id, 'payment_mode': 'card', 'amount': 500})
@@ -64,6 +79,60 @@ class TestReceptionRules(TransactionCase):
         self.assertFalse(refund.encaisse_kind)
         refund.action_confirm()
         self.assertEqual(resa.amount_paid, 1500)
+
+    # --- Virement / chèque : banque + numéro --------------------------------
+    def test_transfer_and_cheque_details(self):
+        Wizard = self.env['hotel.reservation.payment.wizard']
+        for offset, (mode, number_field, payment_field) in enumerate((
+                ('transfer', 'transfer_reference', 'hotel_transfer_number'),
+                ('cheque', 'cheque_reference', 'hotel_cheque_number'))):
+            shift = timedelta(days=20 * (offset + 1))
+            resa = self._resa(checkin=self.ci + shift, checkout=self.co + shift)
+            wizard = Wizard.create({
+                'reservation_id': resa.id, 'payment_mode': mode, 'amount': 1000,
+                'encaisse_kind': 'payment'})
+            with self.assertRaises(UserError):  # banque et numéro obligatoires
+                wizard.action_confirm()
+            wizard.write({'bank_name': ' CPA ', number_field: 'N-4521'})
+            wizard.action_confirm()
+            payment = resa.payment_ids
+            self.assertEqual(payment.hotel_payment_mode, mode)
+            self.assertEqual(payment.hotel_bank_name, 'CPA')
+            self.assertEqual(payment[payment_field], 'N-4521')
+            self.assertIn('N-4521', payment.memo)
+
+    # --- Lits proposés = lits libres sur toute la période ---------------------
+    def test_only_free_beds_proposed(self):
+        bed1, bed2 = self.dorm.bed_ids[:2]
+        other = self._resa(booking_type='bed', checkin=self.ci, checkout=self.co,
+                           line_ids=[(0, 0, {'bed_id': bed1.id})])
+        other.action_confirm()
+        Resa = self.env['hotel.reservation']
+        # Chevauchement partiel (une nuit en commun) : lit non proposé
+        new = Resa.new({'checkin': self.ci - timedelta(days=3),
+                        'checkout': self.ci + timedelta(days=1), 'booking_type': 'bed'})
+        self.assertNotIn(bed1, new.proposed_bed_ids._origin)
+        self.assertIn(bed2, new.proposed_bed_ids._origin)
+        # Période qui englobe l'autre réservation : non proposé non plus
+        new = Resa.new({'checkin': self.ci - timedelta(days=1),
+                        'checkout': self.co + timedelta(days=1), 'booking_type': 'bed'})
+        self.assertNotIn(bed1, new.proposed_bed_ids._origin)
+        # Arrivée le jour du départ de l'autre client : le lit est libre
+        new = Resa.new({'checkin': self.co, 'checkout': self.co + timedelta(days=2),
+                        'booking_type': 'bed'})
+        self.assertIn(bed1, new.proposed_bed_ids._origin)
+        # Lit choisi puis dates changées vers une période où il est pris :
+        # il est retiré de la réservation avec un avertissement
+        form = Form(Resa)
+        form.partner_id = self.partner
+        form.booking_type = 'bed'
+        form.checkin = self.co + timedelta(days=1)
+        form.checkout = self.co + timedelta(days=3)
+        with form.line_ids.new() as line:
+            line.bed_id = bed1
+        self.assertEqual(len(form.line_ids), 1)
+        form.checkin = self.ci
+        self.assertEqual(len(form.line_ids), 0)
 
     # --- Remise client supprimée ---------------------------------------------
     def test_no_partner_discount(self):
@@ -85,8 +154,8 @@ class TestReceptionRules(TransactionCase):
         new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'})
         proposed = new.proposed_bed_ids._origin
         self.assertNotIn(bed, proposed)
-        # Le dortoir entamé est proposé en premier : ses 2 lits restants
-        self.assertEqual(proposed, self.dorm.bed_ids[1:])
+        # Le dortoir entamé est proposé en premier : ses lits restants
+        self.assertEqual(proposed[:len(self.dorm.bed_ids) - 1], self.dorm.bed_ids[1:])
 
     def test_taken_not_proposed_without_checkout(self):
         """Nouvelle réservation, départ pas encore saisi (seule l'arrivée est

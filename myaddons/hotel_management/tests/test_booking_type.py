@@ -79,8 +79,11 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
 
         self._book_bed(self.room_a.bed_ids[0])
         new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'})
-        # A est partiellement réservée : seuls ses lits libres sont proposés
-        self.assertEqual(new.proposed_bed_ids._origin, self.room_a.bed_ids[1:])
+        # A est partiellement réservée : ses lits libres sont proposés en
+        # premier (ordre du site web), puis ceux des chambres libres
+        proposed = new.proposed_bed_ids._origin
+        self.assertEqual(proposed[:2], self.room_a.bed_ids[1:])
+        self.assertTrue(self.room_b.bed_ids <= proposed)
 
         # Par chambre : seulement les chambres libres en entier (C ; pas D
         # déjà réservée, ni les dortoirs)
@@ -99,7 +102,7 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
         form.checkin = self.ci
         form.checkout = self.co
         form.booking_type = 'bed'
-        form.adults = 1
+        form.guest_count = 1
         for bed in self.room_a.bed_ids[1:]:
             with form.line_ids.new() as line:
                 line.bed_id = bed
@@ -172,6 +175,65 @@ class TestBookingTypeWebsite(BookingTypeCommon, HttpCase):
         # trop de voyageurs pour les lits libres de A -> A n'est plus proposée
         self.assertNotIn('Chambre BT-A', self._available_part(self._rooms_page('bed', 4)))
 
+    def test_website_only_free_rooms(self):
+        """Recherche « chambre entière » : seules les chambres libres sur la
+        période sont affichées ; la fiche d'une chambre prise ne permet pas de
+        réserver et renvoie vers les chambres libres."""
+        self._book_room(self.room_d)
+        self.env['hotel.reservation'].create({  # brouillon : bloque aussi
+            'partner_id': self.partner.id, 'checkin': self.co - timedelta(days=1),
+            'checkout': self.co + timedelta(days=2), 'booking_type': 'room',
+            'line_ids': [(0, 0, {'room_id': self.room_c.id})]})
+        page = self._rooms_page('room')
+        self.assertNotIn('Chambre BT-D', page)
+        self.assertNotIn('Chambre BT-C', page)
+        self.assertNotIn('Non disponibles', page)
+        detail = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=1&booking_type=room'
+                               % (self.room_d.id, self.ci, self.co)).text
+        self.assertIn('Voir les chambres libres sur ces dates', detail)
+        self.assertRegex(detail, r'<button type="submit"[^>]*disabled')
+        # Période libre : réservable
+        later = self.co + timedelta(days=10)
+        detail = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=1&booking_type=room'
+                               % (self.room_d.id, later, later + timedelta(days=2))).text
+        self.assertNotIn('Voir les chambres libres sur ces dates', detail)
+        self.assertNotRegex(detail, r'<button type="submit"[^>]*disabled')
+
+    def test_website_only_free_beds(self):
+        """Fiche chambre : seuls les lits libres sur toute la période sont
+        proposés (une réservation en brouillon bloque aussi le lit)."""
+        bed1, bed2, bed3 = self.room_a.bed_ids
+        self._book_bed(bed1)  # confirmée, même période
+        self.env['hotel.reservation'].create({  # brouillon, chevauche d'une nuit
+            'partner_id': self.partner.id, 'checkin': self.co - timedelta(days=1),
+            'checkout': self.co + timedelta(days=3), 'booking_type': 'bed',
+            'line_ids': [(0, 0, {'bed_id': bed2.id})]})
+        url = '/hotel/room/%s?checkin=%s&checkout=%s&guests=1&booking_type=bed'
+        page = self.url_open(url % (self.room_a.id, self.ci, self.co)).text
+        self.assertNotIn('id="bed_%s"' % bed1.id, page)
+        self.assertNotIn('id="bed_%s"' % bed2.id, page)
+        self.assertIn('id="bed_%s"' % bed3.id, page)
+        # Autre période (après les deux réservations) : tous les lits libres
+        later = self.co + timedelta(days=10)
+        page = self.url_open(url % (self.room_a.id, later, later + timedelta(days=2))).text
+        for bed in (bed1, bed2, bed3):
+            self.assertIn('id="bed_%s"' % bed.id, page)
+        # Sans dates : aucun lit proposé, on demande les dates
+        page = self.url_open('/hotel/room/%s' % self.room_a.id).text
+        self.assertNotIn('id="bed_%s"' % bed3.id, page)
+        self.assertIn('les lits libres', page)
+        # Envoi forcé d'un lit retenu par le brouillon : refusé
+        token = re.search(r'name="csrf_token" value="([^"]+)"', page).group(1)
+        res = self.url_open('/hotel/booking/submit', data={
+            'csrf_token': token, 'room_id': self.room_a.id, 'checkin': str(self.ci),
+            'checkout': str(self.co), 'guests': 1, 'booking_type': 'bed',
+            'bed_ids': [bed2.id], 'name': 'Client Web', 'email': 'web.pris@example.com'},
+            allow_redirects=False)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('indisponible', res.text)
+        self.assertFalse(self.env['hotel.reservation'].search(
+            [('partner_id.email', '=', 'web.pris@example.com')]))
+
     def test_website_bed_booking_one_line_per_bed(self):
         page = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=2&booking_type=bed'
                              % (self.room_a.id, self.ci, self.co))
@@ -214,7 +276,8 @@ class TestBookingTypeWebsite(BookingTypeCommon, HttpCase):
                     setTimeout(() => {
                         const items = [...document.querySelectorAll('.o-autocomplete--dropdown-item')]
                             .map((i) => i.textContent.trim()).filter((t) => t.startsWith('BT-'));
-                        if (!items.length || items.some((t) => !t.startsWith('BT-A'))) {
+                        // Ordre du site : d'abord les lits restants de la chambre entamée (A)
+                        if (!items.length || !items[0].startsWith('BT-A') || !items[1].startsWith('BT-A')) {
                             fail('Lits proposés inattendus : ' + items.join(', '));
                             return;
                         }

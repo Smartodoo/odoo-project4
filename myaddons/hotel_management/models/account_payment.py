@@ -1,12 +1,68 @@
-from odoo import api, fields, models
+import re
+from datetime import date
+
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 # Modes de paiement de l'auberge (cahier des charges §8)
 HOTEL_PAYMENT_MODES = [
     ('cash', 'Espèces'),
-    ('card', 'Carte bancaire'),
+    ('card', 'TPE'),
     ('transfer', 'Virement bancaire'),
     ('cheque', 'Chèque'),
 ]
+
+# Cartes acceptées au TPE
+HOTEL_CARD_TYPES = [
+    ('cib', 'Carte CIB'),
+    ('ccp', 'Carte CCP'),
+    ('visa', 'Carte Visa'),
+]
+
+
+def hotel_card_digits(number):
+    """Chiffres du numéro de carte saisi (espaces / tirets ignorés)."""
+    return re.sub(r'[\s-]', '', number or '')
+
+
+def hotel_mask_card_number(number):
+    """Numéro masqué conservé en base : seuls les 4 derniers chiffres restent
+    lisibles (on ne stocke jamais le numéro complet d'une carte)."""
+    digits = hotel_card_digits(number)
+    if not digits:
+        return False
+    if set(digits) <= {'*'} or '*' in digits:
+        return number  # déjà masqué
+    return '**** **** **** ' + digits[-4:]
+
+
+def hotel_check_card(number, expiry):
+    """Contrôle le numéro (13 à 19 chiffres) et la date d'expiration (MM/AA,
+    non dépassée). Lève une ValidationError avec un message clair."""
+    if number and '*' not in number:
+        digits = hotel_card_digits(number)
+        if not digits.isdigit() or not 13 <= len(digits) <= 19:
+            raise ValidationError(_(
+                "Numéro de carte invalide : saisissez de 13 à 19 chiffres."))
+    if expiry:
+        match = re.fullmatch(r'\s*(\d{1,2})\s*/\s*(\d{2}|\d{4})\s*', expiry)
+        if not match or not 1 <= int(match.group(1)) <= 12:
+            raise ValidationError(_(
+                "Date d'expiration invalide : utilisez le format MM/AA (ex. 08/27)."))
+        month, year = int(match.group(1)), int(match.group(2))
+        year = year + 2000 if year < 100 else year
+        today = date.today()
+        if (year, month) < (today.year, today.month):
+            raise ValidationError(_("La carte a expiré (%s).", expiry.strip()))
+
+
+def hotel_format_expiry(expiry):
+    """Normalise la date d'expiration au format MM/AA."""
+    match = re.fullmatch(r'\s*(\d{1,2})\s*/\s*(\d{2}|\d{4})\s*', expiry or '')
+    if not match:
+        return expiry or False
+    return '%02d/%s' % (int(match.group(1)), match.group(2)[-2:])
+
 
 HOTEL_PAYMENT_KINDS = [
     ('deposit', 'Acompte'),
@@ -21,7 +77,7 @@ class AccountPaymentMethodLine(models.Model):
     hotel_payment_mode = fields.Selection(
         HOTEL_PAYMENT_MODES, string="Mode (Auberge)",
         help="Mode de paiement proposé à la réception de l'auberge "
-             "(Espèces, Carte bancaire, Virement, Chèque).")
+             "(Espèces, TPE, Virement, Chèque).")
 
 
 class AccountPayment(models.Model):
@@ -37,6 +93,38 @@ class AccountPayment(models.Model):
     hotel_payment_mode = fields.Selection(
         related='payment_method_line_id.hotel_payment_mode',
         string="Mode de paiement", store=True)
+
+    # Paiement par TPE : carte utilisée (le numéro est conservé masqué)
+    hotel_card_type = fields.Selection(HOTEL_CARD_TYPES, string="Type de carte")
+    hotel_card_last_name = fields.Char(string="Nom du titulaire")
+    hotel_card_first_name = fields.Char(string="Prénom du titulaire")
+    hotel_card_number = fields.Char(
+        string="Numéro de la carte",
+        help="Seuls les 4 derniers chiffres sont conservés.")
+    hotel_card_expiry = fields.Char(
+        string="Date d'expiration", size=7, help="Format MM/AA")
+    # Paiement par virement ou par chèque
+    hotel_bank_name = fields.Char(string="Banque")
+    hotel_transfer_number = fields.Char(string="Numéro de virement")
+    hotel_cheque_number = fields.Char(string="Numéro de chèque")
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._hotel_normalize_card_vals(vals)
+        return super().create(vals_list)
+
+    def write(self, vals):
+        self._hotel_normalize_card_vals(vals)
+        return super().write(vals)
+
+    @api.model
+    def _hotel_normalize_card_vals(self, vals):
+        if vals.get('hotel_card_number'):
+            hotel_check_card(vals['hotel_card_number'], vals.get('hotel_card_expiry'))
+            vals['hotel_card_number'] = hotel_mask_card_number(vals['hotel_card_number'])
+        if vals.get('hotel_card_expiry'):
+            vals['hotel_card_expiry'] = hotel_format_expiry(vals['hotel_card_expiry'])
 
 
 class AccountPaymentRegister(models.TransientModel):
@@ -83,7 +171,7 @@ class AccountJournal(models.Model):
         pour chaque société ayant un plan comptable :
           - Espèces          -> journal Espèces
           - Virement / Chèque -> journal Banque
-          - Carte bancaire   -> journal « Carte bancaire » (créé si absent)
+          - TPE              -> journal « TPE » (créé si absent)
         Idempotent : ne crée que ce qui manque, ne supprime rien."""
         Method = self.env['account.payment.method'].sudo()
         MethodLine = self.env['account.payment.method.line'].sudo()
@@ -135,9 +223,9 @@ class AccountJournal(models.Model):
                 if Journal.search_count(domain + [('code', '=', code)]):
                     code = 'CB'
                 card = Journal.create({
-                    'name': "Carte bancaire",
+                    'name': "TPE",
                     'code': code,
                     'type': 'bank',
                     'company_id': company.id,
                 })
-            ensure_line(card, 'card', "Carte bancaire", manual_in)
+            ensure_line(card, 'card', "TPE", manual_in)

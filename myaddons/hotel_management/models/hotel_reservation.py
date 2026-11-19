@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from markupsafe import Markup
 
-from odoo import api, fields, models, _
+from odoo import Command, api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 
 
@@ -54,6 +54,20 @@ class HotelReservation(models.Model):
         related='partner_id.hotel_first_name', readonly=False, string="Prénom")
     partner_phone = fields.Char(
         related='partner_id.phone', readonly=False, string="Téléphone")
+    # Profil client : rempli depuis la fiche client, et une modification
+    # faite ici est enregistrée sur la fiche client.
+    partner_customer_type_id = fields.Many2one(
+        related='partner_id.hotel_customer_type_id', readonly=False,
+        string="Type de client")
+    partner_is_blacklisted = fields.Boolean(
+        related='partner_id.hotel_customer_type_id.is_blacklist',
+        string="Client en alerte")
+    partner_customer_type_name = fields.Char(
+        related='partner_id.hotel_customer_type_id.name',
+        string="Libellé type de client")
+    partner_preferences = fields.Text(
+        related='partner_id.hotel_preferences', readonly=False,
+        string="Préférences")
     partner_street = fields.Char(
         related='partner_id.street', readonly=False, string="Adresse")
     partner_city = fields.Char(
@@ -79,10 +93,24 @@ class HotelReservation(models.Model):
     nights = fields.Integer(
         string="Nuits", compute='_compute_nights', store=True, aggregator='avg',
         help="Nombre de nuits. Dans les analyses : durée moyenne des séjours.")
-    adults = fields.Integer(string="Adultes", default=1)
+    # Saisie : nombre total de personnes, dont N enfants ; les adultes en
+    # découlent (personnes - enfants). Écrire « adults » reste possible
+    # (site web, imports, code) : le total est alors adultes + enfants.
+    adults = fields.Integer(
+        string="Adultes", compute='_compute_adults', inverse='_inverse_adults',
+        store=True, readonly=False)
     children = fields.Integer(string="Enfants", default=0)
+    guest_ids = fields.One2many(
+        'hotel.reservation.guest', 'reservation_id', string="Autres personnes",
+        copy=False,
+        help="Une fiche par adulte (en plus du client) et par enfant : elles "
+             "suivent automatiquement le nombre d'adultes et d'enfants.")
+    room_type_id = fields.Many2one(
+        'hotel.room.type', string="Type de chambre", tracking=True,
+        help="Si renseigné, seules les chambres / lits de ce type sont proposés.")
     guest_count = fields.Integer(
-        string="Personnes", compute='_compute_guest_count', store=True)
+        string="Personnes", default=1, required=True,
+        help="Nombre total de personnes du séjour, enfants compris.")
     line_ids = fields.One2many(
         'hotel.reservation.line', 'reservation_id', string="Chambres", copy=True)
     room_count = fields.Integer(
@@ -141,6 +169,10 @@ class HotelReservation(models.Model):
     proposed_bed_ids = fields.Many2many(
         'hotel.bed', 'hotel_resa_proposed_bed_rel', 'reservation_id', 'bed_id',
         string="Lits proposés", compute='_compute_proposed')
+    # Ordre d'affichage des propositions dans la liste de choix (ids séparés
+    # par des virgules) : même logique que la recherche du site web.
+    proposed_room_order = fields.Char(compute='_compute_proposed')
+    proposed_bed_order = fields.Char(compute='_compute_proposed')
     state = fields.Selection([
         ('draft', 'Brouillon'),
         ('confirmed', 'Confirmée'),
@@ -158,8 +190,12 @@ class HotelReservation(models.Model):
             else:
                 rec.nights = 0
 
-    @api.depends('adults', 'children')
-    def _compute_guest_count(self):
+    @api.depends('guest_count', 'children')
+    def _compute_adults(self):
+        for rec in self:
+            rec.adults = (rec.guest_count or 0) - (rec.children or 0)
+
+    def _inverse_adults(self):
         for rec in self:
             rec.guest_count = (rec.adults or 0) + (rec.children or 0)
 
@@ -277,6 +313,56 @@ class HotelReservation(models.Model):
         elle, se saisit sur la réservation)."""
         for line in self.line_ids:
             line._apply_price()
+        if self.partner_id.hotel_customer_type_id.is_blacklist:
+            return {'warning': {
+                'title': _("Client en %s", self.partner_id.hotel_customer_type_id.name),
+                'message': _(
+                    "Attention : %(client)s est classé « %(type)s ».\n"
+                    "Vérifiez avec un responsable avant de confirmer la réservation.",
+                    client=self.partner_id.display_name,
+                    type=self.partner_id.hotel_customer_type_id.name),
+            }}
+
+    @api.onchange('checkin', 'checkout')
+    def _onchange_dates_free_only(self):
+        """Nouvelles dates : seuls les lits / chambres libres sur la nouvelle
+        période restent dans la réservation. Ceux déjà pris par une autre
+        réservation (brouillon compris, comme pour les propositions) sur ces
+        dates sont retirés, avec un avertissement."""
+        if not (self.checkin and self.checkout and self.checkout > self.checkin):
+            return
+        origin = self._origin if self._origin else False
+        removed = []
+        to_remove = self.env['hotel.reservation.line']
+        for line in self.line_ids.with_context(hotel_include_draft=True):
+            if not line.room_id:
+                continue
+            if self.booking_type == 'bed':
+                beds = line.bed_id or line.bed_ids
+                taken = beds.filtered(lambda b: not b.is_available(
+                    self.checkin, self.checkout, ignore_reservation=origin))
+                if taken:
+                    to_remove |= line
+                    removed.append(_("lit %(beds)s (chambre %(room)s)",
+                                     beds=", ".join(taken.mapped('name')),
+                                     room=line.room_id.name))
+            elif not line.room_id.is_available(
+                    self.checkin, self.checkout, ignore_reservation=origin):
+                to_remove |= line
+                removed.append(_("chambre %s", line.room_id.name))
+        if not to_remove:
+            return
+        self.line_ids -= to_remove
+        return {'warning': {
+            'title': _("Lits / chambres plus disponibles"),
+            'message': _(
+                "Sur la période du %(start)s au %(end)s, ces éléments sont déjà "
+                "réservés et ont été retirés : %(items)s.\n"
+                "Choisissez parmi les lits / chambres proposés.",
+                start=self.checkin.strftime('%d/%m/%Y'),
+                end=self.checkout.strftime('%d/%m/%Y'),
+                items="; ".join(removed)),
+        }}
 
     @api.onchange('checkin', 'checkout')
     def _onchange_dates_reprice(self):
@@ -397,17 +483,18 @@ class HotelReservation(models.Model):
                     "séjour (%(total)s).",
                     deposit=rec.deposit_amount, total=rec.amount_total))
 
-    @api.constrains('adults', 'children')
+    @api.constrains('guest_count', 'adults', 'children')
     def _check_guest_counts(self):
         for rec in self:
             if (rec.adults or 0) < 1:
                 raise ValidationError(_(
-                    "Une réservation doit compter au moins un adulte."))
+                    "Une réservation doit compter au moins un adulte : le nombre "
+                    "de personnes doit être supérieur au nombre d'enfants."))
             if (rec.children or 0) < 0:
                 raise ValidationError(_(
                     "Le nombre d'enfants ne peut pas être négatif."))
 
-    @api.constrains('state', 'checkin', 'checkout', 'line_ids', 'adults', 'children')
+    @api.constrains('state', 'checkin', 'checkout', 'line_ids', 'guest_count', 'adults', 'children')
     def _check_booking_integrity(self):
         """Toute modification d'une réservation déjà confirmée ou enregistrée
         est revalidée : places suffisantes et aucune surréservation. Sans cela,
@@ -418,25 +505,81 @@ class HotelReservation(models.Model):
                 rec._check_guest_places()
                 rec._check_availability()
 
-    @api.depends('checkin', 'checkout', 'booking_type', 'line_ids.room_id',
-                 'line_ids.bed_ids')
+    @api.depends('checkin', 'checkout', 'booking_type', 'room_type_id',
+                 'guest_count', 'children', 'line_ids.room_id', 'line_ids.bed_ids')
     def _compute_proposed(self):
-        """Chambres / lits proposés dans les lignes (cahier des charges) :
-        - par chambre : chambres entièrement libres sur la période ;
-        - par lit : d'abord les lits des chambres partiellement réservées,
-          sinon ceux des chambres entièrement libres."""
+        """Chambres / lits proposés dans les lignes, triés comme sur le site :
+        - par chambre : chambres entièrement libres sur la période, de la
+          capacité la plus proche du nombre de personnes restant à loger à la
+          plus grande (puis les trop petites) ;
+        - par lit : lits libres, d'abord ceux des chambres déjà partagées, puis
+          par nombre de lits libres dans la chambre, du plus proche du nombre
+          de personnes restant à loger au plus grand.
+        Le type de chambre de la réservation, s'il est choisi, filtre la liste."""
         Room = self.env['hotel.room']
         for rec in self:
             origin = rec._origin if rec._origin else False
             checkin, checkout = rec._proposal_period()
+            domain = [('room_type_id', '=', rec.room_type_id.id)] if rec.room_type_id else None
+            guests = max(rec.guest_count or 1, 1)
             if rec.booking_type == 'room':
-                rec.proposed_room_ids = Room._hotel_whole_free_rooms(
-                    checkin, checkout, origin) - rec.line_ids.room_id
+                rooms = Room._hotel_ordered_free_rooms(
+                    checkin, checkout, origin, guests, rec.line_ids.room_id, domain)
+                rec.proposed_room_ids = rooms
+                rec.proposed_room_order = ','.join(str(i) for i in rooms.ids)
                 rec.proposed_bed_ids = False
+                rec.proposed_bed_order = False
             else:
+                beds = Room._hotel_ordered_free_beds(
+                    checkin, checkout, origin, guests, rec.line_ids.bed_ids, domain)
                 rec.proposed_room_ids = False
-                rec.proposed_bed_ids = Room._hotel_proposed_beds(
-                    checkin, checkout, origin, rec.line_ids.bed_ids)
+                rec.proposed_room_order = False
+                rec.proposed_bed_ids = beds
+                rec.proposed_bed_order = ','.join(str(i) for i in beds.ids)
+
+    # ------------------------------------------------------------------
+    # Personnes du séjour : une fiche par adulte (hors client) et par enfant
+    # ------------------------------------------------------------------
+    def _guest_sync_plan(self):
+        """(fiches en trop, valeurs des fiches à créer) pour que les fiches
+        correspondent aux nombres d'adultes / d'enfants."""
+        self.ensure_one()
+        to_remove = self.env['hotel.reservation.guest']
+        to_create = []
+        adults = (self.guest_count or 1) - (self.children or 0)
+        wanted = {'adult': max(adults - 1, 0),
+                  'child': max(self.children or 0, 0)}
+        first_position = {'adult': 2, 'child': 1}
+        for kind, count in wanted.items():
+            guests = self.guest_ids.filtered(lambda g, k=kind: g.guest_type == k).sorted(
+                lambda g: (g.position or 0))
+            to_remove |= guests[count:]
+            kept = guests[:count]
+            position = max(kept.mapped('position') or [first_position[kind] - 1])
+            for _i in range(count - len(kept)):
+                position += 1
+                to_create.append({'guest_type': kind, 'position': position})
+        return to_remove, to_create
+
+    @api.onchange('guest_count', 'children')
+    def _onchange_guest_counts(self):
+        to_remove, to_create = self._guest_sync_plan()
+        if not to_remove and not to_create:
+            return
+        Guest = self.env['hotel.reservation.guest']
+        new_guests = Guest
+        for vals in to_create:
+            new_guests += Guest.new(vals)
+        self.guest_ids = (self.guest_ids - to_remove) + new_guests
+
+    def _sync_guests(self):
+        """Même règle hors écran (site web, import, code)."""
+        for rec in self:
+            to_remove, to_create = rec._guest_sync_plan()
+            commands = [Command.unlink(g.id) for g in to_remove]
+            commands += [Command.create(vals) for vals in to_create]
+            if commands:
+                rec.with_context(hotel_guest_sync=True).write({'guest_ids': commands})
 
     def _proposal_period(self):
         """Période servant à filtrer les propositions. Dates incomplètes
@@ -630,6 +773,7 @@ class HotelReservation(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'hotel.reservation') or _('Nouveau')
         records = super().create(vals_list)
+        records._sync_guests()
         for rec in records:
             source = dict(self._fields['source'].selection).get(rec.source, '')
             rec._hotel_notify_managers(_(
@@ -643,6 +787,9 @@ class HotelReservation(models.Model):
         res = super().write(vals)
         if 'booking_type' in vals:
             self.line_ids._force_room_beds()
+        if ('adults' in vals or 'children' in vals or 'guest_count' in vals) \
+                and not self.env.context.get('hotel_guest_sync'):
+            self._sync_guests()
         return res
 
     def action_confirm(self):
@@ -679,11 +826,28 @@ class HotelReservation(models.Model):
         Housekeeping = self.env['hotel.housekeeping']
         for rec in self:
             rec.state = 'checkout'
-            rooms = rec.line_ids.mapped('room_id')
+            # Location au lit (dortoir) : seuls les lits libérés sont à
+            # nettoyer ; la chambre, partagée avec d'autres clients, ne change
+            # pas d'état. Chambre entière : ménage de toute la chambre.
+            bed_lines = rec.line_ids.filtered(
+                lambda l: l.booking_type == 'bed' and (l.bed_id or l.bed_ids))
+            room_lines = rec.line_ids - bed_lines
+            rooms = room_lines.mapped('room_id')
             rooms.write({'housekeeping_status': 'dirty'})
+            rooms.bed_ids.sudo().write({'housekeeping_status': 'dirty'})
             for room in rooms:
                 Housekeeping.create({
                     'room_id': room.id,
+                    'reservation_id': rec.id,
+                    'cleaning_type': 'checkout',
+                    'state': 'todo',
+                })
+            beds = bed_lines.mapped('bed_id') | bed_lines.mapped('bed_ids')
+            for room in beds.room_id - rooms:
+                Housekeeping.create({
+                    'room_id': room.id,
+                    'target': 'bed',
+                    'bed_ids': [(6, 0, beds.filtered(lambda b: b.room_id == room).ids)],
                     'reservation_id': rec.id,
                     'cleaning_type': 'checkout',
                     'state': 'todo',
@@ -819,6 +983,17 @@ class HotelReservation(models.Model):
             ((total_beds - free_beds) / total_beds) * 100, 1) if total_beds else 0.0
         all_active_beds = sum(len(r.bed_ids.filtered('active')) for r in rooms)
 
+        # Statistiques des lits (bloc « Lits ») : statut du jour de chaque lit actif
+        beds = self.env['hotel.bed'].search([])
+        bed_groups = {key: beds.filtered(lambda b, k=key: b.status == k)
+                      for key in ('reserved', 'occupied')}
+        # Un lit en attente de ménage reste vendable : compté libre
+        bed_groups['free'] = beds.filtered(lambda b: b.status in ('free', 'cleaning'))
+        beds_unavailable = beds.filtered(
+            lambda b: b.status in ('maintenance', 'out_of_service'))
+        beds_to_clean = beds.filtered(
+            lambda b: b.housekeeping_status in ('dirty', 'inprogress'))
+
         occ_lines = Line.search([
             ('state', '=', 'checkin'),
             ('checkin', '<=', today),
@@ -907,11 +1082,6 @@ class HotelReservation(models.Model):
             'count': count,
         } for room_type, count in by_type_groups]
 
-        housekeeping_todo = self.env['hotel.housekeeping'].search_count([
-            ('state', 'in', ('todo', 'inprogress'))])
-        maintenance_open = self.env['hotel.maintenance.request'].search_count([
-            ('state', 'in', ('new', 'inprogress'))])
-
         # Identifiants des enregistrements comptés par chaque tuile : un clic
         # sur la tuile ouvre exactement ces enregistrements (même filtre que
         # le chiffre affiché, y compris pour les statuts calculés non stockés).
@@ -924,9 +1094,12 @@ class HotelReservation(models.Model):
             'available_rooms': room_ids('available', 'cleaning'),
             'reserved_rooms': room_ids('reserved'),
             'unavailable_rooms': rooms.filtered('maintenance').ids,
-            'to_clean_rooms': rooms.filtered(
-                lambda r: r.housekeeping_status == 'dirty').ids,
-            'cleaning_free_rooms': room_ids('cleaning'),
+            'all_beds': beds.ids,
+            'occupied_beds': bed_groups['occupied'].ids,
+            'reserved_beds': bed_groups['reserved'].ids,
+            'free_beds': bed_groups['free'].ids,
+            'unavailable_beds': beds_unavailable.ids,
+            'to_clean_beds': beds_to_clean.ids,
             'all_guests': all_res.mapped('partner_id').ids,
             'present_guests': occ_lines.mapped('reservation_id.partner_id').ids,
             'arrivals_today': self.search([
@@ -943,8 +1116,14 @@ class HotelReservation(models.Model):
         symbol = self.env.company.currency_id.symbol or ''
         return {
             'tile_ids': tile_ids,
-            'housekeeping_todo': housekeeping_todo,
-            'maintenance_open': maintenance_open,
+            'beds': {
+                'total': len(beds),
+                'occupied': len(bed_groups['occupied']),
+                'reserved': len(bed_groups['reserved']),
+                'free': len(bed_groups['free']),
+                'unavailable': len(beds_unavailable),
+                'to_clean': len(beds_to_clean),
+            },
             'total_rooms': total_rooms,
             'occupied': occupied,
             'reserved': reserved,

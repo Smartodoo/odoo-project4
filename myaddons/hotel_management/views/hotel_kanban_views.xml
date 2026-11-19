@@ -62,6 +62,7 @@
                     group_create="0" group_delete="0" group_edit="0" sample="1">
                 <field name="state"/>
                 <field name="cleaning_type"/>
+                <field name="target"/>
                 <templates>
                     <t t-name="card">
                         <div t-attf-class="o_hotel_kcard o_hotel_kcard_hk_#{record.state.raw_value}">
@@ -70,6 +71,10 @@
                                     <i class="oi me-1" data-icon="key" title="Chambre"/><field name="room_id"/>
                                 </span>
                                 <field name="cleaning_type" class="badge text-bg-light"/>
+                            </div>
+                            <div class="small" t-if="record.target.raw_value == 'bed'">
+                                <i class="oi me-1" data-icon="bed" title="Lits"/>Lits :
+                                <field name="bed_ids" widget="many2many_tags"/>
                             </div>
                             <div class="text-muted small">
                                 <field name="name"/> · <field name="scheduled_date"/>

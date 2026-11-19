@@ -134,6 +134,9 @@ export class HotelDashboard extends Component {
         if (model === "hotel.reservation") {
             return this.openReservations(domain, name);
         }
+        if (model === "hotel.bed") {
+            return this.openModel(model, domain, name, false);
+        }
         return this.openModel(model, domain, name, true);
     }
 

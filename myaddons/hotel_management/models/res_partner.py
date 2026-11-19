@@ -24,6 +24,17 @@ class ResPartner(models.Model):
         help="Photo ou scan de la pièce d'identité (enregistrée au check-in).")
     hotel_id_document_name = fields.Char(string="Nom du fichier pièce d'identité")
     hotel_note = fields.Text(string="Observations (Auberge)")
+    hotel_customer_type_id = fields.Many2one(
+        'hotel.customer.type', string="Type de client", tracking=True,
+        ondelete='restrict')
+    hotel_is_blacklisted = fields.Boolean(
+        related='hotel_customer_type_id.is_blacklist', string="Client en alerte")
+    hotel_customer_type_name = fields.Char(
+        related='hotel_customer_type_id.name', string="Libellé type de client")
+    hotel_preferences = fields.Text(
+        string="Préférences",
+        help="Préférences du client : chambre (étage, lit, calme…), "
+             "consommations, petit-déjeuner, etc.")
 
     # Conditions tarifaires du client (cahier des charges §5)
     hotel_special_room_price = fields.Monetary(

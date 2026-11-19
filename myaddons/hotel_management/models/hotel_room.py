@@ -5,6 +5,25 @@ from markupsafe import Markup, escape
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
+from odoo.fields import Domain
+
+
+def hotel_proposal_name_search(model, name, domain, operator, limit):
+    """Liste de choix d'une réservation : les propositions arrivent dans
+    l'ordre calculé par la réservation (contexte « hotel_proposal_order » =
+    ids séparés par des virgules) au lieu de l'ordre alphabétique.
+    Renvoie None hors de ce contexte."""
+    order = model.env.context.get('hotel_proposal_order')
+    if not order or not isinstance(order, str):
+        return None
+    ids = [int(x) for x in order.split(',') if x.strip().isdigit()]
+    rank = {rid: n for n, rid in enumerate(ids)}
+    search_domain = Domain('display_name', operator, name) & Domain(domain or Domain.TRUE)
+    records = model.search_fetch(search_domain, ['display_name'])
+    records = records.sorted(lambda r: (rank.get(r.id, len(rank)), r.display_name or ''))
+    if limit:
+        records = records[:limit]
+    return [(r.id, r.display_name) for r in records.sudo()]
 
 # Capacité maximale d'une chambre (nombre de places / lits)
 MAX_ROOM_CAPACITY = 3
@@ -438,7 +457,7 @@ class HotelRoom(models.Model):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'name': _("Ménage — %s") % self.name,
+            'name': _("Housekeeping — %s") % self.name,
             'res_model': 'hotel.housekeeping',
             'view_mode': 'list,form',
             'domain': [('room_id', '=', self.id)],
@@ -661,6 +680,46 @@ class HotelRoom(models.Model):
         for free in chosen:
             beds |= free
         return beds
+
+    @api.model
+    def _hotel_ordered_free_rooms(self, checkin, checkout, ignore_reservation=False,
+                                  guests=1, chosen=None, domain=None):
+        """Location « par chambre », ordre du site web : chambres libres en
+        entier pouvant loger les personnes restantes, de la capacité la plus
+        proche à la plus grande ; ensuite celles trop petites."""
+        chosen = chosen or self.env['hotel.room']
+        placed = sum(r.capacity or len(r.bed_ids.filtered('active')) for r in chosen)
+        remaining = max(guests - placed, 1)
+        rooms = self._hotel_whole_free_rooms(
+            checkin, checkout, ignore_reservation, domain=domain) - chosen
+        return rooms.sorted(lambda r: (
+            (r.capacity or 0) < remaining, r.capacity or 0, r.room_price or 0.0, r.name or ''))
+
+    @api.model
+    def _hotel_ordered_free_beds(self, checkin, checkout, ignore_reservation=False,
+                                 guests=1, taken_beds=None, domain=None):
+        """Location « par lit », ordre du site web : d'abord les chambres déjà
+        partagées, puis par nombre de lits libres, du plus proche du nombre de
+        personnes restant à loger au plus grand ; les chambres qui n'ont pas
+        assez de lits libres pour tout le groupe viennent en dernier."""
+        taken_beds = taken_beds or self.env['hotel.bed']
+        remaining = max(guests - len(taken_beds), 1)
+        offer = self._hotel_bed_offer(
+            checkin, checkout, ignore_reservation, taken_beds, domain=domain)
+        offer.sort(key=lambda o: (len(o[1]) < remaining, not o[2], len(o[1]),
+                                  o[0].bed_price or 0.0, o[0].name or ''))
+        beds = self.env['hotel.bed']
+        for _room, free, _partial in offer:
+            beds += free.sorted(lambda b: b.name or '')
+        return beds
+
+    @api.model
+    @api.readonly
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        ordered = hotel_proposal_name_search(self, name, domain, operator, limit)
+        if ordered is not None:
+            return ordered
+        return super().name_search(name, domain, operator, limit)
 
     def _get_season(self, day):
         """Tarif saisonnier actif le jour donné : celui du type de chambre en

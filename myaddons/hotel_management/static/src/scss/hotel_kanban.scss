@@ -33,12 +33,14 @@
     .o_hotel_kcard_bed_free { border-left-color: #059669; }
     .o_hotel_kcard_bed_reserved { border-left-color: #1d4ed8; }
     .o_hotel_kcard_bed_occupied { border-left-color: #b91c1c; }
+    .o_hotel_kcard_bed_cleaning { border-left-color: #7048e8; }
     .o_hotel_kcard_bed_maintenance,
     .o_hotel_kcard_bed_out_of_service { border-left-color: #6b7280; opacity: 0.8; }
 
     .o_hotel_bed_badge_free { background: #d1fae5; color: #065f46; }
     .o_hotel_bed_badge_reserved { background: #dbeafe; color: #1e3a8a; }
     .o_hotel_bed_badge_occupied { background: #fee2e2; color: #7f1d1d; }
+    .o_hotel_bed_badge_cleaning { background: #efe4fb; color: #5b21b6; }
     .o_hotel_bed_badge_maintenance,
     .o_hotel_bed_badge_out_of_service { background: #e5e7eb; color: #374151; }
 
@@ -47,5 +49,15 @@
         width: 64px;
         height: 64px;
         border-radius: 8px;
+    }
+}
+
+// Réservation : une carte par personne du séjour (adultes 2… et enfants)
+.o_hotel_guest_kanban {
+    .o_kanban_record { min-width: 220px; }
+    .o_hotel_guest_card {
+        border-left: 4px solid var(--bs-primary, #714b67);
+        padding-left: .5rem;
+        &.o_hotel_guest_child { border-left-color: #f0ad4e; }
     }
 }

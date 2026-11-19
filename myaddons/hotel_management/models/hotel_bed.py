@@ -1,6 +1,8 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 
+from .hotel_room import hotel_proposal_name_search
+
 
 class HotelBed(models.Model):
     _name = 'hotel.bed'
@@ -24,11 +26,62 @@ class HotelBed(models.Model):
         ('free', 'Libre'),
         ('reserved', 'Réservé'),
         ('occupied', 'Occupé'),
+        ('cleaning', 'En nettoyage'),
         ('maintenance', 'Maintenance'),
         ('out_of_service', 'Hors service'),
     ], string="Statut", compute='_compute_status')
     current_guest_id = fields.Many2one(
         'res.partner', string="Client", compute='_compute_status')
+    # État du ménage du lit (même cycle que la chambre)
+    housekeeping_status = fields.Selection([
+        ('dirty', 'À nettoyer'),
+        ('inprogress', 'En nettoyage'),
+        ('clean', 'Nettoyé'),
+        ('inspected', 'Contrôlé'),
+        ('to_repair', 'À réparer'),
+    ], string="État ménage", default='clean', required=True)
+    housekeeping_count = fields.Integer(
+        string="Ménages", compute='_compute_housekeeping_count')
+
+    def _compute_housekeeping_count(self):
+        groups = self.env['hotel.housekeeping']._read_group(
+            [('bed_ids', 'in', self.ids)], ['bed_ids'], ['__count'])
+        counts = {bed.id: count for bed, count in groups}
+        for bed in self:
+            bed.housekeeping_count = counts.get(bed.id, 0)
+
+    def action_view_housekeeping(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Housekeeping — lit %s", self.display_name),
+            'res_model': 'hotel.housekeeping',
+            'view_mode': 'list,form',
+            'domain': [('bed_ids', 'in', self.ids)],
+            'context': {'default_room_id': self.room_id.id,
+                        'default_target': 'bed',
+                        'default_bed_ids': [(6, 0, self.ids)]},
+        }
+
+    def action_create_housekeeping(self):
+        """Bouton « Ménage » de la liste des lits : une tâche pour les lits
+        sélectionnés, une par chambre."""
+        Housekeeping = self.env['hotel.housekeeping']
+        tasks = Housekeeping
+        for room in self.room_id:
+            tasks |= Housekeeping.create({
+                'room_id': room.id,
+                'target': 'bed',
+                'bed_ids': [(6, 0, self.filtered(lambda b: b.room_id == room).ids)],
+                'cleaning_type': 'other',
+            })
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Housekeeping des lits"),
+            'res_model': 'hotel.housekeeping',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', tasks.ids)],
+        }
 
     _name_room_uniq = models.Constraint(
         'unique(name, room_id)',
@@ -62,6 +115,14 @@ class HotelBed(models.Model):
                 "pas être supprimés. Désactivez-les plutôt (colonne « Actif »).",
                 ', '.join(reserved.mapped('display_name'))))
 
+    @api.model
+    @api.readonly
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        ordered = hotel_proposal_name_search(self, name, domain, operator, limit)
+        if ordered is not None:
+            return ordered
+        return super().name_search(name, domain, operator, limit)
+
     @api.depends('name', 'room_id.name')
     def _compute_display_name(self):
         for bed in self:
@@ -70,6 +131,7 @@ class HotelBed(models.Model):
             else:
                 bed.display_name = bed.name or ''
 
+    @api.depends('housekeeping_status')
     def _compute_status(self):
         today = fields.Date.context_today(self)
         occupation = {}
@@ -85,7 +147,9 @@ class HotelBed(models.Model):
                               if bed.room_id.technical_state != 'in_service'
                               else 'maintenance')
             elif not line:
-                bed.status = 'free'
+                # Comme la chambre : le ménage est signalé mais ne bloque pas la vente
+                bed.status = ('cleaning' if bed.housekeeping_status
+                              not in ('clean', 'inspected') else 'free')
             else:
                 bed.status = 'occupied' if line.state == 'checkin' else 'reserved'
 

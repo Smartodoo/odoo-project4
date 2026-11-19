@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import Form, TransactionCase, tagged
 
 
@@ -34,8 +34,14 @@ class TestHotelFlow(TransactionCase):
         return self.env['hotel.reservation'].create(values)
 
     def _pay(self, resa, mode, amount, **ctx):
-        wizard = self.env['hotel.reservation.payment.wizard'].with_context(**ctx).create({
-            'reservation_id': resa.id, 'payment_mode': mode, 'amount': amount})
+        vals = {'reservation_id': resa.id, 'payment_mode': mode, 'amount': amount}
+        if mode == 'transfer' and not ctx.get('hotel_refund'):
+            vals.update({'bank_name': 'BNA', 'transfer_reference': 'VIR-001'})
+        if mode == 'card' and not ctx.get('hotel_refund'):
+            vals.update({
+                'card_type': 'cib', 'card_last_name': 'Test', 'card_first_name': 'Client',
+                'card_number': '6280 1234 5678 9012', 'card_expiry': '12/99'})
+        wizard = self.env['hotel.reservation.payment.wizard'].with_context(**ctx).create(vals)
         wizard.action_confirm()
         return wizard
 
@@ -93,6 +99,67 @@ class TestHotelFlow(TransactionCase):
         self.assertTrue(task.maintenance_id)
         task.maintenance_id.action_done()
         self.assertEqual(self.room.housekeeping_status, 'dirty')
+
+    def test_bed_housekeeping(self):
+        dorm = self.env['hotel.room'].create({
+            'name': 'T-D', 'room_type_id': self.rtype.id, 'capacity': 3,
+            'bed_price': 1000, 'rental_mode': 'bed'})
+        bed1, bed2, bed3 = dorm.bed_ids
+        # Ménage de deux lits : la chambre et le 3e lit ne bougent pas
+        task = self.env['hotel.housekeeping'].create({
+            'room_id': dorm.id, 'target': 'bed', 'bed_ids': [(6, 0, (bed1 | bed2).ids)]})
+        self.assertEqual((bed1 | bed2).mapped('housekeeping_status'), ['dirty', 'dirty'])
+        self.assertEqual(bed3.housekeeping_status, 'clean')
+        self.assertEqual(dorm.housekeeping_status, 'clean')
+        # Statut « En nettoyage » sur la barre d'état, comme les chambres
+        self.assertEqual(bed1.status, 'cleaning')
+        self.assertEqual(bed3.status, 'free')
+        self.assertTrue(bed1.is_available(self.ci, self.co), "Reste vendable")
+        self.assertEqual(
+            self.env['hotel.reservation'].get_dashboard_data()['beds']['free'] >= 2, True)
+        self.assertIn('Lits', task.display_name)
+        task.action_start()
+        self.assertEqual(bed1.housekeeping_status, 'inprogress')
+        task.action_done()
+        task.action_inspect()
+        self.assertEqual((bed1 | bed2).mapped('housekeeping_status'), ['inspected'] * 2)
+        self.assertEqual(bed1.status, 'free')
+        task.action_to_repair()
+        self.assertEqual(bed1.housekeeping_status, 'to_repair')
+        task.maintenance_id.action_done()
+        self.assertEqual(bed1.housekeeping_status, 'dirty')
+        self.assertEqual(bed1.housekeeping_count, 1)
+        # Ménage des lits sans lit choisi : refusé
+        with self.assertRaises(ValidationError):
+            self.env['hotel.housekeeping'].create({'room_id': dorm.id, 'target': 'bed'})
+        # Bouton « Ménage » depuis la liste des lits
+        action = bed3.action_create_housekeeping()
+        new_task = self.env['hotel.housekeeping'].browse(action['domain'][0][2])
+        self.assertEqual(new_task.bed_ids, bed3)
+        # Ménage de la chambre entière : la chambre et tous ses lits
+        room_task = self.env['hotel.housekeeping'].create({'room_id': dorm.id})
+        room_task.action_start()
+        room_task.action_done()
+        self.assertEqual(dorm.housekeeping_status, 'clean')
+        self.assertEqual(set(dorm.bed_ids.mapped('housekeeping_status')), {'clean'})
+
+    def test_bed_checkout_cleans_beds_only(self):
+        dorm = self.env['hotel.room'].create({
+            'name': 'T-D2', 'room_type_id': self.rtype.id, 'capacity': 3,
+            'bed_price': 1000, 'rental_mode': 'bed'})
+        bed = dorm.bed_ids[0]
+        resa = self._reservation(booking_type='bed', line_ids=[(0, 0, {
+            'room_id': dorm.id, 'bed_id': bed.id})])
+        resa.action_confirm()
+        resa.action_checkin()
+        resa.action_checkout()
+        task = self.env['hotel.housekeeping'].search([('reservation_id', '=', resa.id)])
+        self.assertEqual(len(task), 1)
+        self.assertEqual(task.target, 'bed')
+        self.assertEqual(task.bed_ids, bed)
+        self.assertEqual(bed.housekeeping_status, 'dirty')
+        self.assertEqual(dorm.housekeeping_status, 'clean')
+        self.assertEqual(set((dorm.bed_ids - bed).mapped('housekeeping_status')), {'clean'})
 
     def test_services_locked_after_invoice(self):
         resa = self._reservation()

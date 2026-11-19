@@ -87,14 +87,12 @@
                             </div>
                         </t>
 
-                        <t t-if="occupied_rooms">
-                            <h3 class="mt-4 text-muted">Non disponibles sur cette période</h3>
-                            <div class="row o_hotel_occupied">
-                                <t t-foreach="occupied_rooms" t-as="room">
-                                    <t t-call="hotel_management.room_card"/>
-                                </t>
-                            </div>
-                        </t>
+                        <!-- Seules les chambres libres sur toute la période sont
+                             proposées : celles déjà réservées ne sont pas affichées. -->
+                        <p t-if="occupied_rooms and available_rooms" class="text-muted small mt-2">
+                            <i class="oi me-1" data-icon="info"/>
+                            Seules les chambres libres sur toute la période sont affichées.
+                        </p>
                     </t>
                     <t t-else="">
                         <h2 class="mb-3">Nos chambres</h2>
@@ -232,7 +230,7 @@
                             </div>
                         </div>
                         <div class="col-lg-5">
-                            <div class="o_hotel_booking_box">
+                            <div class="o_hotel_booking_box" id="o_hotel_booking">
                                 <div class="o_hotel_booking_price mb-2">
                                     <t t-if="room.rental_mode == 'bed'">
                                         <small class="text-muted">dès</small>
@@ -246,9 +244,19 @@
                                         <small class="text-muted">/ nuit (chambre entière)</small>
                                     </t>
                                 </div>
-                                <t t-if="available == False">
+                                <!-- Réservable sur la période ? Sinon : pas de réservation
+                                     possible ici, on renvoie vers les chambres libres. -->
+                                <t t-set="book_blocked" t-value="available == False or (booking_type == 'room' and whole_available == False)"/>
+                                <t t-if="book_blocked">
                                     <div class="alert alert-warning py-2">
-                                        <i class="oi oi-filled me-1" data-icon="cancel"/>Complet pour les dates sélectionnées.
+                                        <i class="oi oi-filled me-1" data-icon="cancel"/>
+                                        <t t-if="booking_type == 'room' and available">Cette chambre n'est pas libre en entier</t>
+                                        <t t-else="">Cette chambre n'est pas libre</t>
+                                        pour les dates sélectionnées.
+                                        <a class="alert-link d-block mt-1"
+                                           t-attf-href="/hotel/rooms?checkin=#{checkin}&amp;checkout=#{checkout}&amp;guests=#{guests}&amp;booking_type=#{booking_type or ('bed' if room.rental_mode == 'bed' else 'room')}">
+                                            Voir les chambres libres sur ces dates
+                                        </a>
                                     </div>
                                 </t>
                                 <t t-elif="available and whole_available == False and room.rental_mode == 'both'">
@@ -265,7 +273,7 @@
                                         </ul>
                                     </div>
                                 </t>
-                                <form method="post" action="/hotel/booking/submit">
+                                <form method="post" action="/hotel/booking/submit" class="o_hotel_booking_form">
                                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                     <input type="hidden" name="room_id" t-att-value="room.id"/>
                                     <div class="row g-2">
@@ -330,19 +338,26 @@
                                         <hr/>
                                         <label class="form-label fw-bold">Choisissez vos lits</label>
                                     </t>
+                                    <div t-if="beds_need_dates" class="alert alert-info py-2 mt-3 mb-0">
+                                        <i class="oi oi-filled me-1" data-icon="info"/>
+                                        Choisissez vos dates d'arrivée et de départ : les lits libres
+                                        sur toute la période s'afficheront.
+                                    </div>
+                                    <div t-if="show_beds" class="small text-muted mt-2">
+                                        Seuls les lits libres du <t t-out="period_start"/>
+                                        au <t t-out="period_end"/> sont proposés.
+                                    </div>
                                     <div t-if="show_beds" class="o_hotel_bed_pick mt-2">
                                         <t t-foreach="beds_info" t-as="bi">
                                             <input class="btn-check" type="checkbox" name="bed_ids"
                                                    t-att-value="bi['bed'].id"
-                                                   t-att-id="'bed_%s' % bi['bed'].id"
-                                                   t-att-disabled="'disabled' if bi['available'] == False else None"/>
-                                            <label t-attf-class="o_hotel_bed_option #{'o_hotel_bed_taken' if bi['available'] == False else ''}"
+                                                   t-att-id="'bed_%s' % bi['bed'].id"/>
+                                            <label class="o_hotel_bed_option"
                                                    t-att-for="'bed_%s' % bi['bed'].id">
                                                 <i class="oi" data-icon="bed"/>
                                                 <span class="fw-bold" t-out="bi['bed'].name"/>
                                                 <span t-field="bi['bed'].price"
                                                       t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                                                <small t-if="bi['available'] == False">Occupé</small>
                                             </label>
                                         </t>
                                     </div>
@@ -366,7 +381,8 @@
                                         <label class="form-label">Demandes particulières</label>
                                         <textarea class="form-control" name="note" rows="2"/>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                                    <button type="submit" class="btn btn-primary w-100 mt-3"
+                                            t-att-disabled="'disabled' if book_blocked else None">
                                         <i class="oi me-1" data-icon="check"/>Confirmer la réservation
                                     </button>
                                 </form>

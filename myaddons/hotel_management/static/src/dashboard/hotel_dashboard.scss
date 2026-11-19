@@ -26,10 +26,10 @@
         }
     }
 
-    // Indicateurs : 3 blocs séparés (Chambres / Clients / Ménage & travaux)
+    // Indicateurs : 3 blocs séparés (Chambres / Lits / Clients)
     .o_hotel_blocks {
         display: grid;
-        grid-template-columns: 3fr 4fr 3fr;
+        grid-template-columns: 3fr 4fr 4fr;
         gap: 16px;
         margin-bottom: 14px;
     }
@@ -47,7 +47,7 @@
 
         &.o_hotel_block_rooms  { --block-color: #2f6fd0; --block-soft: #e8f0fc; }
         &.o_hotel_block_guests { --block-color: #8e44ad; --block-soft: #f4ecf9; }
-        &.o_hotel_block_ops    { --block-color: #e08a00; --block-soft: #fdf3e2; }
+        &.o_hotel_block_beds   { --block-color: #0f8a8a; --block-soft: #e3f4f4; }
     }
 
     .o_hotel_block_head {
@@ -62,6 +62,17 @@
             font-weight: 600;
             color: #2c2f45;
         }
+    }
+
+    .o_hotel_block_badge {
+        margin-left: auto;
+        padding: 2px 9px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 600;
+        background: var(--block-soft);
+        color: var(--block-color);
+        white-space: nowrap;
     }
 
     .o_hotel_block_icon {
@@ -104,6 +115,7 @@
         &.o_hotel_tile_danger  { --tile-color: #e4572e; }
         &.o_hotel_tile_success { --tile-color: #17a673; }
         &.o_hotel_tile_muted   { --tile-color: #6b7089; }
+        &.o_hotel_tile_info    { --tile-color: #2f5bb7; }
 
         .o_hotel_tile_value {
             font-size: 26px;

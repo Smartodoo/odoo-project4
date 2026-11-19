@@ -104,19 +104,19 @@ class HotelWebsite(http.Controller):
         ci = self._parse_date(checkin)
         co = self._parse_date(checkout)
         Bed = request.env['hotel.bed']
-        beds = room.bed_ids.filtered('active') \
-            if room and room.rental_mode != 'room' else Bed
+        # Comme au back-office : une réservation en brouillon bloque aussi
+        room = room.with_context(hotel_include_draft=True) if room else room
         available = None
         whole_available = None
-        free_beds = beds
-        if room and ci and co and co > ci:
+        free_beds = Bed
+        dates_ok = bool(room and ci and co and co > ci)
+        if dates_ok:
             whole_available = room.can_book_whole_room(ci, co)
             free_beds = room.bookable_beds(ci, co)
             available = bool(whole_available or free_beds)
-        beds_info = [{
-            'bed': b,
-            'available': None if available is None else b in free_beds,
-        } for b in beds]
+        # Seuls les lits libres sur TOUTE la période sont proposés ; sans
+        # dates, aucun lit n'est proposé (on demande d'abord les dates).
+        beds_info = [{'bed': b, 'available': True} for b in free_beds]
         values = {
             'room': room,
             'checkin': checkin,
@@ -128,6 +128,9 @@ class HotelWebsite(http.Controller):
             'whole_price': room._get_whole_room_price(ci) if room else 0.0,
             'free_bed_count': len(free_beds),
             'beds_info': beds_info,
+            'beds_need_dates': bool(room and room.rental_mode != 'room' and not dates_ok),
+            'period_start': ci.strftime('%d/%m/%Y') if dates_ok else '',
+            'period_end': co.strftime('%d/%m/%Y') if dates_ok else '',
             'errors': [],
             'name': '',
             'email': '',
@@ -157,7 +160,8 @@ class HotelWebsite(http.Controller):
     @http.route(['/hotel/booking/submit'], type='http', auth='public',
                 website=True, methods=['POST'])
     def hotel_booking_submit(self, **post):
-        Room = request.env['hotel.room'].sudo()
+        # Brouillons compris : un lit / une chambre déjà retenu n'est pas revendu
+        Room = request.env['hotel.room'].sudo().with_context(hotel_include_draft=True)
         try:
             room = Room.browse(int(post.get('room_id') or 0)).exists()
         except ValueError:
@@ -177,7 +181,8 @@ class HotelWebsite(http.Controller):
         booking_type = post.get('booking_type') or 'room'
         bed_ids_raw = request.httprequest.form.getlist('bed_ids')
         bed_ids = [int(x) for x in bed_ids_raw if x.isdigit()]
-        beds = request.env['hotel.bed'].sudo().browse(bed_ids).exists()
+        beds = request.env['hotel.bed'].sudo().with_context(
+            hotel_include_draft=True).browse(bed_ids).exists()
         if room:
             beds = beds.filtered(lambda b: b.room_id == room)
         # Le mode de location de la chambre prime sur le choix du formulaire
@@ -262,7 +267,7 @@ class HotelWebsite(http.Controller):
             'partner_id': partner.id,
             'checkin': ci,
             'checkout': co,
-            'adults': guests,
+            'guest_count': guests,
             'source': 'website',
             'booking_type': booking_type,
             'note': note,

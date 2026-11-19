@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <record id="customer_type_loyal" model="hotel.customer.type">
+        <field name="name">Client fidèle</field>
+        <field name="sequence">10</field>
+        <field name="color">10</field>
+    </record>
+    <record id="customer_type_vip" model="hotel.customer.type">
+        <field name="name">Client VIP</field>
+        <field name="sequence">20</field>
+        <field name="color">3</field>
+    </record>
+    <record id="customer_type_blacklist" model="hotel.customer.type">
+        <field name="name">Liste noire</field>
+        <field name="sequence">30</field>
+        <field name="color">1</field>
+        <field name="is_blacklist" eval="True"/>
+    </record>
+</odoo>

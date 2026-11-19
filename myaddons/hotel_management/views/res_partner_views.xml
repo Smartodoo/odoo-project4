@@ -5,6 +5,13 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="before">
+                <div class="alert alert-danger fw-bold d-flex align-items-center gap-2 mb-2" role="alert"
+                     invisible="not hotel_is_blacklisted">
+                    <i class="oi" data-icon="block"/>
+                    <span>Attention : client en « <field name="hotel_customer_type_name" class="d-inline" nolabel="1"/> » (Auberge).</span>
+                </div>
+            </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_hotel_reservations" type="object"
                         class="oe_stat_button" icon="bed"
@@ -42,6 +49,12 @@
                             <field name="hotel_amount_due" widget="monetary"
                                    decoration-danger="hotel_amount_due &gt; 0"/>
                         </group>
+                    </group>
+                    <group string="Profil client" name="hotel_profile">
+                        <field name="hotel_customer_type_id"
+                               options="{'no_create': True, 'no_open': True}"/>
+                        <field name="hotel_preferences"
+                               placeholder="Chambre (étage, calme, type de lit…), consommations, petit-déjeuner…"/>
                     </group>
                     <group string="Observations">
                         <field name="hotel_note" nolabel="1" placeholder="Remarques sur le client…"/>

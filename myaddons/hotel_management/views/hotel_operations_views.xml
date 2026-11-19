@@ -69,7 +69,7 @@
                 <field name="name"/>
                 <field name="role"/>
                 <filter name="reception" string="Réception" domain="[('role', '=', 'reception')]"/>
-                <filter name="housekeeping" string="Ménage" domain="[('role', '=', 'housekeeping')]"/>
+                <filter name="housekeeping" string="Housekeeping" domain="[('role', '=', 'housekeeping')]"/>
                 <filter name="maintenance" string="Maintenance" domain="[('role', '=', 'maintenance')]"/>
                 <group>
                     <filter name="group_role" string="Fonction" context="{'group_by': 'role'}"/>
@@ -94,6 +94,8 @@
                   decoration-danger="state == 'to_repair'" decoration-muted="state == 'cancel'">
                 <field name="name"/>
                 <field name="room_id"/>
+                <field name="target" optional="show"/>
+                <field name="bed_ids" widget="many2many_tags" optional="show"/>
                 <field name="cleaning_type"/>
                 <field name="staff_id"/>
                 <field name="scheduled_date"/>
@@ -144,6 +146,11 @@
                     <group>
                         <group>
                             <field name="room_id"/>
+                            <field name="target" widget="radio" options="{'horizontal': true}"/>
+                            <field name="bed_ids" widget="many2many_tags"
+                                   invisible="target != 'bed'" required="target == 'bed'"
+                                   options="{'no_create': True}"
+                                   context="{'default_room_id': room_id}"/>
                             <field name="cleaning_type"/>
                             <field name="scheduled_date"/>
                         </group>
@@ -169,6 +176,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="room_id"/>
+                <field name="bed_ids"/>
                 <field name="staff_id"/>
                 <filter name="active_tasks" string="En cours de traitement"
                         domain="[('state', 'in', ('todo', 'inprogress', 'done', 'to_repair'))]"/>
@@ -182,6 +190,9 @@
                 <filter name="mine" string="Mes tâches" domain="[('staff_id.user_id', '=', uid)]"/>
                 <separator/>
                 <filter name="checkout" string="Après départ" domain="[('cleaning_type', '=', 'checkout')]"/>
+                <separator/>
+                <filter name="target_room" string="Chambres entières" domain="[('target', '=', 'room')]"/>
+                <filter name="target_bed" string="Lits" domain="[('target', '=', 'bed')]"/>
                 <group>
                     <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
                     <filter name="group_room" string="Chambre" context="{'group_by': 'room_id'}"/>
@@ -192,7 +203,7 @@
     </record>
 
     <record id="action_hotel_housekeeping" model="ir.actions.act_window">
-        <field name="name">Ménage</field>
+        <field name="name">Housekeeping</field>
         <field name="res_model">hotel.housekeeping</field>
         <field name="view_mode">kanban,list,form</field>
         <field name="search_view_id" ref="view_hotel_housekeeping_search"/>

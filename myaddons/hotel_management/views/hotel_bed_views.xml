@@ -5,6 +5,11 @@
         <field name="model">hotel.bed</field>
         <field name="arch" type="xml">
             <list editable="bottom">
+                <header>
+                    <button name="action_create_housekeeping" type="object" string="Housekeeping"
+                            icon="wand_stars"
+                            help="Crée une tâche de ménage pour les lits sélectionnés"/>
+                </header>
                 <field name="name"/>
                 <field name="room_id"/>
                 <field name="room_type_id" readonly="1"/>
@@ -12,10 +17,16 @@
                 <field name="currency_id" column_invisible="1"/>
                 <field name="status" widget="badge" readonly="1"
                        decoration-success="status == 'free'"
+                       decoration-warning="status == 'cleaning'"
                        decoration-info="status == 'reserved'"
                        decoration-danger="status == 'occupied'"
                        decoration-muted="status in ('maintenance', 'out_of_service')"/>
                 <field name="current_guest_id" readonly="1" optional="show"/>
+                <field name="housekeeping_status" widget="badge" readonly="1" optional="show"
+                       decoration-warning="housekeeping_status == 'dirty'"
+                       decoration-info="housekeeping_status == 'inprogress'"
+                       decoration-success="housekeeping_status in ('clean', 'inspected')"
+                       decoration-danger="housekeeping_status == 'to_repair'"/>
             </list>
         </field>
     </record>
@@ -29,9 +40,15 @@
                     <!-- Statut calculé (réservations / travaux de la chambre),
                          même présentation que la fiche chambre -->
                     <field name="status" widget="statusbar" class="o_hotel_statusbar o_hotel_status"
-                           statusbar_visible="free,reserved,occupied,maintenance,out_of_service"/>
+                           statusbar_visible="free,reserved,occupied,cleaning,maintenance,out_of_service"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_housekeeping" type="object"
+                                class="oe_stat_button" icon="wand_stars">
+                            <field name="housekeeping_count" widget="statinfo" string="Housekeeping"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <label for="name"/>
                         <h1><field name="name" placeholder="ex : 101-L1"/></h1>
@@ -41,6 +58,11 @@
                             <field name="room_id"/>
                             <field name="room_type_id" readonly="1"/>
                             <field name="current_guest_id" invisible="not current_guest_id"/>
+                            <field name="housekeeping_status" widget="badge" readonly="1"
+                                   decoration-warning="housekeeping_status == 'dirty'"
+                                   decoration-info="housekeeping_status == 'inprogress'"
+                                   decoration-success="housekeeping_status in ('clean', 'inspected')"
+                                   decoration-danger="housekeeping_status == 'to_repair'"/>
                         </group>
                         <group>
                             <field name="price" widget="monetary"/>
@@ -63,6 +85,7 @@
                 <field name="status"/>
                 <field name="currency_id"/>
                 <field name="current_guest_id"/>
+                <field name="housekeeping_status"/>
                 <templates>
                     <t t-name="card">
                         <div t-attf-class="o_hotel_kcard o_hotel_kcard_bed_#{record.status.raw_value}">
@@ -81,6 +104,11 @@
                             <div t-if="record.current_guest_id.raw_value" class="small">
                                 <i class="oi oi-filled me-1" data-icon="person" title="Client"/>
                                 <field name="current_guest_id"/>
+                            </div>
+                            <div t-if="!['clean', 'inspected'].includes(record.housekeeping_status.raw_value)"
+                                 class="small text-warning">
+                                <i class="oi me-1" data-icon="wand_stars" title="Housekeeping"/>
+                                <field name="housekeeping_status"/>
                             </div>
                             <footer class="mt-1">
                                 <div class="ms-auto text-end">
@@ -102,6 +130,9 @@
             <search>
                 <field name="name"/>
                 <field name="room_id"/>
+                <filter name="to_clean" string="À nettoyer"
+                        domain="[('housekeeping_status', 'in', ('dirty', 'inprogress'))]"/>
+                <separator/>
                 <filter name="archived" string="Archivés" domain="[('active', '=', False)]"/>
                 <group>
                     <filter name="group_room" string="Chambre" context="{'group_by': 'room_id'}"/>
@@ -182,6 +213,7 @@
                             <field name="currency_id" column_invisible="1"/>
                             <field name="status" widget="badge" readonly="1"
                                    decoration-success="status == 'free'"
+                                   decoration-warning="status == 'cleaning'"
                                    decoration-info="status == 'reserved'"
                                    decoration-danger="status == 'occupied'"
                                    decoration-muted="status in ('maintenance', 'out_of_service')"/>

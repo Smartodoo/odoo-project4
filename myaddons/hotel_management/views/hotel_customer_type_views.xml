@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_hotel_customer_type_list" model="ir.ui.view">
+        <field name="name">hotel.customer.type.list</field>
+        <field name="model">hotel.customer.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="color" widget="color_picker"/>
+                <field name="is_blacklist" widget="boolean_toggle"/>
+                <field name="partner_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_hotel_customer_type" model="ir.actions.act_window">
+        <field name="name">Types de client</field>
+        <field name="res_model">hotel.customer.type</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Créer un type de client</p>
+            <p>Exemples : client fidèle, client VIP, liste noire.
+               Le type se choisit sur la fiche client ou sur la réservation.</p>
+        </field>
+    </record>
+</odoo>

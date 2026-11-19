@@ -8,10 +8,10 @@
                 <header>
                     <button name="action_confirm" string="Confirmer" type="object"
                             class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="action_checkin" string="Entrer" type="object"
+                    <button name="action_checkin" string="Check-in" type="object"
                             class="btn-primary" invisible="state != 'confirmed'"
                             help="Le client entre : la/les chambre(s) passent en « Occupée »."/>
-                    <button name="action_checkout" string="Sortir" type="object"
+                    <button name="action_checkout" string="Check-out" type="object"
                             class="btn-primary" invisible="state != 'checkin'"
                             help="Le client sort : la/les chambre(s) passent en « À nettoyer »."/>
                     <button name="action_cancel" string="Annuler" type="object"
@@ -45,6 +45,11 @@
                            statusbar_visible="draft,confirmed,checkin,checkout"/>
                 </header>
                 <sheet>
+                    <div class="alert alert-danger fw-bold d-flex align-items-center gap-2 mb-2" role="alert"
+                         invisible="not partner_is_blacklisted">
+                        <i class="oi" data-icon="block"/>
+                        <span>Attention : client en « <field name="partner_customer_type_name" class="d-inline" nolabel="1"/> » — vérifiez avec un responsable avant de confirmer.</span>
+                    </div>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_invoices" type="object"
                                 class="oe_stat_button" icon="article"
@@ -84,41 +89,120 @@
                             <span class="o_hotel_pay_value"><i class="oi oi-filled me-1" data-icon="check_circle" title="Soldé"/>Soldé</span>
                         </div>
                     </div>
-                    <group>
-                        <group string="Client" name="client">
-                            <field name="partner_id"/>
-                            <field name="partner_last_name" invisible="not partner_id"/>
-                            <field name="partner_first_name" invisible="not partner_id"/>
-                            <field name="partner_birthdate" invisible="not partner_id"
-                                   required="partner_id"/>
-                            <field name="partner_phone" widget="phone" invisible="not partner_id"/>
-                            <label for="partner_street" string="Adresse" invisible="not partner_id"/>
-                            <div class="o_row" invisible="not partner_id">
-                                <field name="partner_street" placeholder="Rue…"/>
-                                <field name="partner_city" placeholder="Ville"/>
-                            </div>
-                            <field name="partner_id_type" invisible="not partner_id"/>
-                            <field name="partner_id_number" invisible="not partner_id"/>
-                            <field name="partner_id_document" filename="partner_id_document_name"
-                                   invisible="not partner_id"/>
-                            <field name="partner_id_document_name" invisible="1"/>
-                        </group>
-                        <group string="Séjour" name="stay">
+                    <!-- 1. Séjour (comme la recherche du site : dates, type de location,
+                         type de chambre, nombre de personnes) -->
+                    <group string="Séjour" name="stay">
+                        <group name="stay_dates">
                             <field name="checkin"/>
                             <field name="checkout"/>
                             <field name="nights"/>
                             <field name="source"/>
-                            <field name="booking_type" widget="radio" options="{'horizontal': true}"/>
-                            <label for="adults" string="Personnes"/>
-                            <div class="o_row">
-                                <field name="adults"/> <span>adulte(s)</span>
-                                <field name="children"/> <span>enfant(s)</span>
-                            </div>
-                            <field name="guest_count" string="Total personnes"/>
-                            <field name="places"/>
                             <field name="user_id"/>
                         </group>
+                        <group name="stay_rooms">
+                            <field name="booking_type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="room_type_id" placeholder="Tous les types"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="guest_count"/>
+                            <field name="children" string="Dont enfants"/>
+                            <field name="adults" readonly="1" force_save="1"/>
+                            <field name="places"/>
+                        </group>
                     </group>
+                    <!-- 2. Client principal = Adulte 1 -->
+                    <group string="Client principal (adulte)" name="client">
+                        <group name="client_identity">
+                            <field name="partner_id"/>
+                            <field name="partner_customer_type_id" invisible="not partner_id"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="partner_preferences" invisible="not partner_id"
+                                   placeholder="Préférences du client (chambre, consommations…)"/>
+                            <field name="partner_last_name" invisible="not partner_id"/>
+                            <field name="partner_first_name" invisible="not partner_id"/>
+                            <field name="partner_birthdate" invisible="not partner_id"
+                                   required="partner_id"/>
+                        </group>
+                        <group name="client_contact" invisible="not partner_id">
+                            <field name="partner_phone" widget="phone"/>
+                            <label for="partner_street" string="Adresse"/>
+                            <div class="o_row">
+                                <field name="partner_street" placeholder="Rue…"/>
+                                <field name="partner_city" placeholder="Ville"/>
+                            </div>
+                            <field name="partner_id_type"/>
+                            <field name="partner_id_number"/>
+                            <field name="partner_id_document" filename="partner_id_document_name"/>
+                            <field name="partner_id_document_name" invisible="1"/>
+                        </group>
+                    </group>
+                    <!-- 3. Une fiche par autre personne (adultes 2… et enfants) -->
+                    <div name="guests" invisible="not guest_ids" class="mb-3">
+                        <div class="o_horizontal_separator mt-2 mb-2 text-uppercase fw-bolder small">
+                            Autres personnes du séjour
+                        </div>
+                        <field name="guest_ids" mode="kanban" nolabel="1"
+                               context="{'default_reservation_id': id}">
+                            <kanban create="0" delete="0" class="o_hotel_guest_kanban">
+                                <field name="guest_type" force_save="1"/>
+                                <field name="position" force_save="1"/>
+                                <field name="name"/>
+                                <templates>
+                                    <t t-name="card">
+                                        <div t-attf-class="o_hotel_guest_card o_hotel_guest_#{record.guest_type.raw_value}">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="fw-bold">
+                                                    <i t-if="record.guest_type.raw_value == 'child'" class="oi me-1" data-icon="child_care" title="Enfant"/>
+                                                    <i t-else="" class="oi me-1" data-icon="person" title="Adulte"/>
+                                                    <field name="label"/>
+                                                </span>
+                                                <span t-if="!record.name.raw_value" class="badge text-bg-warning">À renseigner</span>
+                                            </div>
+                                            <div class="fs-6" t-if="record.name.raw_value"><field name="name"/></div>
+                                            <div class="text-muted small" t-if="record.birthdate.raw_value">
+                                                Né(e) le <field name="birthdate"/>
+                                            </div>
+                                            <div class="text-muted small" t-if="record.id_number.raw_value">
+                                                <field name="id_type"/> <field name="id_number"/>
+                                            </div>
+                                            <div class="text-muted small" t-if="record.phone.raw_value">
+                                                <field name="phone"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
+                            <form string="Personne du séjour">
+                                <sheet>
+                                    <div class="oe_title">
+                                        <h2><field name="label" readonly="1"/></h2>
+                                    </div>
+                                    <group>
+                                        <group>
+                                            <field name="guest_type" readonly="1" force_save="1"/>
+                                            <field name="position" invisible="1" force_save="1"/>
+                                            <field name="partner_id" options="{'no_create': True}"/>
+                                            <field name="last_name"/>
+                                            <field name="first_name"/>
+                                            <field name="birthdate"/>
+                                        </group>
+                                        <group invisible="guest_type == 'child'">
+                                            <field name="phone" widget="phone"/>
+                                            <field name="id_type"/>
+                                            <field name="id_number"/>
+                                            <field name="id_document" filename="id_document_name"/>
+                                            <field name="id_document_name" invisible="1"/>
+                                        </group>
+                                    </group>
+                                </sheet>
+                                <!-- Pas de « Enregistrer & Créer » : le nombre de fiches
+                                     suit les nombres d'adultes / d'enfants du séjour. -->
+                                <footer>
+                                    <button string="Enregistrer" special="save" class="btn-primary"/>
+                                    <button string="Annuler" special="cancel" class="btn-secondary"/>
+                                </footer>
+                            </form>
+                        </field>
+                    </div>
                     <div class="alert alert-warning d-flex align-items-center mb-3" role="alert"
                          invisible="not line_ids or guest_count &lt;= places">
                         <i class="oi me-2" data-icon="warning" title="Attention"/>
@@ -133,11 +217,13 @@
                              tous leurs lits sont réservés d'office. -->
                         <page string="Chambres" name="rooms" invisible="booking_type == 'bed'">
                             <field name="proposed_room_ids" invisible="1"/>
+                            <field name="proposed_room_order" invisible="1"/>
                             <field name="line_ids">
                                 <list editable="bottom">
                                     <field name="booking_type" column_invisible="1"/>
                                     <field name="room_id" options="{'no_create': True}"
-                                           domain="[('id', 'in', parent.proposed_room_ids)]"/>
+                                           domain="[('id', 'in', parent.proposed_room_ids)]"
+                                           context="{'hotel_proposal_order': parent.proposed_room_order}"/>
                                     <field name="bed_ids" widget="many2many_tags" string="Lits (tous)"
                                            readonly="1" force_save="1"/>
                                     <field name="room_type_id" readonly="1"/>
@@ -152,12 +238,14 @@
                              chambres partiellement réservées), la chambre est déduite. -->
                         <page string="Lits" name="beds" invisible="booking_type == 'room'">
                             <field name="proposed_bed_ids" invisible="1"/>
+                            <field name="proposed_bed_order" invisible="1"/>
                             <field name="line_ids">
                                 <list editable="bottom">
                                     <field name="booking_type" column_invisible="1"/>
                                     <field name="bed_ids" column_invisible="1" force_save="1"/>
                                     <field name="bed_id" required="1" options="{'no_create': True}"
-                                           domain="[('id', 'in', parent.proposed_bed_ids)]"/>
+                                           domain="[('id', 'in', parent.proposed_bed_ids)]"
+                                           context="{'hotel_proposal_order': parent.proposed_bed_order}"/>
                                     <field name="room_id" readonly="1" force_save="1"/>
                                     <field name="room_type_id" readonly="1"/>
                                     <field name="nights" readonly="1"/>
@@ -254,9 +342,9 @@
                        decoration-muted="state in ('checkout', 'cancel')"/>
                 <button name="action_confirm" type="object" string="Confirmer"
                         icon="check" invisible="state != 'draft'"/>
-                <button name="action_checkin" type="object" string="Entrer"
+                <button name="action_checkin" type="object" string="Check-in"
                         icon="login" invisible="state != 'confirmed'"/>
-                <button name="action_checkout" type="object" string="Sortir"
+                <button name="action_checkout" type="object" string="Check-out"
                         icon="logout" invisible="state != 'checkin'"/>
             </list>
         </field>

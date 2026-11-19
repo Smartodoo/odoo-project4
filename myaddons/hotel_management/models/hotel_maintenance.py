@@ -104,6 +104,9 @@ class HotelMaintenanceRequest(models.Model):
             # Après réparation, la chambre doit être nettoyée avant d'être revendue
             if rec.room_id.housekeeping_status == 'to_repair':
                 rec.room_id.housekeeping_status = 'dirty'
+            rec.room_id.bed_ids.filtered(
+                lambda b: b.housekeeping_status == 'to_repair'
+            ).sudo().write({'housekeeping_status': 'dirty'})
 
     def action_cancel(self):
         for rec in self:

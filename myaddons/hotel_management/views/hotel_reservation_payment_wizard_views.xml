@@ -22,6 +22,10 @@
                                invisible="payment_kind == 'refund'"
                                required="payment_kind != 'refund'"/>
                         <field name="payment_mode" widget="radio"/>
+                        <field name="bank_name" invisible="payment_mode not in ('transfer', 'cheque')"
+                               required="payment_mode in ('transfer', 'cheque') and payment_kind != 'refund'"/>
+                        <field name="transfer_reference" invisible="payment_mode != 'transfer'"
+                               required="payment_mode == 'transfer' and payment_kind != 'refund'"/>
                         <field name="cheque_reference" invisible="payment_mode != 'cheque'"
                                required="payment_mode == 'cheque' and payment_kind != 'refund'"/>
                     </group>
@@ -32,6 +36,23 @@
                                groups="account.group_account_manager"/>
                         <field name="journal_id" readonly="1" groups="account.group_account_invoice"/>
                         <field name="memo" placeholder="Optionnel"/>
+                    </group>
+                </group>
+                <!-- Paiement par TPE : carte utilisée -->
+                <group string="Carte (TPE)" invisible="payment_mode != 'card' or payment_kind == 'refund'">
+                    <group>
+                        <field name="card_type" widget="radio" options="{'horizontal': true}"
+                               required="payment_mode == 'card' and payment_kind != 'refund'"/>
+                        <field name="card_last_name"
+                               required="payment_mode == 'card' and payment_kind != 'refund'"/>
+                        <field name="card_first_name"
+                               required="payment_mode == 'card' and payment_kind != 'refund'"/>
+                    </group>
+                    <group>
+                        <field name="card_number" placeholder="0000 0000 0000 0000"
+                               required="payment_mode == 'card' and payment_kind != 'refund'"/>
+                        <field name="card_expiry" placeholder="MM/AA"
+                               required="payment_mode == 'card' and payment_kind != 'refund'"/>
                     </group>
                 </group>
                 <div class="text-muted small" invisible="payment_kind != 'refund'">
@@ -64,6 +85,36 @@
                 <field name="hotel_payment_kind" invisible="not hotel_reservation_id"/>
                 <field name="hotel_payment_mode" invisible="not hotel_payment_mode"/>
             </xpath>
+            <xpath expr="//group[@name='main_group']" position="after">
+                <group string="Virement" name="hotel_transfer"
+                       invisible="hotel_payment_mode != 'transfer'">
+                    <group>
+                        <field name="hotel_bank_name" readonly="state != 'draft'"/>
+                        <field name="hotel_transfer_number" readonly="state != 'draft'"/>
+                    </group>
+                </group>
+                <group string="Chèque" name="hotel_cheque"
+                       invisible="hotel_payment_mode != 'cheque'">
+                    <group>
+                        <field name="hotel_bank_name" readonly="state != 'draft'"/>
+                        <field name="hotel_cheque_number" readonly="state != 'draft'"/>
+                    </group>
+                </group>
+                <group string="Carte (TPE)" name="hotel_card"
+                       invisible="hotel_payment_mode != 'card' or payment_type != 'inbound'">
+                    <group>
+                        <field name="hotel_card_type" widget="radio" options="{'horizontal': true}"
+                               readonly="state != 'draft'"/>
+                        <field name="hotel_card_last_name" string="Nom" readonly="state != 'draft'"/>
+                        <field name="hotel_card_first_name" string="Prénom" readonly="state != 'draft'"/>
+                    </group>
+                    <group>
+                        <field name="hotel_card_number" readonly="state != 'draft'"
+                               placeholder="0000 0000 0000 0000"/>
+                        <field name="hotel_card_expiry" readonly="state != 'draft'" placeholder="MM/AA"/>
+                    </group>
+                </group>
+            </xpath>
         </field>
     </record>
 
@@ -74,6 +125,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='journal_id']" position="after">
                 <field name="hotel_payment_mode" optional="show"/>
+                <field name="hotel_card_type" optional="hide"/>
                 <field name="hotel_payment_kind" optional="show"/>
                 <field name="hotel_reservation_id" optional="show"/>
             </xpath>

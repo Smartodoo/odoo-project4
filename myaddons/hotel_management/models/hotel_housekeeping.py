@@ -1,5 +1,5 @@
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class HotelHousekeeping(models.Model):
@@ -12,6 +12,14 @@ class HotelHousekeeping(models.Model):
         string="Référence", required=True, copy=False, readonly=True,
         default=lambda self: _('Nouveau'))
     room_id = fields.Many2one('hotel.room', string="Chambre", required=True, tracking=True)
+    # Ménage de la chambre entière ou seulement de certains lits (dortoir)
+    target = fields.Selection([
+        ('room', 'Chambre entière'),
+        ('bed', 'Lits'),
+    ], string="Ménage de", default='room', required=True, tracking=True)
+    bed_ids = fields.Many2many(
+        'hotel.bed', 'hotel_housekeeping_bed_rel', 'housekeeping_id', 'bed_id',
+        string="Lits", domain="[('room_id', '=', room_id)]")
     staff_id = fields.Many2one('hotel.staff', string="Agent d'entretien", tracking=True)
     reservation_id = fields.Many2one('hotel.reservation', string="Séjour lié")
     maintenance_id = fields.Many2one(
@@ -40,6 +48,53 @@ class HotelHousekeeping(models.Model):
     company_id = fields.Many2one(
         'res.company', default=lambda self: self.env.company)
 
+    @api.constrains('target', 'bed_ids', 'room_id')
+    def _check_beds(self):
+        for rec in self:
+            if rec.target != 'bed':
+                continue
+            if not rec.bed_ids:
+                raise ValidationError(_(
+                    "Ménage des lits (%s) : choisissez au moins un lit.", rec.name))
+            if rec.bed_ids.room_id != rec.room_id:
+                raise ValidationError(_(
+                    "Les lits à nettoyer doivent appartenir à la chambre %s.",
+                    rec.room_id.name))
+
+    @api.onchange('room_id')
+    def _onchange_room_id_beds(self):
+        self.bed_ids = self.bed_ids.filtered(lambda b: b.room_id == self.room_id)
+
+    @api.onchange('target')
+    def _onchange_target(self):
+        if self.target == 'room':
+            self.bed_ids = False
+
+    @api.depends('name', 'room_id', 'target', 'bed_ids')
+    def _compute_display_name(self):
+        for rec in self:
+            rec.display_name = "%s — %s" % (rec.name or '', rec._target_label())
+
+    def _target_label(self):
+        """« Chambre 101 » ou « Lits L1, L2 (chambre 101) »."""
+        self.ensure_one()
+        if self.target == 'bed' and self.bed_ids:
+            return _("Lits %(beds)s (chambre %(room)s)",
+                     beds=", ".join(self.bed_ids.mapped('name')),
+                     room=self.room_id.name or '')
+        return _("Chambre %s", self.room_id.name or '')
+
+    def _set_housekeeping_status(self, status):
+        """Répercute l'état du ménage : sur la chambre et tous ses lits pour un
+        ménage « chambre entière », sur les lits concernés seulement sinon.
+        sudo : l'équipe de ménage n'a que la lecture sur les lits."""
+        for rec in self.filtered('room_id'):
+            if rec.target == 'bed':
+                rec.bed_ids.sudo().write({'housekeeping_status': status})
+            else:
+                rec.room_id.housekeeping_status = status
+                rec.room_id.bed_ids.sudo().write({'housekeeping_status': status})
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -47,6 +102,10 @@ class HotelHousekeeping(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'hotel.housekeeping') or _('Nouveau')
         records = super().create(vals_list)
+        # Un ménage de lits à faire signale tout de suite ces lits « À nettoyer »
+        records.filtered(
+            lambda r: r.target == 'bed' and r.state == 'todo'
+        )._set_housekeeping_status('dirty')
         records._notify_assignment()
         return records
 
@@ -60,7 +119,7 @@ class HotelHousekeeping(models.Model):
         """Alerte « Chambre nécessitant un nettoyage » (cahier des charges §18) :
         activité pour l'agent affecté (s'il a un compte utilisateur)."""
         for rec in self.filtered(lambda r: r.state == 'todo' and r.staff_id.user_id):
-            summary = _("Nettoyer la chambre %s", rec.room_id.name)
+            summary = _("Nettoyer : %s", rec._target_label())
             if rec.activity_ids.filtered(lambda a: a.summary == summary):
                 continue
             rec.sudo().activity_schedule(
@@ -72,14 +131,12 @@ class HotelHousekeeping(models.Model):
     def action_start(self):
         for rec in self:
             rec.state = 'inprogress'
-            if rec.room_id:
-                rec.room_id.housekeeping_status = 'inprogress'
+            rec._set_housekeeping_status('inprogress')
 
     def action_done(self):
         for rec in self:
             rec.state = 'done'
-            if rec.room_id:
-                rec.room_id.housekeeping_status = 'clean'
+            rec._set_housekeeping_status('clean')
             rec.activity_ids.action_feedback(feedback=_("Ménage terminé"))
 
     def action_inspect(self):
@@ -90,21 +147,19 @@ class HotelHousekeeping(models.Model):
             if rec.state != 'done':
                 raise UserError(_("Seule une chambre nettoyée peut être contrôlée."))
             rec.write({'state': 'inspected', 'inspected_by_id': self.env.user.id})
-            if rec.room_id:
-                rec.room_id.housekeeping_status = 'inspected'
+            rec._set_housekeeping_status('inspected')
 
     def action_to_repair(self):
         """Problème constaté pendant le ménage : la chambre passe « À réparer »
         et une demande de travaux est créée."""
         self.ensure_one()
         request = self.env['hotel.maintenance.request'].create({
-            'name': _("Réparation signalée au ménage — chambre %s", self.room_id.name),
+            'name': _("Réparation signalée au ménage — %s", self._target_label()),
             'room_id': self.room_id.id,
             'description': self.note or False,
         })
         self.write({'state': 'to_repair', 'maintenance_id': request.id})
-        if self.room_id:
-            self.room_id.housekeeping_status = 'to_repair'
+        self._set_housekeeping_status('to_repair')
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'hotel.maintenance.request',
@@ -118,5 +173,4 @@ class HotelHousekeeping(models.Model):
 
     def action_reset(self):
         self.write({'state': 'todo'})
-        for rec in self.filtered('room_id'):
-            rec.room_id.housekeeping_status = 'dirty'
+        self._set_housekeeping_status('dirty')

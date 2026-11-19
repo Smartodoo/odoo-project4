@@ -33,7 +33,7 @@
               sequence="25"/>
 
     <!-- Ménage & travaux -->
-    <menuitem id="menu_hotel_operations" name="Ménage"
+    <menuitem id="menu_hotel_operations" name="Housekeeping"
               parent="menu_hotel_root" sequence="30"/>
     <menuitem id="menu_hotel_housekeeping" name="Tâches de ménage"
               parent="menu_hotel_operations" action="action_hotel_housekeeping"
@@ -96,6 +96,9 @@
     <menuitem id="menu_hotel_partner_rates" name="Tarifs clients"
               parent="menu_hotel_config" action="action_hotel_partner_rates"
               sequence="45"/>
+    <menuitem id="menu_hotel_customer_type" name="Types de client"
+              parent="menu_hotel_config" action="action_hotel_customer_type"
+              sequence="46"/>
     <menuitem id="menu_hotel_service_products" name="Consommations &amp; services"
               parent="menu_hotel_config" action="action_hotel_service_products"
               sequence="50"/>

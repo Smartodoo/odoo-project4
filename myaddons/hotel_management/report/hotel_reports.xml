@@ -162,7 +162,8 @@
                 <t t-call="web.external_layout">
                     <div class="page">
                         <h2>Fiche client — <span t-field="o.name"/></h2>
-                        <table class="table table-bordered mt-3">
+                        <h5 class="mt-3">Client principal (adulte)</h5>
+                        <table class="table table-bordered">
                             <tr><th style="width: 35%;">Nom</th><td t-out="o.partner_id.hotel_last_name or o.partner_id.name"/></tr>
                             <tr><th>Prénom</th><td t-out="o.partner_id.hotel_first_name or ''"/></tr>
                             <tr><th>Date de naissance</th><td><span t-field="o.partner_id.hotel_birthdate"/></td></tr>
@@ -173,10 +174,35 @@
                             <tr><th>Arrivée / départ</th><td><span t-field="o.checkin"/> → <span t-field="o.checkout"/> (<t t-out="o.nights"/> nuit(s))</td></tr>
                             <tr><th>Chambre(s) / lit(s)</th>
                                 <td><t t-foreach="o.line_ids" t-as="line"><div t-out="line._invoice_label()"/></t></td></tr>
-                            <tr><th>Personnes</th><td><t t-out="o.adults"/> adulte(s), <t t-out="o.children"/> enfant(s)</td></tr>
+                            <tr><th>Personnes</th><td><t t-out="o.guest_count"/> personne(s) : <t t-out="o.adults"/> adulte(s), <t t-out="o.children"/> enfant(s)</td></tr>
                             <tr><th>Acompte versé</th><td><span t-field="o.deposit_amount"/></td></tr>
                             <tr><th>Observations</th><td t-out="o.note or ''"/></tr>
                         </table>
+                        <t t-set="guests" t-value="o.guest_ids.sorted(lambda g: (g.guest_type != 'adult', g.position or 0))"/>
+                        <t t-if="guests">
+                            <h5 class="mt-4">Autres personnes du séjour</h5>
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Personne</th><th>Nom</th><th>Prénom</th>
+                                        <th>Date de naissance</th><th>Pièce d'identité</th><th>Téléphone</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="guests" t-as="g">
+                                        <td t-out="g.label"/>
+                                        <td t-out="g.last_name or ''"/>
+                                        <td t-out="g.first_name or ''"/>
+                                        <td><span t-if="g.birthdate" t-field="g.birthdate"/></td>
+                                        <td>
+                                            <t t-if="g.guest_type == 'child'">—</t>
+                                            <t t-elif="g.id_number or g.id_type"><span t-field="g.id_type"/> n° <t t-out="g.id_number or ''"/></t>
+                                        </td>
+                                        <td t-out="(g.guest_type != 'child' and g.phone) or ''"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
                         <div class="row mt-5">
                             <div class="col-6">Signature du client :</div>
                             <div class="col-6">Visa de la réception :</div>
@@ -303,7 +329,7 @@
                         <thead>
                             <tr>
                                 <th>Chambre</th><th>Étage</th><th>Type</th><th>Statut</th>
-                                <th>Ménage</th><th>Lits libres</th><th>Client(s) présent(s)</th>
+                                <th>Housekeeping</th><th>Lits libres</th><th>Client(s) présent(s)</th>
                             </tr>
                         </thead>
                         <tbody>

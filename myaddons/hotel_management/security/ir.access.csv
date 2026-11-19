@@ -44,3 +44,8 @@ access_hotel_reservation_service_user,hotel.reservation.service.user,hotel.reser
 access_hotel_reservation_service_hk,hotel.reservation.service.housekeeping,hotel.reservation.service,hotel_management.group_hotel_housekeeping,r,
 access_hotel_revenue_report_manager,hotel.revenue.report.manager,hotel.revenue.report,hotel_management.group_hotel_manager,r,
 access_hotel_activity_report_wizard_manager,hotel.activity.report.wizard.manager,hotel.activity.report.wizard,hotel_management.group_hotel_manager,crud,
+access_hotel_customer_type_hk,hotel.customer.type.housekeeping,hotel.customer.type,hotel_management.group_hotel_housekeeping,r,
+access_hotel_customer_type_user,hotel.customer.type.user,hotel.customer.type,hotel_management.group_hotel_user,r,
+access_hotel_customer_type_manager,hotel.customer.type.manager,hotel.customer.type,hotel_management.group_hotel_manager,crud,
+access_hotel_reservation_guest_user,hotel.reservation.guest.user,hotel.reservation.guest,hotel_management.group_hotel_user,crud,
+access_hotel_reservation_guest_hk,hotel.reservation.guest.housekeeping,hotel.reservation.guest,hotel_management.group_hotel_housekeeping,r,

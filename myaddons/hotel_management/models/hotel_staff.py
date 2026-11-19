@@ -16,7 +16,7 @@ class HotelStaff(models.Model):
         help="Employé Odoo : contrat, service, horaires, présences et congés.")
     role = fields.Selection([
         ('reception', 'Réception'),
-        ('housekeeping', 'Ménage'),
+        ('housekeeping', 'Housekeeping'),
         ('maintenance', 'Maintenance / Technicien'),
         ('manager', 'Encadrement'),
         ('other', 'Autre'),

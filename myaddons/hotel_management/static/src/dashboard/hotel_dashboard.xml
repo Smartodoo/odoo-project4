@@ -21,13 +21,13 @@
                     </div>
                 </div>
 
-                <!-- Indicateurs regroupés en 3 blocs : Chambres / Clients / Ménage & travaux -->
+                <!-- Indicateurs regroupés en 3 blocs : Chambres / Lits / Clients -->
                 <div class="o_hotel_blocks">
 
                     <!-- Bloc Chambres -->
                     <section class="o_hotel_block o_hotel_block_rooms">
                         <header class="o_hotel_block_head">
-                            <span class="o_hotel_block_icon"><i class="oi" data-icon="bed"/></span>
+                            <span class="o_hotel_block_icon"><i class="oi" data-icon="home"/></span>
                             <h2>Chambres</h2>
                         </header>
                         <div class="o_hotel_block_tiles">
@@ -55,6 +55,50 @@
                                  t-on-click="() => this.openTile('hotel.room', 'unavailable_rooms', 'Chambres en maintenance / hors service')">
                                 <div class="o_hotel_tile_value"><t t-out="this.state.data.maintenance"/></div>
                                 <div class="o_hotel_tile_label">Maintenance / hors service</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Bloc Lits -->
+                    <section class="o_hotel_block o_hotel_block_beds">
+                        <header class="o_hotel_block_head">
+                            <span class="o_hotel_block_icon"><i class="oi" data-icon="bed"/></span>
+                            <h2>Lits</h2>
+                            <span class="o_hotel_block_badge" t-if="this.state.data.beds.total"
+                                  title="Lits occupés ou réservés aujourd'hui / lits vendables">
+                                <t t-out="this.state.data.bed_occupancy_rate"/>% occupés
+                            </span>
+                        </header>
+                        <div class="o_hotel_block_tiles">
+                            <div class="o_hotel_tile"
+                                 t-on-click="() => this.openTile('hotel.bed', 'all_beds', 'Lits')">
+                                <div class="o_hotel_tile_value"><t t-out="this.state.data.beds.total"/></div>
+                                <div class="o_hotel_tile_label">Lits au total</div>
+                                <div class="o_hotel_tile_sub o_hotel_tile_link" t-if="this.state.data.beds.unavailable"
+                                     title="Voir les lits en maintenance / hors service"
+                                     t-on-click.stop="() => this.openTile('hotel.bed', 'unavailable_beds', 'Lits en maintenance / hors service')">
+                                    <t t-out="this.state.data.beds.unavailable"/> en maintenance
+                                </div>
+                            </div>
+                            <div class="o_hotel_tile o_hotel_tile_danger"
+                                 t-on-click="() => this.openTile('hotel.bed', 'occupied_beds', 'Lits occupés')">
+                                <div class="o_hotel_tile_value"><t t-out="this.state.data.beds.occupied"/></div>
+                                <div class="o_hotel_tile_label">Lits occupés</div>
+                            </div>
+                            <div class="o_hotel_tile o_hotel_tile_info"
+                                 t-on-click="() => this.openTile('hotel.bed', 'reserved_beds', 'Lits réservés')">
+                                <div class="o_hotel_tile_value"><t t-out="this.state.data.beds.reserved"/></div>
+                                <div class="o_hotel_tile_label">Lits réservés</div>
+                            </div>
+                            <div class="o_hotel_tile o_hotel_tile_success"
+                                 t-on-click="() => this.openTile('hotel.bed', 'free_beds', 'Lits libres')">
+                                <div class="o_hotel_tile_value"><t t-out="this.state.data.beds.free"/></div>
+                                <div class="o_hotel_tile_label">Lits libres</div>
+                                <div class="o_hotel_tile_sub o_hotel_tile_link" t-if="this.state.data.beds.to_clean"
+                                     title="Voir les lits à nettoyer"
+                                     t-on-click.stop="() => this.openTile('hotel.bed', 'to_clean_beds', 'Lits à nettoyer')">
+                                    <t t-out="this.state.data.beds.to_clean"/> à nettoyer
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -89,35 +133,6 @@
                         </div>
                     </section>
 
-                    <!-- Bloc Ménage & travaux -->
-                    <section class="o_hotel_block o_hotel_block_ops">
-                        <header class="o_hotel_block_head">
-                            <span class="o_hotel_block_icon"><i class="oi" data-icon="wand_stars"/></span>
-                            <h2>Ménage &amp; travaux</h2>
-                        </header>
-                        <div class="o_hotel_block_tiles">
-                            <div class="o_hotel_tile"
-                                 t-on-click="() => this.openTile('hotel.room', 'to_clean_rooms', 'Chambres à nettoyer')">
-                                <div class="o_hotel_tile_value"><t t-out="this.state.data.to_clean"/></div>
-                                <div class="o_hotel_tile_label">Chambres à nettoyer</div>
-                                <div class="o_hotel_tile_sub o_hotel_tile_link" t-if="this.state.data.cleaning"
-                                     title="Voir les chambres libres en attente de ménage"
-                                     t-on-click.stop="() => this.openTile('hotel.room', 'cleaning_free_rooms', 'Chambres libres à nettoyer')">
-                                    <t t-out="this.state.data.cleaning"/> libre(s)
-                                </div>
-                            </div>
-                            <div class="o_hotel_tile"
-                                 t-on-click="() => this.openModel('hotel.housekeeping', [['state','in',['todo','inprogress']]], 'Tâches ménage à faire / en cours')">
-                                <div class="o_hotel_tile_value"><t t-out="this.state.data.housekeeping_todo"/></div>
-                                <div class="o_hotel_tile_label"><i class="oi me-1" data-icon="checklist"/>Tâches ménage</div>
-                            </div>
-                            <div class="o_hotel_tile"
-                                 t-on-click="() => this.openModel('hotel.maintenance.request', [['state','in',['new','inprogress']]], 'Interventions en cours')">
-                                <div class="o_hotel_tile_value"><t t-out="this.state.data.maintenance_open"/></div>
-                                <div class="o_hotel_tile_label"><i class="oi me-1" data-icon="build"/>Interventions</div>
-                            </div>
-                        </div>
-                    </section>
                 </div>
 
                 <!-- Choix de la période du bloc « Sur la période » -->
