@@ -105,9 +105,28 @@ class TestReservationForm(TransactionCase):
                 line.bed_id = bed
         with f.line_ids.new() as line:
             line.bed_id = self.r2.bed_ids[0]
+        # Autre adulte : nom, prénom, naissance, téléphone, pièce obligatoires
+        with self.assertRaises(AssertionError):
+            with f.guest_adult_ids.edit(0) as guest:
+                guest.last_name = 'Benali'
+                guest.first_name = 'Amine'
         with f.guest_adult_ids.edit(0) as guest:
             guest.last_name = 'Benali'
             guest.first_name = 'Amine'
+            guest.birthdate = '1988-08-08'
+            guest.phone = '0550101010'
+            guest.id_type = 'cni'
+            guest.id_number = 'CNI-77'
+        with f.guest_adult_ids.edit(1) as guest:
+            guest.last_name = 'Benali'
+            guest.first_name = 'Sofia'
+            guest.birthdate = '1990-09-09'
+            guest.phone = '0550202020'
+            guest.id_type = 'passport'
+            guest.id_number = 'P-88'
+        # Enfant : rien d'obligatoire
+        with f.guest_child_ids.edit(0) as child:
+            child.first_name = 'Ines'
         resa = f.save()
         self.assertEqual(resa.adults, 3)
         labels = sorted(resa.guest_ids.mapped('label'))
