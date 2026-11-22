@@ -93,12 +93,10 @@ class HotelReservation(models.Model):
     nights = fields.Integer(
         string="Nuits", compute='_compute_nights', store=True, aggregator='avg',
         help="Nombre de nuits. Dans les analyses : durée moyenne des séjours.")
-    # Saisie : nombre total de personnes, dont N enfants ; les adultes en
-    # découlent (personnes - enfants). Écrire « adults » reste possible
-    # (site web, imports, code) : le total est alors adultes + enfants.
-    adults = fields.Integer(
-        string="Adultes", compute='_compute_adults', inverse='_inverse_adults',
-        store=True, readonly=False)
+    # Saisie : nombre d'adultes et nombre d'enfants ; le total de personnes
+    # en découle (adultes + enfants). Écrire « guest_count » reste possible
+    # (site web, imports, code) : les adultes sont alors personnes - enfants.
+    adults = fields.Integer(string="Adultes", default=1, required=True)
     children = fields.Integer(string="Enfants", default=0)
     guest_ids = fields.One2many(
         'hotel.reservation.guest', 'reservation_id', string="Autres personnes",
@@ -112,8 +110,9 @@ class HotelReservation(models.Model):
              "Seuls les types ayant des chambres louables selon le type de "
              "location choisi (chambre entière ou au lit) sont proposés.")
     guest_count = fields.Integer(
-        string="Personnes", default=1, required=True,
-        help="Nombre total de personnes du séjour, enfants compris.")
+        string="Personnes", compute='_compute_guest_count',
+        inverse='_inverse_guest_count', store=True, readonly=False,
+        help="Nombre total de personnes du séjour = adultes + enfants.")
     line_ids = fields.One2many(
         'hotel.reservation.line', 'reservation_id', string="Chambres", copy=True)
     room_count = fields.Integer(
@@ -193,14 +192,14 @@ class HotelReservation(models.Model):
             else:
                 rec.nights = 0
 
-    @api.depends('guest_count', 'children')
-    def _compute_adults(self):
-        for rec in self:
-            rec.adults = (rec.guest_count or 0) - (rec.children or 0)
-
-    def _inverse_adults(self):
+    @api.depends('adults', 'children')
+    def _compute_guest_count(self):
         for rec in self:
             rec.guest_count = (rec.adults or 0) + (rec.children or 0)
+
+    def _inverse_guest_count(self):
+        for rec in self:
+            rec.adults = (rec.guest_count or 0) - (rec.children or 0)
 
     @api.depends('amount_total', 'company_id.hotel_deposit_percent')
     def _compute_deposit_requested(self):
@@ -491,8 +490,7 @@ class HotelReservation(models.Model):
         for rec in self:
             if (rec.adults or 0) < 1:
                 raise ValidationError(_(
-                    "Une réservation doit compter au moins un adulte : le nombre "
-                    "de personnes doit être supérieur au nombre d'enfants."))
+                    "Une réservation doit compter au moins un adulte."))
             if (rec.children or 0) < 0:
                 raise ValidationError(_(
                     "Le nombre d'enfants ne peut pas être négatif."))
@@ -510,14 +508,14 @@ class HotelReservation(models.Model):
                 guests=self.guest_count, type=rtype.name, capacity=rtype.default_capacity)
         return False
 
-    @api.constrains('guest_count', 'room_type_id')
+    @api.constrains('guest_count', 'adults', 'children', 'room_type_id')
     def _check_room_type_capacity(self):
         for rec in self:
             message = rec._room_type_capacity_message()
             if message:
                 raise ValidationError(message)
 
-    @api.onchange('guest_count', 'room_type_id')
+    @api.onchange('adults', 'children', 'guest_count', 'room_type_id')
     def _onchange_room_type_capacity(self):
         message = self._room_type_capacity_message()
         if message:
@@ -576,7 +574,7 @@ class HotelReservation(models.Model):
         self.ensure_one()
         to_remove = self.env['hotel.reservation.guest']
         to_create = []
-        adults = (self.guest_count or 1) - (self.children or 0)
+        adults = self.adults or 1
         wanted = {'adult': max(adults - 1, 0),
                   'child': max(self.children or 0, 0)}
         first_position = {'adult': 2, 'child': 1}
@@ -591,7 +589,7 @@ class HotelReservation(models.Model):
                 to_create.append({'guest_type': kind, 'position': position})
         return to_remove, to_create
 
-    @api.onchange('guest_count', 'children')
+    @api.onchange('adults', 'children', 'guest_count')
     def _onchange_guest_counts(self):
         to_remove, to_create = self._guest_sync_plan()
         if not to_remove and not to_create:

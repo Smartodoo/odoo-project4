@@ -103,9 +103,9 @@
                             <field name="booking_type" widget="radio" options="{'horizontal': true}"/>
                             <field name="room_type_id" placeholder="Tous les types"
                                    options="{'no_create': True, 'no_open': True}"/>
-                            <field name="guest_count"/>
-                            <field name="children" string="Dont enfants"/>
-                            <field name="adults" readonly="1" force_save="1"/>
+                            <field name="adults"/>
+                            <field name="children"/>
+                            <field name="guest_count" readonly="1" force_save="1"/>
                             <field name="places"/>
                         </group>
                     </group>

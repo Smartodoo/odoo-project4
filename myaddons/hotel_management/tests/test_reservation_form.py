@@ -93,8 +93,9 @@ class TestReservationForm(TransactionCase):
         f.checkin = self.ci
         f.checkout = self.co
         f.booking_type = 'bed'
-        f.guest_count = 4
+        f.adults = 3
         f.children = 1
+        self.assertEqual(f.guest_count, 4)
         self.assertEqual(len(f.guest_ids), 3)
         with f.line_ids.new() as line:
             line.bed_id = self.r3.bed_ids[0]
@@ -130,14 +131,19 @@ class TestReservationForm(TransactionCase):
     def test_persons_include_children(self):
         f = Form(self.env['hotel.reservation'])
         f.partner_id = self.partner
-        f.guest_count = 3
+        f.adults = 2
         f.children = 1
-        self.assertEqual(f.adults, 2)
         self.assertEqual(f.guest_count, 3)
         self.assertEqual(len(f.guest_ids), 2)
         f.children = 2
-        self.assertEqual(f.adults, 1)
-        self.assertEqual(f.guest_count, 3)
+        self.assertEqual(f.adults, 2)
+        self.assertEqual(f.guest_count, 4)
+        self.assertEqual(len(f.guest_ids), 3)
+        # Compatibilité site web / imports : écrire le total -> adultes déduits
+        resa = self.env['hotel.reservation'].create({
+            'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+            'booking_type': 'bed', 'guest_count': 3, 'children': 1})
+        self.assertEqual((resa.adults, resa.guest_count), (2, 3))
 
     def test_room_type_follows_booking_type(self):
         Room = self.env['hotel.room']
