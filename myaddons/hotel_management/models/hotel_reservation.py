@@ -45,8 +45,11 @@ class HotelReservation(models.Model):
     amount_tax = fields.Monetary(
         string="Taxes", compute='_compute_amounts', store=True)
 
+    # Pas required au niveau du modèle : la section « Client principal » se
+    # remplit aussi sans choisir de contact, la fiche client est alors créée
+    # à l'enregistrement (voir create / _check_partner_set).
     partner_id = fields.Many2one(
-        'res.partner', string="Client", required=True, tracking=True)
+        'res.partner', string="Client", tracking=True, index=True)
     # Coordonnées et pièce d'identité du client, modifiables depuis la réservation
     partner_last_name = fields.Char(
         related='partner_id.hotel_last_name', readonly=False, string="Nom")
@@ -103,6 +106,13 @@ class HotelReservation(models.Model):
         copy=False,
         help="Une fiche par adulte (en plus du client) et par enfant : elles "
              "suivent automatiquement le nombre d'adultes et d'enfants.")
+    # Mêmes fiches, séparées pour l'affichage : section Adultes puis Enfants
+    guest_adult_ids = fields.One2many(
+        'hotel.reservation.guest', 'reservation_id', string="Autres adultes",
+        domain=[('guest_type', '=', 'adult')], copy=False)
+    guest_child_ids = fields.One2many(
+        'hotel.reservation.guest', 'reservation_id', string="Enfants du séjour",
+        domain=[('guest_type', '=', 'child')], copy=False)
     room_type_id = fields.Many2one(
         'hotel.room.type', string="Type de chambre", tracking=True,
         domain="[('room_ids.rental_mode', '=', booking_type)]",
@@ -579,8 +589,7 @@ class HotelReservation(models.Model):
                   'child': max(self.children or 0, 0)}
         first_position = {'adult': 2, 'child': 1}
         for kind, count in wanted.items():
-            guests = self.guest_ids.filtered(lambda g, k=kind: g.guest_type == k).sorted(
-                lambda g: (g.position or 0))
+            guests = self[self._GUEST_FIELDS[kind]].sorted(lambda g: (g.position or 0))
             to_remove |= guests[count:]
             kept = guests[:count]
             position = max(kept.mapped('position') or [first_position[kind] - 1])
@@ -595,13 +604,17 @@ class HotelReservation(models.Model):
         if not to_remove and not to_create:
             return
         Guest = self.env['hotel.reservation.guest']
-        new_guests = Guest
-        for vals in to_create:
-            new_guests += Guest.new(vals)
-        self.guest_ids = (self.guest_ids - to_remove) + new_guests
+        for kind, fname in self._GUEST_FIELDS.items():
+            new_guests = Guest
+            for vals in to_create:
+                if vals['guest_type'] == kind:
+                    new_guests += Guest.new(vals)
+            if new_guests or (self[fname] & to_remove):
+                self[fname] = (self[fname] - to_remove) + new_guests
 
     def _sync_guests(self):
         """Même règle hors écran (site web, import, code)."""
+        self.invalidate_recordset(list(self._GUEST_FIELDS.values()))
         for rec in self:
             to_remove, to_create = rec._guest_sync_plan()
             commands = [Command.unlink(g.id) for g in to_remove]
@@ -799,9 +812,41 @@ class HotelReservation(models.Model):
                         "(maintenance ou déjà réservée).",
                         line.room_id.name, rec.checkin, rec.checkout))
 
+    _GUEST_FIELDS = {'adult': 'guest_adult_ids', 'child': 'guest_child_ids'}
+
+    def _partner_related_fields(self):
+        """{champ de la réservation: champ du contact} pour les coordonnées du
+        client modifiables depuis la réservation (related partner_id.xxx)."""
+        return {
+            name: field.related.split('.', 1)[1]
+            for name, field in self._fields.items()
+            if field.related and field.related.startswith('partner_id.')
+            and field.related.count('.') == 1 and not field.readonly
+        }
+
+    def _create_partner_from_vals(self, vals):
+        """Client saisi directement dans la section « Client principal » sans
+        choisir de contact : la fiche client est créée avec ces informations."""
+        mapping = self._partner_related_fields()
+        partner_vals = {mapping[k]: vals.pop(k) for k in list(vals) if k in mapping}
+        partner_vals = {k: v for k, v in partner_vals.items() if v}
+        if not (partner_vals.get('hotel_last_name') or partner_vals.get('hotel_first_name')):
+            raise UserError(_(
+                "Indiquez le client principal : choisissez un client existant, "
+                "ou saisissez au moins son nom."))
+        return self.env['res.partner'].create(partner_vals)
+
+    @api.constrains('partner_id')
+    def _check_partner_set(self):
+        for rec in self:
+            if not rec.partner_id:
+                raise ValidationError(_("Le client principal est obligatoire."))
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            if not vals.get('partner_id'):
+                vals['partner_id'] = self._create_partner_from_vals(vals).id
             if vals.get('name', _('Nouveau')) == _('Nouveau'):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'hotel.reservation') or _('Nouveau')

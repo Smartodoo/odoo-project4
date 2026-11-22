@@ -112,17 +112,18 @@
                     <!-- 2. Client principal = Adulte 1 -->
                     <group string="Client principal (adulte)" name="client">
                         <group name="client_identity">
-                            <field name="partner_id"/>
-                            <field name="partner_customer_type_id" invisible="not partner_id"
+                            <field name="partner_id" required="not partner_last_name and not partner_first_name"
+                                   placeholder="Client existant, ou remplissez la fiche ci-dessous"/>
+                            <field name="partner_customer_type_id"
                                    options="{'no_create': True, 'no_open': True}"/>
-                            <field name="partner_preferences" invisible="not partner_id"
+                            <field name="partner_preferences"
                                    placeholder="Préférences du client (chambre, consommations…)"/>
-                            <field name="partner_last_name" invisible="not partner_id"/>
-                            <field name="partner_first_name" invisible="not partner_id"/>
-                            <field name="partner_birthdate" invisible="not partner_id"
-                                   required="partner_id"/>
+                            <field name="partner_last_name"/>
+                            <field name="partner_first_name"/>
+                            <field name="partner_birthdate"
+                                   required="1"/>
                         </group>
-                        <group name="client_contact" invisible="not partner_id">
+                        <group name="client_contact">
                             <field name="partner_phone" widget="phone"/>
                             <label for="partner_street" string="Adresse"/>
                             <div class="o_row">
@@ -135,13 +136,79 @@
                             <field name="partner_id_document_name" invisible="1"/>
                         </group>
                     </group>
-                    <!-- 3. Une fiche par autre personne (adultes 2… et enfants) -->
-                    <div name="guests" invisible="not guest_ids" class="mb-3">
+                    <!-- 3. Autres personnes du séjour : section Adultes (hors client
+                         principal) puis section Enfants -->
+                    <div name="guest_adult_ids" invisible="not guest_adult_ids" class="mb-3">
                         <div class="o_horizontal_separator mt-2 mb-2 text-uppercase fw-bolder small">
-                            Autres personnes du séjour
+                            Autres adultes du séjour
                         </div>
-                        <field name="guest_ids" mode="kanban" nolabel="1"
-                               context="{'default_reservation_id': id}">
+                        <field name="guest_adult_ids" mode="kanban" nolabel="1"
+                               context="{'default_reservation_id': id, 'default_guest_type': 'adult'}">
+                            <kanban create="0" delete="0" class="o_hotel_guest_kanban">
+                                <field name="guest_type" force_save="1"/>
+                                <field name="position" force_save="1"/>
+                                <field name="name"/>
+                                <templates>
+                                    <t t-name="card">
+                                        <div t-attf-class="o_hotel_guest_card o_hotel_guest_#{record.guest_type.raw_value}">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="fw-bold">
+                                                    <i t-if="record.guest_type.raw_value == 'child'" class="oi me-1" data-icon="child_care" title="Enfant"/>
+                                                    <i t-else="" class="oi me-1" data-icon="person" title="Adulte"/>
+                                                    <field name="label"/>
+                                                </span>
+                                                <span t-if="!record.name.raw_value" class="badge text-bg-warning">À renseigner</span>
+                                            </div>
+                                            <div class="fs-6" t-if="record.name.raw_value"><field name="name"/></div>
+                                            <div class="text-muted small" t-if="record.birthdate.raw_value">
+                                                Né(e) le <field name="birthdate"/>
+                                            </div>
+                                            <div class="text-muted small" t-if="record.id_number.raw_value">
+                                                <field name="id_type"/> <field name="id_number"/>
+                                            </div>
+                                            <div class="text-muted small" t-if="record.phone.raw_value">
+                                                <field name="phone"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </templates>
+                            </kanban>
+                            <!-- Boutons standard de la fenêtre (le bouton « Enregistrer &
+                                 Créer » est masqué en CSS : le nombre de fiches suit le
+                                 nombre de personnes). Pas de footer special="save" : il
+                                 enregistrerait la fiche hors de la réservation. -->
+                            <form string="Personne du séjour" class="o_hotel_guest_form">
+                                <sheet>
+                                    <div class="oe_title">
+                                        <h2><field name="label" readonly="1"/></h2>
+                                    </div>
+                                    <group>
+                                        <group>
+                                            <field name="guest_type" readonly="1" force_save="1"/>
+                                            <field name="position" invisible="1" force_save="1"/>
+                                            <field name="partner_id"/>
+                                            <field name="last_name"/>
+                                            <field name="first_name"/>
+                                            <field name="birthdate"/>
+                                        </group>
+                                        <group invisible="guest_type == 'child'">
+                                            <field name="phone" widget="phone"/>
+                                            <field name="id_type"/>
+                                            <field name="id_number"/>
+                                            <field name="id_document" filename="id_document_name"/>
+                                            <field name="id_document_name" invisible="1"/>
+                                        </group>
+                                    </group>
+                                </sheet>
+                            </form>
+                        </field>
+                    </div>
+                    <div name="guest_child_ids" invisible="not guest_child_ids" class="mb-3">
+                        <div class="o_horizontal_separator mt-2 mb-2 text-uppercase fw-bolder small">
+                            Enfants du séjour
+                        </div>
+                        <field name="guest_child_ids" mode="kanban" nolabel="1"
+                               context="{'default_reservation_id': id, 'default_guest_type': 'child'}">
                             <kanban create="0" delete="0" class="o_hotel_guest_kanban">
                                 <field name="guest_type" force_save="1"/>
                                 <field name="position" force_save="1"/>

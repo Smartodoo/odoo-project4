@@ -96,7 +96,8 @@ class TestReservationForm(TransactionCase):
         f.adults = 3
         f.children = 1
         self.assertEqual(f.guest_count, 4)
-        self.assertEqual(len(f.guest_ids), 3)
+        self.assertEqual(len(f.guest_adult_ids), 2)
+        self.assertEqual(len(f.guest_child_ids), 1)
         with f.line_ids.new() as line:
             line.bed_id = self.r3.bed_ids[0]
         for bed in self.r3.bed_ids[1:]:
@@ -104,7 +105,7 @@ class TestReservationForm(TransactionCase):
                 line.bed_id = bed
         with f.line_ids.new() as line:
             line.bed_id = self.r2.bed_ids[0]
-        with f.guest_ids.edit(0) as guest:
+        with f.guest_adult_ids.edit(0) as guest:
             guest.last_name = 'Benali'
             guest.first_name = 'Amine'
         resa = f.save()
@@ -128,17 +129,40 @@ class TestReservationForm(TransactionCase):
         self.assertEqual(len(resa.guest_ids), 3)
         self.assertEqual(len(resa.guest_ids.filtered(lambda g: g.guest_type == 'child')), 2)
 
+    def test_main_client_typed_without_contact(self):
+        """Client principal saisi directement : la fiche client est créée."""
+        f = Form(self.env['hotel.reservation'])
+        f.checkin = self.ci
+        f.checkout = self.co
+        f.booking_type = 'bed'
+        f.partner_last_name = 'Haddad'
+        f.partner_first_name = 'Sara'
+        f.partner_birthdate = '1992-05-04'
+        f.partner_phone = '0550000000'
+        with f.line_ids.new() as line:
+            line.bed_id = self.r2.bed_ids[0]
+        resa = f.save()
+        self.assertTrue(resa.partner_id)
+        self.assertEqual(resa.partner_id.hotel_last_name, 'Haddad')
+        self.assertEqual(resa.partner_id.phone, '0550000000')
+        self.assertEqual(str(resa.partner_id.hotel_birthdate), '1992-05-04')
+        self.assertIn('Haddad', resa.partner_id.name)
+        from odoo.exceptions import UserError
+        with self.assertRaises(UserError):
+            self.env['hotel.reservation'].create({
+                'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'})
+
     def test_persons_include_children(self):
         f = Form(self.env['hotel.reservation'])
         f.partner_id = self.partner
         f.adults = 2
         f.children = 1
         self.assertEqual(f.guest_count, 3)
-        self.assertEqual(len(f.guest_ids), 2)
+        self.assertEqual((len(f.guest_adult_ids), len(f.guest_child_ids)), (1, 1))
         f.children = 2
         self.assertEqual(f.adults, 2)
         self.assertEqual(f.guest_count, 4)
-        self.assertEqual(len(f.guest_ids), 3)
+        self.assertEqual((len(f.guest_adult_ids), len(f.guest_child_ids)), (1, 2))
         # Compatibilité site web / imports : écrire le total -> adultes déduits
         resa = self.env['hotel.reservation'].create({
             'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
@@ -292,3 +316,4 @@ class TestRoomCreation(TransactionCase):
         floor.name = 'RC RDC'
         self.assertEqual(room.floor, 'RC RDC')
         self.assertIn('floor_id', self.env['hotel.room']._fields)
+
