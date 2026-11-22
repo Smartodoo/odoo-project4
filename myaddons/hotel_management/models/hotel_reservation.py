@@ -836,6 +836,23 @@ class HotelReservation(models.Model):
                 "ou saisissez au moins son nom."))
         return self.env['res.partner'].create(partner_vals)
 
+    @api.onchange('partner_last_name', 'partner_first_name')
+    def _onchange_partner_names_create(self):
+        """Nouveau client : dès que nom ET prénom sont saisis (sans contact
+        choisi), le contact est créé et sélectionné dans « Client ». Ce qui a
+        déjà été saisi (téléphone, naissance…) est repris sur sa fiche ; la
+        suite est enregistrée sur la fiche à l'enregistrement de la réservation."""
+        if self.partner_id or not (self.partner_last_name and self.partner_first_name):
+            return
+        partner_vals = {}
+        for fname, partner_field in self._partner_related_fields().items():
+            value = self[fname]
+            if self._fields[fname].type == 'many2one':
+                value = value.id
+            if value:
+                partner_vals[partner_field] = value
+        self.partner_id = self.env['res.partner'].create(partner_vals)
+
     @api.constrains('partner_id')
     def _check_partner_set(self):
         for rec in self:
