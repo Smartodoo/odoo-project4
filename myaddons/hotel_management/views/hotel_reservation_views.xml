@@ -381,6 +381,8 @@
                         domain="[('checkout', '=', 'today')]"/>
                 <filter name="upcoming" string="À venir"
                         domain="[('checkin', '&gt;', 'today'), ('state', 'in', ('draft', 'confirmed'))]"/>
+                <filter name="online" string="Réservations en ligne"
+                        domain="[('source', '=', 'website')]"/>
                 <filter name="unpaid" string="Impayés"
                         domain="[('amount_due', '&gt;', 0), ('state', 'in', ('checkin', 'checkout'))]"/>
                 <separator/>
@@ -428,5 +430,19 @@
         <field name="res_model">hotel.reservation</field>
         <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
         <field name="search_view_id" ref="view_hotel_reservation_search"/>
+    </record>
+
+    <!-- Réservations créées depuis le site web (source = website) -->
+    <record id="action_hotel_reservation_online" model="ir.actions.act_window">
+        <field name="name">Réservations en ligne</field>
+        <field name="res_model">hotel.reservation</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
+        <field name="search_view_id" ref="view_hotel_reservation_search"/>
+        <field name="domain">[('source', '=', 'website')]</field>
+        <field name="context">{'default_source': 'website'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune réservation en ligne</p>
+            <p>Les réservations faites par les clients sur le site web apparaissent ici.</p>
+        </field>
     </record>
 </odoo>
