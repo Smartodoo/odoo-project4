@@ -439,7 +439,8 @@
         <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
         <field name="search_view_id" ref="view_hotel_reservation_search"/>
         <field name="domain">[('source', '=', 'website')]</field>
-        <field name="context">{'default_source': 'website'}</field>
+        <!-- Créées uniquement par les clients sur le site : pas de création ici -->
+        <field name="context">{'create': False}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Aucune réservation en ligne</p>
             <p>Les réservations faites par les clients sur le site web apparaissent ici.</p>

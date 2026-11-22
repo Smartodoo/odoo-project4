@@ -17,7 +17,7 @@
               sequence="1"/>
     <menuitem id="menu_hotel_reservation_online" name="Réservations en ligne"
               parent="menu_hotel_reservations_top" action="action_hotel_reservation_online"
-              sequence="2"/>
+              sequence="0"/>
     <menuitem id="menu_hotel_clients" name="Clients"
               parent="menu_hotel_reservations_top" action="base.action_partner_form"
               sequence="10"/>
