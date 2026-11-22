@@ -844,6 +844,11 @@ class HotelReservation(models.Model):
         suite est enregistrée sur la fiche à l'enregistrement de la réservation."""
         if self.partner_id or not (self.partner_last_name and self.partner_first_name):
             return
+        warning = self._homonym_warning(self.partner_last_name, self.partner_first_name)
+        if warning:
+            # Client peut-être déjà connu : on ne crée rien, on prévient. Si
+            # c'est une autre personne, le contact est créé à l'enregistrement.
+            return warning
         partner_vals = {}
         for fname, partner_field in self._partner_related_fields().items():
             value = self[fname]
@@ -852,6 +857,47 @@ class HotelReservation(models.Model):
             if value:
                 partner_vals[partner_field] = value
         self.partner_id = self.env['res.partner'].create(partner_vals)
+
+    @api.model
+    def _homonym_warning(self, last_name, first_name):
+        """Avertissement (dict onchange) si un contact porte déjà ce nom et
+        ce prénom, sinon False. Sert au client principal et aux autres
+        personnes du séjour."""
+        homonyms = self._find_homonym_partners(last_name, first_name)
+        if not homonyms:
+            return False
+        lines = []
+        for partner in homonyms[:5]:
+            details = [d for d in (
+                partner.phone,
+                partner.hotel_birthdate and _("né(e) le %s", partner.hotel_birthdate.strftime('%d/%m/%Y')),
+                partner.hotel_id_number and _("pièce n° %s", partner.hotel_id_number),
+            ) if d]
+            lines.append("• %s%s" % (partner.display_name, details and " (%s)" % ", ".join(details) or ""))
+        return {'warning': {
+            'title': _("Ce client existe peut-être déjà"),
+            'message': _(
+                "Un contact porte déjà ce nom :\n%(list)s\n\n"
+                "S'il s'agit de la même personne, choisissez-le dans le champ "
+                "« %(field)s ».\n"
+                "Sinon, continuez la saisie : un nouveau contact sera créé à "
+                "l'enregistrement.",
+                list="\n".join(lines),
+                field=self.env.context.get('hotel_homonym_field') or _("Client")),
+        }}
+
+    @api.model
+    def _find_homonym_partners(self, last_name, first_name):
+        """Contacts portant déjà ce nom et ce prénom (casse et espaces ignorés)."""
+        last, first = (last_name or '').strip(), (first_name or '').strip()
+        if not (last and first):
+            return self.env['res.partner']
+        return self.env['res.partner'].search([
+            '|', '|',
+            '&', ('hotel_last_name', '=ilike', last), ('hotel_first_name', '=ilike', first),
+            ('name', '=ilike', "%s %s" % (last, first)),
+            ('name', '=ilike', "%s %s" % (first, last)),
+        ], limit=10)
 
     @api.constrains('partner_id')
     def _check_partner_set(self):

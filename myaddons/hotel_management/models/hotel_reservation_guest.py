@@ -62,3 +62,70 @@ class HotelReservationGuest(models.Model):
         self.phone = partner.phone or self.phone
         self.id_type = partner.hotel_id_type or self.id_type
         self.id_number = partner.hotel_id_number or self.id_number
+
+    # Champ de la fiche personne -> champ du contact (même fiche client que
+    # pour le client principal de la réservation)
+    _PARTNER_FIELDS = {
+        'last_name': 'hotel_last_name',
+        'first_name': 'hotel_first_name',
+        'birthdate': 'hotel_birthdate',
+        'phone': 'phone',
+        'id_type': 'hotel_id_type',
+        'id_number': 'hotel_id_number',
+        'id_document': 'hotel_id_document',
+        'id_document_name': 'hotel_id_document_name',
+    }
+
+    def _partner_vals_from(self, values):
+        return {self._PARTNER_FIELDS[k]: v for k, v in values.items()
+                if k in self._PARTNER_FIELDS and v}
+
+    @api.onchange('last_name', 'first_name')
+    def _onchange_names_create_partner(self):
+        """Nouvelle personne : dès que nom ET prénom sont saisis (sans contact
+        choisi), le contact est créé et sélectionné ; avertissement à la
+        place si un contact porte déjà ce nom."""
+        # Adultes seulement : un contact doit avoir 18 ans (règle des contacts
+        # de l'auberge) ; les enfants restent sur leur fiche de séjour.
+        if self.guest_type != 'adult' or self.partner_id \
+                or not (self.last_name and self.first_name):
+            return
+        warning = self.env['hotel.reservation'].with_context(
+            hotel_homonym_field=_("Contact existant"),
+        )._homonym_warning(self.last_name, self.first_name)
+        if warning:
+            return warning
+        values = {}
+        for fname in self._PARTNER_FIELDS:
+            values[fname] = self[fname]
+        self.partner_id = self.env['res.partner'].create(self._partner_vals_from(values))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # Nom saisi sans contact (ex. homonyme confirmé) : contact créé ici
+            if vals.get('guest_type', 'adult') == 'adult' and not vals.get('partner_id') \
+                    and (vals.get('last_name') or vals.get('first_name')):
+                vals['partner_id'] = self.env['res.partner'].create(
+                    self._partner_vals_from(vals)).id
+        guests = super().create(vals_list)
+        for guest, vals in zip(guests, vals_list):
+            guest._push_to_partner(vals)
+        return guests
+
+    def write(self, vals):
+        res = super().write(vals)
+        for guest in self.filtered(lambda g: g.guest_type == 'adult'):
+            if not guest.partner_id and (guest.last_name or guest.first_name):
+                guest.partner_id = self.env['res.partner'].create(guest._partner_vals_from(
+                    {f: guest[f] for f in self._PARTNER_FIELDS}))
+            else:
+                guest._push_to_partner(vals)
+        return res
+
+    def _push_to_partner(self, vals):
+        """Informations saisies sur la fiche personne recopiées sur le contact."""
+        self.ensure_one()
+        partner_vals = self._partner_vals_from(vals)
+        if self.guest_type == 'adult' and self.partner_id and partner_vals:
+            self.partner_id.write(partner_vals)

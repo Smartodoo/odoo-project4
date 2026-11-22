@@ -168,6 +168,61 @@ class TestReservationForm(TransactionCase):
             self.env['hotel.reservation'].create({
                 'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'})
 
+    def test_homonym_warning(self):
+        """Nom + prénom déjà connus : avertissement, pas de création immédiate."""
+        self.env['res.partner'].create({
+            'hotel_last_name': 'Brahimi', 'hotel_first_name': 'Nadia',
+            'phone': '0770000000', 'hotel_birthdate': '1985-03-02'})
+        resa = self._new(partner_last_name=' brahimi', partner_first_name='NADIA ')
+        res = resa._onchange_partner_names_create()
+        self.assertFalse(resa.partner_id)
+        self.assertIn('Brahimi Nadia', res['warning']['message'])
+        self.assertIn('02/03/1985', res['warning']['message'])
+        # Contact créé avec seulement un nom complet (sans nom/prénom séparés)
+        self.env['res.partner'].create({'name': 'Kaci Yacine'})
+        res = self._new(partner_last_name='Kaci', partner_first_name='Yacine'
+                        )._onchange_partner_names_create()
+        self.assertTrue(res and 'Kaci Yacine' in res['warning']['message'])
+
+    def test_guest_contact_created(self):
+        """Autres personnes : contact créé/sélectionné au nom + prénom, fiche
+        contact remplie, avertissement si homonyme."""
+        Guest = self.env['hotel.reservation.guest']
+        g = Guest.new({'guest_type': 'adult', 'phone': '0551112233', 'last_name': 'Saidi'})
+        g.first_name = 'Omar'
+        self.assertFalse(g._onchange_names_create_partner())
+        partner = g.partner_id
+        self.assertEqual((partner.hotel_last_name, partner.phone), ('Saidi', '0551112233'))
+        # Données complétées à l'enregistrement -> recopiées sur le contact
+        resa = self.env['hotel.reservation'].create({
+            'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+            'booking_type': 'bed', 'adults': 2,
+            'line_ids': [(0, 0, {'bed_id': b.id}) for b in self.r2.bed_ids]})
+        guest = resa.guest_adult_ids
+        guest.write({'partner_id': partner.id, 'last_name': 'Saidi', 'first_name': 'Omar',
+                     'birthdate': '1979-07-01', 'id_number': 'X123'})
+        self.assertEqual(str(partner.hotel_birthdate), '1979-07-01')
+        self.assertEqual(partner.hotel_id_number, 'X123')
+        # Homonyme : avertissement, rien de créé
+        g2 = Guest.new({'guest_type': 'adult', 'last_name': 'saidi', 'first_name': 'omar'})
+        res = g2._onchange_names_create_partner()
+        self.assertFalse(g2.partner_id)
+        self.assertIn('Contact existant', res['warning']['message'])
+        # ... puis enregistrée quand même : nouveau contact créé à l'enregistrement
+        resa.write({'adults': 3, 'children': 1})
+        other = resa.guest_adult_ids - guest
+        self.assertFalse(other.partner_id)
+        other.write({'last_name': 'Saidi', 'first_name': 'Omar', 'birthdate': '1990-01-01'})
+        self.assertTrue(other.partner_id and other.partner_id != partner)
+        self.assertEqual(str(other.partner_id.hotel_birthdate), '1990-01-01')
+        # Enfants : pas de contact (un contact doit être majeur)
+        child = resa.guest_child_ids
+        child.write({'last_name': 'Saidi', 'first_name': 'Lina', 'birthdate': '2015-01-01'})
+        self.assertFalse(child.partner_id)
+        c2 = Guest.new({'guest_type': 'child', 'last_name': 'Saidi', 'first_name': 'Rayan'})
+        c2._onchange_names_create_partner()
+        self.assertFalse(c2.partner_id)
+
     def test_persons_include_children(self):
         f = Form(self.env['hotel.reservation'])
         f.partner_id = self.partner
