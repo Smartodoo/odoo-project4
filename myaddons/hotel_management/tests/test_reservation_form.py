@@ -27,7 +27,7 @@ class TestReservationForm(TransactionCase):
         cls.r2 = room('RF-2', 2, cls.type_dorm)
         cls.rx = room('RF-X', 2, cls.type_other)
         cls.partner = cls.env['res.partner'].create({
-            'name': 'Client RF', 'hotel_birthdate': '1990-01-01'})
+            'hotel_last_name': 'RF', 'hotel_first_name': 'Test', 'phone': '0550000001', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID0001', 'hotel_birthdate': '1990-01-01'})
 
     def _new(self, **vals):
         values = {'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed',
@@ -144,6 +144,9 @@ class TestReservationForm(TransactionCase):
         self.assertEqual(f.partner_id.phone, '0550000000')
         self.assertEqual(f.partner_phone, '0550000000')
         f.partner_birthdate = '1992-05-04'
+        f.partner_street = '5 rue des Oliviers'
+        f.partner_id_type = 'passport'
+        f.partner_id_number = 'P445566'
         with f.line_ids.new() as line:
             line.bed_id = self.r2.bed_ids[0]
         resa = f.save()
@@ -152,17 +155,14 @@ class TestReservationForm(TransactionCase):
         self.assertEqual(resa.partner_id.phone, '0550000000')
         self.assertEqual(str(resa.partner_id.hotel_birthdate), '1992-05-04')
         self.assertIn('Haddad', resa.partner_id.name)
-        # Nom seul (sans prénom) : contact créé à l'enregistrement
+        self.assertEqual((resa.partner_id.street, resa.partner_id.hotel_id_type,
+                          resa.partner_id.hotel_id_number),
+                         ('5 rue des Oliviers', 'passport', 'P445566'))
+        # Champs obligatoires du client principal dans le formulaire
         f = Form(self.env['hotel.reservation'])
-        f.checkin = self.ci
-        f.checkout = self.co
-        f.booking_type = 'bed'
         f.partner_last_name = 'Mansouri'
-        f.partner_birthdate = '1980-01-01'
-        self.assertFalse(f.partner_id)
-        with f.line_ids.new() as line:
-            line.bed_id = self.r2.bed_ids[1]
-        self.assertEqual(f.save().partner_id.hotel_last_name, 'Mansouri')
+        with self.assertRaises(AssertionError):
+            f.save()
         from odoo.exceptions import UserError
         with self.assertRaises(UserError):
             self.env['hotel.reservation'].create({

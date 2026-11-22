@@ -23,7 +23,7 @@ class TestHotelFlow(TransactionCase):
             'name': 'T-01', 'room_type_id': cls.rtype.id, 'capacity': 2,
             'room_price': 5000, 'bed_price': 2000, 'rental_mode': 'room'})
         cls.partner = cls.env['res.partner'].create({
-            'name': 'Client test', 'hotel_birthdate': '1990-01-01'})
+            'hotel_last_name': 'Flow', 'hotel_first_name': 'Test', 'phone': '0550000001', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID0001', 'hotel_birthdate': '1990-01-01'})
 
     def _reservation(self, **vals):
         values = {

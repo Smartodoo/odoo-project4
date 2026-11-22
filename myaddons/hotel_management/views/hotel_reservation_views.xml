@@ -109,7 +109,9 @@
                             <field name="places"/>
                         </group>
                     </group>
-                    <!-- 2. Client principal = Adulte 1 -->
+                    <!-- 2. Client principal = Adulte 1. Nom, prénom, naissance, téléphone,
+                         adresse, type et n° de pièce obligatoires (sauf réservation
+                         annulée ou terminée). -->
                     <group string="Client principal (adulte)" name="client">
                         <group name="client_identity">
                             <field name="partner_id" required="not partner_last_name and not partner_first_name"
@@ -118,20 +120,19 @@
                                    options="{'no_create': True, 'no_open': True}"/>
                             <field name="partner_preferences"
                                    placeholder="Préférences du client (chambre, consommations…)"/>
-                            <field name="partner_last_name"/>
-                            <field name="partner_first_name"/>
-                            <field name="partner_birthdate"
-                                   required="1"/>
+                            <field name="partner_last_name" required="state not in ('cancel', 'checkout')"/>
+                            <field name="partner_first_name" required="state not in ('cancel', 'checkout')"/>
+                            <field name="partner_birthdate" required="state not in ('cancel', 'checkout')"/>
                         </group>
                         <group name="client_contact">
-                            <field name="partner_phone" widget="phone"/>
+                            <field name="partner_phone" widget="phone" required="state not in ('cancel', 'checkout')"/>
                             <label for="partner_street" string="Adresse"/>
                             <div class="o_row">
-                                <field name="partner_street" placeholder="Rue…"/>
+                                <field name="partner_street" placeholder="Rue…" required="state not in ('cancel', 'checkout')"/>
                                 <field name="partner_city" placeholder="Ville"/>
                             </div>
-                            <field name="partner_id_type"/>
-                            <field name="partner_id_number"/>
+                            <field name="partner_id_type" required="state not in ('cancel', 'checkout')"/>
+                            <field name="partner_id_number" required="state not in ('cancel', 'checkout')"/>
                             <field name="partner_id_document" filename="partner_id_document_name"/>
                             <field name="partner_id_document_name" invisible="1"/>
                         </group>

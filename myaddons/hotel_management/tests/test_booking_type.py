@@ -26,7 +26,7 @@ class BookingTypeCommon:
         cls.room_c = room('BT-C', 2, mode='room')
         cls.room_d = room('BT-D', 2, mode='room')
         cls.partner = cls.env['res.partner'].create({
-            'name': 'Client lits', 'email': 'lits@example.com', 'hotel_birthdate': '1990-01-01'})
+            'hotel_last_name': 'Lits', 'hotel_first_name': 'Test', 'phone': '0550000001', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID0001', 'email': 'lits@example.com', 'hotel_birthdate': '1990-01-01'})
 
     def _book_room(self, room):
         resa = self.env['hotel.reservation'].create({

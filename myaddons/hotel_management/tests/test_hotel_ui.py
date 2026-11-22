@@ -84,6 +84,17 @@ class TestHotelUi(HttpCase):
             lambda r: r.amount_due > 0 and r.partner_id)[:1]
         if not resa:
             self.skipTest("Aucune réservation avec un reste à payer")
+        # Fiche client complète (champs obligatoires du client principal)
+        partner = resa.partner_id
+        partner.write({k: v for k, v in {
+            'hotel_last_name': partner.hotel_last_name or 'Test',
+            'hotel_first_name': partner.hotel_first_name or 'Test',
+            'hotel_birthdate': partner.hotel_birthdate or '1990-01-01',
+            'phone': partner.phone or '0550000000',
+            'street': partner.street or '1 rue Test',
+            'hotel_id_type': partner.hotel_id_type or 'cni',
+            'hotel_id_number': partner.hotel_id_number or 'ID-TEST',
+        }.items()})
         self.browser_js(
             '/odoo/action-hotel_management.action_hotel_reservation/%s' % resa.id,
             """
