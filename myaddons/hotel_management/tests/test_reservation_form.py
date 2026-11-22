@@ -187,6 +187,41 @@ class TestReservationForm(TransactionCase):
             self.env['hotel.reservation'].create({
                 'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'})
 
+    def test_identity_blocks_confirm_and_checkin(self):
+        """Confirmation et check-in refusés tant que le client principal et les
+        autres adultes n'ont pas toutes leurs informations ; le site web, lui,
+        confirme quand même (pièces complétées par la réception)."""
+        from odoo.exceptions import UserError
+        incomplete = self.env['res.partner'].create({
+            'hotel_last_name': 'Partiel', 'hotel_first_name': 'Client',
+            'hotel_birthdate': '1990-01-01', 'phone': '0550000000'})
+        resa = self.env['hotel.reservation'].create({
+            'partner_id': incomplete.id, 'checkin': self.ci, 'checkout': self.co,
+            'booking_type': 'bed', 'adults': 2,
+            'line_ids': [(0, 0, {'bed_id': b.id}) for b in self.r2.bed_ids]})
+        with self.assertRaises(UserError) as err:
+            resa.action_confirm()
+        msg = str(err.exception)
+        self.assertIn('Client principal', msg)
+        self.assertIn('Adresse', msg)
+        self.assertIn('Adulte 2', msg)
+        self.assertEqual(resa.state, 'draft')
+        # Site web : confirmée malgré tout
+        resa.with_context(hotel_skip_identity_check=True).action_confirm()
+        self.assertEqual(resa.state, 'confirmed')
+        # Check-in bloqué tant que tout n'est pas complet
+        with self.assertRaises(UserError):
+            resa.action_checkin()
+        incomplete.write({'street': '1 rue A', 'hotel_id_type': 'cni', 'hotel_id_number': 'C1'})
+        with self.assertRaises(UserError) as err:
+            resa.action_checkin()
+        self.assertNotIn('Client principal', str(err.exception))
+        resa.guest_adult_ids.write({
+            'last_name': 'Autre', 'first_name': 'Adulte', 'birthdate': '1991-01-01',
+            'phone': '0551111111', 'id_type': 'passport', 'id_number': 'P1'})
+        resa.action_checkin()
+        self.assertEqual(resa.state, 'checkin')
+
     def test_homonym_warning(self):
         """Nom + prénom déjà connus : avertissement, pas de création immédiate."""
         self.env['res.partner'].create({

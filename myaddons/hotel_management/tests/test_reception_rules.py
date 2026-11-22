@@ -25,6 +25,8 @@ class TestReceptionRules(TransactionCase):
             'bed_price': 1000, 'rental_mode': 'bed'})
         cls.partner = cls.env['res.partner'].create({
             'name': 'Client règles', 'email': 'regles@example.com',
+            'hotel_last_name': 'Regles', 'hotel_first_name': 'Client', 'phone': '0550000008',
+            'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID-R',
             'hotel_birthdate': '1990-01-01'})
 
     def _resa(self, **vals):
@@ -181,7 +183,9 @@ class TestReceptionRules(TransactionCase):
     # --- « Envoyer mail » sur plusieurs réservations enregistrées ---------------
     def _three_reservations(self):
         no_mail = self.env['res.partner'].create({
-            'name': 'Second client', 'hotel_last_name': 'Benali', 'hotel_id_number': 'ID-42'})
+            'name': 'Second client', 'hotel_last_name': 'Benali', 'hotel_id_number': 'ID-42',
+            'hotel_first_name': 'Second', 'hotel_birthdate': '1985-01-01', 'phone': '0550000007',
+            'street': '2 rue Test', 'hotel_id_type': 'cni'})
         resas = self.env['hotel.reservation']
         for partner, state in ((self.partner, 'checkin'), (no_mail, 'checkin'),
                                (self.partner, 'confirmed')):

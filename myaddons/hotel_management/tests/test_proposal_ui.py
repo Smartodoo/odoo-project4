@@ -17,7 +17,7 @@ class TestProposalUi(HttpCase):
         room = self.env['hotel.room'].create({
             'name': 'ZZTAKEN', 'room_type_id': rtype.id, 'capacity': 2,
             'room_price': 3000, 'rental_mode': 'room'})
-        partner = self.env['res.partner'].create({'name': 'Client UI', 'hotel_birthdate': '1990-01-01'})
+        partner = self.env['res.partner'].create({'hotel_last_name': 'Test', 'hotel_first_name': 'Client', 'phone': '0550000009', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID-T', 'name': 'Client UI', 'hotel_birthdate': '1990-01-01'})
         resa = self.env['hotel.reservation'].create({
             'partner_id': partner.id, 'checkin': ci, 'checkout': co,
             'line_ids': [(0, 0, {'room_id': room.id, 'price_unit': 3000})]})

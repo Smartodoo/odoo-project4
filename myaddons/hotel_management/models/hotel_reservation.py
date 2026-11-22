@@ -933,6 +933,49 @@ class HotelReservation(models.Model):
             self._sync_guests()
         return res
 
+    def _identity_missing(self):
+        """Liste des informations obligatoires manquantes (client principal et
+        autres adultes du séjour), pour bloquer confirmation et check-in."""
+        self.ensure_one()
+        partner_fields = [
+            ('hotel_last_name', _("Nom")), ('hotel_first_name', _("Prénom")),
+            ('hotel_birthdate', _("Date de naissance")), ('phone', _("Téléphone")),
+            ('street', _("Adresse")), ('hotel_id_type', _("Type de pièce d'identité")),
+            ('hotel_id_number', _("N° de pièce d'identité")),
+        ]
+        guest_fields = [
+            ('last_name', _("Nom")), ('first_name', _("Prénom")),
+            ('birthdate', _("Date de naissance")), ('phone', _("Téléphone")),
+            ('id_type', _("Type de pièce d'identité")), ('id_number', _("N° de pièce d'identité")),
+        ]
+        problems = []
+        if not self.partner_id:
+            problems.append(_("Client principal : à renseigner"))
+        else:
+            missing = [label for f, label in partner_fields if not self.partner_id[f]]
+            if missing:
+                problems.append(_("Client principal (%(name)s) : %(missing)s",
+                                  name=self.partner_id.display_name, missing=", ".join(missing)))
+        for index, guest in enumerate(self.guest_adult_ids.sorted(lambda g: g.position or 0), start=2):
+            missing = [label for f, label in guest_fields if not guest[f]]
+            if missing:
+                problems.append(_("Adulte %(n)s (%(name)s) : %(missing)s",
+                                  n=index, name=guest.name or _("sans nom"),
+                                  missing=", ".join(missing)))
+        return problems
+
+    def _check_identity_complete(self, action_label):
+        if self.env.context.get('hotel_skip_identity_check'):
+            return
+        for rec in self:
+            problems = rec._identity_missing()
+            if problems:
+                raise UserError(_(
+                    "%(action)s impossible pour %(name)s : informations obligatoires "
+                    "manquantes.\n\n%(list)s\n\nComplétez la fiche puis réessayez.",
+                    action=action_label, name=rec.name,
+                    list="\n".join("• " + p for p in problems)))
+
     def action_confirm(self):
         for rec in self:
             if rec.state != 'draft':
@@ -942,6 +985,7 @@ class HotelReservation(models.Model):
                     name=rec.name, state=rec._state_label()))
             if not rec.line_ids:
                 raise UserError(_("Ajoutez au moins une chambre avant de confirmer."))
+            rec._check_identity_complete(_("Confirmation"))
             rec._check_guest_places()
             rec._check_availability()
             rec.state = 'confirmed'
@@ -953,6 +997,7 @@ class HotelReservation(models.Model):
                     "L'enregistrement (check-in) n'est possible que sur une "
                     "réservation confirmée (%(name)s est « %(state)s »).",
                     name=rec.name, state=rec._state_label()))
+            rec._check_identity_complete(_("Check-in"))
             rec._check_guest_places()
             rec._check_availability()
             rec.state = 'checkin'

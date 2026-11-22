@@ -274,7 +274,9 @@ class HotelWebsite(http.Controller):
             'line_ids': lines,
         })
         try:
-            reservation.action_confirm()
+            # Le client ne saisit pas ses pièces d'identité sur le site : la
+            # réception les complète avant le check-in (bloqué sinon).
+            reservation.with_context(hotel_skip_identity_check=True).action_confirm()
         except Exception:
             # En cas de conflit de dernière minute, on laisse en brouillon
             # pour traitement manuel par l'hôtel.

@@ -31,7 +31,7 @@ class TestWebsiteSearchOrder(HttpCase):
         cls.r1 = room('ZS-R1', 1, 'room', rtype)
         cls.r2 = room('ZS-R2', 2, 'room', rtype)
         cls.r3 = room('ZS-R3', 3, 'room', rtype)
-        partner = cls.env['res.partner'].create({'name': 'ZS client', 'hotel_birthdate': '1990-01-01'})
+        partner = cls.env['res.partner'].create({'hotel_last_name': 'Test', 'hotel_first_name': 'Client', 'phone': '0550000009', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID-T', 'name': 'ZS client', 'hotel_birthdate': '1990-01-01'})
         beds = cls.p1.bed_ids[:2] | cls.p2.bed_ids[:1]
         resa = cls.env['hotel.reservation'].create({
             'partner_id': partner.id, 'checkin': date(2092, 3, 10), 'checkout': date(2092, 3, 12),
