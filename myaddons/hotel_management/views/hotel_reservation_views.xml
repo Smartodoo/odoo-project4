@@ -381,8 +381,6 @@
                         domain="[('checkout', '=', 'today')]"/>
                 <filter name="upcoming" string="À venir"
                         domain="[('checkin', '&gt;', 'today'), ('state', 'in', ('draft', 'confirmed'))]"/>
-                <filter name="online" string="Réservations en ligne"
-                        domain="[('source', '=', 'website')]"/>
                 <filter name="unpaid" string="Impayés"
                         domain="[('amount_due', '&gt;', 0), ('state', 'in', ('checkin', 'checkout'))]"/>
                 <separator/>
@@ -430,6 +428,8 @@
         <field name="res_model">hotel.reservation</field>
         <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
         <field name="search_view_id" ref="view_hotel_reservation_search"/>
+        <!-- Les réservations du site web ont leur propre menu (Réservations en ligne) -->
+        <field name="domain">[('source', '!=', 'website')]</field>
     </record>
 
     <!-- Réservations créées depuis le site web (source = website) -->
