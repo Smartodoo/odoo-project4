@@ -227,7 +227,7 @@ class TestBookingTypeWebsite(BookingTypeCommon, HttpCase):
         res = self.url_open('/hotel/booking/submit', data={
             'csrf_token': token, 'room_id': self.room_a.id, 'checkin': str(self.ci),
             'checkout': str(self.co), 'guests': 1, 'booking_type': 'bed',
-            'bed_ids': [bed2.id], 'last_name': 'Client', 'first_name': 'Web', 'birthdate': '1990-01-01', 'street': '1 rue Test', 'email': 'web.pris@example.com'},
+            'bed_ids': [bed2.id], 'last_name': 'Client', 'first_name': 'Web', 'birthdate': '1990-01-01', 'street': '1 rue Test', 'phone': '0550000000', 'email': 'web.pris@example.com'},
             allow_redirects=False)
         self.assertEqual(res.status_code, 200)
         self.assertIn('indisponible', res.text)
@@ -243,7 +243,7 @@ class TestBookingTypeWebsite(BookingTypeCommon, HttpCase):
         res = self.url_open('/hotel/booking/submit', data={
             'csrf_token': token, 'room_id': self.room_a.id, 'checkin': str(self.ci),
             'checkout': str(self.co), 'guests': 2, 'booking_type': 'bed',
-            'bed_ids': beds.ids, 'last_name': 'Client', 'first_name': 'Web', 'birthdate': '1990-01-01', 'street': '1 rue Test', 'email': 'web.lits@example.com'},
+            'bed_ids': beds.ids, 'last_name': 'Client', 'first_name': 'Web', 'birthdate': '1990-01-01', 'street': '1 rue Test', 'phone': '0550000000', 'email': 'web.lits@example.com'},
             allow_redirects=False)
         self.assertIn(res.status_code, (302, 303))
         resa = self.env['hotel.reservation'].search([('line_ids.room_id', '=', self.room_a.id)])

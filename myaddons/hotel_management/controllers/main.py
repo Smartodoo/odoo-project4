@@ -258,6 +258,8 @@ class HotelWebsite(http.Controller):
                 errors.append("La date de naissance ne peut pas être dans le futur.")
             elif relativedelta(today, birthdate).years < 18:
                 errors.append("La personne qui réserve doit avoir au moins 18 ans.")
+        if not phone:
+            errors.append("Le téléphone est obligatoire.")
         if not street:
             errors.append("L'adresse est obligatoire.")
         if not email:

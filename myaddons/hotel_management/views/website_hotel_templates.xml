@@ -388,7 +388,7 @@
                                     <div class="mt-2">
                                         <label class="form-label">Téléphone</label>
                                         <input type="text" class="form-control" name="phone"
-                                               t-att-value="phone"/>
+                                               t-att-value="phone" required="required"/>
                                     </div>
                                     <div class="mt-2">
                                         <label class="form-label">Adresse</label>

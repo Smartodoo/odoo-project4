@@ -152,7 +152,7 @@ class TestHotelUi(HttpCase):
         res = self.url_open('/hotel/booking/submit', data={
             'csrf_token': token, 'room_id': room.id, 'checkin': str(ci), 'checkout': str(co),
             'guests': 1, 'booking_type': 'room', 'last_name': last, 'first_name': first,
-            'birthdate': birthdate, 'street': street, 'city': 'Oran',
+            'birthdate': birthdate, 'street': street, 'city': 'Oran', 'phone': '0551000000',
             'email': email}, allow_redirects=False)
         self.assertIn(res.status_code, (302, 303))
         return self.env['hotel.reservation'].search(
@@ -207,14 +207,14 @@ class TestHotelUi(HttpCase):
             'room_price': 1000, 'rental_mode': 'room', 'website_published': True})
         d = fields.Date.today() + timedelta(days=900)
         minor = str(fields.Date.today() - timedelta(days=365 * 10))
-        for kw in ({'birthdate': minor}, {'birthdate': ''}, {'street': ''}):
+        for kw in ({'birthdate': minor}, {'birthdate': ''}, {'street': ''}, {'phone': ''}):
             import re
             page = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=1' % (room.id, d, d + timedelta(days=1)))
             token = re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
             data = {'csrf_token': token, 'room_id': room.id, 'checkin': str(d),
                     'checkout': str(d + timedelta(days=1)), 'guests': 1, 'booking_type': 'room',
                     'last_name': 'Mineur', 'first_name': 'Test', 'email': 'mineur@example.com',
-                    'birthdate': '1990-01-01', 'street': '1 rue'}
+                    'birthdate': '1990-01-01', 'street': '1 rue', 'phone': '0552000000'}
             data.update(kw)
             res = self.url_open('/hotel/booking/submit', data=data, allow_redirects=False)
             self.assertEqual(res.status_code, 200, kw)  # formulaire réaffiché avec erreur
