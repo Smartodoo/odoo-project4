@@ -273,18 +273,10 @@ class HotelWebsite(http.Controller):
             'note': note,
             'line_ids': lines,
         })
-        try:
-            # Le client ne saisit pas ses pièces d'identité sur le site : la
-            # réception les complète avant le check-in (bloqué sinon).
-            reservation.with_context(hotel_skip_identity_check=True).action_confirm()
-        except Exception:
-            # En cas de conflit de dernière minute, on laisse en brouillon
-            # pour traitement manuel par l'hôtel.
-            pass
-        try:
-            reservation.action_send_confirmation()
-        except Exception:
-            pass
+        # Réservation en ligne laissée en BROUILLON : l'hôtel la vérifie,
+        # complète l'identité du client puis la confirme lui-même (bouton
+        # Confirmer, puis « Envoyer confirmation » pour l'e-mail au client).
+        # Le brouillon bloque déjà la chambre / les lits sur le site.
 
         token = reservation._portal_ensure_token()
         return request.redirect('/hotel/booking/confirmation/%s?access_token=%s'

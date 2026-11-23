@@ -401,10 +401,11 @@
                 <div class="container my-5">
                     <div class="o_hotel_confirm text-center">
                         <div class="o_hotel_confirm_icon"><i class="oi oi-filled" data-icon="check_circle"/></div>
-                        <h1>Réservation enregistrée !</h1>
+                        <h1>Demande de réservation enregistrée !</h1>
                         <p class="lead">
                             Merci <t t-out="reservation.partner_id.name"/>,
                             votre demande <strong t-out="reservation.name"/> a bien été prise en compte.
+                            Elle est <strong>en attente de confirmation</strong> par notre équipe.
                         </p>
                         <div class="o_hotel_confirm_card mx-auto">
                             <table class="table mb-0">

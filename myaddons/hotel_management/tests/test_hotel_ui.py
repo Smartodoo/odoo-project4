@@ -131,6 +131,8 @@ class TestHotelUi(HttpCase):
         self.assertIn('access_token=', res.headers['Location'])
         resa = self.env['hotel.reservation'].search([('line_ids.room_id', '=', room.id)])
         self.assertEqual(resa.source, 'website')
+        # Réservation en ligne : brouillon, confirmée ensuite par l'hôtel
+        self.assertEqual(resa.state, 'draft')
         self.assertEqual(resa.amount_total, 6000)
         # Sans jeton : pas d'accès à la confirmation
         blocked = self.url_open('/hotel/booking/confirmation/%s' % resa.id, allow_redirects=False)
