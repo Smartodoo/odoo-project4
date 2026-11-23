@@ -2,11 +2,13 @@
 <odoo>
     <data noupdate="1">
         <!-- Canal Discuss où sont annoncées les réservations faites sur le site.
-             Membres automatiques : responsables de l'auberge et administrateurs. -->
+             Membres automatiques (à la création de l'utilisateur ou quand on lui
+             donne l'accès) : Réception, Responsable (inclut Réception) et
+             administrateurs. -->
         <record id="channel_online_reservations" model="discuss.channel">
             <field name="name">Réservations en ligne</field>
             <field name="description">Nouvelles réservations faites par les clients sur le site web.</field>
-            <field name="group_ids" eval="[Command.link(ref('hotel_management.group_hotel_manager')), Command.link(ref('base.group_system'))]"/>
+            <field name="group_ids" eval="[Command.link(ref('hotel_management.group_hotel_user')), Command.link(ref('hotel_management.group_hotel_manager')), Command.link(ref('base.group_system'))]"/>
         </record>
     </data>
 </odoo>

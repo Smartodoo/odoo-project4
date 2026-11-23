@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from odoo import fields
+from odoo import Command, fields
 from odoo.tests import TransactionCase, tagged
 
 
@@ -50,3 +50,24 @@ class TestOnlineChannel(TransactionCase):
         before = len(self.channel.message_ids)
         self._resa('direct', days=10)
         self.assertEqual(len(self.channel.message_ids), before)
+
+    def test_new_users_auto_member(self):
+        """Utilisateur créé (ou modifié) avec l'accès Réception ou Responsable
+        -> membre du canal ; simple employé -> non."""
+        Users = self.env['res.users'].with_context(no_reset_password=True)
+        members = lambda: self.channel.channel_member_ids.partner_id
+        reception = Users.create({
+            'name': 'OC Réception', 'login': 'oc_reception@example.com',
+            'group_ids': [Command.link(self.env.ref('hotel_management.group_hotel_user').id)]})
+        manager = Users.create({
+            'name': 'OC Responsable', 'login': 'oc_manager@example.com',
+            'group_ids': [Command.link(self.env.ref('hotel_management.group_hotel_manager').id)]})
+        employee = Users.create({
+            'name': 'OC Employé', 'login': 'oc_employee@example.com',
+            'group_ids': [Command.link(self.env.ref('base.group_user').id)]})
+        self.assertIn(reception.partner_id, members())
+        self.assertIn(manager.partner_id, members())
+        self.assertNotIn(employee.partner_id, members())
+        # Accès Réception donné plus tard -> ajouté aussi
+        employee.write({'group_ids': [Command.link(self.env.ref('hotel_management.group_hotel_user').id)]})
+        self.assertIn(employee.partner_id, members())
