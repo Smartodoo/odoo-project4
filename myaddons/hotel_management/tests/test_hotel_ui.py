@@ -125,7 +125,7 @@ class TestHotelUi(HttpCase):
         token = re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
         res = self.url_open('/hotel/booking/submit', data={
             'csrf_token': token, 'room_id': room.id, 'checkin': str(ci), 'checkout': str(co),
-            'guests': 1, 'booking_type': 'room', 'last_name': 'Client', 'first_name': 'Web',
+            'guests': 1, 'booking_type': 'room', 'last_name': 'Client', 'first_name': 'Web', 'birthdate': '1990-01-01', 'street': '1 rue Test',
             'email': 'client.web@example.com', 'phone': '0550000000'}, allow_redirects=False)
         self.assertIn(res.status_code, (302, 303))
         self.assertIn('access_token=', res.headers['Location'])
@@ -141,7 +141,8 @@ class TestHotelUi(HttpCase):
         self.assertEqual(ok.status_code, 200)
         self.assertIn(resa.name, ok.text)
 
-    def _web_book(self, room, ci, co, last, first, email, login=None):
+    def _web_book(self, room, ci, co, last, first, email, login=None,
+                  birthdate='1990-05-17', street='5 rue des Pins'):
         import re
         if login:
             self.authenticate(login, login)
@@ -151,6 +152,7 @@ class TestHotelUi(HttpCase):
         res = self.url_open('/hotel/booking/submit', data={
             'csrf_token': token, 'room_id': room.id, 'checkin': str(ci), 'checkout': str(co),
             'guests': 1, 'booking_type': 'room', 'last_name': last, 'first_name': first,
+            'birthdate': birthdate, 'street': street, 'city': 'Oran',
             'email': email}, allow_redirects=False)
         self.assertIn(res.status_code, (302, 303))
         return self.env['hotel.reservation'].search(
@@ -176,6 +178,10 @@ class TestHotelUi(HttpCase):
         self.assertEqual(r1.partner_id.hotel_last_name, 'Nouveau')
         self.assertEqual(r1.partner_id.hotel_first_name, 'Client')
         self.assertEqual(r1.partner_id.name, 'Nouveau Client')
+        self.assertEqual(str(r1.partner_id.hotel_birthdate), '1990-05-17')
+        self.assertEqual(r1.partner_id.street, '5 rue des Pins')
+        self.assertEqual(r1.partner_id.city, 'Oran')
+        self.assertEqual(r1.partner_street, '5 rue des Pins')
         self.assertEqual(r1.state, 'draft')
         # Même nom/prénom/e-mail (casse différente) -> même contact
         r2 = self._web_book(room, d + timedelta(days=2), d + timedelta(days=3),
@@ -190,6 +196,30 @@ class TestHotelUi(HttpCase):
                             'Client', 'Guichet', 'guichet.web@example.com', login='admin')
         self.assertNotEqual(r4.partner_id, admin.partner_id)
         self.assertEqual(r4.partner_id.name, 'Client Guichet')
+
+    def test_website_booking_identity_checks(self):
+        """Date de naissance et adresse obligatoires ; client mineur refusé."""
+        from datetime import timedelta
+        from odoo import fields
+        rtype = self.env['hotel.room.type'].create({'name': 'WebM', 'list_price': 1000})
+        room = self.env['hotel.room'].create({
+            'name': 'WEB-M', 'room_type_id': rtype.id, 'capacity': 2,
+            'room_price': 1000, 'rental_mode': 'room', 'website_published': True})
+        d = fields.Date.today() + timedelta(days=900)
+        minor = str(fields.Date.today() - timedelta(days=365 * 10))
+        for kw in ({'birthdate': minor}, {'birthdate': ''}, {'street': ''}):
+            import re
+            page = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=1' % (room.id, d, d + timedelta(days=1)))
+            token = re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
+            data = {'csrf_token': token, 'room_id': room.id, 'checkin': str(d),
+                    'checkout': str(d + timedelta(days=1)), 'guests': 1, 'booking_type': 'room',
+                    'last_name': 'Mineur', 'first_name': 'Test', 'email': 'mineur@example.com',
+                    'birthdate': '1990-01-01', 'street': '1 rue'}
+            data.update(kw)
+            res = self.url_open('/hotel/booking/submit', data=data, allow_redirects=False)
+            self.assertEqual(res.status_code, 200, kw)  # formulaire réaffiché avec erreur
+            self.assertFalse(self.env['hotel.reservation'].search(
+                [('line_ids.room_id', '=', room.id)]), kw)
 
     def test_cash_and_report_views_render(self):
         for action in ('hotel_management.action_hotel_revenue_report',

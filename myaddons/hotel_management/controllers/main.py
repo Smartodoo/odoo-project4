@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from dateutil.relativedelta import relativedelta
+
 from odoo import fields, http
 from odoo.http import request
 from odoo.tools import consteq
@@ -134,6 +136,11 @@ class HotelWebsite(http.Controller):
             'errors': [],
             'last_name': '',
             'first_name': '',
+            'birthdate': '',
+            'street': '',
+            'city': '',
+            'birthdate_max': fields.Date.to_string(
+                fields.Date.context_today(request.env.user) - relativedelta(years=18)),
             'email': '',
             'phone': '',
             'today': self._today_str(),
@@ -158,7 +165,8 @@ class HotelWebsite(http.Controller):
             booking_type=kw.get('booking_type') if kw.get('booking_type') in ('room', 'bed') else '')
         return request.render('hotel_management.room_detail_page', values)
 
-    def _website_booking_partner(self, last_name, first_name, email, phone):
+    def _website_booking_partner(self, last_name, first_name, email, phone,
+                                 birthdate=None, street='', city=''):
         """Client de la réservation en ligne = la personne SAISIE dans le
         formulaire (jamais l'utilisateur connecté : un employé ou l'admin qui
         réserve pour un client ne doit pas se retrouver client). On reprend un
@@ -173,17 +181,22 @@ class HotelWebsite(http.Controller):
             last_name, first_name).filtered(
             lambda p: (p.email or '').strip().lower() == email_norm
             and p not in internal_partners)
-        if candidates:
-            partner = candidates[0]
-            if phone and not partner.phone:
-                partner.phone = phone
-            return partner
-        return Partner.create({
-            'hotel_last_name': last_name,
-            'hotel_first_name': first_name,
-            'email': email,
+        values = {
             'phone': phone,
-        })
+            'hotel_birthdate': birthdate,
+            'street': street,
+            'city': city,
+        }
+        if candidates:
+            # Contact connu : on complète seulement ce qui manque sur sa fiche
+            partner = candidates[0]
+            missing = {k: v for k, v in values.items() if v and not partner[k]}
+            if missing:
+                partner.write(missing)
+            return partner
+        values = {k: v for k, v in values.items() if v}
+        return Partner.create(dict(
+            values, hotel_last_name=last_name, hotel_first_name=first_name, email=email))
 
     @http.route(['/hotel/booking/submit'], type='http', auth='public',
                 website=True, methods=['POST'])
@@ -198,6 +211,9 @@ class HotelWebsite(http.Controller):
         co = self._parse_date(post.get('checkout'))
         last_name = (post.get('last_name') or '').strip()
         first_name = (post.get('first_name') or '').strip()
+        birthdate = self._parse_date(post.get('birthdate'))
+        street = (post.get('street') or '').strip()
+        city = (post.get('city') or '').strip()
         email = (post.get('email') or '').strip()
         phone = (post.get('phone') or '').strip()
         note = (post.get('note') or '').strip()
@@ -234,6 +250,16 @@ class HotelWebsite(http.Controller):
             errors.append("Le nom est obligatoire.")
         if not first_name:
             errors.append("Le prénom est obligatoire.")
+        if not birthdate:
+            errors.append("La date de naissance est obligatoire.")
+        else:
+            today = fields.Date.context_today(request.env.user)
+            if birthdate > today:
+                errors.append("La date de naissance ne peut pas être dans le futur.")
+            elif relativedelta(today, birthdate).years < 18:
+                errors.append("La personne qui réserve doit avoir au moins 18 ans.")
+        if not street:
+            errors.append("L'adresse est obligatoire.")
         if not email:
             errors.append("L'adresse e-mail est obligatoire.")
         if room and ci and co and co > ci:
@@ -270,11 +296,14 @@ class HotelWebsite(http.Controller):
             values = self._room_detail_values(
                 room, post.get('checkin') or '', post.get('checkout') or '',
                 guests, errors=errors, last_name=last_name,
-                first_name=first_name, email=email, phone=phone,
+                first_name=first_name, birthdate=post.get('birthdate') or '',
+                street=street, city=city, email=email, phone=phone,
                 booking_type=post.get('booking_type') or '')
             return request.render('hotel_management.room_detail_page', values)
 
-        partner = self._website_booking_partner(last_name, first_name, email, phone)
+        partner = self._website_booking_partner(
+            last_name, first_name, email, phone,
+            birthdate=birthdate, street=street, city=city)
 
         # Prix : tarif spécial client, sinon tarifs saisonniers nuit par nuit
         unit = room._get_stay_unit_price(ci, co, booking_type, partner)

@@ -375,6 +375,12 @@
                                         </div>
                                     </div>
                                     <div class="mt-2">
+                                        <label class="form-label">Date de naissance</label>
+                                        <input type="date" class="form-control" name="birthdate"
+                                               t-att-value="birthdate" t-att-max="birthdate_max"
+                                               required="required"/>
+                                    </div>
+                                    <div class="mt-2">
                                         <label class="form-label">E-mail</label>
                                         <input type="email" class="form-control" name="email"
                                                t-att-value="email" required="required"/>
@@ -383,6 +389,16 @@
                                         <label class="form-label">Téléphone</label>
                                         <input type="text" class="form-control" name="phone"
                                                t-att-value="phone"/>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label">Adresse</label>
+                                        <input type="text" class="form-control" name="street"
+                                               t-att-value="street" required="required"/>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label">Ville</label>
+                                        <input type="text" class="form-control" name="city"
+                                               t-att-value="city"/>
                                     </div>
                                     <div class="mt-2">
                                         <label class="form-label">Demandes particulières</label>
