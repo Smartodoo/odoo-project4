@@ -323,7 +323,7 @@ class CaisseSession(models.Model):
         """Tout ce que le responsable doit voir d'un coup d'œil (cf. action
         client « caisse_dashboard »).
         date_from / date_to (« AAAA-MM-JJ », inclus) : période des statistiques
-        (tuiles, alertes, graphique). Par défaut : du 1er du mois à aujourd'hui.
+        (tuiles, alertes, graphique). Par défaut : aujourd'hui.
         La caisse ouverte et « Encaissé aujourd'hui » restent sur le jour même."""
         company = self.env.company
         currency = company.currency_id
@@ -331,7 +331,7 @@ class CaisseSession(models.Model):
         Journal = self.env['caisse.journal'].sudo()
         Payment = self.env['account.payment'].sudo()
         today = fields.Date.context_today(self)
-        date_from = fields.Date.to_date(date_from) or today.replace(day=1)
+        date_from = fields.Date.to_date(date_from) or today
         date_to = fields.Date.to_date(date_to) or today
         if date_from > date_to:
             date_from, date_to = date_to, date_from

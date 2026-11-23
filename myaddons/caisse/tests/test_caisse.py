@@ -19,7 +19,9 @@ class TestCaisse(TransactionCase):
             'name': 'C-01', 'room_type_id': rtype.id, 'capacity': 2,
             'room_price': 5000, 'rental_mode': 'room'})
         cls.partner = cls.env['res.partner'].create({
-            'name': 'Client caisse', 'hotel_birthdate': '1990-01-01'})
+            'name': 'Client caisse', 'hotel_birthdate': '1990-01-01',
+            'hotel_last_name': 'Client', 'hotel_first_name': 'Caisse', 'phone': '0550000010',
+            'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID-CAISSE'})
         ci = fields.Date.today() + timedelta(days=600)
         cls.resa = cls.env['hotel.reservation'].create({
             'partner_id': cls.partner.id, 'checkin': ci, 'checkout': ci + timedelta(days=2),
@@ -119,10 +121,10 @@ class TestCaisse(TransactionCase):
         self.assertEqual(data['current']['spent'], 400)
         self.assertGreaterEqual(data['month']['expense'], 400)
         self.assertGreaterEqual(data['month']['missing_proof'], 1)  # dépense sans justificatif
-        # période par défaut : du 1er du mois à aujourd'hui, un point par jour
+        # période par défaut : aujourd'hui seulement (un point)
         today = fields.Date.context_today(session)
-        self.assertEqual(len(data['days']), today.day)
-        self.assertEqual(data['month']['start'], fields.Date.to_string(today.replace(day=1)))
+        self.assertEqual(len(data['days']), 1)
+        self.assertEqual(data['month']['start'], fields.Date.to_string(today))
         self.assertEqual(data['month']['end'], fields.Date.to_string(today))
         # période choisie : du jour seulement
         day_data = self.env['caisse.session'].get_dashboard_data(
