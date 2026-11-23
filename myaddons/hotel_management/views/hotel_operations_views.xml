@@ -23,14 +23,18 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_create_employee" type="object" string="Créer la fiche employé"
-                            invisible="employee_id" class="btn-secondary"
-                            help="Crée la fiche Employés Odoo : contrat, service, horaires, présences, congés."/>
+                    <button name="action_create_employee" type="object" string="Créer employé et utilisateur"
+                            invisible="not id or (employee_id and user_id)" class="btn-secondary"
+                            groups="hotel_management.group_hotel_manager"
+                            help="Crée la fiche employé et l'utilisateur Odoo manquants (agents créés avant cette fonction)."/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_employee" type="object" class="oe_stat_button"
                                 icon="badge" invisible="not employee_id" string="Fiche employé"/>
+                        <button name="action_open_user" type="object" class="oe_stat_button"
+                                icon="fa-user" invisible="not user_id" string="Utilisateur"
+                                groups="base.group_erp_manager"/>
                     </div>
                     <field name="image" widget="image" class="oe_avatar"/>
                     <div class="oe_title">
@@ -40,11 +44,13 @@
                     <group>
                         <group>
                             <field name="role"/>
-                            <field name="employee_id"/>
+                            <field name="employee_id" readonly="id"
+                                   help="Laisser vide : la fiche employé et l'utilisateur sont créés à l'enregistrement."/>
                             <field name="department_id" invisible="not employee_id"/>
                             <field name="job_title" invisible="not employee_id"/>
                             <field name="resource_calendar_id" invisible="not employee_id"/>
-                            <field name="user_id"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="login" invisible="not user_id"/>
                         </group>
                         <group>
                             <field name="phone"/>
