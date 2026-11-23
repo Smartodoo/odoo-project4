@@ -60,6 +60,76 @@
         <field name="binding_type">report</field>
     </record>
 
+    <!-- Rapports « tableau croisé » (CA, CA par lit, performance par source) :
+         impression du tableau tel qu'affiché (bouton « Imprimer PDF »). -->
+    <record id="paperformat_hotel_landscape" model="report.paperformat">
+        <field name="name">Auberge - A4 paysage</field>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">30</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_spacing">25</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_hotel_pivot" model="ir.actions.report">
+        <field name="name">Rapport Auberge (tableau)</field>
+        <field name="model">hotel.revenue.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management.report_hotel_pivot</field>
+        <field name="paperformat_id" ref="paperformat_hotel_landscape"/>
+    </record>
+
+    <template id="report_hotel_pivot">
+        <t t-call="web.html_container">
+            <t t-set="company" t-value="res_company"/>
+            <t t-call="web.external_layout">
+                <div class="page o_hotel_pivot_pdf">
+                    <h3 t-out="table.get('report_title') or table.get('title')"/>
+                    <div class="text-muted mb-2" style="font-size: 13px;">
+                        Imprimé le <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                        <t t-if="table.get('filters')"> — Filtres : <t t-out="' ; '.join(table['filters'])"/></t>
+                    </div>
+                    <t t-set="nb_header_rows" t-value="len(table.get('col_group_headers') or []) + 1"/>
+                    <table class="table table-sm table-bordered" style="font-size: 14px;">
+                        <thead>
+                            <t t-foreach="table.get('col_group_headers') or []" t-as="header_row">
+                                <tr>
+                                    <th t-if="header_row_first" t-att-rowspan="nb_header_rows"/>
+                                    <t t-foreach="header_row" t-as="h">
+                                        <th class="text-center" t-att-colspan="h.get('width') or 1"
+                                            t-att-rowspan="h.get('height') or 1" t-out="h.get('title')"/>
+                                    </t>
+                                </tr>
+                            </t>
+                            <tr>
+                                <th t-if="not table.get('col_group_headers')"/>
+                                <t t-foreach="table.get('measure_headers') or []" t-as="m">
+                                    <th t-att-class="'text-end' + (' fw-bold' if m.get('is_bold') else ' fw-normal')"
+                                        t-out="m.get('title')"/>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="table.get('rows') or []" t-as="row">
+                                <tr t-att-class="'fw-bold' if not row.get('indent') else ''">
+                                    <td t-att-style="'padding-left: %spx;' % (4 + 14 * (row.get('indent') or 0))"
+                                        t-out="row.get('title')"/>
+                                    <t t-foreach="row.get('values') or []" t-as="cell">
+                                        <td t-att-class="'text-end text-nowrap' + (' fw-bold' if cell.get('is_bold') else '')"
+                                            t-out="cell.get('text')"/>
+                                    </t>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
     <!-- ================= GABARITS ================= -->
 
     <!-- Bloc commun : client + séjour -->

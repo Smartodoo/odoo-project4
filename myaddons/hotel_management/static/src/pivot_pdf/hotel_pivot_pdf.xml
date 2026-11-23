@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hotel_management.PivotPdfButtons" t-inherit="web.PivotView.Buttons" t-inherit-mode="primary">
+        <xpath expr="//button[hasclass('o_pivot_download')]" position="after">
+            <button class="btn btn-secondary o_hotel_pivot_pdf" t-on-click="this.onPrintPdfClicked"
+                    data-tooltip="Imprimer en PDF" aria-label="Imprimer en PDF"
+                    t-attf-disabled="{{noDataDisplayed ? 'disabled' : false}}">
+                <i class="fa fa-print me-1"/>Imprimer PDF
+            </button>
+        </xpath>
+    </t>
+</templates>

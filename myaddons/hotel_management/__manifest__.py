@@ -69,6 +69,11 @@ Gestion d'auberge (PMS) — cahier des charges complet
             'hotel_management/static/src/planning/hotel_planning.js',
             'hotel_management/static/src/planning/hotel_planning.xml',
         ],
+        # Vue « tableau croisé » chargée à la demande (Odoo 20) : l'extension
+        # « Imprimer PDF » doit être dans le même bundle.
+        'web.assets_backend_lazy': [
+            'hotel_management/static/src/pivot_pdf/**',
+        ],
         'web.assets_frontend': [
             'hotel_management/static/src/website/hotel_website.scss',
             'hotel_management/static/src/website/hotel_home.js',

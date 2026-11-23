@@ -11,7 +11,7 @@
         <field name="name">hotel.revenue.report.pivot</field>
         <field name="model">hotel.revenue.report</field>
         <field name="arch" type="xml">
-            <pivot string="Chiffre d'affaires" sample="1">
+            <pivot string="Chiffre d'affaires" sample="1" js_class="hotel_pivot_pdf">
                 <field name="room_id" type="row"/>
                 <field name="date" interval="month" type="col"/>
                 <field name="amount" type="measure"/>
@@ -93,10 +93,23 @@
         <field name="context">{'pivot_row_groupby': ['bed_id'], 'pivot_measures': ['amount', 'bed_nights']}</field>
     </record>
 
+    <record id="view_hotel_reservation_source_pivot" model="ir.ui.view">
+        <field name="name">hotel.reservation.pivot.source</field>
+        <field name="model">hotel.reservation</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="view_hotel_reservation_pivot"/>
+        <field name="arch" type="xml">
+            <pivot position="attributes">
+                <attribute name="js_class">hotel_pivot_pdf</attribute>
+            </pivot>
+        </field>
+    </record>
+
     <record id="action_hotel_revenue_by_source" model="ir.actions.act_window">
         <field name="name">Performance par source</field>
         <field name="res_model">hotel.reservation</field>
         <field name="view_mode">pivot,graph,list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_hotel_reservation_source_pivot')})]"/>
         <field name="domain">[('state', 'in', ('confirmed', 'checkin', 'checkout'))]</field>
         <field name="context">{'pivot_row_groupby': ['source'], 'pivot_measures': ['__count', 'amount_total', 'nights', 'guest_count']}</field>
     </record>
