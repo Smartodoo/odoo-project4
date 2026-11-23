@@ -515,4 +515,24 @@
             <p>Les réservations faites par les clients sur le site web apparaissent ici.</p>
         </field>
     </record>
+
+    <!-- Réservations en ligne : la plus récemment reçue en haut de la liste -->
+    <record id="view_hotel_reservation_online_tree" model="ir.ui.view">
+        <field name="name">hotel.reservation.online.tree</field>
+        <field name="model">hotel.reservation</field>
+        <field name="inherit_id" ref="view_hotel_reservation_tree"/>
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <xpath expr="/list" position="attributes">
+                <attribute name="default_order">create_date desc, id desc</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_hotel_reservation_online_view_list" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_hotel_reservation_online_tree"/>
+        <field name="act_window_id" ref="action_hotel_reservation_online"/>
+    </record>
 </odoo>
