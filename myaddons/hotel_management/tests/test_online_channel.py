@@ -71,3 +71,33 @@ class TestOnlineChannel(TransactionCase):
         # Accès Réception donné plus tard -> ajouté aussi
         employee.write({'group_ids': [Command.link(self.env.ref('hotel_management.group_hotel_user').id)]})
         self.assertIn(employee.partner_id, members())
+
+    def test_users_removed_when_access_lost(self):
+        """Accès Réception / Responsable retiré -> retiré du canal (sauf s'il
+        garde un accès qui y donne droit)."""
+        Users = self.env['res.users'].with_context(no_reset_password=True)
+        g_user = self.env.ref('hotel_management.group_hotel_user')
+        g_manager = self.env.ref('hotel_management.group_hotel_manager')
+        g_employee = self.env.ref('base.group_user')
+        members = lambda: self.channel.channel_member_ids.partner_id
+        # 1) depuis la fiche utilisateur
+        reception = Users.create({'name': 'OC R2', 'login': 'oc_r2@example.com',
+                                  'group_ids': [Command.link(g_user.id)]})
+        self.assertIn(reception.partner_id, members())
+        reception.write({'group_ids': [Command.unlink(g_user.id), Command.unlink(g_manager.id)]})
+        self.assertNotIn(reception.partner_id, members())
+        # 2) Responsable rétrogradé en Réception -> reste membre
+        manager = Users.create({'name': 'OC M2', 'login': 'oc_m2@example.com',
+                                'group_ids': [Command.link(g_manager.id)]})
+        manager.write({'group_ids': [Command.unlink(g_manager.id), Command.link(g_user.id)]})
+        self.assertIn(manager.partner_id, members())
+        # 3) depuis la fiche du groupe
+        g_user.write({'user_ids': [Command.unlink(manager.id)]})
+        self.assertNotIn(manager.partner_id, members())
+        # 4) l'admin reste toujours membre
+        self.assertIn(self.env.ref('base.partner_admin'), members())
+        # 5) un employé sans accès hôtel modifié : rien ne casse
+        employee = Users.create({'name': 'OC E2', 'login': 'oc_e2@example.com',
+                                 'group_ids': [Command.link(g_employee.id)]})
+        employee.write({'group_ids': [Command.link(g_employee.id)]})
+        self.assertNotIn(employee.partner_id, members())
