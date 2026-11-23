@@ -750,7 +750,7 @@ class HotelReservation(models.Model):
             raise UserError(_("Le modèle d'e-mail de confirmation est introuvable."))
         sent = self.filtered(lambda r: r.partner_id.email)
         for rec in sent:
-            template.sudo().send_mail(rec.id, force_send=False)
+            template.sudo().send_mail(rec.id, force_send=True)
         return sent, self - sent
 
     def _confirmation_notification(self, sent, no_email):
