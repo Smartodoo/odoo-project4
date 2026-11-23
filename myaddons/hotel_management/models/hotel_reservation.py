@@ -574,13 +574,10 @@ class HotelReservation(models.Model):
     @api.depends('checkin', 'checkout', 'booking_type', 'room_type_id',
                  'guest_count', 'children', 'line_ids.room_id', 'line_ids.bed_ids')
     def _compute_proposed(self):
-        """Chambres / lits proposés dans les lignes, triés comme sur le site :
-        - par chambre : chambres entièrement libres sur la période, de la
-          capacité la plus proche du nombre de personnes restant à loger à la
-          plus grande (puis les trop petites) ;
-        - par lit : lits libres, d'abord ceux des chambres déjà partagées, puis
-          par nombre de lits libres dans la chambre, du plus proche du nombre
-          de personnes restant à loger au plus grand.
+        """Chambres / lits proposés dans les lignes : seulement les chambres
+        dont le nombre de lits (libres) = nombre de personnes restant à loger,
+        à défaut + 1, puis + 2… (voir hotel.room._hotel_ordered_free_rooms /
+        _hotel_ordered_free_beds).
         Le type de chambre de la réservation, s'il est choisi, filtre la liste."""
         Room = self.env['hotel.room']
         for rec in self:
@@ -590,14 +587,14 @@ class HotelReservation(models.Model):
             guests = max(rec.guest_count or 1, 1)
             if rec.booking_type == 'room':
                 rooms = Room._hotel_ordered_free_rooms(
-                    checkin, checkout, origin, guests, rec.line_ids.room_id, domain)
+                    checkin, checkout, origin, guests, rec.line_ids.room_id._origin, domain)
                 rec.proposed_room_ids = rooms
                 rec.proposed_room_order = ','.join(str(i) for i in rooms.ids)
                 rec.proposed_bed_ids = False
                 rec.proposed_bed_order = False
             else:
                 beds = Room._hotel_ordered_free_beds(
-                    checkin, checkout, origin, guests, rec.line_ids.bed_ids, domain)
+                    checkin, checkout, origin, guests, rec.line_ids.bed_ids._origin, domain)
                 rec.proposed_room_ids = False
                 rec.proposed_room_order = False
                 rec.proposed_bed_ids = beds

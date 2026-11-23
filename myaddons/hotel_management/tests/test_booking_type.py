@@ -71,16 +71,20 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
 
     def test_proposals(self):
         Resa = self.env['hotel.reservation']
-        new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'})
-        # Aucune chambre partielle : lits des chambres libres (A et B, pas C)
-        self.assertTrue(self.room_a.bed_ids <= new.proposed_bed_ids._origin)
+        vals = {'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'}
+        # 2 personnes : chambres de 2 lits libres (B), pas A (3 lits) ni C (par chambre)
+        new = Resa.new(dict(vals, guest_count=2))
         self.assertTrue(self.room_b.bed_ids <= new.proposed_bed_ids._origin)
+        self.assertFalse(self.room_a.bed_ids & new.proposed_bed_ids._origin)
         self.assertFalse(self.room_c.bed_ids & new.proposed_bed_ids._origin)
+        # 3 personnes : A
+        new = Resa.new(dict(vals, guest_count=3))
+        self.assertTrue(self.room_a.bed_ids <= new.proposed_bed_ids._origin)
+        self.assertFalse(self.room_b.bed_ids & new.proposed_bed_ids._origin)
 
         self._book_bed(self.room_a.bed_ids[0])
-        new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'})
-        # A est partiellement réservée : ses lits libres sont proposés en
-        # premier (ordre du site web), puis ceux des chambres libres
+        new = Resa.new(dict(vals, guest_count=2))
+        # A partiellement réservée, 2 lits libres : proposée en premier, puis B
         proposed = new.proposed_bed_ids._origin
         self.assertEqual(proposed[:2], self.room_a.bed_ids[1:])
         self.assertTrue(self.room_b.bed_ids <= proposed)
@@ -88,7 +92,8 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
         # Par chambre : seulement les chambres libres en entier (C ; pas D
         # déjà réservée, ni les dortoirs)
         self._book_room(self.room_d)
-        new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'room'})
+        new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'room',
+                        'guest_count': 2})
         self.assertIn(self.room_c, new.proposed_room_ids._origin)
         self.assertNotIn(self.room_d, new.proposed_room_ids._origin)
         self.assertNotIn(self.room_a, new.proposed_room_ids._origin)

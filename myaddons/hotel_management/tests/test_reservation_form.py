@@ -37,30 +37,43 @@ class TestReservationForm(TransactionCase):
         return self.env['hotel.reservation'].new(values)
 
     def test_room_type_filters_proposals(self):
-        proposed = self._new().proposed_bed_ids._origin
-        self.assertTrue((self.r3.bed_ids | self.r2.bed_ids) <= proposed)
+        proposed = self._new(guest_count=2).proposed_bed_ids._origin
+        self.assertTrue(self.r2.bed_ids <= proposed)
         self.assertFalse(self.rx.bed_ids & proposed)
-        # Sans type : tout est proposé
-        proposed = self._new(room_type_id=False).proposed_bed_ids._origin
+        # Sans type : toutes les chambres du bon nombre de lits
+        proposed = self._new(room_type_id=False, guest_count=2).proposed_bed_ids._origin
         self.assertTrue(self.rx.bed_ids <= proposed)
 
     def test_bed_order_like_website(self):
-        # 2 personnes : la chambre de 2 lits libres d'abord, puis celle de 3
+        """Par lit : seulement les chambres dont le nombre de lits libres =
+        personnes ; à défaut personnes + 1, + 2…"""
+        # 2 personnes : seulement la chambre de 2 lits (pas celle de 3)
         resa = self._new(guest_count=2)
         beds = resa.proposed_bed_ids._origin
-        self.assertEqual(beds[:2], self.r2.bed_ids)
-        self.assertEqual(beds[2:5], self.r3.bed_ids)
+        self.assertEqual(beds, self.r2.bed_ids)
         self.assertEqual(resa.proposed_bed_order, ','.join(map(str, beds.ids)))
-        # 3 personnes : la chambre de 2 lits (trop petite) passe après
-        beds = self._new(guest_count=3).proposed_bed_ids._origin
+        # 3 personnes : seulement la chambre de 3 lits
+        self.assertEqual(self._new(guest_count=3).proposed_bed_ids._origin, self.r3.bed_ids)
+        # 1 personne : aucune chambre de 1 lit -> chambres de 2 lits (1 + 1)
+        self.assertEqual(self._new(guest_count=1).proposed_bed_ids._origin, self.r2.bed_ids)
+        # 4 personnes : aucune chambre assez grande -> tout, la plus libre d'abord
+        beds = self._new(guest_count=4).proposed_bed_ids._origin
         self.assertEqual(beds[:3], self.r3.bed_ids)
-        # Chambre déjà partagée : proposée en premier
+        self.assertEqual(beds[3:], self.r2.bed_ids)
+        # Chambre déjà partagée avec 2 lits libres : proposée en premier, avec
+        # les autres chambres de 2 lits libres
         other = self.env['hotel.reservation'].create({
             'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
             'booking_type': 'bed', 'line_ids': [(0, 0, {'bed_id': self.r3.bed_ids[0].id})]})
         other.action_confirm()
         beds = self._new(guest_count=2).proposed_bed_ids._origin
         self.assertEqual(beds[:2], self.r3.bed_ids[1:])
+        self.assertEqual(beds[2:], self.r2.bed_ids)
+        # Lits déjà choisis : comptés comme placés (2 personnes, 1 lit choisi
+        # dans r2 -> reste 1 personne -> la chambre où il reste 1 lit : r2)
+        bed = self.r2.bed_ids[0]
+        resa = self._new(guest_count=2, line_ids=[(0, 0, {'bed_id': bed.id, 'bed_ids': [(6, 0, bed.ids)]})])
+        self.assertEqual(resa.proposed_bed_ids._origin, self.r2.bed_ids[1:])
 
     def test_room_order_like_website(self):
         Room = self.env['hotel.room']
@@ -70,14 +83,20 @@ class TestReservationForm(TransactionCase):
                            'room_price': 3000, 'rental_mode': 'room'})
         small = Room.create({'name': 'RF-R1', 'room_type_id': self.type_other.id, 'capacity': 1,
                              'room_price': 3000, 'rental_mode': 'room'})
-        resa = self._new(booking_type='room', room_type_id=self.type_other.id, guest_count=2)
-        rooms = resa.proposed_room_ids._origin
-        # capacité ≥ 2 la plus proche d'abord (RF-R2, puis RF-R3), RF-R1 trop petite à la fin
-        # (RF-X, dortoir « par lit », n'est pas louable entière)
-        self.assertNotIn(self.rx, rooms)
-        self.assertEqual(rooms[0], two)
-        self.assertEqual(rooms[1], big)
-        self.assertEqual(rooms[-1], small)
+
+        def proposed(guests):
+            return self._new(booking_type='room', room_type_id=self.type_other.id,
+                             guest_count=guests).proposed_room_ids._origin
+        # nombre de lits = personnes uniquement (RF-X, dortoir, jamais proposée)
+        self.assertEqual(proposed(2), two)
+        self.assertEqual(proposed(3), big)
+        self.assertEqual(proposed(1), small)
+        # plus de chambre de 2 lits libre -> 2 + 1 = chambre de 3 lits
+        two.maintenance = True
+        self.assertEqual(proposed(2), big)
+        two.maintenance = False
+        # 4 personnes : aucune assez grande -> toutes, la plus grande d'abord
+        self.assertEqual(list(proposed(4)), [big, two, small])
 
     def test_dropdown_follows_order(self):
         resa = self._new(guest_count=2)

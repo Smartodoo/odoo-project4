@@ -722,30 +722,47 @@ class HotelRoom(models.Model):
     @api.model
     def _hotel_ordered_free_rooms(self, checkin, checkout, ignore_reservation=False,
                                   guests=1, chosen=None, domain=None):
-        """Location « par chambre », ordre du site web : chambres libres en
-        entier pouvant loger les personnes restantes, de la capacité la plus
-        proche à la plus grande ; ensuite celles trop petites."""
+        """Location « par chambre » : seules les chambres libres en entier dont
+        le nombre de lits est le plus proche du nombre de personnes restant à
+        loger sont proposées (= personnes ; à défaut personnes + 1, puis + 2…).
+        Si aucune chambre ne peut loger tout le monde, toutes sont proposées,
+        de la plus grande à la plus petite (groupe à répartir)."""
         chosen = chosen or self.env['hotel.room']
         placed = sum(r.capacity or len(r.bed_ids.filtered('active')) for r in chosen)
         remaining = max(guests - placed, 1)
         rooms = self._hotel_whole_free_rooms(
             checkin, checkout, ignore_reservation, domain=domain) - chosen
-        return rooms.sorted(lambda r: (
-            (r.capacity or 0) < remaining, r.capacity or 0, r.room_price or 0.0, r.name or ''))
+
+        def size(room):
+            return room.capacity or len(room.bed_ids.filtered('active'))
+        fitting = [size(r) for r in rooms if size(r) >= remaining]
+        if fitting:
+            target = min(fitting)
+            return rooms.filtered(lambda r: size(r) == target).sorted(
+                lambda r: (r.room_price or 0.0, r.name or ''))
+        return rooms.sorted(lambda r: (-size(r), r.room_price or 0.0, r.name or ''))
 
     @api.model
     def _hotel_ordered_free_beds(self, checkin, checkout, ignore_reservation=False,
                                  guests=1, taken_beds=None, domain=None):
-        """Location « par lit », ordre du site web : d'abord les chambres déjà
-        partagées, puis par nombre de lits libres, du plus proche du nombre de
-        personnes restant à loger au plus grand ; les chambres qui n'ont pas
-        assez de lits libres pour tout le groupe viennent en dernier."""
+        """Location « par lit » : seuls les lits des chambres dont le nombre de
+        lits libres est le plus proche du nombre de personnes restant à loger
+        sont proposés (= personnes ; à défaut personnes + 1, puis + 2…), les
+        chambres déjà partagées d'abord. Si aucune chambre n'a assez de lits
+        libres pour tout le groupe, tous les lits libres sont proposés, des
+        chambres les plus libres aux moins libres (groupe à répartir)."""
         taken_beds = taken_beds or self.env['hotel.bed']
         remaining = max(guests - len(taken_beds), 1)
         offer = self._hotel_bed_offer(
             checkin, checkout, ignore_reservation, taken_beds, domain=domain)
-        offer.sort(key=lambda o: (len(o[1]) < remaining, not o[2], len(o[1]),
-                                  o[0].bed_price or 0.0, o[0].name or ''))
+        fitting = [len(o[1]) for o in offer if len(o[1]) >= remaining]
+        if fitting:
+            target = min(fitting)
+            offer = [o for o in offer if len(o[1]) == target]
+            offer.sort(key=lambda o: (not o[2], o[0].bed_price or 0.0, o[0].name or ''))
+        else:
+            offer.sort(key=lambda o: (-len(o[1]), not o[2], o[0].bed_price or 0.0,
+                                      o[0].name or ''))
         beds = self.env['hotel.bed']
         for _room, free, _partial in offer:
             beds += free.sorted(lambda b: b.name or '')
