@@ -33,7 +33,7 @@
                         <button name="action_open_employee" type="object" class="oe_stat_button"
                                 icon="badge" invisible="not employee_id" string="Fiche employé"/>
                         <button name="action_open_user" type="object" class="oe_stat_button"
-                                icon="fa-user" invisible="not user_id" string="Utilisateur"
+                                icon="person" invisible="not user_id" string="Utilisateur"
                                 groups="base.group_erp_manager"/>
                     </div>
                     <field name="image" widget="image" class="oe_avatar"/>

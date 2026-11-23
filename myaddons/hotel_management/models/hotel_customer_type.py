@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import _, fields, models
 
 
 class HotelCustomerType(models.Model):
@@ -15,6 +15,8 @@ class HotelCustomerType(models.Model):
         string="Alerte rouge",
         help="Client à risque (ex. liste noire) : bandeau rouge sur la fiche "
              "client et sur ses réservations, avertissement à la sélection.")
+    partner_ids = fields.One2many(
+        'res.partner', 'hotel_customer_type_id', string="Clients")
     partner_count = fields.Integer(
         string="Nb clients", compute='_compute_partner_count')
 
@@ -28,3 +30,15 @@ class HotelCustomerType(models.Model):
         mapping = {t.id: count for t, count in groups}
         for rec in self:
             rec.partner_count = mapping.get(rec.id, 0)
+
+    def action_view_partners(self):
+        """Contacts ayant ce type de client."""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Clients « %s »", self.name),
+            'res_model': 'res.partner',
+            'view_mode': 'list,kanban,form',
+            'domain': [('hotel_customer_type_id', '=', self.id)],
+            'context': {'default_hotel_customer_type_id': self.id},
+        }

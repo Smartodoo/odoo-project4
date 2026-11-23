@@ -4,7 +4,7 @@
         <xpath expr="//button[hasclass('o_list_button_add')]" position="after">
             <button t-if="!this.editedRecord" type="button" class="btn btn-secondary o_hotel_list_pdf"
                     t-on-click="this.onPrintPdfClicked" data-tooltip="Imprimer en PDF">
-                <i class="fa fa-print me-1"/>Imprimer PDF
+                <i class="oi me-1" data-icon="print"/>Imprimer PDF
             </button>
         </xpath>
     </t>

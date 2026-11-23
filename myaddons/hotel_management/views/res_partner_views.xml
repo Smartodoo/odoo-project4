@@ -79,6 +79,28 @@
     </record>
 
     <!-- ===== Configuration > Tarifs clients : remises et tarifs spéciaux ===== -->
+    <record id="view_res_partner_filter_hotel_type" model="ir.ui.view">
+        <field name="name">res.partner.select.hotel.type</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <field name="category_id" position="after">
+                <field name="hotel_customer_type_id" groups="hotel_management.group_hotel_housekeeping" string="Type de client"/>
+            </field>
+            <filter name="inactive" position="before">
+                <filter name="hotel_with_type" string="Avec type de client" groups="hotel_management.group_hotel_housekeeping"
+                        domain="[('hotel_customer_type_id', '!=', False)]"/>
+                <filter name="hotel_blacklisted" string="Alerte rouge (Auberge)" groups="hotel_management.group_hotel_housekeeping"
+                        domain="[('hotel_customer_type_id.is_blacklist', '=', True)]"/>
+                <separator/>
+            </filter>
+            <filter name="group_country" position="after">
+                <filter name="group_hotel_customer_type" string="Type de client" groups="hotel_management.group_hotel_housekeeping"
+                        context="{'group_by': 'hotel_customer_type_id'}"/>
+            </filter>
+        </field>
+    </record>
+
     <record id="view_partner_hotel_rates_list" model="ir.ui.view">
         <field name="name">res.partner.hotel.rates.list</field>
         <field name="model">res.partner</field>

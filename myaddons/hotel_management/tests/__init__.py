@@ -11,3 +11,4 @@ from . import test_reservation_form
 from . import test_online_channel
 from . import test_staff_user
 from . import test_pivot_pdf
+from . import test_customer_type_partners
