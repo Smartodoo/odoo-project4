@@ -125,7 +125,7 @@ class TestHotelUi(HttpCase):
         token = re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
         res = self.url_open('/hotel/booking/submit', data={
             'csrf_token': token, 'room_id': room.id, 'checkin': str(ci), 'checkout': str(co),
-            'guests': 1, 'booking_type': 'room', 'name': 'Client Web',
+            'guests': 1, 'booking_type': 'room', 'last_name': 'Client', 'first_name': 'Web',
             'email': 'client.web@example.com', 'phone': '0550000000'}, allow_redirects=False)
         self.assertIn(res.status_code, (302, 303))
         self.assertIn('access_token=', res.headers['Location'])
@@ -140,6 +140,56 @@ class TestHotelUi(HttpCase):
         ok = self.url_open(res.headers['Location'])
         self.assertEqual(ok.status_code, 200)
         self.assertIn(resa.name, ok.text)
+
+    def _web_book(self, room, ci, co, last, first, email, login=None):
+        import re
+        if login:
+            self.authenticate(login, login)
+        page = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=1' % (room.id, ci, co))
+        self.assertEqual(page.status_code, 200)
+        token = re.search(r'csrf_token["\']?\s*(?:value=|:)\s*["\']([^"\']+)', page.text).group(1)
+        res = self.url_open('/hotel/booking/submit', data={
+            'csrf_token': token, 'room_id': room.id, 'checkin': str(ci), 'checkout': str(co),
+            'guests': 1, 'booking_type': 'room', 'last_name': last, 'first_name': first,
+            'email': email}, allow_redirects=False)
+        self.assertIn(res.status_code, (302, 303))
+        return self.env['hotel.reservation'].search(
+            [('line_ids.room_id', '=', room.id), ('checkin', '=', ci)])
+
+    def test_website_booking_new_customer(self):
+        """Le client d'une réservation en ligne est la personne saisie : jamais
+        l'admin connecté, ni un contact interne qui partage l'e-mail ; un même
+        nom + prénom + e-mail reprend le contact existant."""
+        from datetime import timedelta
+        from odoo import fields
+        admin = self.env.ref('base.user_admin')
+        admin.partner_id.email = 'partage.web@example.com'
+        rtype = self.env['hotel.room.type'].create({'name': 'WebN', 'list_price': 1000})
+        room = self.env['hotel.room'].create({
+            'name': 'WEB-N', 'room_type_id': rtype.id, 'capacity': 2,
+            'room_price': 1000, 'rental_mode': 'room', 'website_published': True})
+        d = fields.Date.today() + timedelta(days=800)
+        # Visiteur anonyme avec l'e-mail de l'admin -> nouveau contact
+        r1 = self._web_book(room, d, d + timedelta(days=1), 'Nouveau', 'Client',
+                            'partage.web@example.com')
+        self.assertNotEqual(r1.partner_id, admin.partner_id)
+        self.assertEqual(r1.partner_id.hotel_last_name, 'Nouveau')
+        self.assertEqual(r1.partner_id.hotel_first_name, 'Client')
+        self.assertEqual(r1.partner_id.name, 'Nouveau Client')
+        self.assertEqual(r1.state, 'draft')
+        # Même nom/prénom/e-mail (casse différente) -> même contact
+        r2 = self._web_book(room, d + timedelta(days=2), d + timedelta(days=3),
+                            'NOUVEAU', 'client', 'Partage.Web@example.com')
+        self.assertEqual(r2.partner_id, r1.partner_id)
+        # Même e-mail mais autre prénom -> autre contact
+        r3 = self._web_book(room, d + timedelta(days=4), d + timedelta(days=5),
+                            'Nouveau', 'Autre', 'partage.web@example.com')
+        self.assertNotEqual(r3.partner_id, r1.partner_id)
+        # Admin connecté qui réserve pour un client -> le client, pas l'admin
+        r4 = self._web_book(room, d + timedelta(days=6), d + timedelta(days=7),
+                            'Client', 'Guichet', 'guichet.web@example.com', login='admin')
+        self.assertNotEqual(r4.partner_id, admin.partner_id)
+        self.assertEqual(r4.partner_id.name, 'Client Guichet')
 
     def test_cash_and_report_views_render(self):
         for action in ('hotel_management.action_hotel_revenue_report',

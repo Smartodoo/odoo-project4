@@ -132,7 +132,8 @@ class HotelWebsite(http.Controller):
             'period_start': ci.strftime('%d/%m/%Y') if dates_ok else '',
             'period_end': co.strftime('%d/%m/%Y') if dates_ok else '',
             'errors': [],
-            'name': '',
+            'last_name': '',
+            'first_name': '',
             'email': '',
             'phone': '',
             'today': self._today_str(),
@@ -157,6 +158,33 @@ class HotelWebsite(http.Controller):
             booking_type=kw.get('booking_type') if kw.get('booking_type') in ('room', 'bed') else '')
         return request.render('hotel_management.room_detail_page', values)
 
+    def _website_booking_partner(self, last_name, first_name, email, phone):
+        """Client de la réservation en ligne = la personne SAISIE dans le
+        formulaire (jamais l'utilisateur connecté : un employé ou l'admin qui
+        réserve pour un client ne doit pas se retrouver client). On reprend un
+        contact existant seulement s'il a le même nom, le même prénom ET le
+        même e-mail (hors contacts des utilisateurs internes) ; sinon un
+        nouveau contact est créé."""
+        Partner = request.env['res.partner'].sudo()
+        internal_partners = request.env['res.users'].sudo().with_context(
+            active_test=False).search([('share', '=', False)]).partner_id
+        email_norm = email.strip().lower()
+        candidates = request.env['hotel.reservation'].sudo()._find_homonym_partners(
+            last_name, first_name).filtered(
+            lambda p: (p.email or '').strip().lower() == email_norm
+            and p not in internal_partners)
+        if candidates:
+            partner = candidates[0]
+            if phone and not partner.phone:
+                partner.phone = phone
+            return partner
+        return Partner.create({
+            'hotel_last_name': last_name,
+            'hotel_first_name': first_name,
+            'email': email,
+            'phone': phone,
+        })
+
     @http.route(['/hotel/booking/submit'], type='http', auth='public',
                 website=True, methods=['POST'])
     def hotel_booking_submit(self, **post):
@@ -168,7 +196,8 @@ class HotelWebsite(http.Controller):
             room = Room.browse()
         ci = self._parse_date(post.get('checkin'))
         co = self._parse_date(post.get('checkout'))
-        name = (post.get('name') or '').strip()
+        last_name = (post.get('last_name') or '').strip()
+        first_name = (post.get('first_name') or '').strip()
         email = (post.get('email') or '').strip()
         phone = (post.get('phone') or '').strip()
         note = (post.get('note') or '').strip()
@@ -201,8 +230,10 @@ class HotelWebsite(http.Controller):
             errors.append("Chambre introuvable.")
         if not (ci and co and co > ci):
             errors.append("Les dates de séjour sont invalides.")
-        if not name:
+        if not last_name:
             errors.append("Le nom est obligatoire.")
+        if not first_name:
+            errors.append("Le prénom est obligatoire.")
         if not email:
             errors.append("L'adresse e-mail est obligatoire.")
         if room and ci and co and co > ci:
@@ -238,21 +269,12 @@ class HotelWebsite(http.Controller):
         if errors:
             values = self._room_detail_values(
                 room, post.get('checkin') or '', post.get('checkout') or '',
-                guests, errors=errors, name=name, email=email, phone=phone,
+                guests, errors=errors, last_name=last_name,
+                first_name=first_name, email=email, phone=phone,
                 booking_type=post.get('booking_type') or '')
             return request.render('hotel_management.room_detail_page', values)
 
-        # Client : utilisateur connecté, sinon existant par e-mail, sinon création
-        partner = False
-        if not request.env.user._is_public():
-            partner = request.env.user.partner_id
-        if not partner:
-            partner = request.env['res.partner'].sudo().search(
-                [('email', '=', email)], limit=1)
-        if not partner:
-            partner = request.env['res.partner'].sudo().create({
-                'name': name, 'email': email, 'phone': phone,
-            })
+        partner = self._website_booking_partner(last_name, first_name, email, phone)
 
         # Prix : tarif spécial client, sinon tarifs saisonniers nuit par nuit
         unit = room._get_stay_unit_price(ci, co, booking_type, partner)

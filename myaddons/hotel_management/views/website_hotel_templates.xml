@@ -362,10 +362,17 @@
                                         </t>
                                     </div>
                                     <hr/>
-                                    <div class="mt-2">
-                                        <label class="form-label">Nom complet</label>
-                                        <input type="text" class="form-control" name="name"
-                                               t-att-value="name" required="required"/>
+                                    <div class="row g-2 mt-0">
+                                        <div class="col-6">
+                                            <label class="form-label">Nom</label>
+                                            <input type="text" class="form-control" name="last_name"
+                                                   t-att-value="last_name" required="required"/>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">Prénom</label>
+                                            <input type="text" class="form-control" name="first_name"
+                                                   t-att-value="first_name" required="required"/>
+                                        </div>
                                     </div>
                                     <div class="mt-2">
                                         <label class="form-label">E-mail</label>
