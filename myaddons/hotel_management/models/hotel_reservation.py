@@ -884,6 +884,12 @@ class HotelReservation(models.Model):
         suite est enregistrée sur la fiche à l'enregistrement de la réservation."""
         if self.partner_id or not (self.partner_last_name and self.partner_first_name):
             return
+        warning = self._homonym_warning(self.partner_last_name, self.partner_first_name)
+        if warning:
+            # Client peut-être déjà connu : simple notification (non bloquante).
+            # Pas de création immédiate : si c'est bien une autre personne,
+            # le contact est créé à l'enregistrement de la réservation.
+            return warning
         partner_vals = {}
         for fname, partner_field in self._partner_related_fields().items():
             value = self[fname]
@@ -892,6 +898,18 @@ class HotelReservation(models.Model):
             if value:
                 partner_vals[partner_field] = value
         self.partner_id = self.env['res.partner'].create(partner_vals)
+
+    @api.onchange('partner_id_number')
+    def _onchange_partner_id_number(self):
+        """Alerte immédiate si le n° de pièce saisi appartient déjà à un autre
+        contact (l'enregistrement sera refusé)."""
+        Partner = self.env['res.partner']
+        existing = Partner._hotel_find_id_number(
+            self.partner_id_number, exclude=self.partner_id._origin)
+        if existing:
+            return {'warning': {
+                'title': _("Pièce d'identité déjà enregistrée"),
+                'message': Partner._hotel_id_number_message(self.partner_id_number, existing)}}
 
     @api.model
     def _homonym_warning(self, last_name, first_name):
@@ -910,6 +928,7 @@ class HotelReservation(models.Model):
             ) if d]
             lines.append("• %s%s" % (partner.display_name, details and " (%s)" % ", ".join(details) or ""))
         return {'warning': {
+            'type': 'notification',
             'title': _("Ce client existe peut-être déjà"),
             'message': _(
                 "Un contact porte déjà ce nom :\n%(list)s\n\n"

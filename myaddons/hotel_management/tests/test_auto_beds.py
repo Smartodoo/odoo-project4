@@ -124,7 +124,8 @@ class TestAutoBeds(TransactionCase):
         from datetime import timedelta
         from odoo import fields as f
         ci = f.Date.today() + timedelta(days=days_from_today)
-        partner = self.env['res.partner'].create({'hotel_last_name': 'Test', 'hotel_first_name': 'Client', 'phone': '0550000009', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID-T', 'name': 'Client lits', 'hotel_birthdate': '1990-01-01'})
+        # n° de pièce unique : le contact de test est réutilisé
+        partner = self.env['res.partner']._hotel_find_id_number('ID-T') or self.env['res.partner'].create({'hotel_last_name': 'Test', 'hotel_first_name': 'Client', 'phone': '0550000009', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID-T', 'name': 'Client lits', 'hotel_birthdate': '1990-01-01'})
         resa = self.env['hotel.reservation'].create({
             'partner_id': partner.id, 'checkin': ci, 'checkout': ci + timedelta(days=2),
             'booking_type': 'bed', 'line_ids': [(0, 0, {'bed_id': bed.id})]})

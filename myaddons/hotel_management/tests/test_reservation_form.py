@@ -224,14 +224,47 @@ class TestReservationForm(TransactionCase):
         resa.action_checkin()
         self.assertEqual(resa.state, 'checkin')
 
-    def test_no_homonym_warning(self):
-        """Nouveau client homonyme d'un contact existant : plus d'alerte, le
-        contact est créé directement."""
-        existing = self.env['res.partner'].create({
-            'hotel_last_name': 'Brahimi', 'hotel_first_name': 'Nadia'})
-        resa = self._new(partner_last_name='Brahimi', partner_first_name='Nadia')
-        self.assertFalse(resa._onchange_partner_names_create())
-        self.assertTrue(resa.partner_id and resa.partner_id != existing)
+    def test_homonym_warning(self):
+        """Nom + prénom déjà connus : notification non bloquante, contact créé
+        seulement à l'enregistrement."""
+        self.env['res.partner'].create({
+            'hotel_last_name': 'Brahimi', 'hotel_first_name': 'Nadia',
+            'phone': '0770000000', 'hotel_birthdate': '1985-03-02'})
+        resa = self._new(partner_last_name=' brahimi', partner_first_name='NADIA ')
+        res = resa._onchange_partner_names_create()
+        self.assertFalse(resa.partner_id)
+        self.assertEqual(res['warning']['type'], 'notification')
+        self.assertIn('Brahimi Nadia', res['warning']['message'])
+        self.assertIn('02/03/1985', res['warning']['message'])
+
+    def test_id_number_unique(self):
+        """N° de pièce déjà utilisé par un autre contact : alerte + refus."""
+        Partner = self.env['res.partner']
+        Partner.create({'hotel_last_name': 'Haddad', 'hotel_first_name': 'Ali',
+                        'hotel_id_number': 'AB123'})
+        with self.assertRaises(ValidationError) as err:
+            Partner.create({'hotel_last_name': 'Autre', 'hotel_first_name': 'Personne',
+                            'hotel_id_number': ' ab123 '})
+        self.assertIn('existe déjà', str(err.exception))
+        other = Partner.create({'hotel_last_name': 'Autre', 'hotel_first_name': 'P',
+                                'hotel_id_number': 'AB1234'})
+        with self.assertRaises(ValidationError):
+            other.hotel_id_number = 'AB123'
+        # Formulaire réservation : alerte immédiate (fenêtre)
+        resa = self._new(partner_last_name='Neuf', partner_first_name='Client',
+                         partner_id_number='AB123')
+        res = resa._onchange_partner_id_number()
+        self.assertIn('Haddad Ali', res['warning']['message'])
+        self.assertNotEqual(res['warning'].get('type'), 'notification')
+        # Nouveau client enregistré avec ce numéro : refusé
+        with self.assertRaises(ValidationError):
+            self.env['hotel.reservation'].create({
+                'checkin': self.ci, 'checkout': self.co, 'booking_type': 'room',
+                'partner_last_name': 'Neuf', 'partner_first_name': 'Client',
+                'partner_id_number': 'AB123'})
+        # Autre adulte du séjour : alerte aussi
+        g = self.env['hotel.reservation.guest'].new({'guest_type': 'adult', 'id_number': 'ab123'})
+        self.assertTrue(g._onchange_id_number())
 
     def test_bed_count_equals_guests(self):
         """Location par lit : lits sélectionnés = personnes, sinon refus."""
@@ -252,7 +285,7 @@ class TestReservationForm(TransactionCase):
 
     def test_guest_contact_created(self):
         """Autres personnes : contact créé/sélectionné au nom + prénom, fiche
-        contact remplie, homonyme créé sans alerte."""
+        contact remplie, notification si homonyme."""
         Guest = self.env['hotel.reservation.guest']
         g = Guest.new({'guest_type': 'adult', 'phone': '0551112233', 'last_name': 'Saidi'})
         g.first_name = 'Omar'
@@ -269,10 +302,12 @@ class TestReservationForm(TransactionCase):
                      'birthdate': '1979-07-01', 'id_number': 'X123'})
         self.assertEqual(str(partner.hotel_birthdate), '1979-07-01')
         self.assertEqual(partner.hotel_id_number, 'X123')
-        # Homonyme : plus d'alerte, nouveau contact créé directement
+        # Homonyme : notification non bloquante, rien de créé
         g2 = Guest.new({'guest_type': 'adult', 'last_name': 'saidi', 'first_name': 'omar'})
-        self.assertFalse(g2._onchange_names_create_partner())
-        self.assertTrue(g2.partner_id and g2.partner_id != partner)
+        res = g2._onchange_names_create_partner()
+        self.assertFalse(g2.partner_id)
+        self.assertEqual(res['warning']['type'], 'notification')
+        self.assertIn('Contact existant', res['warning']['message'])
         # ... puis enregistrée quand même : nouveau contact créé à l'enregistrement
         resa.write({'adults': 3, 'children': 1,
                     'line_ids': [(0, 0, {'bed_id': b.id}) for b in self.r3.bed_ids[:2]]})

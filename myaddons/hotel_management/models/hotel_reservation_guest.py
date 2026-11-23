@@ -83,16 +83,31 @@ class HotelReservationGuest(models.Model):
     @api.onchange('last_name', 'first_name')
     def _onchange_names_create_partner(self):
         """Nouvelle personne : dès que nom ET prénom sont saisis (sans contact
-        choisi), le contact est créé et sélectionné."""
+        choisi), le contact est créé et sélectionné ; notification (non
+        bloquante) à la place si un contact porte déjà ce nom."""
         # Adultes seulement : un contact doit avoir 18 ans (règle des contacts
         # de l'auberge) ; les enfants restent sur leur fiche de séjour.
         if self.guest_type != 'adult' or self.partner_id \
                 or not (self.last_name and self.first_name):
             return
+        warning = self.env['hotel.reservation'].with_context(
+            hotel_homonym_field=_("Contact existant"),
+        )._homonym_warning(self.last_name, self.first_name)
+        if warning:
+            return warning
         values = {}
         for fname in self._PARTNER_FIELDS:
             values[fname] = self[fname]
         self.partner_id = self.env['res.partner'].create(self._partner_vals_from(values))
+
+    @api.onchange('id_number')
+    def _onchange_id_number(self):
+        Partner = self.env['res.partner']
+        existing = Partner._hotel_find_id_number(self.id_number, exclude=self.partner_id._origin)
+        if existing:
+            return {'warning': {
+                'title': _("Pièce d'identité déjà enregistrée"),
+                'message': Partner._hotel_id_number_message(self.id_number, existing)}}
 
     @api.model_create_multi
     def create(self, vals_list):

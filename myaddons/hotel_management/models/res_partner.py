@@ -105,6 +105,43 @@ class ResPartner(models.Model):
                     "%s doit avoir au moins 18 ans pour réserver.",
                     partner.display_name))
 
+    @api.model
+    def _hotel_find_id_number(self, number, exclude=None):
+        """Contact (actif) ayant déjà ce n° de pièce d'identité (casse et
+        espaces de début/fin ignorés), hors `exclude`."""
+        number = (number or '').strip()
+        if not number:
+            return self.browse()
+        escaped = number.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+        domain = [('hotel_id_number', '=ilike', escaped)]
+        if exclude:
+            domain.append(('id', 'not in', exclude.ids))
+        return self.search(domain, limit=1)
+
+    @api.model
+    def _hotel_id_number_message(self, number, existing):
+        return _(
+            "Ce contact existe déjà avec la pièce d'identité n° %(number)s : "
+            "%(name)s.\n\nSélectionnez le contact existant au lieu d'en créer "
+            "un nouveau, ou corrigez le numéro.",
+            number=number.strip(), name=existing.display_name)
+
+    @api.constrains('hotel_id_number')
+    def _check_hotel_id_number_unique(self):
+        for partner in self.filtered('hotel_id_number'):
+            existing = self._hotel_find_id_number(partner.hotel_id_number, exclude=partner)
+            if existing:
+                raise ValidationError(
+                    self._hotel_id_number_message(partner.hotel_id_number, existing))
+
+    @api.onchange('hotel_id_number')
+    def _onchange_hotel_id_number(self):
+        existing = self._hotel_find_id_number(self.hotel_id_number, exclude=self._origin)
+        if existing:
+            return {'warning': {
+                'title': _("Pièce d'identité déjà enregistrée"),
+                'message': self._hotel_id_number_message(self.hotel_id_number, existing)}}
+
     @api.onchange('hotel_last_name', 'hotel_first_name')
     def _onchange_hotel_names(self):
         full = self._hotel_full_name(self.hotel_last_name, self.hotel_first_name)
