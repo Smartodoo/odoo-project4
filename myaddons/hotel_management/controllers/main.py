@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from dateutil.relativedelta import relativedelta
 
 from odoo import fields, http
 from odoo.http import request
 from odoo.tools import consteq
+
+_logger = logging.getLogger(__name__)
 
 
 class HotelWebsite(http.Controller):
@@ -330,10 +334,34 @@ class HotelWebsite(http.Controller):
         # complète l'identité du client puis la confirme lui-même (bouton
         # Confirmer, puis « Envoyer confirmation » pour l'e-mail au client).
         # Le brouillon bloque déjà la chambre / les lits sur le site.
+        # Le client reçoit tout de suite un e-mail « demande reçue ».
+        try:
+            reservation._send_request_received_mails()
+        except Exception:
+            _logger.exception("E-mail « demande reçue » non envoyé pour %s",
+                              reservation.name)
 
         token = reservation._portal_ensure_token()
         return request.redirect('/hotel/booking/confirmation/%s?access_token=%s'
                                 % (reservation.id, token))
+
+    @http.route(['/hotel/booking/receipt/<int:reservation_id>'],
+                type='http', auth='public', website=True, sitemap=False)
+    def hotel_booking_receipt(self, reservation_id, access_token=None, **kw):
+        """Reçu PDF (lien de l'e-mail client), protégé par le jeton d'accès."""
+        reservation = request.env['hotel.reservation'].sudo().browse(
+            reservation_id).exists()
+        if not reservation or not access_token or not consteq(
+                reservation.access_token or '', access_token):
+            return request.redirect('/hotel/rooms')
+        pdf, _type = request.env['ir.actions.report'].sudo()._render_qweb_pdf(
+            'hotel_management.action_report_hotel_reservation_receipt', reservation.ids)
+        filename = 'Recu-%s.pdf' % reservation.name.replace('/', '-')
+        return request.make_response(pdf, headers=[
+            ('Content-Type', 'application/pdf'),
+            ('Content-Length', len(pdf)),
+            ('Content-Disposition', 'attachment; filename="%s"' % filename),
+        ])
 
     @http.route(['/hotel/booking/confirmation/<int:reservation_id>'],
                 type='http', auth='public', website=True, sitemap=False)

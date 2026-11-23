@@ -11,6 +11,16 @@
         <field name="binding_type">report</field>
     </record>
 
+    <record id="action_report_hotel_reservation_receipt" model="ir.actions.report">
+        <field name="name">Reçu de réservation</field>
+        <field name="model">hotel.reservation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management.report_reservation_receipt</field>
+        <field name="print_report_name">'Recu - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_hotel_reservation"/>
+        <field name="binding_type">report</field>
+    </record>
+
     <record id="action_report_hotel_guest_card" model="ir.actions.report">
         <field name="name">Fiche client</field>
         <field name="model">hotel.reservation</field>
@@ -149,6 +159,61 @@
                             <p t-field="o.company_id.hotel_deposit_instructions" style="white-space: pre-line;"/>
                         </div>
                         <p class="mt-4 text-muted">Merci de votre confiance. Nous vous attendons le <span t-field="o.checkin"/>.</p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- 1 bis. Reçu de réservation (téléchargeable depuis l'e-mail client) -->
+    <template id="report_reservation_receipt">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="row align-items-center mb-3">
+                            <div class="col-8">
+                                <h2 class="mb-0">Reçu de réservation</h2>
+                                <div class="text-muted">Référence <strong t-field="o.name"/></div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <span t-if="o.state == 'draft'" class="badge text-bg-warning p-2">En attente de confirmation</span>
+                                <span t-elif="o.state == 'cancel'" class="badge text-bg-danger p-2">Annulée</span>
+                                <span t-else="" class="badge text-bg-success p-2">Confirmée</span>
+                            </div>
+                        </div>
+                        <p t-if="o.state == 'draft'">Votre demande de réservation est enregistrée.
+                            Elle sera confirmée par notre équipe dans les meilleurs délais.</p>
+                        <t t-call="hotel_management.report_reservation_header"/>
+                        <!-- Reçu client : chambre(s) et prix uniquement,
+                             sans le détail des paiements. -->
+                        <table class="table table-sm o_main_table mt-3">
+                            <thead>
+                                <tr>
+                                    <th>Chambre / lit</th>
+                                    <th class="text-end">Prix par nuit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.line_ids" t-as="line">
+                                    <td><t t-out="line._invoice_label()"/></td>
+                                    <td class="text-end"><span t-field="line.price_unit"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="row justify-content-end">
+                            <div class="col-6">
+                                <table class="table table-sm">
+                                    <tr class="fw-bold">
+                                        <td>Prix du séjour (<t t-out="o.nights"/> nuit(s))</td>
+                                        <td class="text-end"><span t-field="o.amount_total"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-muted small">Document émis le
+                            <span t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y à %H:%M')"/>.
+                            Ce reçu n'est pas une facture.</p>
                     </div>
                 </t>
             </t>

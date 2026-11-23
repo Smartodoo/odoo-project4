@@ -753,6 +753,18 @@ class HotelReservation(models.Model):
             template.sudo().send_mail(rec.id, force_send=True)
         return sent, self - sent
 
+    def _send_request_received_mails(self):
+        """E-mail « demande reçue » envoyé au client après une réservation
+        sur le site (la réservation reste en brouillon)."""
+        template = self.env.ref(
+            'hotel_management.mail_template_reservation_received',
+            raise_if_not_found=False)
+        if not template:
+            return
+        for rec in self.filtered(lambda r: r.partner_id.email):
+            rec._portal_ensure_token()  # lien « Télécharger mon reçu »
+            template.sudo().send_mail(rec.id, force_send=True)
+
     def _confirmation_notification(self, sent, no_email):
         lines = []
         if sent:
