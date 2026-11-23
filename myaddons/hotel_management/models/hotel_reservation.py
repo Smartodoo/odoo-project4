@@ -916,6 +916,8 @@ class HotelReservation(models.Model):
         records = super().create(vals_list)
         records._sync_guests()
         for rec in records:
+            if rec.source == 'website' and rec._hotel_post_online_channel():
+                continue
             source = dict(self._fields['source'].selection).get(rec.source, '')
             rec._hotel_notify_managers(_(
                 "Nouvelle réservation %(name)s (%(source)s) : %(partner)s, "
@@ -1073,6 +1075,49 @@ class HotelReservation(models.Model):
             rec.sudo().message_post(
                 body=body, partner_ids=partners.ids,
                 message_type='comment', subtype_xmlid='mail.mt_note')
+
+    def _hotel_post_online_channel(self):
+        """Annonce une réservation faite sur le site dans le canal Discuss
+        « Réservations en ligne » (au lieu d'une notification en boîte de
+        réception). Renvoie False si le canal n'existe plus."""
+        self.ensure_one()
+        channel = self.env.ref('hotel_management.channel_online_reservations',
+                               raise_if_not_found=False)
+        if not channel:
+            return False
+        rec = self.sudo()
+        partner = rec.partner_id
+        rooms = ', '.join(rec.line_ids.mapped('room_id.name')) or '—'
+        beds = ', '.join(rec.line_ids.mapped('bed_ids.name'))
+        url = '/odoo/action-hotel_management.action_hotel_reservation_online/%s' % rec.id
+        amount = rec.currency_id.format(rec.amount_total) if rec.currency_id else rec.amount_total
+        body = Markup(
+            "<p><b>Nouvelle réservation en ligne</b> : "
+            "<a href=\"%(url)s\">%(name)s</a></p>"
+            "<ul>"
+            "<li>Client : %(partner)s — %(phone)s — %(email)s</li>"
+            "<li>Séjour : du %(ci)s au %(co)s (%(nights)s nuit(s)), %(guests)s personne(s)</li>"
+            "<li>Chambre(s) : %(rooms)s%(beds)s</li>"
+            "<li>Total : %(amount)s</li>"
+            "</ul>"
+            "<p>À vérifier et confirmer (réservation en brouillon).</p>"
+        ) % {
+            'url': url, 'name': rec.name,
+            'partner': partner.display_name, 'phone': partner.phone or '—',
+            'email': partner.email or '—',
+            'ci': rec.checkin.strftime('%d/%m/%Y') if rec.checkin else '',
+            'co': rec.checkout.strftime('%d/%m/%Y') if rec.checkout else '',
+            'nights': rec.nights, 'guests': rec.guest_count,
+            'rooms': rooms, 'beds': (' — lit(s) : %s' % beds) if beds else '',
+            'amount': amount,
+        }
+        channel.sudo().message_post(
+            body=body, author_id=self.env.ref('base.partner_root').id,
+            message_type='comment', subtype_xmlid='mail.mt_comment')
+        # Trace dans l'historique de la réservation (sans notifier personne)
+        rec.message_post(body=_("Réservation reçue depuis le site web."),
+                         message_type='comment', subtype_xmlid='mail.mt_note')
+        return True
 
     def _hotel_schedule_alert(self, summary, note, deadline=None):
         """Activité « à faire » pour le responsable de la réservation, sans
