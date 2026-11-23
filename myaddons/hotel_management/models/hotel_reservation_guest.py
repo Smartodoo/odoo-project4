@@ -83,18 +83,12 @@ class HotelReservationGuest(models.Model):
     @api.onchange('last_name', 'first_name')
     def _onchange_names_create_partner(self):
         """Nouvelle personne : dès que nom ET prénom sont saisis (sans contact
-        choisi), le contact est créé et sélectionné ; avertissement à la
-        place si un contact porte déjà ce nom."""
+        choisi), le contact est créé et sélectionné."""
         # Adultes seulement : un contact doit avoir 18 ans (règle des contacts
         # de l'auberge) ; les enfants restent sur leur fiche de séjour.
         if self.guest_type != 'adult' or self.partner_id \
                 or not (self.last_name and self.first_name):
             return
-        warning = self.env['hotel.reservation'].with_context(
-            hotel_homonym_field=_("Contact existant"),
-        )._homonym_warning(self.last_name, self.first_name)
-        if warning:
-            return warning
         values = {}
         for fname in self._PARTNER_FIELDS:
             values[fname] = self[fname]

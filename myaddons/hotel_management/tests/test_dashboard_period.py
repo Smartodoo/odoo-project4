@@ -18,7 +18,7 @@ class TestDashboardPeriod(TransactionCase):
         # 2 lits du 10 au 13/01/2091 : 3 nuits x 2 places = 6 nuitées
         cls.resa = cls.env['hotel.reservation'].create({
             'partner_id': partner.id, 'checkin': date(2091, 1, 10), 'checkout': date(2091, 1, 13),
-            'booking_type': 'bed', 'line_ids': [
+            'booking_type': 'bed', 'children': 1, 'line_ids': [
                 (0, 0, {'bed_id': cls.room.bed_ids[0].id}),
                 (0, 0, {'bed_id': cls.room.bed_ids[1].id})]})
         cls.resa.action_confirm()

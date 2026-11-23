@@ -532,6 +532,34 @@ class HotelReservation(models.Model):
             return {'warning': {'title': _("Capacité du type de chambre dépassée"),
                                 'message': message}}
 
+    def _bed_count_message(self):
+        """Location par lit : il faut exactement un lit par personne.
+        Message d'erreur si ce n'est pas le cas, sinon False."""
+        self.ensure_one()
+        if self.booking_type != 'bed' or self.state in ('cancel', 'checkout'):
+            return False
+        beds = len(self.line_ids.bed_ids)
+        if beds != (self.guest_count or 0):
+            return _(
+                "Réservation par lit : le nombre de lits sélectionnés (%(beds)s) "
+                "doit être égal au nombre de personnes (%(guests)s).\n\n"
+                "Ajoutez ou retirez des lits, ou corrigez le nombre d'adultes / "
+                "d'enfants.",
+                beds=beds, guests=self.guest_count or 0)
+        return False
+
+    _BED_COUNT_FIELDS = {'state', 'booking_type', 'line_ids', 'guest_count', 'adults', 'children'}
+
+    def _check_bed_count(self):
+        # Vérifié en fin de create/write (et pas via @api.constrains) : le
+        # recalcul de guest_count déclenche les contraintes en cours
+        # d'écriture, avant la suppression des lits retirés dans le même
+        # enregistrement.
+        for rec in self:
+            message = rec._bed_count_message()
+            if message:
+                raise ValidationError(message)
+
     @api.constrains('state', 'checkin', 'checkout', 'line_ids', 'guest_count', 'adults', 'children')
     def _check_booking_integrity(self):
         """Toute modification d'une réservation déjà confirmée ou enregistrée
@@ -856,11 +884,6 @@ class HotelReservation(models.Model):
         suite est enregistrée sur la fiche à l'enregistrement de la réservation."""
         if self.partner_id or not (self.partner_last_name and self.partner_first_name):
             return
-        warning = self._homonym_warning(self.partner_last_name, self.partner_first_name)
-        if warning:
-            # Client peut-être déjà connu : on ne crée rien, on prévient. Si
-            # c'est une autre personne, le contact est créé à l'enregistrement.
-            return warning
         partner_vals = {}
         for fname, partner_field in self._partner_related_fields().items():
             value = self[fname]
@@ -926,6 +949,7 @@ class HotelReservation(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'hotel.reservation') or _('Nouveau')
         records = super().create(vals_list)
+        records._check_bed_count()
         records._sync_guests()
         for rec in records:
             if rec.source == 'website' and rec._hotel_post_online_channel():
@@ -942,6 +966,8 @@ class HotelReservation(models.Model):
         res = super().write(vals)
         if 'booking_type' in vals:
             self.line_ids._force_room_beds()
+        if self._BED_COUNT_FIELDS & set(vals):
+            self._check_bed_count()
         if ('adults' in vals or 'children' in vals or 'guest_count' in vals) \
                 and not self.env.context.get('hotel_guest_sync'):
             self._sync_guests()
@@ -1000,6 +1026,9 @@ class HotelReservation(models.Model):
             if not rec.line_ids:
                 raise UserError(_("Ajoutez au moins une chambre avant de confirmer."))
             rec._check_identity_complete(_("Confirmation"))
+            message = rec._bed_count_message()
+            if message:
+                raise UserError(message)
             rec._check_guest_places()
             rec._check_availability()
             rec.state = 'confirmed'

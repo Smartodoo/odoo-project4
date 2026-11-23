@@ -278,9 +278,9 @@ class HotelWebsite(http.Controller):
                         errors.append(
                             "Lit(s) indisponible(s) sur la période : %s."
                             % ', '.join(unavailable.mapped('name')))
-                    if guests > len(beds):
+                    if guests != len(beds):
                         errors.append(
-                            "Vous êtes %s personne(s) : sélectionnez au moins %s lit(s)."
+                            "Vous êtes %s personne(s) : sélectionnez exactement %s lit(s)."
                             % (guests, guests))
             else:
                 room_places = room.capacity or len(room.bed_ids.filtered('active'))

@@ -35,7 +35,7 @@ class TestWebsiteSearchOrder(HttpCase):
         beds = cls.p1.bed_ids[:2] | cls.p2.bed_ids[:1]
         resa = cls.env['hotel.reservation'].create({
             'partner_id': partner.id, 'checkin': date(2092, 3, 10), 'checkout': date(2092, 3, 12),
-            'booking_type': 'bed',
+            'booking_type': 'bed', 'children': len(beds) - 1,
             'line_ids': [(0, 0, {'bed_id': b.id}) for b in beds]})
         resa.action_confirm()
 

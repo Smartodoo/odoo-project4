@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from odoo import fields
+from odoo.exceptions import ValidationError
 from odoo.tests import Form, TransactionCase, tagged
 
 
@@ -133,7 +134,8 @@ class TestReservationForm(TransactionCase):
         self.assertEqual(labels, ['Adulte', 'Adulte', 'Enfant'])
         self.assertIn('Benali Amine', resa.guest_ids.mapped('name'))
         # Moins de personnes : les fiches en trop disparaissent
-        resa.write({'adults': 2, 'children': 0})
+        resa.write({'adults': 2, 'children': 0,
+                    'line_ids': [(2, line.id) for line in resa.line_ids[2:]]})
         self.assertEqual(resa.guest_ids.mapped('label'), ['Adulte'])
         self.assertEqual(resa.guest_count, 2)
 
@@ -222,25 +224,35 @@ class TestReservationForm(TransactionCase):
         resa.action_checkin()
         self.assertEqual(resa.state, 'checkin')
 
-    def test_homonym_warning(self):
-        """Nom + prénom déjà connus : avertissement, pas de création immédiate."""
-        self.env['res.partner'].create({
-            'hotel_last_name': 'Brahimi', 'hotel_first_name': 'Nadia',
-            'phone': '0770000000', 'hotel_birthdate': '1985-03-02'})
-        resa = self._new(partner_last_name=' brahimi', partner_first_name='NADIA ')
-        res = resa._onchange_partner_names_create()
-        self.assertFalse(resa.partner_id)
-        self.assertIn('Brahimi Nadia', res['warning']['message'])
-        self.assertIn('02/03/1985', res['warning']['message'])
-        # Contact créé avec seulement un nom complet (sans nom/prénom séparés)
-        self.env['res.partner'].create({'name': 'Kaci Yacine'})
-        res = self._new(partner_last_name='Kaci', partner_first_name='Yacine'
-                        )._onchange_partner_names_create()
-        self.assertTrue(res and 'Kaci Yacine' in res['warning']['message'])
+    def test_no_homonym_warning(self):
+        """Nouveau client homonyme d'un contact existant : plus d'alerte, le
+        contact est créé directement."""
+        existing = self.env['res.partner'].create({
+            'hotel_last_name': 'Brahimi', 'hotel_first_name': 'Nadia'})
+        resa = self._new(partner_last_name='Brahimi', partner_first_name='Nadia')
+        self.assertFalse(resa._onchange_partner_names_create())
+        self.assertTrue(resa.partner_id and resa.partner_id != existing)
+
+    def test_bed_count_equals_guests(self):
+        """Location par lit : lits sélectionnés = personnes, sinon refus."""
+        beds = self.r2.bed_ids
+        self.assertGreaterEqual(len(beds), 2)
+        vals = {'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+                'booking_type': 'bed'}
+        with self.assertRaises(ValidationError):
+            self.env['hotel.reservation'].create(dict(
+                vals, adults=1, line_ids=[(0, 0, {'bed_id': b.id}) for b in beds[:2]]))
+        with self.assertRaises(ValidationError):
+            self.env['hotel.reservation'].create(dict(
+                vals, adults=2, line_ids=[(0, 0, {'bed_id': beds[0].id})]))
+        resa = self.env['hotel.reservation'].create(dict(
+            vals, adults=2, line_ids=[(0, 0, {'bed_id': b.id}) for b in beds[:2]]))
+        with self.assertRaises(ValidationError):
+            resa.write({'adults': 1})
 
     def test_guest_contact_created(self):
         """Autres personnes : contact créé/sélectionné au nom + prénom, fiche
-        contact remplie, avertissement si homonyme."""
+        contact remplie, homonyme créé sans alerte."""
         Guest = self.env['hotel.reservation.guest']
         g = Guest.new({'guest_type': 'adult', 'phone': '0551112233', 'last_name': 'Saidi'})
         g.first_name = 'Omar'
@@ -257,13 +269,13 @@ class TestReservationForm(TransactionCase):
                      'birthdate': '1979-07-01', 'id_number': 'X123'})
         self.assertEqual(str(partner.hotel_birthdate), '1979-07-01')
         self.assertEqual(partner.hotel_id_number, 'X123')
-        # Homonyme : avertissement, rien de créé
+        # Homonyme : plus d'alerte, nouveau contact créé directement
         g2 = Guest.new({'guest_type': 'adult', 'last_name': 'saidi', 'first_name': 'omar'})
-        res = g2._onchange_names_create_partner()
-        self.assertFalse(g2.partner_id)
-        self.assertIn('Contact existant', res['warning']['message'])
+        self.assertFalse(g2._onchange_names_create_partner())
+        self.assertTrue(g2.partner_id and g2.partner_id != partner)
         # ... puis enregistrée quand même : nouveau contact créé à l'enregistrement
-        resa.write({'adults': 3, 'children': 1})
+        resa.write({'adults': 3, 'children': 1,
+                    'line_ids': [(0, 0, {'bed_id': b.id}) for b in self.r3.bed_ids[:2]]})
         other = resa.guest_adult_ids - guest
         self.assertFalse(other.partner_id)
         other.write({'last_name': 'Saidi', 'first_name': 'Omar', 'birthdate': '1990-01-01'})
@@ -291,7 +303,8 @@ class TestReservationForm(TransactionCase):
         # Compatibilité site web / imports : écrire le total -> adultes déduits
         resa = self.env['hotel.reservation'].create({
             'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
-            'booking_type': 'bed', 'guest_count': 3, 'children': 1})
+            'booking_type': 'bed', 'guest_count': 3, 'children': 1,
+            'line_ids': [(0, 0, {'bed_id': b.id}) for b in self.r3.bed_ids]})
         self.assertEqual((resa.adults, resa.guest_count), (2, 3))
 
     def test_room_type_follows_booking_type(self):
@@ -323,7 +336,10 @@ class TestReservationForm(TransactionCase):
         from odoo.exceptions import ValidationError
         self.type_dorm.default_capacity = 2
         vals = {'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
-                'booking_type': 'bed', 'room_type_id': self.type_dorm.id, 'guest_count': 3}
+                'booking_type': 'bed', 'room_type_id': self.type_dorm.id, 'guest_count': 3,
+                # la capacité du type (2) vient de réduire r3 à 2 lits
+                'line_ids': [(0, 0, {'bed_id': b.id})
+                             for b in self.r3.bed_ids | self.r2.bed_ids[:1]]}
         with self.assertRaises(ValidationError) as err:
             self.env['hotel.reservation'].create(vals)
         self.assertIn('Changez le type de chambre', str(err.exception))
@@ -333,10 +349,12 @@ class TestReservationForm(TransactionCase):
         self.assertTrue(warning and 'RF Dortoir' in warning['warning']['message'])
         # Dans la capacité, ou sans type : accepté
         vals['guest_count'] = 2
+        vals['line_ids'] = [(0, 0, {'bed_id': b.id}) for b in self.r3.bed_ids]
         resa = self.env['hotel.reservation'].create(vals)
         with self.assertRaises(ValidationError):
             resa.guest_count = 3
-        resa.write({'room_type_id': False, 'guest_count': 3})
+        resa.write({'room_type_id': False, 'guest_count': 3,
+                    'line_ids': [(0, 0, {'bed_id': self.r2.bed_ids[0].id})]})
         self.assertEqual(resa.guest_count, 3)
 
     def test_reception_can_create_clients(self):

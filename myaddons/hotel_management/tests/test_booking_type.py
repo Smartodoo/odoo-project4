@@ -102,7 +102,7 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
         form.checkin = self.ci
         form.checkout = self.co
         form.booking_type = 'bed'
-        form.adults = 1
+        form.children = len(self.room_a.bed_ids) - 2
         for bed in self.room_a.bed_ids[1:]:
             with form.line_ids.new() as line:
                 line.bed_id = bed
