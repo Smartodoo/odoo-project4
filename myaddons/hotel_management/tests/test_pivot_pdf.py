@@ -49,3 +49,34 @@ class TestPivotPdf(HttpCase):
                 "setTimeout(() => { if (document.querySelector('.o_hotel_pivot_pdf')) "
                 "{ console.log('test successful'); } else { console.error('bouton PDF absent'); } }, 3000)",
                 ready="!!document.querySelector('.o_pivot')", login='admin')
+
+    def test_list_pdf_route(self):
+        """Vue liste : tous les enregistrements filtrés, groupes et totaux."""
+        self.authenticate('admin', 'admin')
+        payload = {
+            'model': 'hotel.reservation', 'domain': [], 'group_by': ['source', 'checkin:month'],
+            'order': 'checkin desc', 'title': 'Performance par source', 'filters': [],
+            'columns': [{'name': 'name', 'label': 'Référence', 'sum': False},
+                        {'name': 'partner_id', 'label': 'Client', 'sum': False},
+                        {'name': 'checkin', 'label': 'Arrivée', 'sum': False},
+                        {'name': 'amount_total', 'label': 'Total', 'sum': True}],
+        }
+        res = self.url_open('/hotel/list/pdf', data={
+            'data': json.dumps(payload), 'csrf_token': self.csrf_token()}, timeout=60)
+        self.assertEqual(res.status_code, 200, res.text[:500])
+        self.assertIn(b'Performance par source', res.content)
+        self.assertIn(b'Total', res.content)
+        # Modèle non autorisé : refusé
+        payload['model'] = 'res.users'
+        res = self.url_open('/hotel/list/pdf', data={
+            'data': json.dumps(payload), 'csrf_token': self.csrf_token()}, timeout=60)
+        self.assertNotEqual(res.status_code, 200)
+
+    def test_list_button_in_reports(self):
+        for action in ('action_hotel_revenue_report', 'action_hotel_revenue_by_bed',
+                       'action_hotel_revenue_by_source'):
+            self.browser_js(
+                '/odoo/action-hotel_management.%s?view_type=list' % action,
+                "setTimeout(() => { if (document.querySelector('.o_hotel_list_pdf')) "
+                "{ console.log('test successful'); } else { console.error('bouton PDF liste absent'); } }, 3000)",
+                ready="!!document.querySelector('.o_list_view')", login='admin')

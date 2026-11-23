@@ -130,6 +130,67 @@
         </t>
     </template>
 
+    <record id="action_report_hotel_list" model="ir.actions.report">
+        <field name="name">Rapport Auberge (liste)</field>
+        <field name="model">hotel.revenue.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">hotel_management.report_hotel_list</field>
+        <field name="paperformat_id" ref="paperformat_hotel_landscape"/>
+    </record>
+
+    <template id="report_hotel_list">
+        <t t-call="web.html_container">
+            <t t-set="company" t-value="res_company"/>
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h3 t-out="hotel_list['title']"/>
+                    <div class="text-muted mb-2" style="font-size: 13px;">
+                        Imprimé le <t t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                        — <t t-out="hotel_list['count']"/> enregistrement(s)
+                        <t t-if="hotel_list['truncated']"> (limité aux premiers)</t>
+                        <t t-if="hotel_list['filters']"> — Filtres : <t t-out="' ; '.join(hotel_list['filters'])"/></t>
+                    </div>
+                    <table class="table table-sm table-bordered" style="font-size: 13px;">
+                        <thead>
+                            <tr>
+                                <t t-foreach="hotel_list['columns']" t-as="col">
+                                    <th t-att-class="'text-end' if col.get('numeric') else ''" t-out="col['label']"/>
+                                </t>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="hotel_list['rows']" t-as="row">
+                                <tr t-if="row['type'] == 'group'" style="background-color: #f2f2f2;" class="fw-bold">
+                                    <t t-foreach="hotel_list['columns']" t-as="col">
+                                        <td t-if="col_first" t-att-style="'padding-left: %spx;' % (4 + 14 * row['level'])">
+                                            <t t-out="row['label']"/> (<t t-out="row['count']"/>)
+                                        </td>
+                                        <td t-else="" class="text-end text-nowrap" t-out="row['cells'].get(col['name'], '')"/>
+                                    </t>
+                                </tr>
+                                <tr t-else="">
+                                    <t t-foreach="hotel_list['columns']" t-as="col">
+                                        <td t-att-class="'text-end text-nowrap' if col.get('numeric') else ''"
+                                            t-att-style="('padding-left: %spx;' % (4 + 14 * row['level'])) if col_first else None"
+                                            t-out="row['cells'].get(col['name'], '')"/>
+                                    </t>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot t-if="hotel_list['grand_total']">
+                            <tr class="fw-bold">
+                                <t t-foreach="hotel_list['columns']" t-as="col">
+                                    <td t-if="col_first">Total</td>
+                                    <td t-else="" class="text-end text-nowrap" t-out="hotel_list['grand_total'].get(col['name'], '')"/>
+                                </t>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
     <!-- ================= GABARITS ================= -->
 
     <!-- Bloc commun : client + séjour -->
