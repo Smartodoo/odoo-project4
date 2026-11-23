@@ -1,5 +1,6 @@
 from datetime import date
 
+from odoo import fields
 from odoo.tests import TransactionCase, tagged
 
 
@@ -49,4 +50,5 @@ class TestDashboardPeriod(TransactionCase):
         self.assertEqual(data['period']['start'], '2091-01-01')
         self.assertEqual(data['period']['nights'], 6)
         default = self.env['hotel.reservation'].get_dashboard_data()
-        self.assertTrue(default['period']['start'].endswith('-01'))
+        today = str(fields.Date.context_today(self.env['hotel.reservation']))
+        self.assertEqual((default['period']['start'], default['period']['end']), (today, today))

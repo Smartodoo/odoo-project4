@@ -11,12 +11,12 @@ export class HotelDashboard extends Component {
         this.state = proxy({
             data: null,
             loading: true,
-            preset: "month",
+            preset: "today",
             dateFrom: "",
             dateTo: "",
             periodError: "",
         });
-        this.applyPreset("month", false);
+        this.applyPreset("today", false);
         onWillStart(() => this.loadData());
     }
 

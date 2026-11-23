@@ -1223,10 +1223,10 @@ class HotelReservation(models.Model):
         """Données agrégées pour le tableau de bord hôtelier.
         date_from / date_to (« AAAA-MM-JJ », inclus) : période du bloc « Sur la
         période » (réservations, CA, encaissements, nuitées, occupation moyenne).
-        Par défaut : du 1er du mois à aujourd'hui. Les autres indicateurs
+        Par défaut : aujourd'hui. Les autres indicateurs
         (chambres, clients présents, arrivées / départs…) restent en temps réel."""
         today = fields.Date.context_today(self)
-        date_from = fields.Date.to_date(date_from) or today.replace(day=1)
+        date_from = fields.Date.to_date(date_from) or today
         date_to = fields.Date.to_date(date_to) or today
         if date_from > date_to:
             date_from, date_to = date_to, date_from
