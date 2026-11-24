@@ -68,9 +68,13 @@ class TestReservationForm(TransactionCase):
         other.action_confirm()
         beds = self._new(guest_count=2).proposed_bed_ids._origin
         self.assertEqual(beds, self.r3.bed_ids[1:])
-        # 1 personne : pas de chambre partielle avec 1 lit libre -> lits des
-        # chambres disponibles (r2), pas r3
-        self.assertEqual(self._new(guest_count=1).proposed_bed_ids._origin, self.r2.bed_ids)
+        # 1 personne : aucune chambre (partielle ou libre) avec 1 lit libre ;
+        # i = 1 -> 2 lits libres : la chambre partielle r3 passe avant r2 libre
+        self.assertEqual(self._new(guest_count=1).proposed_bed_ids._origin, self.r3.bed_ids[1:])
+        # 3 personnes : r3 n'a plus que 2 lits libres, aucune chambre de 3 ->
+        # tout, la plus libre d'abord, partielle avant libre à égalité
+        beds = self._new(guest_count=3).proposed_bed_ids._origin
+        self.assertEqual(beds, self.r3.bed_ids[1:] + self.r2.bed_ids)
         # Autres dates : r3 libre en entier -> règle des chambres disponibles
         later = self.co + timedelta(days=5)
         beds = self._new(guest_count=2, checkin=later,
