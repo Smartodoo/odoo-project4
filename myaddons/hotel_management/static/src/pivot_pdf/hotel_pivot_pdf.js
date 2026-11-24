@@ -9,6 +9,22 @@ import { PivotRenderer } from "@web/views/pivot/pivot_renderer";
 
 export class HotelPivotPdfRenderer extends PivotRenderer {
     async onPrintPdfClicked() {
+        // Un seul PDF à la fois : un double clic occupait les 2 workers
+        // (wkhtmltopdf) et bloquait tout le serveur jusqu'au timeout.
+        if (this._hotelPdfPrinting) {
+            return;
+        }
+        this._hotelPdfPrinting = true;
+        this.env.services.ui.block();
+        try {
+            await this._hotelPrintPdf();
+        } finally {
+            this.env.services.ui.unblock();
+            this._hotelPdfPrinting = false;
+        }
+    }
+
+    async _hotelPrintPdf() {
         const table = this.model.exportData();
         const facets = this.env.searchModel ? this.env.searchModel.facets : [];
         table.filters = facets.map((f) => [...f.values].join(` ${f.separator || "ou"} `));
