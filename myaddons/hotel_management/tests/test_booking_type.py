@@ -84,10 +84,15 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
 
         self._book_bed(self.room_a.bed_ids[0])
         new = Resa.new(dict(vals, guest_count=2))
-        # A partiellement réservée, 2 lits libres : proposée en premier, puis B
+        # A partiellement réservée, 2 lits libres = 2 personnes : seulement A
         proposed = new.proposed_bed_ids._origin
-        self.assertEqual(proposed[:2], self.room_a.bed_ids[1:])
+        self.assertEqual(proposed, self.room_a.bed_ids[1:])
+        self.assertFalse(self.room_b.bed_ids & proposed)
+        # 1 personne : aucune chambre partielle avec 1 lit libre -> chambres
+        # disponibles (B, 2 lits), pas A
+        proposed = Resa.new(dict(vals, guest_count=1)).proposed_bed_ids._origin
         self.assertTrue(self.room_b.bed_ids <= proposed)
+        self.assertFalse(self.room_a.bed_ids & proposed)
 
         # Par chambre : seulement les chambres libres en entier (C ; pas D
         # déjà réservée, ni les dortoirs)

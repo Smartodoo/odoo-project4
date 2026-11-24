@@ -745,28 +745,60 @@ class HotelRoom(models.Model):
     @api.model
     def _hotel_ordered_free_beds(self, checkin, checkout, ignore_reservation=False,
                                  guests=1, taken_beds=None, domain=None):
-        """Location « par lit » : seuls les lits des chambres dont le nombre de
-        lits libres est le plus proche du nombre de personnes restant à loger
-        sont proposés (= personnes ; à défaut personnes + 1, puis + 2…), les
-        chambres déjà partagées d'abord. Si aucune chambre n'a assez de lits
-        libres pour tout le groupe, tous les lits libres sont proposés, des
-        chambres les plus libres aux moins libres (groupe à répartir)."""
+        """Location « par lit », sur la période [checkin, checkout[ :
+          1. s'il existe des chambres partiellement occupées (des lits déjà
+             loués par d'autres réservations sur la période) dont le nombre de
+             lits libres = nombre de personnes restant à loger, seuls leurs
+             lits libres sont proposés ;
+          2. sinon, les lits libres des chambres disponibles (aucun lit loué
+             sur la période) : celles dont le nombre de lits est le plus proche
+             du nombre de personnes (= personnes ; à défaut + 1, + 2…) ; si
+             aucune n'est assez grande, toutes, de la plus grande à la plus
+             petite (groupe à répartir) ;
+          3. s'il n'y a aucune chambre disponible : tous les lits libres, des
+             chambres les plus libres aux moins libres.
+        `taken_beds` = lits déjà choisis dans la réservation en cours : ils
+        comptent comme placés, et la chambre où l'on a commencé à placer le
+        groupe reste proposée pour ses lits restants."""
         taken_beds = taken_beds or self.env['hotel.bed']
         remaining = max(guests - len(taken_beds), 1)
-        offer = self._hotel_bed_offer(
-            checkin, checkout, ignore_reservation, taken_beds, domain=domain)
-        fitting = [len(o[1]) for o in offer if len(o[1]) >= remaining]
-        if fitting:
-            target = min(fitting)
-            offer = [o for o in offer if len(o[1]) == target]
-            offer.sort(key=lambda o: (not o[2], o[0].bed_price or 0.0, o[0].name or ''))
-        else:
-            offer.sort(key=lambda o: (-len(o[1]), not o[2], o[0].bed_price or 0.0,
-                                      o[0].name or ''))
-        beds = self.env['hotel.bed']
-        for _room, free, _partial in offer:
-            beds += free.sorted(lambda b: b.name or '')
-        return beds
+        # Occupation réelle (autres réservations) : sans les lits en cours de choix
+        offer = []
+        for room, free, partial in self._hotel_bed_offer(
+                checkin, checkout, ignore_reservation, domain=domain):
+            left = free - taken_beds
+            if left:
+                offer.append((room, left, partial, bool(free & taken_beds)))
+
+        def key(o):
+            return (o[0].bed_price or 0.0, o[0].name or '')
+
+        def beds_of(entries):
+            beds = self.env['hotel.bed']
+            for entry in entries:
+                beds += entry[1].sorted(lambda b: b.name or '')
+            return beds
+
+        # 1. Chambres partiellement occupées (ou entamées par cette
+        #    réservation) avec exactement le nombre de lits libres voulu
+        exact = [o for o in offer if (o[2] or o[3]) and len(o[1]) == remaining]
+        if exact:
+            exact.sort(key=lambda o: (not o[3], not o[2]) + key(o))
+            return beds_of(exact)
+        # 2. Chambres disponibles (aucun lit loué par un autre client)
+        available = [o for o in offer if not o[2]]
+        if available:
+            fitting = [len(o[1]) for o in available if len(o[1]) >= remaining]
+            if fitting:
+                target = min(fitting)
+                available = [o for o in available if len(o[1]) == target]
+                available.sort(key=lambda o: (not o[3],) + key(o))
+            else:
+                available.sort(key=lambda o: (not o[3], -len(o[1])) + key(o))
+            return beds_of(available)
+        # 3. Aucune chambre disponible : tous les lits libres
+        offer.sort(key=lambda o: (not o[3], -len(o[1])) + key(o))
+        return beds_of(offer)
 
     @api.model
     @api.readonly

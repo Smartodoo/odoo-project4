@@ -112,16 +112,18 @@ class TestReceptionRules(TransactionCase):
         Resa = self.env['hotel.reservation']
         # Chevauchement partiel (une nuit en commun) : lit non proposé
         new = Resa.new({'checkin': self.ci - timedelta(days=3),
-                        'checkout': self.ci + timedelta(days=1), 'booking_type': 'bed'})
+                        'checkout': self.ci + timedelta(days=1), 'booking_type': 'bed',
+                        'guest_count': 2})
         self.assertNotIn(bed1, new.proposed_bed_ids._origin)
         self.assertIn(bed2, new.proposed_bed_ids._origin)
         # Période qui englobe l'autre réservation : non proposé non plus
         new = Resa.new({'checkin': self.ci - timedelta(days=1),
-                        'checkout': self.co + timedelta(days=1), 'booking_type': 'bed'})
+                        'checkout': self.co + timedelta(days=1), 'booking_type': 'bed',
+                        'guest_count': 2})
         self.assertNotIn(bed1, new.proposed_bed_ids._origin)
         # Arrivée le jour du départ de l'autre client : le lit est libre
         new = Resa.new({'checkin': self.co, 'checkout': self.co + timedelta(days=2),
-                        'booking_type': 'bed'})
+                        'booking_type': 'bed', 'guest_count': 3})
         self.assertIn(bed1, new.proposed_bed_ids._origin)
         # Lit choisi puis dates changées vers une période où il est pris :
         # il est retiré de la réservation avec un avertissement
@@ -153,10 +155,11 @@ class TestReceptionRules(TransactionCase):
 
         bed = self.dorm.bed_ids[0]
         self._resa(booking_type='bed', line_ids=[(0, 0, {'bed_id': bed.id})])  # brouillon
-        new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'})
+        new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed',
+                        'guest_count': len(self.dorm.bed_ids) - 1})
         proposed = new.proposed_bed_ids._origin
         self.assertNotIn(bed, proposed)
-        # Le dortoir entamé est proposé en premier : ses lits restants
+        # Dortoir entamé avec autant de lits libres que de personnes : ses lits restants
         self.assertEqual(proposed[:len(self.dorm.bed_ids) - 1], self.dorm.bed_ids[1:])
 
     def test_taken_not_proposed_without_checkout(self):

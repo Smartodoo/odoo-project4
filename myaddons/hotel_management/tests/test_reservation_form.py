@@ -60,15 +60,22 @@ class TestReservationForm(TransactionCase):
         beds = self._new(guest_count=4).proposed_bed_ids._origin
         self.assertEqual(beds[:3], self.r3.bed_ids)
         self.assertEqual(beds[3:], self.r2.bed_ids)
-        # Chambre déjà partagée avec 2 lits libres : proposée en premier, avec
-        # les autres chambres de 2 lits libres
+        # Chambre partiellement occupée avec 2 lits libres = 2 personnes :
+        # seuls ses lits sont proposés
         other = self.env['hotel.reservation'].create({
             'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
             'booking_type': 'bed', 'line_ids': [(0, 0, {'bed_id': self.r3.bed_ids[0].id})]})
         other.action_confirm()
         beds = self._new(guest_count=2).proposed_bed_ids._origin
-        self.assertEqual(beds[:2], self.r3.bed_ids[1:])
-        self.assertEqual(beds[2:], self.r2.bed_ids)
+        self.assertEqual(beds, self.r3.bed_ids[1:])
+        # 1 personne : pas de chambre partielle avec 1 lit libre -> lits des
+        # chambres disponibles (r2), pas r3
+        self.assertEqual(self._new(guest_count=1).proposed_bed_ids._origin, self.r2.bed_ids)
+        # Autres dates : r3 libre en entier -> règle des chambres disponibles
+        later = self.co + timedelta(days=5)
+        beds = self._new(guest_count=2, checkin=later,
+                         checkout=later + timedelta(days=1)).proposed_bed_ids._origin
+        self.assertEqual(beds, self.r2.bed_ids)
         # Lits déjà choisis : comptés comme placés (2 personnes, 1 lit choisi
         # dans r2 -> reste 1 personne -> la chambre où il reste 1 lit : r2)
         bed = self.r2.bed_ids[0]
