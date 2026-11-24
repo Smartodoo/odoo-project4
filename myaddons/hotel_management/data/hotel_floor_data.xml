@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo noupdate="1">
-    <record id="floor_1" model="hotel.floor">
+    <record id="floor_1" model="hotel.floor" forcecreate="0">
         <field name="name">1</field>
         <field name="sequence">10</field>
     </record>
-    <record id="floor_2" model="hotel.floor">
+    <record id="floor_2" model="hotel.floor" forcecreate="0">
         <field name="name">2</field>
         <field name="sequence">20</field>
     </record>
-    <record id="floor_3" model="hotel.floor">
+    <record id="floor_3" model="hotel.floor" forcecreate="0">
         <field name="name">3</field>
         <field name="sequence">30</field>
     </record>

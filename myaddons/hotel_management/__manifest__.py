@@ -23,8 +23,8 @@ Gestion d'auberge (PMS) — cahier des charges complet
     'data': [
         'security/hotel_security.xml',
         'data/hotel_sequence.xml',
-        'data/hotel_data.xml',
         'data/hotel_floor_data.xml',
+        'data/hotel_data.xml',
         'data/hotel_customer_type_data.xml',
         'data/mail_template_data.xml',
         'data/website_data.xml',
