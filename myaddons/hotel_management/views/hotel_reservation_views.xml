@@ -101,6 +101,7 @@
                         </group>
                         <group name="stay_rooms">
                             <field name="booking_type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="bed_placement" widget="radio" invisible="booking_type != 'bed'"/>
                             <field name="room_type_id" placeholder="Type le moins cher"
                                    options="{'no_create': True, 'no_open': True}"/>
                             <field name="floor_id" required="state not in ('cancel', 'checkout')"

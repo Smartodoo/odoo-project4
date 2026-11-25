@@ -143,7 +143,9 @@ class TestReservationForm(TransactionCase):
 
     def test_bed_partial_rooms_before_free_rooms(self):
         """Par lit : une chambre partiellement occupée passe avant une chambre
-        libre, même si elle a plus de lits libres que de personnes."""
+        libre, même si elle a plus de lits libres que de personnes ; tant
+        qu'il existe une chambre partielle, les chambres libres ne sont
+        proposées qu'en dernier recours."""
         Room = self.env['hotel.room']
         self.r2.technical_state = 'out_of_service'
         big = Room.create({'name': 'RF-B3', 'capacity': 3, 'floor_id': self.floor.id})
@@ -156,9 +158,66 @@ class TestReservationForm(TransactionCase):
                          .proposed_bed_ids._origin, self.r3.bed_ids[1:])
         self.assertEqual(self._new(guest_count=2, floor_id=self.floor.id)
                          .proposed_bed_ids._origin, self.r3.bed_ids[1:])
-        # 3 personnes : la partielle ne suffit plus -> chambre libre de 3 lits
-        self.assertEqual(self._new(guest_count=3, floor_id=self.floor.id)
-                         .proposed_bed_ids._origin, big.bed_ids)
+        # 3 personnes : la partielle ne suffit plus -> dernier recours, tous
+        # les lits libres, la partielle d'abord
+        beds = self._new(guest_count=3, floor_id=self.floor.id).proposed_bed_ids._origin
+        self.assertEqual(beds, self.r3.bed_ids[1:] | big.bed_ids)
+        self.assertEqual(beds[:2], self.r3.bed_ids[1:])
+
+    def _book_beds(self, beds):
+        resa = self.env['hotel.reservation'].create({
+            'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+            'booking_type': 'bed', 'children': len(beds) - 1,
+            'line_ids': [(0, 0, {'bed_id': b.id}) for b in beds]})
+        resa.action_confirm()
+        return resa
+
+    def test_bed_placement_fill_then_together(self):
+        """2 personnes, deux chambres partielles avec 1 lit libre chacune :
+        « compléter » propose ces 2 lits (chambres différentes) ; « ensemble »
+        propose une chambre partielle avec 2 lits libres (sinon 2 + i) ; les
+        chambres entièrement libres ne sont pas proposées."""
+        Room = self.env['hotel.room']
+        fl = self.floor.id
+        g1 = Room.create({'name': 'RF-G1', 'capacity': 2, 'floor_id': fl})
+        g2 = Room.create({'name': 'RF-G2', 'capacity': 3, 'floor_id': fl})
+        p3 = Room.create({'name': 'RF-P3', 'capacity': 3, 'floor_id': fl})
+        self._book_beds(g1.bed_ids[:1])          # g1 : 1 lit libre
+        self._book_beds(g2.bed_ids[:2])          # g2 : 1 lit libre
+        self._book_beds(p3.bed_ids[:1])          # p3 : 2 lits libres
+        # r2 / r3 restent entièrement libres
+
+        def proposed(guests, placement, **vals):
+            return self._new(guest_count=guests, floor_id=fl, bed_placement=placement,
+                             **vals).proposed_bed_ids._origin
+        gaps = g1.bed_ids[1:] | g2.bed_ids[2:]
+        self.assertEqual(proposed(2, 'fill'), gaps)
+        self.assertEqual(proposed(2, 'together'), p3.bed_ids[1:])
+        # 3 personnes, « compléter » : trous de 1, 1 puis 2 lits -> les 3 chambres
+        beds = proposed(3, 'fill')
+        self.assertEqual(beds, gaps | p3.bed_ids[1:])
+        self.assertEqual(beds[-2:], p3.bed_ids[1:])   # plus petits trous d'abord
+        # 3 personnes, « ensemble » : aucune partielle de 3 lits libres ->
+        # dernier recours, tous les lits libres, partielles d'abord
+        beds = proposed(3, 'together')
+        self.assertTrue(self.r3.bed_ids <= beds)
+        self.assertEqual(beds[:4], p3.bed_ids[1:] | gaps)
+        # 1 personne, « compléter » : pas de trou < 1 -> partielle à 1 lit libre
+        self.assertEqual(proposed(1, 'fill'), g1.bed_ids[1:] | g2.bed_ids[2:])
+        # un lit déjà choisi dans g1 : il reste 1 personne -> g2
+        bed = g1.bed_ids[1]
+        resa = self._new(guest_count=2, floor_id=fl, bed_placement='fill',
+                         line_ids=[(0, 0, {'bed_id': bed.id, 'bed_ids': [(6, 0, bed.ids)]})])
+        self.assertEqual(resa.proposed_bed_ids._origin, g2.bed_ids[2:])
+
+    def test_bed_free_rooms_only_without_partial(self):
+        """Aucune chambre partielle à l'étage : chambres libres (lits = N + i)."""
+        self.assertEqual(self._new(guest_count=2, floor_id=self.floor.id,
+                                   bed_placement='fill').proposed_bed_ids._origin,
+                         self.r2.bed_ids)
+        self.assertEqual(self._new(guest_count=3, floor_id=self.floor.id,
+                                   bed_placement='together').proposed_bed_ids._origin,
+                         self.r3.bed_ids)
 
     def test_dropdown_follows_order(self):
         resa = self._new(guest_count=2)

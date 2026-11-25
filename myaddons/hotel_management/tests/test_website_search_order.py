@@ -46,11 +46,16 @@ class TestWebsiteSearchOrder(HttpCase):
         return [n for pos, n in sorted(found) if pos >= 0], html
 
     def test_bed_order(self):
+        # chambres partagées seulement (les chambres vides ne sont pas
+        # proposées tant qu'une chambre partagée peut loger le groupe)
         order, _html = self._order('bed', 1, ['ZS-P1', 'ZS-P2', 'ZS-E2', 'ZS-E3'])
-        self.assertEqual(order, ['ZS-P1', 'ZS-P2', 'ZS-E2', 'ZS-E3'])
+        self.assertEqual(order, ['ZS-P1', 'ZS-P2'])
         # 2 voyageurs : P1 (1 lit libre) ne convient plus
         order, _html = self._order('bed', 2, ['ZS-P1', 'ZS-P2', 'ZS-E2', 'ZS-E3'])
-        self.assertEqual(order, ['ZS-P2', 'ZS-E2', 'ZS-E3'])
+        self.assertEqual(order, ['ZS-P2'])
+        # 3 voyageurs : aucune chambre partagée assez grande -> chambres vides
+        order, _html = self._order('bed', 3, ['ZS-P1', 'ZS-P2', 'ZS-E2', 'ZS-E3'])
+        self.assertEqual(order, ['ZS-E3'])
 
     def test_room_order(self):
         order, _html = self._order('room', 2, ['ZS-R1', 'ZS-R2', 'ZS-R3'])

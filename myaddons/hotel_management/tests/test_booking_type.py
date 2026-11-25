@@ -181,11 +181,11 @@ class TestBookingTypeWebsite(BookingTypeCommon, HttpCase):
         self.assertNotIn('Chambre BT-D', by_room)   # déjà réservée
         self.assertNotIn('Chambre BT-A', by_room)   # un lit déjà loué
         by_bed = self._available_part(self._rooms_page('bed'))
-        # la chambre partagée d'abord, puis les chambres entièrement libres
+        # une chambre partagée peut loger le voyageur : les chambres
+        # entièrement libres ne sont pas proposées
         self.assertIn('Chambre BT-A', by_bed)
-        self.assertIn('Chambre BT-B', by_bed)
-        self.assertLess(by_bed.index('Chambre BT-A'), by_bed.index('Chambre BT-B'))
-        self.assertIn('Chambre BT-C', by_bed)       # toute chambre se loue au lit
+        self.assertNotIn('Chambre BT-B', by_bed)
+        self.assertNotIn('Chambre BT-C', by_bed)
         self.assertIn('chambres partagées', by_bed)
         # trop de voyageurs pour les lits libres de A -> A n'est plus proposée
         self.assertNotIn('Chambre BT-A', self._available_part(self._rooms_page('bed', 4)))

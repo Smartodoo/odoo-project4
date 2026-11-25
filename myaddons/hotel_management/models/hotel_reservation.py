@@ -117,6 +117,15 @@ class HotelReservation(models.Model):
         'hotel.room.type', string="Type de chambre", tracking=True,
         help="Fixe le prix de la réservation : « Prix chambre » du type pour une "
              "location par chambre, « Prix lit » pour une location par lit.")
+    bed_placement = fields.Selection([
+        ('fill', 'Compléter les chambres (lits séparés)'),
+        ('together', 'Ensemble dans une même chambre'),
+    ], string="Placement", default='fill', required=True, tracking=True,
+        help="Location par lit.\n"
+             "Compléter les chambres : d'abord les lits restants des chambres "
+             "partiellement occupées, quitte à séparer le groupe.\n"
+             "Ensemble : une chambre partiellement occupée ayant assez de lits "
+             "libres pour tout le groupe.")
     floor_id = fields.Many2one(
         'hotel.floor', string="Étage", tracking=True, index=True,
         help="Seules les chambres / lits de cet étage sont proposés ; toutes les "
@@ -579,13 +588,14 @@ class HotelReservation(models.Model):
                 rec._check_guest_places()
                 rec._check_availability()
 
-    @api.depends('checkin', 'checkout', 'booking_type', 'floor_id', 'room_type_id.capacity',
+    @api.depends('checkin', 'checkout', 'booking_type', 'bed_placement', 'floor_id',
+                 'room_type_id.capacity',
                  'guest_count', 'children', 'line_ids.room_id', 'line_ids.bed_ids')
     def _compute_proposed(self):
         """Chambres / lits proposés dans les lignes, seulement à l'étage choisi :
         par chambre, les chambres totalement vides de capacité = celle du type
         de chambre choisi si elle est renseignée, sinon personnes + i ;
-        par lit, d'abord
+        par lit, selon le placement (voir _hotel_ordered_free_beds) : d'abord
         les chambres partiellement occupées (lits libres = personnes + i),
         sinon les chambres libres (lits = personnes + i). Voir
         hotel.room._hotel_ordered_free_rooms / _hotel_ordered_free_beds."""
@@ -605,7 +615,8 @@ class HotelReservation(models.Model):
                 rec.proposed_bed_order = False
             else:
                 beds = Room._hotel_ordered_free_beds(
-                    checkin, checkout, origin, guests, rec.line_ids.bed_ids._origin, domain)
+                    checkin, checkout, origin, guests, rec.line_ids.bed_ids._origin, domain,
+                    placement=rec.bed_placement)
                 rec.proposed_room_ids = False
                 rec.proposed_room_order = False
                 rec.proposed_bed_ids = beds

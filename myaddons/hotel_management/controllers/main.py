@@ -65,12 +65,16 @@ class HotelWebsite(http.Controller):
                         lambda r: (r.capacity, r.name or ''))
                     occupied_rooms = rooms - available_rooms
                 else:
-                    # Par lit : d'abord les chambres déjà partagées, du nombre de
-                    # lits libres le plus proche du nombre de voyageurs au plus
-                    # grand ; puis les chambres entièrement vides (même ordre).
+                    # Par lit (placement « ensemble ») : les chambres déjà
+                    # partagées pouvant loger tout le groupe, du nombre de lits
+                    # libres le plus proche au plus grand ; les chambres
+                    # entièrement vides seulement si aucune chambre partagée ne
+                    # peut loger le groupe.
                     offer = Room._hotel_bed_offer(ci, co, domain=published)
                     fits = [(room, free, partial) for room, free, partial in offer
                             if room in rooms and len(free) >= guests]
+                    if any(partial for _r, _f, partial in fits):
+                        fits = [f for f in fits if f[2]]
                     fits.sort(key=lambda f: (not f[2], len(f[1]), f[0].name or ''))
                     available_rooms = Room.browse([room.id for room, _f, _p in fits])
                     for room, free, partial in fits:
@@ -319,6 +323,7 @@ class HotelWebsite(http.Controller):
             'booking_type': booking_type,
             'room_type_id': room_type.id,
             'floor_id': room.floor_id.id,
+            'bed_placement': 'together',
             'note': note,
             'line_ids': lines,
         })

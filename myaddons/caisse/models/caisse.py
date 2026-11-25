@@ -456,7 +456,7 @@ class CaisseSession(models.Model):
             'difference': rnd(s.difference),
         } for s in Session.search([
             ('company_id', '=', company.id), ('state', '=', 'closed')],
-            order='date_close desc', limit=5)]
+            order='date_close desc, id desc', limit=5)]
 
         missing_proof = self.env['caisse.move'].sudo().search_count([
             ('company_id', '=', company.id),
