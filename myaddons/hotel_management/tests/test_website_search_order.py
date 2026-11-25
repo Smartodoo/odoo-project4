@@ -13,13 +13,12 @@ class TestWebsiteSearchOrder(HttpCase):
     def setUpClass(cls):
         super().setUpClass()
         Room = cls.env['hotel.room']
-        btype = cls.env['hotel.room.type'].create({'name': 'ZS dortoir', 'rental_mode': 'bed'})
-        rtype = cls.env['hotel.room.type'].create({'name': 'ZS privée', 'rental_mode': 'room'})
+        btype = cls.env['hotel.room.type'].create({'name': 'ZS dortoir'})
+        rtype = cls.env['hotel.room.type'].create({'name': 'ZS privée'})
 
         def room(name, cap, mode, rtype_):
             return Room.create({
-                'name': name, 'room_type_id': rtype_.id, 'capacity': cap,
-                'rental_mode': mode, 'bed_price': 1000, 'room_price': 3000,
+                'name': name, 'capacity': cap,
                 'website_published': True})
 
         # par lit : P1 = 1 lit libre, P2 = 2 lits libres (partagées) ; E2 / E3 vides

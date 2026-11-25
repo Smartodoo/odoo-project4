@@ -117,7 +117,7 @@ export class HotelPlanning extends Component {
             context: {
                 default_checkin: day.date,
                 default_checkout: this.isoDate(next),
-                default_booking_type: room.rental_mode === "bed" ? "bed" : "room",
+                default_booking_type: "room",
                 default_line_ids: [[0, 0, { room_id: room.id }]],
             },
         });

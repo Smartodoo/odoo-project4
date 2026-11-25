@@ -6,17 +6,8 @@ from odoo.tests import TransactionCase, tagged
 class TestAutoBeds(TransactionCase):
     """Création d'une chambre : lits créés automatiquement selon la capacité."""
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        # Dortoir : le prix par lit n'est saisi que pour les chambres louées au lit
-        cls.rtype = cls.env['hotel.room.type'].create({
-            'name': 'Type auto', 'list_price': 2000, 'rental_mode': 'bed',
-            'default_capacity': 3})
-
     def _room(self, **vals):
-        values = {'name': 'AB-101', 'room_type_id': self.rtype.id, 'capacity': 3,
-                  'bed_price': 1500}
+        values = {'name': 'AB-101', 'capacity': 3}
         values.update(vals)
         return self.env['hotel.room'].create(values)
 
@@ -24,7 +15,11 @@ class TestAutoBeds(TransactionCase):
         room = self._room()
         self.assertEqual(sorted(room.bed_ids.mapped('name')),
                          ['AB-101-L1', 'AB-101-L2', 'AB-101-L3'])
-        self.assertEqual(set(room.bed_ids.mapped('price')), {1500})
+
+    def test_default_capacity_3(self):
+        room = self.env['hotel.room'].create({'name': 'AB-DEF'})
+        self.assertEqual(room.capacity, 3)
+        self.assertEqual(len(room.bed_ids), 3)
 
     def test_bed_name_editable(self):
         room = self._room()
@@ -43,50 +38,25 @@ class TestAutoBeds(TransactionCase):
         view = 'hotel_management.view_hotel_room_config_form'
         with Form(self.env['hotel.room'], view=view) as f:
             f.name = 'AB-202'
-            f.room_type_id = self.rtype  # capacité (3) et prix d'un lit repris du type
-            self.assertEqual(f.capacity, 3)
+            self.assertEqual(f.capacity, 3)  # capacité par défaut
             self.assertEqual(len(f.bed_ids), 3)
             with f.bed_ids.edit(0) as line:
                 self.assertEqual(line.name, 'AB-202-L1')
                 line.name = 'Lit porte'
         room = f.record
         self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-202-L2', 'AB-202-L3', 'Lit porte'])
-        self.assertEqual(room.bed_price, 2000)
-        self.assertEqual(set(room.bed_ids.mapped('price')), {2000})
 
-    def test_form_creation_with_bed_price(self):
+    def test_form_capacity_editable(self):
         from odoo.tests import Form
         view = 'hotel_management.view_hotel_room_config_form'
         with Form(self.env['hotel.room'], view=view) as f:
-            f.room_type_id = self.rtype
             f.name = 'AB-303'
-            f.bed_price = 1800  # saisi après la génération des lits
-        self.assertEqual(set(f.record.bed_ids.mapped('price')), {1800})
-
-    def test_no_bed_price_gives_zero(self):
-        room = self._room(bed_price=0)
-        self.assertEqual(set(room.bed_ids.mapped('price')), {0})
-
-    def test_bed_price_change_updates_beds(self):
-        room = self._room(capacity=2)
-        room.bed_ids[0].price = 999  # prix modifié à la main sur un lit
-        archived = room.bed_ids[1]
-        archived.active = False
-        room.bed_price = 2500
-        beds = room.with_context(active_test=False).bed_ids
-        self.assertEqual(set(beds.mapped('price')), {2500})
-        self.assertIn(archived, beds)
-        # les lits ajoutés ensuite prennent aussi le nouveau prix
-        room.capacity = 3
-        self.assertEqual(set(room.bed_ids.mapped('price')), {2500})
-
-    def test_bed_price_change_form(self):
-        from odoo.tests import Form
-        room = self._room(capacity=2)
-        view = 'hotel_management.view_hotel_room_config_form'
-        with Form(room, view=view) as f:
-            f.bed_price = 3000
-        self.assertEqual(set(room.bed_ids.mapped('price')), {3000})
+            f.capacity = 2
+            self.assertEqual(len(f.bed_ids), 2)
+        self.assertEqual(f.record.capacity, 2)
+        with Form(f.record, view=view) as f2:
+            f2.capacity = 3
+        self.assertEqual(len(f.record.bed_ids), 3)
 
     def test_capacity_increase_adds_beds(self):
         room = self._room(capacity=1)
@@ -94,15 +64,6 @@ class TestAutoBeds(TransactionCase):
         room.capacity = 3
         self.assertEqual(sorted(room.bed_ids.mapped('name')),
                          ['AB-101-L1', 'AB-101-L2', 'Lit fenêtre'])
-
-    def test_capacity_follows_type(self):
-        # La capacité ne se modifie plus sur la chambre mais sur son type
-        room = self._room(capacity=1)
-        self.rtype.default_capacity = 3
-        self.assertEqual(len(room.bed_ids), 3)
-        self.rtype.default_capacity = 2
-        self.assertEqual(sorted(room.bed_ids.mapped('name')),
-                         ['AB-101-L1', 'AB-101-L2'])
 
     def test_rename_room_renames_beds(self):
         room = self._room(capacity=3)
@@ -133,14 +94,14 @@ class TestAutoBeds(TransactionCase):
         return resa
 
     def test_capacity_decrease_removes_beds(self):
-        room = self._room(capacity=3, rental_mode='bed')
+        room = self._room(capacity=3)
         room.capacity = 1
         self.assertEqual(sorted(room.bed_ids.mapped('name')), ['AB-101-L1'])
         self.assertFalse(self.env['hotel.bed'].with_context(active_test=False).search(
             [('room_id', '=', room.id), ('active', '=', False)]))
 
     def test_capacity_decrease_keeps_history_and_busy(self):
-        room = self._room(capacity=3, rental_mode='bed')
+        room = self._room(capacity=3)
         beds = {b.name: b for b in room.bed_ids}
         old = self._book(beds['AB-101-L3'], -10)
         old.state = 'checkout'
@@ -163,5 +124,3 @@ class TestAutoBeds(TransactionCase):
         room = self._room(capacity=3)
         with self.assertRaises(ValidationError):
             room.capacity = 4
-        with self.assertRaises(ValidationError):
-            self.env['hotel.room.type'].create({'name': 'Trop grand', 'default_capacity': 4})

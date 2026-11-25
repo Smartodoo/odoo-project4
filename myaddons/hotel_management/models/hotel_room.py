@@ -36,15 +36,12 @@ class HotelRoom(models.Model):
     _inherit = ['mail.thread']
 
     name = fields.Char(string="Numéro / Nom", required=True, tracking=True)
-    room_type_id = fields.Many2one(
-        'hotel.room.type', string="Type", required=True, tracking=True)
     floor_id = fields.Many2one(
         'hotel.floor', string="Étage", ondelete='restrict', index=True,
         help="Étages saisis dans Configuration > Étages.")
     # Nom de l'étage (site web, planning, rapports, tri)
     floor = fields.Char(related='floor_id.name', string="Étage (nom)", store=True)
-    capacity = fields.Integer(string="Capacité", default=2)
-    price = fields.Monetary(string="Prix / nuit", currency_field='currency_id')
+    capacity = fields.Integer(string="Capacité", default=3, tracking=True)
     currency_id = fields.Many2one(
         'res.currency', default=lambda self: self.env.company.currency_id)
     amenity_ids = fields.Many2many('hotel.amenity', string="Équipements")
@@ -80,32 +77,20 @@ class HotelRoom(models.Model):
         ('to_repair', 'À réparer'),
     ], string="État ménage", default='clean', required=True, tracking=True)
 
-    # Mode de location : chambre privée, dortoir (au lit) ou mixte
-    rental_mode = fields.Selection([
-        ('room', 'Chambre entière'),
-        ('bed', 'Au lit (dortoir)'),
-    ], string="Mode de location", default='room', required=True, tracking=True,
-        help="Chambre entière : la chambre se loue à un seul client.\n"
-             "Au lit : chaque lit se loue séparément (dortoir).")
-    whole_room_pricing = fields.Selection([
-        ('sum_beds', 'Somme des prix des lits'),
-        ('fixed', 'Prix fixe de la chambre'),
-    ], string="Prix chambre entière", default='sum_beds', required=True,
-        tracking=True,
-        help="Somme des lits : 3 lits à 2000 DA = 6000 DA la nuit.\n"
-             "Prix fixe : le champ « Prix / nuit » (tarifs saisonniers inclus).")
+    # Les prix sont portés par les types de chambre (choisi dans la
+    # réservation) : sur la chambre, simple « à partir de » (site web, tri).
     whole_room_price = fields.Monetary(
-        string="Prix chambre entière / nuit", currency_field='currency_id',
+        string="Prix chambre à partir de", currency_field='currency_id',
         compute='_compute_whole_room_price')
     bed_price_min = fields.Monetary(
         string="Prix lit à partir de", currency_field='currency_id',
         compute='_compute_whole_room_price')
     room_price = fields.Monetary(
-        string="Prix chambre", currency_field='currency_id',
-        help="Prix / nuit de la chambre entière (réservation « chambre entière »).")
+        string="Prix chambre (à partir de)", currency_field='currency_id',
+        compute='_compute_whole_room_price')
     bed_price = fields.Monetary(
-        string="Prix lit", currency_field='currency_id',
-        help="Prix / nuit d'un lit. Même prix pour tous les lits de la chambre.")
+        string="Prix lit (à partir de)", currency_field='currency_id',
+        compute='_compute_whole_room_price')
 
     status = fields.Selection([
         ('available', 'Disponible'),
@@ -182,50 +167,11 @@ class HotelRoom(models.Model):
                     "(capacité saisie : %(capacity)s).",
                     room=room.name, max=MAX_ROOM_CAPACITY, capacity=room.capacity))
 
-    _prices_non_negative = models.Constraint(
-        'CHECK(price >= 0 AND room_price >= 0 AND bed_price >= 0)',
-        "Les prix d'une chambre (chambre enti\u00e8re, lit) ne peuvent pas \u00eatre n\u00e9gatifs.",
-    )
-
-    @api.onchange('room_type_id')
-    def _onchange_room_type_id(self):
-        if self.room_type_id:
-            if not self.price:
-                self.price = self.room_type_id.list_price
-            # La capacité de la chambre est celle du type choisi (non modifiable
-            # sur la chambre) ; le prix du type est repris (modifiable) : prix
-            # de la chambre entière, ou prix d'un lit pour une location au lit.
-            if self.room_type_id.default_capacity:
-                self.capacity = self.room_type_id.default_capacity
-            self.rental_mode = self.room_type_id.rental_mode
-            if self.rental_mode == 'bed':
-                self.bed_price = self.room_type_id.list_price
-                for bed in self.bed_ids:
-                    bed.price = self.bed_price
-            else:
-                self.room_price = self.room_type_id.list_price
-            if self.room_type_id.amenity_ids:
-                self.amenity_ids = [(6, 0, self.room_type_id.amenity_ids.ids)]
-
     @api.model_create_multi
     def create(self, vals_list):
-        for vals in vals_list:
-            if vals.get('room_type_id'):
-                rtype = self.env['hotel.room.type'].browse(vals['room_type_id'])
-                if 'rental_mode' not in vals:
-                    vals['rental_mode'] = rtype.rental_mode
-                if 'capacity' not in vals and rtype.default_capacity:
-                    vals['capacity'] = rtype.default_capacity
-                price_field = 'bed_price' if vals['rental_mode'] == 'bed' else 'room_price'
-                if price_field not in vals:
-                    vals[price_field] = rtype.list_price
         rooms = super().create(vals_list)
         if not self.env.context.get('hotel_no_auto_beds'):
             rooms._create_missing_beds()
-        for room, vals in zip(rooms, vals_list):
-            if vals.get('bed_price'):
-                room._sync_bed_prices()
-        rooms._sync_bed_room_price()
         return rooms
 
     def write(self, vals):
@@ -236,39 +182,7 @@ class HotelRoom(models.Model):
         if 'capacity' in vals and not self.env.context.get('hotel_no_auto_beds'):
             self._create_missing_beds()
             self._remove_extra_beds()
-        if 'bed_price' in vals:
-            self._sync_bed_prices()
-        if {'bed_price', 'capacity', 'rental_mode', 'bed_ids'} & set(vals):
-            self._sync_bed_room_price()
         return res
-
-    def _bed_rooms_total(self):
-        """Location au lit : prix de la chambre = somme des prix de ses lits actifs."""
-        self.ensure_one()
-        beds = self.bed_ids.filtered('active')
-        if beds:
-            return sum(beds.mapped('price'))
-        return (self.bed_price or 0.0) * (self.capacity or 0)
-
-    def _sync_bed_room_price(self):
-        """Chambres louées au lit : le « Prix chambre » enregistré suit la somme
-        des lits (pas de prix chambre à saisir pour ce mode)."""
-        for room in self.filtered(lambda r: r.rental_mode == 'bed'):
-            total = room._bed_rooms_total()
-            if room.room_price != total:
-                super(HotelRoom, room).write({'room_price': total})
-
-    def _sync_bed_prices(self):
-        """Le « Prix lit » de la chambre fait foi : il est recopié sur tous ses
-        lits (actifs et archivés)."""
-        for room in self:
-            beds = room.with_context(active_test=False).bed_ids
-            beds.filtered(lambda b: b.price != room.bed_price).write({'price': room.bed_price})
-
-    @api.onchange('bed_price')
-    def _onchange_bed_price(self):
-        for bed in self.bed_ids:
-            bed.price = self.bed_price
 
     def _rename_beds(self, old_names):
         """Chambre renommée : <ancien>-L<n> devient <nouveau>-L<n>. Les lits
@@ -340,12 +254,11 @@ class HotelRoom(models.Model):
             taken = set(self.env['hotel.bed'].with_context(active_test=False).search(
                 [('room_id', '=', self._origin.id)]).mapped('name'))
             taken |= set(self.bed_ids.mapped('name'))
-            price = self._default_bed_price()
             commands = []
             for _i in range(-extra):
                 name = self._next_bed_reference(taken)
                 taken.add(name)
-                commands.append(Command.create({'name': name, 'price': price}))
+                commands.append(Command.create({'name': name}))
             self.bed_ids = commands
 
     def _create_missing_beds(self):
@@ -357,16 +270,14 @@ class HotelRoom(models.Model):
         bed_vals = []
         for room in self:
             existing = room.with_context(active_test=False).bed_ids
-            existing.filtered(lambda b: not b.price).price = room._default_bed_price()
             missing = (room.capacity or 0) - len(room.bed_ids)
             if missing <= 0:
                 continue
             taken = set(existing.mapped('name'))
-            price = room._default_bed_price()
             for _i in range(missing):
                 name = room._next_bed_reference(taken)
                 taken.add(name)
-                bed_vals.append({'room_id': room.id, 'name': name, 'price': price})
+                bed_vals.append({'room_id': room.id, 'name': name})
         if bed_vals:
             self.env['hotel.bed'].create(bed_vals)
 
@@ -395,10 +306,6 @@ class HotelRoom(models.Model):
             n += 1
         return "%s-L%s" % (self.name, n)
 
-    def _default_bed_price(self):
-        self.ensure_one()
-        return self.bed_price or 0.0
-
     def _number_new_beds(self, beds):
         """Numérote les nouveaux lits d'un formulaire : plusieurs lignes ajoutées
         avant l'enregistrement reçoivent sinon la même référence par défaut."""
@@ -410,8 +317,6 @@ class HotelRoom(models.Model):
             if not bed.name or bed.name in taken:
                 bed.name = self._next_bed_reference(taken)
             taken.add(bed.name)
-            if not bed.price:
-                bed.price = self._default_bed_price()
 
     @api.onchange('capacity', 'name')
     def _onchange_auto_beds(self):
@@ -424,14 +329,13 @@ class HotelRoom(models.Model):
             return self._onchange_topup_beds()
         auto = re.compile(r'.+-L\d+$')
         custom = self.bed_ids.filtered(lambda b: not auto.match(b.name or ''))
-        price = self._default_bed_price()
         commands = [Command.clear()] + [
-            Command.create({'name': b.name, 'price': b.price or price}) for b in custom]
+            Command.create({'name': b.name}) for b in custom]
         taken = set(custom.mapped('name'))
         for _i in range(max((self.capacity or 0) - len(custom), 0)):
             name = self._next_bed_reference(taken)
             taken.add(name)
-            commands.append(Command.create({'name': name, 'price': price}))
+            commands.append(Command.create({'name': name}))
         self.bed_ids = commands
 
     @api.onchange('bed_ids')
@@ -516,16 +420,16 @@ class HotelRoom(models.Model):
         for room in self:
             room.maintenance = room.technical_state != 'in_service'
 
-    @api.depends('room_price', 'bed_price', 'rental_mode', 'capacity',
-                 'bed_ids.price', 'bed_ids.active')
     def _compute_whole_room_price(self):
+        RoomType = self.env['hotel.room.type']
+        room_min = RoomType._hotel_min_price('room')
+        bed_min = RoomType._hotel_min_price('bed')
         for room in self:
-            room.whole_room_price = (room._bed_rooms_total() if room.rental_mode == 'bed'
-                                     else room.room_price)
-            room.bed_price_min = room.bed_price
+            room.room_price = room.whole_room_price = room_min
+            room.bed_price = room.bed_price_min = bed_min
 
     def _get_whole_room_price(self, day):
-        """Prix/nuit de la chambre entière (saisi sur la chambre)."""
+        """Prix/nuit « à partir de » de la chambre entière (types de chambre)."""
         self.ensure_one()
         return self.room_price
 
@@ -656,14 +560,11 @@ class HotelRoom(models.Model):
     def can_book_whole_room(self, checkin, checkout, ignore_reservation=False):
         """La chambre entière peut-elle être louée sur la période ?"""
         self.ensure_one()
-        return self.rental_mode != 'bed' and self.is_available(
-            checkin, checkout, ignore_reservation)
+        return self.is_available(checkin, checkout, ignore_reservation)
 
     def bookable_beds(self, checkin, checkout, ignore_reservation=False):
         """Lits louables individuellement sur la période."""
         self.ensure_one()
-        if self.rental_mode == 'room':
-            return self.env['hotel.bed']
         return self.available_beds(checkin, checkout, ignore_reservation)
 
     # ------------------------------------------------------------------
@@ -676,7 +577,7 @@ class HotelRoom(models.Model):
         (aucun lit loué, pas en maintenance) sur la période."""
         self = self.with_context(hotel_include_draft=True)
         rooms = self.search((domain or []) + [
-            ('maintenance', '=', False), ('rental_mode', '!=', 'bed')])
+            ('maintenance', '=', False)])
         if not (checkin and checkout and checkout > checkin):
             return rooms
         return rooms.filtered(
@@ -692,7 +593,7 @@ class HotelRoom(models.Model):
         self = self.with_context(hotel_include_draft=True)
         taken_beds = taken_beds or self.env['hotel.bed']
         rooms = self.search((domain or []) + [
-            ('maintenance', '=', False), ('rental_mode', '!=', 'room')])
+            ('maintenance', '=', False)])
         dated = checkin and checkout and checkout > checkin
         offer = []
         for room in rooms:
@@ -739,8 +640,8 @@ class HotelRoom(models.Model):
         if fitting:
             target = min(fitting)
             return rooms.filtered(lambda r: size(r) == target).sorted(
-                lambda r: (r.room_price or 0.0, r.name or ''))
-        return rooms.sorted(lambda r: (-size(r), r.room_price or 0.0, r.name or ''))
+                lambda r: r.name or '')
+        return rooms.sorted(lambda r: (-size(r), r.name or ''))
 
     @api.model
     def _hotel_ordered_free_beds(self, checkin, checkout, ignore_reservation=False,
@@ -768,7 +669,7 @@ class HotelRoom(models.Model):
                 offer.append((room, left, partial or started, started))
 
         def key(o):
-            return (not o[3], o[0].bed_price or 0.0, o[0].name or '')
+            return (not o[3], o[0].name or '')
 
         def beds_of(entries):
             beds = self.env['hotel.bed']
@@ -796,23 +697,25 @@ class HotelRoom(models.Model):
             return ordered
         return super().name_search(name, domain, operator, limit)
 
-    def _get_season(self, day):
-        """Tarif saisonnier actif le jour donné : celui du type de chambre en
-        priorité, sinon un tarif global (sans type)."""
+    def _get_season(self, day, room_type=False):
+        """Tarif saisonnier actif le jour donné : celui du type de chambre (de
+        la réservation) en priorité, sinon un tarif global (sans type)."""
         self.ensure_one()
         Season = self.env['hotel.rate.season'].sudo()
         base = [('date_start', '<=', day), ('date_end', '>=', day),
                 ('active', '=', True), ('company_id', 'in', (self.company_id.id, False))]
-        season = Season.search(
-            base + [('room_type_id', '=', self.room_type_id.id)], limit=1)
+        season = Season.browse()
+        if room_type:
+            season = Season.search(base + [('room_type_id', '=', room_type.id)], limit=1)
         return season or Season.search(base + [('room_type_id', '=', False)], limit=1)
 
-    def _get_night_price(self, day, booking_type='room', partner=False):
+    def _get_night_price(self, day, booking_type='room', partner=False, room_type=False):
         """Prix d'UNE nuit : chambre entière, ou un seul lit (booking_type='bed').
         Priorité (cahier des charges §5) :
           1. tarif spécial du client,
           2. tarif spécial de la période (tarif saisonnier),
-          3. prix de la chambre."""
+          3. prix du type de chambre choisi dans la réservation
+             (à défaut : le type le moins cher)."""
         self.ensure_one()
         is_bed = booking_type == 'bed'
         if partner:
@@ -821,21 +724,24 @@ class HotelRoom(models.Model):
             if special:
                 return special
         if day:
-            season = self._get_season(day)
+            season = self._get_season(day, room_type)
             season_price = season.bed_price if is_bed else season.price
             if season and season_price:
                 return season_price
+        if room_type:
+            return room_type.bed_price if is_bed else room_type.room_price
         return self.bed_price if is_bed else self.room_price
 
-    def _get_stay_unit_price(self, checkin, checkout, booking_type='room', partner=False):
+    def _get_stay_unit_price(self, checkin, checkout, booking_type='room', partner=False,
+                             room_type=False):
         """Prix moyen par nuit sur [checkin, checkout[ (les nuits d'un séjour à
         cheval sur deux périodes tarifaires sont prises chacune à leur prix)."""
         self.ensure_one()
         if not (checkin and checkout and checkout > checkin):
-            return self._get_night_price(checkin, booking_type, partner)
+            return self._get_night_price(checkin, booking_type, partner, room_type)
         nights = (checkout - checkin).days
         total = sum(
-            self._get_night_price(checkin + timedelta(days=n), booking_type, partner)
+            self._get_night_price(checkin + timedelta(days=n), booking_type, partner, room_type)
             for n in range(nights))
         return self.currency_id.round(total / nights) if self.currency_id else total / nights
 

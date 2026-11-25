@@ -17,16 +17,16 @@ class TestReservationForm(TransactionCase):
         cls.ci = fields.Date.today() + timedelta(days=1200)
         cls.co = cls.ci + timedelta(days=2)
         Type = cls.env['hotel.room.type']
-        cls.type_dorm = Type.create({'name': 'RF Dortoir', 'list_price': 1000})
-        cls.type_other = Type.create({'name': 'RF Autre', 'list_price': 1000})
+        cls.type_dorm = Type.create({'name': 'RF Dortoir', 'bed_price': 1000})
+        cls.type_other = Type.create({'name': 'RF Autre', 'room_price': 3000, 'bed_price': 1000})
         Room = cls.env['hotel.room']
+        # chambres de la base hors service : seules celles du test sont proposées
+        Room.search([]).write({'technical_state': 'out_of_service'})
 
-        def room(name, cap, rtype, mode='bed', price=1000):
-            return Room.create({'name': name, 'room_type_id': rtype.id, 'capacity': cap,
-                                'room_price': 3000, 'bed_price': price, 'rental_mode': mode})
-        cls.r3 = room('RF-3', 3, cls.type_dorm)
-        cls.r2 = room('RF-2', 2, cls.type_dorm)
-        cls.rx = room('RF-X', 2, cls.type_other)
+        def room(name, cap):
+            return Room.create({'name': name, 'capacity': cap})
+        cls.r3 = room('RF-3', 3)
+        cls.r2 = room('RF-2', 2)
         cls.partner = cls.env['res.partner'].create({
             'hotel_last_name': 'RF', 'hotel_first_name': 'Test', 'phone': '0550000001', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID0001', 'hotel_birthdate': '1990-01-01'})
 
@@ -36,13 +36,12 @@ class TestReservationForm(TransactionCase):
         values.update(vals)
         return self.env['hotel.reservation'].new(values)
 
-    def test_room_type_filters_proposals(self):
-        proposed = self._new(guest_count=2).proposed_bed_ids._origin
-        self.assertTrue(self.r2.bed_ids <= proposed)
-        self.assertFalse(self.rx.bed_ids & proposed)
-        # Sans type : toutes les chambres du bon nombre de lits
-        proposed = self._new(room_type_id=False, guest_count=2).proposed_bed_ids._origin
-        self.assertTrue(self.rx.bed_ids <= proposed)
+    def test_room_type_does_not_filter_proposals(self):
+        """Le type de chambre fixe le prix, il ne filtre plus les chambres."""
+        with_type = self._new(guest_count=2).proposed_bed_ids._origin
+        without = self._new(room_type_id=False, guest_count=2).proposed_bed_ids._origin
+        self.assertEqual(with_type, self.r2.bed_ids)
+        self.assertEqual(without, self.r2.bed_ids)
 
     def test_bed_order_like_website(self):
         """Par lit : seulement les chambres dont le nombre de lits libres =
@@ -88,17 +87,15 @@ class TestReservationForm(TransactionCase):
 
     def test_room_order_like_website(self):
         Room = self.env['hotel.room']
-        two = Room.create({'name': 'RF-R2', 'room_type_id': self.type_other.id, 'capacity': 2,
-                           'room_price': 3000, 'rental_mode': 'room'})
-        big = Room.create({'name': 'RF-R3', 'room_type_id': self.type_other.id, 'capacity': 3,
-                           'room_price': 3000, 'rental_mode': 'room'})
-        small = Room.create({'name': 'RF-R1', 'room_type_id': self.type_other.id, 'capacity': 1,
-                             'room_price': 3000, 'rental_mode': 'room'})
+        (self.r2 | self.r3).technical_state = 'out_of_service'
+        two = Room.create({'name': 'RF-R2', 'capacity': 2})
+        big = Room.create({'name': 'RF-R3', 'capacity': 3})
+        small = Room.create({'name': 'RF-R1', 'capacity': 1})
 
         def proposed(guests):
             return self._new(booking_type='room', room_type_id=self.type_other.id,
                              guest_count=guests).proposed_room_ids._origin
-        # nombre de lits = personnes uniquement (RF-X, dortoir, jamais proposée)
+        # nombre de lits = personnes uniquement
         self.assertEqual(proposed(2), two)
         self.assertEqual(proposed(3), big)
         self.assertEqual(proposed(1), small)
@@ -373,152 +370,75 @@ class TestReservationForm(TransactionCase):
         self.assertEqual((resa.adults, resa.guest_count), (2, 3))
 
     def test_room_type_follows_booking_type(self):
-        Room = self.env['hotel.room']
-        type_private = self.env['hotel.room.type'].create({'name': 'RF Privée', 'rental_mode': 'room'})
-        Room.create({'name': 'RF-P1', 'room_type_id': type_private.id, 'capacity': 2,
-                     'room_price': 3000, 'rental_mode': 'room'})
+        """Par lit : seuls les types ayant un prix lit ; par chambre : ceux
+        ayant un prix chambre. Changer de mode vide un type sans prix."""
         Type = self.env['hotel.room.type']
+        type_private = Type.create({'name': 'RF Privée', 'room_price': 5000})
         domain = self.env['hotel.reservation']._fields['room_type_id'].domain
         self.assertIn('booking_type', domain)
-        bed_types = Type.search([('room_ids.rental_mode', '=', 'bed')])
-        room_types = Type.search([('room_ids.rental_mode', '=', 'room')])
+        bed_types = Type.search([('bed_price', '>', 0), ('room_price', '>', -1)])
+        room_types = Type.search([('bed_price', '>', -1), ('room_price', '>', 0)])
         self.assertIn(self.type_dorm, bed_types)
         self.assertNotIn(type_private, bed_types)
         self.assertIn(type_private, room_types)
         self.assertNotIn(self.type_dorm, room_types)
-        # Passage « par lit » -> « par chambre » : un type dortoir est vidé
+        self.assertIn(self.type_other, bed_types & room_types)
         f = Form(self.env['hotel.reservation'])
         f.booking_type = 'bed'
         f.room_type_id = self.type_dorm
         f.booking_type = 'room'
         self.assertFalse(f.room_type_id)
-        f.room_type_id = type_private
-        f.booking_type = 'room'
-        self.assertEqual(f.room_type_id, type_private)
-
-
-    def test_guests_above_room_type_capacity(self):
-        from odoo.exceptions import ValidationError
-        self.type_dorm.default_capacity = 2
-        vals = {'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
-                'booking_type': 'bed', 'room_type_id': self.type_dorm.id, 'guest_count': 3,
-                # la capacité du type (2) vient de réduire r3 à 2 lits
-                'line_ids': [(0, 0, {'bed_id': b.id})
-                             for b in self.r3.bed_ids | self.r2.bed_ids[:1]]}
-        with self.assertRaises(ValidationError) as err:
-            self.env['hotel.reservation'].create(vals)
-        self.assertIn('Changez le type de chambre', str(err.exception))
-        # Avertissement immédiat dans le formulaire
-        resa = self._new(guest_count=3)
-        warning = resa._onchange_room_type_capacity()
-        self.assertTrue(warning and 'RF Dortoir' in warning['warning']['message'])
-        # Dans la capacité, ou sans type : accepté
-        vals['guest_count'] = 2
-        vals['line_ids'] = [(0, 0, {'bed_id': b.id}) for b in self.r3.bed_ids]
-        resa = self.env['hotel.reservation'].create(vals)
-        with self.assertRaises(ValidationError):
-            resa.guest_count = 3
-        resa.write({'room_type_id': False, 'guest_count': 3,
-                    'line_ids': [(0, 0, {'bed_id': self.r2.bed_ids[0].id})]})
-        self.assertEqual(resa.guest_count, 3)
-
-    def test_reception_can_create_clients(self):
-        reception = self.env.ref('hotel_management.group_hotel_user')
-        self.assertIn(self.env.ref('base.group_partner_manager'), reception.all_implied_ids)
-
-    def test_room_booking_lines_valid_in_form(self):
-        """Par chambre : la ligne (sans lit unique) ne doit pas être bloquée par
-        le champ « Lit » de l'onglet Lits (lignes partagées entre les onglets) ;
-        le lit n'est obligatoire qu'en location par lit. Vérifié aussi dans le
-        navigateur (réservation par chambre enregistrée puis confirmée)."""
-        from lxml import etree
-        arch = etree.fromstring(self.env.ref('hotel_management.view_hotel_reservation_form').arch)
-        beds = arch.xpath("//page[@name='beds']//field[@name='bed_id']")
-        self.assertEqual(len(beds), 1)
-        self.assertEqual(beds[0].get('required'), "booking_type == 'bed'")
-        room = self.env['hotel.room'].create({
-            'name': 'RF-C1', 'room_type_id': self.type_other.id, 'capacity': 2,
-            'room_price': 3000, 'rental_mode': 'room'})
-        resa = self.env['hotel.reservation'].create({
-            'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
-            'booking_type': 'room', 'line_ids': [(0, 0, {'room_id': room.id})]})
-        resa.action_confirm()
-        self.assertEqual(resa.state, 'confirmed')
+        f.room_type_id = self.type_other
+        f.booking_type = 'bed'
+        self.assertEqual(f.room_type_id, self.type_other)
 
 @tagged('post_install', '-at_install')
 class TestRoomCreation(TransactionCase):
-    """Création des chambres : capacité du type, prix selon le mode de location."""
+    """Chambres : ni type, ni mode, ni prix ; capacité modifiable (3 par
+    défaut). Les prix sont sur les types de chambre."""
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.env = cls.env(user=cls.env.ref('base.user_admin'))
-        Type = cls.env['hotel.room.type']
-        cls.type_dorm = Type.create({'name': 'RC Dortoir', 'rental_mode': 'bed',
-                                     'default_capacity': 3, 'list_price': 1000})
-        cls.type_room = Type.create({'name': 'RC Privée', 'rental_mode': 'room',
-                                     'default_capacity': 1, 'list_price': 4000})
 
-    def test_capacity_from_type(self):
-        room = self.env['hotel.room'].create({'name': 'RC-1', 'room_type_id': self.type_dorm.id})
+    def test_room_fields_removed(self):
+        Room = self.env['hotel.room']
+        for fname in ('room_type_id', 'rental_mode', 'price'):
+            self.assertNotIn(fname, Room._fields)
+        Type = self.env['hotel.room.type']
+        for fname in ('rental_mode', 'default_capacity', 'list_price'):
+            self.assertNotIn(fname, Type._fields)
+        self.assertIn('room_price', Type._fields)
+        self.assertIn('bed_price', Type._fields)
+
+    def test_capacity_default_and_editable(self):
+        room = self.env['hotel.room'].create({'name': 'RC-1'})
         self.assertEqual(room.capacity, 3)
         self.assertEqual(len(room.bed_ids), 3)
-        f = Form(self.env['hotel.room'], view='hotel_management.view_hotel_room_config_form')
-        f.name = 'RC-2'
-        f.room_type_id = self.type_room
-        self.assertEqual(f.capacity, 1)
-        f.room_type_id = self.type_dorm
-        self.assertEqual(f.capacity, 3)
-        self.assertEqual(f.rental_mode, 'bed')
+        for view in ('hotel_management.view_hotel_room_config_form',
+                     'hotel_management.view_hotel_room_form'):
+            with Form(room, view=view) as f:
+                f.capacity = 2
+            self.assertEqual(len(room.bed_ids), 2)
+            room.capacity = 3
 
-    def test_bed_room_price_is_sum_of_beds(self):
-        room = self.env['hotel.room'].create({
-            'name': 'RC-3', 'room_type_id': self.type_dorm.id, 'bed_price': 1500})
-        self.assertEqual(room.room_price, 4500)
-        self.assertEqual(room.whole_room_price, 4500)
-        room.bed_price = 1000
-        self.assertEqual(room.room_price, 3000)
-        room.capacity = 2
-        self.assertEqual(room.room_price, 2000)
-        # Chambre entière : le prix saisi reste
-        private = self.env['hotel.room'].create({
-            'name': 'RC-4', 'room_type_id': self.type_room.id, 'room_price': 5000})
-        self.assertEqual(private.room_price, 5000)
-        self.assertEqual(private.whole_room_price, 5000)
-
-    def test_capacity_readonly_and_price_from_type(self):
-        f = Form(self.env['hotel.room'], view='hotel_management.view_hotel_room_config_form')
-        f.name = 'RC-5'
-        f.room_type_id = self.type_room
-        self.assertEqual(f.room_price, 4000)
-        f.room_price = 4500  # prix modifiable
-        with self.assertRaises(AssertionError):
-            f.capacity = 2  # capacité non modifiable : celle du type
-        room = f.save()
-        self.assertEqual((room.capacity, room.room_price), (1, 4500))
-        # Dortoir : le prix du type devient le prix d'un lit
-        f = Form(self.env['hotel.room'], view='hotel_management.view_hotel_room_config_form')
-        f.name = 'RC-6'
-        f.room_type_id = self.type_dorm
-        self.assertEqual(f.bed_price, 1000)
-        dorm = f.save()
-        self.assertEqual(set(dorm.bed_ids.mapped('price')), {1000})
-        self.assertEqual(dorm.room_price, 3000)
-        # Création directe sans prix : prix du type
-        direct = self.env['hotel.room'].create({'name': 'RC-7', 'room_type_id': self.type_room.id})
-        self.assertEqual(direct.room_price, 4000)
-
-    def test_type_capacity_propagates(self):
-        room = self.env['hotel.room'].create({'name': 'RC-8', 'room_type_id': self.type_dorm.id})
-        self.assertEqual(len(room.bed_ids), 3)
-        self.type_dorm.default_capacity = 2
-        self.assertEqual(room.capacity, 2)
-        self.assertEqual(len(room.bed_ids), 2)
+    def test_room_price_is_cheapest_type(self):
+        """Sur la chambre : simple « à partir de » (type le moins cher)."""
+        Type = self.env['hotel.room.type']
+        Type.search([]).write({'active': False})
+        Type.create({'name': 'RC A', 'room_price': 5000, 'bed_price': 2000})
+        Type.create({'name': 'RC B', 'room_price': 4000})
+        room = self.env['hotel.room'].create({'name': 'RC-3'})
+        self.assertEqual(room.room_price, 4000)
+        self.assertEqual(room.whole_room_price, 4000)
+        self.assertEqual(room.bed_price_min, 2000)
+        self.assertEqual(set(room.bed_ids.mapped('price')), {2000})
 
     def test_floor_model(self):
         floor = self.env['hotel.floor'].create({'name': 'RC Rez-de-chaussée', 'sequence': 1})
         room = self.env['hotel.room'].create({
-            'name': 'RC-9', 'room_type_id': self.type_room.id, 'floor_id': floor.id})
+            'name': 'RC-9', 'floor_id': floor.id})
         self.assertEqual(room.floor, 'RC Rez-de-chaussée')
         self.assertEqual(floor.room_count, 1)
         floor.name = 'RC RDC'

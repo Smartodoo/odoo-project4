@@ -16,13 +16,11 @@ class TestReceptionRules(TransactionCase):
         cls.env = cls.env(user=cls.env.ref('base.user_admin'))
         cls.ci = fields.Date.today() + timedelta(days=950)
         cls.co = cls.ci + timedelta(days=2)
-        rtype = cls.env['hotel.room.type'].create({'name': 'Type règles', 'list_price': 3000})
+        rtype = cls.env['hotel.room.type'].create({'name': 'Type règles', 'room_price': 3000})
         cls.room = cls.env['hotel.room'].create({
-            'name': 'RR-1', 'room_type_id': rtype.id, 'capacity': 2,
-            'room_price': 3000, 'rental_mode': 'room'})
+            'name': 'RR-1', 'capacity': 2})
         cls.dorm = cls.env['hotel.room'].create({
-            'name': 'RR-D', 'room_type_id': rtype.id, 'capacity': 3,
-            'bed_price': 1000, 'rental_mode': 'bed'})
+            'name': 'RR-D', 'capacity': 3})
         cls.partner = cls.env['res.partner'].create({
             'name': 'Client règles', 'email': 'regles@example.com',
             'hotel_last_name': 'Regles', 'hotel_first_name': 'Client', 'phone': '0550000008',
@@ -193,8 +191,7 @@ class TestReceptionRules(TransactionCase):
         for partner, state in ((self.partner, 'checkin'), (no_mail, 'checkin'),
                                (self.partner, 'confirmed')):
             room = self.env['hotel.room'].create({
-                'name': 'RR-M%s' % len(resas), 'capacity': 2, 'room_price': 1000,
-                'rental_mode': 'room', 'room_type_id': self.room.room_type_id.id})
+                'name': 'RR-M%s' % len(resas), 'capacity': 2})
             resa = self._resa(partner_id=partner.id,
                               line_ids=[(0, 0, {'room_id': room.id, 'price_unit': 1000})])
             resa.action_confirm()

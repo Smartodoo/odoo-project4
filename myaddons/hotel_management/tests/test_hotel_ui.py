@@ -114,10 +114,9 @@ class TestHotelUi(HttpCase):
         from datetime import timedelta
         import re
         from odoo import fields
-        rtype = self.env['hotel.room.type'].create({'name': 'Web', 'list_price': 3000})
+        rtype = self.env['hotel.room.type'].create({'name': 'Web', 'room_price': 3000})
         room = self.env['hotel.room'].create({
-            'name': 'WEB-1', 'room_type_id': rtype.id, 'capacity': 2,
-            'room_price': 3000, 'rental_mode': 'room', 'website_published': True})
+            'name': 'WEB-1', 'capacity': 2, 'website_published': True})
         ci = fields.Date.today() + timedelta(days=700)
         co = ci + timedelta(days=2)
         page = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=1' % (room.id, ci, co))
@@ -166,10 +165,9 @@ class TestHotelUi(HttpCase):
         from odoo import fields
         admin = self.env.ref('base.user_admin')
         admin.partner_id.email = 'partage.web@example.com'
-        rtype = self.env['hotel.room.type'].create({'name': 'WebN', 'list_price': 1000})
+        rtype = self.env['hotel.room.type'].create({'name': 'WebN', 'room_price': 1000})
         room = self.env['hotel.room'].create({
-            'name': 'WEB-N', 'room_type_id': rtype.id, 'capacity': 2,
-            'room_price': 1000, 'rental_mode': 'room', 'website_published': True})
+            'name': 'WEB-N', 'capacity': 2, 'website_published': True})
         d = fields.Date.today() + timedelta(days=800)
         # Visiteur anonyme avec l'e-mail de l'admin -> nouveau contact
         r1 = self._web_book(room, d, d + timedelta(days=1), 'Nouveau', 'Client',
@@ -201,10 +199,9 @@ class TestHotelUi(HttpCase):
         """Date de naissance et adresse obligatoires ; client mineur refusé."""
         from datetime import timedelta
         from odoo import fields
-        rtype = self.env['hotel.room.type'].create({'name': 'WebM', 'list_price': 1000})
+        rtype = self.env['hotel.room.type'].create({'name': 'WebM', 'room_price': 1000})
         room = self.env['hotel.room'].create({
-            'name': 'WEB-M', 'room_type_id': rtype.id, 'capacity': 2,
-            'room_price': 1000, 'rental_mode': 'room', 'website_published': True})
+            'name': 'WEB-M', 'capacity': 2, 'website_published': True})
         d = fields.Date.today() + timedelta(days=900)
         minor = str(fields.Date.today() - timedelta(days=365 * 10))
         for kw in ({'birthdate': minor}, {'birthdate': ''}, {'street': ''}, {'phone': ''}):

@@ -13,10 +13,9 @@ class TestOnlineChannel(TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.channel = cls.env.ref('hotel_management.channel_online_reservations')
-        rtype = cls.env['hotel.room.type'].create({'name': 'OC', 'list_price': 1500})
+        rtype = cls.env['hotel.room.type'].create({'name': 'OC', 'room_price': 1500})
         cls.room = cls.env['hotel.room'].create({
-            'name': 'OC-1', 'room_type_id': rtype.id, 'capacity': 2,
-            'room_price': 1500, 'rental_mode': 'room'})
+            'name': 'OC-1', 'capacity': 2})
         cls.partner = cls.env['res.partner'].create({
             'hotel_last_name': 'Canal', 'hotel_first_name': 'Client',
             'email': 'canal@example.com', 'phone': '0550123456'})

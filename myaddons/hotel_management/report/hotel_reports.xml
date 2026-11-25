@@ -524,7 +524,7 @@
                     <table class="table table-sm o_main_table mt-3">
                         <thead>
                             <tr>
-                                <th>Chambre</th><th>Étage</th><th>Type</th><th>Statut</th>
+                                <th>Chambre</th><th>Étage</th><th>Capacité</th><th>Statut</th>
                                 <th>Housekeeping</th><th>Lits libres</th><th>Client(s) présent(s)</th>
                             </tr>
                         </thead>
@@ -532,7 +532,7 @@
                             <tr t-foreach="docs" t-as="room">
                                 <td><strong t-out="room.name"/></td>
                                 <td t-out="room.floor or ''"/>
-                                <td t-out="room.room_type_id.name"/>
+                                <td t-out="room.capacity"/>
                                 <td><span t-field="room.status"/></td>
                                 <td><span t-field="room.housekeeping_status"/></td>
                                 <td t-out="room.bed_availability or ''"/>

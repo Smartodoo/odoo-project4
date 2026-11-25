@@ -18,16 +18,16 @@ class TestHotelFlow(TransactionCase):
         cls.ci = cls.today + timedelta(days=500)
         cls.co = cls.ci + timedelta(days=3)
         cls.rtype = cls.env['hotel.room.type'].create({
-            'name': 'Type test', 'list_price': 5000, 'rental_mode': 'room'})
+            'name': 'Type test', 'room_price': 5000, 'bed_price': 2000})
         cls.room = cls.env['hotel.room'].create({
-            'name': 'T-01', 'room_type_id': cls.rtype.id, 'capacity': 2,
-            'room_price': 5000, 'bed_price': 2000, 'rental_mode': 'room'})
+            'name': 'T-01', 'capacity': 2})
         cls.partner = cls.env['res.partner'].create({
             'hotel_last_name': 'Flow', 'hotel_first_name': 'Test', 'phone': '0550000001', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID0001', 'hotel_birthdate': '1990-01-01'})
 
     def _reservation(self, **vals):
         values = {
             'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+            'room_type_id': self.rtype.id,
             'line_ids': [(0, 0, {'room_id': self.room.id, 'price_unit': 5000})],
         }
         values.update(vals)
@@ -49,11 +49,37 @@ class TestHotelFlow(TransactionCase):
         self.env['hotel.rate.season'].create({
             'name': 'Pic', 'date_start': self.ci, 'date_end': self.ci,
             'room_type_id': self.rtype.id, 'price': 8000, 'bed_price': 3000})
-        self.assertEqual(self.room._get_stay_unit_price(self.ci, self.co, 'room'),
+        rtype = self.rtype
+        self.assertEqual(self.room._get_stay_unit_price(self.ci, self.co, 'room', room_type=rtype),
                          round((8000 + 5000 * 2) / 3, 2))
-        self.assertEqual(self.room._get_night_price(self.ci, 'bed'), 3000)
+        self.assertEqual(self.room._get_night_price(self.ci, 'bed', room_type=rtype), 3000)
+        self.assertEqual(self.room._get_night_price(self.co, 'bed', room_type=rtype), 2000)
         self.partner.hotel_special_room_price = 4000
-        self.assertEqual(self.room._get_night_price(self.ci, 'room', self.partner), 4000)
+        self.assertEqual(self.room._get_night_price(self.ci, 'room', self.partner, rtype), 4000)
+
+    def test_price_from_reservation_room_type(self):
+        """Le prix vient du type de chambre choisi dans la réservation ;
+        changer de type recalcule les lignes."""
+        other = self.env['hotel.room.type'].create({
+            'name': 'Type test 2', 'room_price': 7000, 'bed_price': 2500})
+        ci = self.co + timedelta(days=30)
+        resa = self.env['hotel.reservation'].create({
+            'partner_id': self.partner.id, 'checkin': ci, 'checkout': ci + timedelta(days=2),
+            'room_type_id': self.rtype.id, 'line_ids': [(0, 0, {'room_id': self.room.id})]})
+        resa.line_ids._apply_price()
+        self.assertEqual(resa.line_ids.price_unit, 5000)
+        with Form(resa) as form:
+            form.room_type_id = other
+        self.assertEqual(resa.line_ids.price_unit, 7000)
+        self.assertEqual(resa.line_ids.room_type_id, other)
+        # par lit : prix lit du type
+        bed_resa = self.env['hotel.reservation'].create({
+            'partner_id': self.partner.id, 'checkin': ci + timedelta(days=5),
+            'checkout': ci + timedelta(days=6), 'booking_type': 'bed',
+            'room_type_id': other.id,
+            'line_ids': [(0, 0, {'bed_id': self.room.bed_ids[0].id})]})
+        bed_resa.line_ids._apply_price()
+        self.assertEqual(bed_resa.line_ids.price_unit, 2500)
 
     def test_full_stay(self):
         resa = self._reservation(discount_type='amount', discount_value=1000)
@@ -102,8 +128,7 @@ class TestHotelFlow(TransactionCase):
 
     def test_bed_housekeeping(self):
         dorm = self.env['hotel.room'].create({
-            'name': 'T-D', 'room_type_id': self.rtype.id, 'capacity': 3,
-            'bed_price': 1000, 'rental_mode': 'bed'})
+            'name': 'T-D', 'capacity': 3})
         bed1, bed2, bed3 = dorm.bed_ids
         # Ménage de deux lits : la chambre et le 3e lit ne bougent pas
         task = self.env['hotel.housekeeping'].create({
@@ -145,8 +170,7 @@ class TestHotelFlow(TransactionCase):
 
     def test_bed_checkout_cleans_beds_only(self):
         dorm = self.env['hotel.room'].create({
-            'name': 'T-D2', 'room_type_id': self.rtype.id, 'capacity': 3,
-            'bed_price': 1000, 'rental_mode': 'bed'})
+            'name': 'T-D2', 'capacity': 3})
         bed = dorm.bed_ids[0]
         resa = self._reservation(booking_type='bed', line_ids=[(0, 0, {
             'room_id': dorm.id, 'bed_id': bed.id})])
@@ -177,8 +201,11 @@ class TestHotelFlow(TransactionCase):
         resa.action_confirm()
         data = self.env['hotel.planning'].get_planning_data(fields.Date.to_string(self.ci), 7)
         row = next(r for r in data['rooms'] if r['id'] == self.room.id)
-        self.assertEqual(row['bookings'][0]['start'], 0)
-        self.assertEqual(row['bookings'][0]['end'], 3)
+        # une ligne par lit : la chambre entière occupe tous les lits
+        self.assertEqual(len(row['beds']), 2)
+        for bed_row in row['beds']:
+            self.assertEqual(bed_row['bookings'][0]['start'], 0)
+            self.assertEqual(bed_row['bookings'][0]['end'], 3)
         self.assertEqual(data['days'][0]['rooms_busy'] >= 1, True)
 
     def test_partner_has_no_discount(self):

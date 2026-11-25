@@ -18,10 +18,9 @@ class TestCustomerProfile(TransactionCase):
             'hotel_last_name': 'Profil', 'hotel_first_name': 'Test', 'phone': '0550000001', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID0001', 'hotel_birthdate': '1990-01-01',
             'hotel_customer_type_id': cls.vip.id,
             'hotel_preferences': 'Chambre calme, étage élevé'})
-        rtype = cls.env['hotel.room.type'].create({'name': 'Type profil', 'list_price': 3000})
+        rtype = cls.env['hotel.room.type'].create({'name': 'Type profil', 'room_price': 3000})
         cls.room = cls.env['hotel.room'].create({
-            'name': 'CP-1', 'room_type_id': rtype.id, 'capacity': 2,
-            'room_price': 3000, 'bed_price': 1000, 'rental_mode': 'room'})
+            'name': 'CP-1', 'capacity': 2})
         cls.ci = fields.Date.today() + timedelta(days=950)
 
     def test_default_types(self):

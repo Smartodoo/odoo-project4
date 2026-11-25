@@ -115,10 +115,13 @@ class HotelReservation(models.Model):
         domain=[('guest_type', '=', 'child')], copy=False)
     room_type_id = fields.Many2one(
         'hotel.room.type', string="Type de chambre", tracking=True,
-        domain="[('room_ids.rental_mode', '=', booking_type)]",
-        help="Si renseigné, seules les chambres / lits de ce type sont proposés. "
-             "Seuls les types ayant des chambres louables selon le type de "
-             "location choisi (chambre entière ou au lit) sont proposés.")
+        # par lit : types avec un prix lit ; par chambre : types avec un prix chambre
+        domain="[('bed_price', '>', 0 if booking_type == 'bed' else -1), "
+               "('room_price', '>', 0 if booking_type != 'bed' else -1)]",
+        help="Fixe le prix de la réservation : « Prix chambre » du type pour une "
+             "location par chambre, « Prix lit » pour une location par lit. "
+             "Seuls les types ayant un prix pour le type de location choisi "
+             "sont proposés.")
     guest_count = fields.Integer(
         string="Personnes", compute='_compute_guest_count',
         inverse='_inverse_guest_count', store=True, readonly=False,
@@ -505,32 +508,11 @@ class HotelReservation(models.Model):
                 raise ValidationError(_(
                     "Le nombre d'enfants ne peut pas être négatif."))
 
-    def _room_type_capacity_message(self):
-        """Message si le nombre de personnes dépasse la capacité du type de
-        chambre choisi, sinon False."""
-        self.ensure_one()
-        rtype = self.room_type_id
-        if rtype and rtype.default_capacity and (self.guest_count or 0) > rtype.default_capacity:
-            return _(
-                "Le nombre de personnes (%(guests)s) dépasse la capacité du type "
-                "de chambre « %(type)s » (%(capacity)s personne(s) maximum).\n"
-                "Changez le type de chambre, ou réduisez le nombre de personnes.",
-                guests=self.guest_count, type=rtype.name, capacity=rtype.default_capacity)
-        return False
-
-    @api.constrains('guest_count', 'adults', 'children', 'room_type_id')
-    def _check_room_type_capacity(self):
-        for rec in self:
-            message = rec._room_type_capacity_message()
-            if message:
-                raise ValidationError(message)
-
-    @api.onchange('adults', 'children', 'guest_count', 'room_type_id')
-    def _onchange_room_type_capacity(self):
-        message = self._room_type_capacity_message()
-        if message:
-            return {'warning': {'title': _("Capacité du type de chambre dépassée"),
-                                'message': message}}
+    @api.onchange('room_type_id')
+    def _onchange_room_type_reprice(self):
+        """Nouveau type de chambre : prix des lignes recalculés."""
+        for line in self.line_ids:
+            line._apply_price()
 
     def _bed_count_message(self):
         """Location par lit : il faut exactement un lit par personne.
@@ -571,19 +553,18 @@ class HotelReservation(models.Model):
                 rec._check_guest_places()
                 rec._check_availability()
 
-    @api.depends('checkin', 'checkout', 'booking_type', 'room_type_id',
+    @api.depends('checkin', 'checkout', 'booking_type',
                  'guest_count', 'children', 'line_ids.room_id', 'line_ids.bed_ids')
     def _compute_proposed(self):
         """Chambres / lits proposés dans les lignes : seulement les chambres
         dont le nombre de lits (libres) = nombre de personnes restant à loger,
         à défaut + 1, puis + 2… (voir hotel.room._hotel_ordered_free_rooms /
-        _hotel_ordered_free_beds).
-        Le type de chambre de la réservation, s'il est choisi, filtre la liste."""
+        _hotel_ordered_free_beds)."""
         Room = self.env['hotel.room']
         for rec in self:
             origin = rec._origin if rec._origin else False
             checkin, checkout = rec._proposal_period()
-            domain = [('room_type_id', '=', rec.room_type_id.id)] if rec.room_type_id else None
+            domain = None
             guests = max(rec.guest_count or 1, 1)
             if rec.booking_type == 'room':
                 rooms = Room._hotel_ordered_free_rooms(
@@ -664,10 +645,11 @@ class HotelReservation(models.Model):
         """Changement de type de location : les lignes sont converties.
         Par chambre -> par lit : une ligne par lit de chaque chambre ;
         par lit -> par chambre : une ligne par chambre (tous ses lits).
-        Le type de chambre choisi est vidé s'il n'a aucune chambre louable
-        selon le nouveau type de location."""
-        if self.room_type_id and self.booking_type and not self.room_type_id.room_ids.filtered(
-                lambda r: r.rental_mode == self.booking_type):
+        Le type de chambre choisi est vidé s'il n'a pas de prix pour le
+        nouveau type de location."""
+        if self.room_type_id and not (
+                self.room_type_id.bed_price if self.booking_type == 'bed'
+                else self.room_type_id.room_price):
             self.room_type_id = False
         if not self.line_ids:
             return
@@ -1364,7 +1346,9 @@ class HotelReservation(models.Model):
             'guests': r.guest_count,
         } for r in arrivals]
 
-        by_type_groups = Room._read_group([], ['room_type_id'], ['__count'])
+        # Réservations en cours (confirmées / enregistrées) par type de chambre
+        by_type_groups = self._read_group(
+            [('state', 'in', ('confirmed', 'checkin'))], ['room_type_id'], ['__count'])
         rooms_by_type = [{
             'name': room_type.display_name if room_type else _('Sans type'),
             'count': count,
@@ -1472,9 +1456,8 @@ class HotelReservationLine(models.Model):
         string="Lits disponibles", compute='_compute_available_bed_ids',
         help="Lits libres de la chambre sur la période : seuls ceux-ci sont "
              "proposés à la sélection.")
-    rental_mode = fields.Selection(related='room_id.rental_mode')
     room_type_id = fields.Many2one(
-        related='room_id.room_type_id', string="Type", store=True)
+        related='reservation_id.room_type_id', string="Type", store=True)
     checkin = fields.Date(related='reservation_id.checkin', store=True)
     checkout = fields.Date(related='reservation_id.checkout', store=True)
     nights = fields.Integer(related='reservation_id.nights', store=True)
@@ -1515,12 +1498,13 @@ class HotelReservationLine(models.Model):
 
     def _apply_price(self):
         """Prix / nuit de la ligne : tarif spécial du client, sinon tarif
-        saisonnier nuit par nuit, sinon prix de la chambre (ou du lit × nb lits)."""
+        saisonnier nuit par nuit, sinon prix du type de chambre (chambre, ou lit × nb lits)."""
         if not self.room_id:
             return
         resa = self.reservation_id
         unit = self.room_id._get_stay_unit_price(
-            resa.checkin, resa.checkout, self.booking_type, resa.partner_id)
+            resa.checkin, resa.checkout, self.booking_type, resa.partner_id,
+            resa.room_type_id)
         if self.booking_type == 'bed':
             self.price_unit = len(self.bed_ids) * unit
         else:

@@ -14,10 +14,9 @@ class TestCaisse(TransactionCase):
         cls.env = cls.env(user=cls.env.ref('base.user_admin'))
         for session in cls.env['caisse.session'].search([('state', '=', 'open')]):
             session.action_close()
-        rtype = cls.env['hotel.room.type'].create({'name': 'Type caisse', 'list_price': 5000})
+        rtype = cls.env['hotel.room.type'].create({'name': 'Type caisse', 'room_price': 5000})
         cls.room = cls.env['hotel.room'].create({
-            'name': 'C-01', 'room_type_id': rtype.id, 'capacity': 2,
-            'room_price': 5000, 'rental_mode': 'room'})
+            'name': 'C-01', 'capacity': 2})
         cls.partner = cls.env['res.partner'].create({
             'name': 'Client caisse', 'hotel_birthdate': '1990-01-01',
             'hotel_last_name': 'Client', 'hotel_first_name': 'Caisse', 'phone': '0550000010',

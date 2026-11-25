@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 
 WEEKDAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 STATE_LABELS = {
@@ -109,8 +109,8 @@ class HotelPlanning(models.AbstractModel):
             room_lines = lines.filtered(lambda l: l.room_id == room)
             beds = room.bed_ids.filtered('active')
             bed_rows = []
-            # Dortoirs (location au lit) : une ligne par lit
-            if room.rental_mode == 'bed' and beds:
+            # Une ligne par lit (toute chambre peut se louer au lit)
+            if beds:
                 for bed in beds:
                     bed_lines = room_lines.filtered(
                         lambda l: l.booking_type == 'room' or bed in l.bed_ids)
@@ -124,8 +124,7 @@ class HotelPlanning(models.AbstractModel):
                 'id': room.id,
                 'name': room.name,
                 'floor': room.floor or '',
-                'type': room.room_type_id.display_name or '',
-                'rental_mode': room.rental_mode,
+                'type': _("%s pers.", room.capacity) if room.capacity else '',
                 'status': room.status,
                 'status_label': dict(room._fields['status'].selection).get(room.status, ''),
                 'housekeeping': room.housekeeping_status,

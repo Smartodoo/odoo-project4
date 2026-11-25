@@ -13,8 +13,9 @@
             <t t-set="gallery_rooms" t-value="all_rooms.filtered('image')[:3]"/>
             <t t-set="amenities" t-value="request.env['hotel.amenity'].search([('website_home', '=', True)], limit=8)"/>
             <t t-set="currency" t-value="all_rooms[:1].currency_id or company.currency_id"/>
-            <t t-set="whole_rooms" t-value="all_rooms.filtered(lambda r: r.rental_mode == 'room')"/>
-            <t t-set="bed_rooms" t-value="all_rooms.filtered(lambda r: r.rental_mode == 'bed')"/>
+            <!-- Toute chambre se loue entière ou au lit (prix fixés par les types de chambre) -->
+            <t t-set="whole_rooms" t-value="all_rooms.filtered('whole_room_price')"/>
+            <t t-set="bed_rooms" t-value="all_rooms.filtered(lambda r: r.bed_price_min and r.bed_count)"/>
             <t t-set="price_room" t-value="min(whole_rooms.mapped('whole_room_price') or [0])"/>
             <t t-set="price_bed" t-value="min([p for p in bed_rooms.mapped('bed_price_min') if p] or [0])"/>
             <t t-set="total_beds" t-value="sum(all_rooms.mapped('bed_count'))"/>
@@ -24,7 +25,7 @@
             <!-- Disponibilité de ce soir (sudo : le public ne lit pas les réservations, on n'expose qu'un total) -->
             <t t-set="free_tonight" t-value="len(all_rooms.sudo().filtered(lambda r: r.status in ('available', 'partial', 'cleaning')))"/>
             <t t-set="card_room" t-value="whole_rooms.filtered('image')[:1]"/>
-            <t t-set="card_bed" t-value="bed_rooms.filtered('image')[:1]"/>
+            <t t-set="card_bed" t-value="(bed_rooms.filtered('image') - card_room)[:1] or bed_rooms.filtered('image')[:1]"/>
 
             <div class="o_auberge_home">
                 <!-- ============ HERO ============ -->
@@ -37,7 +38,7 @@
                     <a t-if="card_room" t-attf-href="/hotel/room/#{card_room.id}" class="ah_float ah_float_left">
                         <img t-attf-src="/web/image/hotel.room/#{card_room.id}/image" t-attf-alt="Chambre #{card_room.name}"/>
                         <div class="ah_float_info">
-                            <span><i class="oi" data-icon="key"/> Chambre <t t-out="card_room.name"/> · privée</span>
+                            <span><i class="oi" data-icon="key"/> Chambre <t t-out="card_room.name"/> · entière</span>
                             <strong>
                                 dès <t t-out="card_room.whole_room_price"
                                        t-options='{"widget": "monetary", "display_currency": card_room.currency_id}'/>
@@ -48,7 +49,7 @@
                     <a t-if="card_bed" t-attf-href="/hotel/room/#{card_bed.id}" class="ah_float ah_float_right">
                         <img t-attf-src="/web/image/hotel.room/#{card_bed.id}/image" t-attf-alt="Chambre #{card_bed.name}"/>
                         <div class="ah_float_info">
-                            <span><i class="oi" data-icon="bed"/> Chambre <t t-out="card_bed.name"/> · dortoir</span>
+                            <span><i class="oi" data-icon="bed"/> Chambre <t t-out="card_bed.name"/> · au lit</span>
                             <strong>
                                 dès <t t-out="card_bed.bed_price_min"
                                        t-options='{"widget": "monetary", "display_currency": card_bed.currency_id}'/>
@@ -342,15 +343,15 @@
                                             <img t-if="card['image_url']" t-att-src="card['image_url']"
                                                  t-att-alt="rtype.name" loading="lazy"/>
                                             <div t-else="" class="ah_type_placeholder">
-                                                <i t-attf-class="oi #{'fa-bed' if rtype.rental_mode == 'bed' else 'fa-key'}"/>
+                                                <i t-attf-class="oi #{'fa-bed' if card['per_bed'] else 'fa-key'}"/>
                                             </div>
                                         </div>
                                         <div class="ah_type_shade"/>
                                         <div class="ah_type_shine"/>
 
                                         <span class="ah_type_num" t-out="'%02d' % (card_index + 1)"/>
-                                        <span t-attf-class="ah_type_mode #{'ah_type_mode_bed' if rtype.rental_mode == 'bed' else ''}">
-                                            <t t-if="rtype.rental_mode == 'bed'"><i class="oi" data-icon="bed"/> Au lit</t>
+                                        <span t-attf-class="ah_type_mode #{'ah_type_mode_bed' if card['per_bed'] else ''}">
+                                            <t t-if="card['per_bed']"><i class="oi" data-icon="bed"/> Au lit</t>
                                             <t t-else=""><i class="oi" data-icon="key"/> Chambre entière</t>
                                         </span>
 
@@ -372,7 +373,7 @@
                                                     <small>dès</small>
                                                     <strong t-out="card['price']"
                                                             t-options='{"widget": "monetary", "display_currency": currency}'/>
-                                                    <small><t t-if="rtype.rental_mode == 'bed'">/ lit</t><t t-else="">/ nuit</t></small>
+                                                    <small><t t-if="card['per_bed']">/ lit</t><t t-else="">/ nuit</t></small>
                                                 </div>
                                                 <span class="ah_type_go" aria-hidden="true"><i class="oi" data-icon="arrow_forward"/></span>
                                             </div>
@@ -402,24 +403,25 @@
                                             <img t-if="room.image" t-attf-src="/web/image/hotel.room/#{room.id}/image"
                                                  t-att-alt="room.name" loading="lazy"/>
                                             <div t-else="" class="ah_room_placeholder">
-                                                <i t-attf-class="oi #{'fa-bed' if room.rental_mode == 'bed' else 'fa-key'}"/>
+                                                <i t-attf-class="oi #{'fa-key' if room.whole_room_price else 'fa-bed'}"/>
                                             </div>
-                                            <span class="ah_room_type" t-out="room.room_type_id.name"/>
-                                            <span t-attf-class="ah_room_mode #{'ah_mode_bed' if room.rental_mode == 'bed' else ''}">
-                                                <t t-if="room.rental_mode == 'bed'"><i class="oi" data-icon="bed"/> Au lit</t>
-                                                <t t-else=""><i class="oi" data-icon="key"/> Privée</t>
+                                            <span t-attf-class="ah_room_mode #{'' if room.whole_room_price else 'ah_mode_bed'}">
+                                                <t t-if="room.whole_room_price"><i class="oi" data-icon="key"/> Entière<t t-if="room.bed_price_min and room.bed_count"> ou au lit</t></t>
+                                                <t t-else=""><i class="oi" data-icon="bed"/> Au lit</t>
                                             </span>
                                         </div>
                                         <div class="ah_room_body">
                                             <div class="ah_room_top">
                                                 <h4>Chambre <t t-out="room.name"/></h4>
                                                 <div class="ah_room_price">
-                                                    <t t-if="room.rental_mode == 'bed'">
+                                                    <t t-if="not room.whole_room_price">
+                                                        <small>dès</small>
                                                         <strong t-field="room.bed_price_min"
                                                                 t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
                                                         <small>/ lit</small>
                                                     </t>
                                                     <t t-else="">
+                                                        <small>dès</small>
                                                         <strong t-field="room.whole_room_price"
                                                                 t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
                                                         <small>/ nuit</small>

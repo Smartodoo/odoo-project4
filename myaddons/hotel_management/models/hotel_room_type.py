@@ -1,7 +1,4 @@
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
-
-from .hotel_room import MAX_ROOM_CAPACITY
 
 
 class HotelRoomType(models.Model):
@@ -12,91 +9,66 @@ class HotelRoomType(models.Model):
     name = fields.Char(string="Type", required=True, translate=True)
     sequence = fields.Integer(default=10)
     code = fields.Char(string="Code")
-    list_price = fields.Monetary(
-        string="Prix / nuit", currency_field='currency_id',
-        help="Repris sur les nouvelles chambres de ce type (modifiable) :\n"
-             "- chambre entière : prix de la chambre par nuit ;\n"
-             "- au lit (dortoir) : prix d'UN lit par nuit (la chambre = somme des lits).")
+    # Prix de base (cf. réservation : le type de chambre choisi fixe le prix)
+    room_price = fields.Monetary(
+        string="Prix chambre / nuit", currency_field='currency_id',
+        help="Prix d'une nuit pour une chambre entière réservée avec ce type.")
+    bed_price = fields.Monetary(
+        string="Prix lit / nuit", currency_field='currency_id',
+        help="Prix d'une nuit pour UN lit réservé avec ce type (location au lit).")
     currency_id = fields.Many2one(
         'res.currency', default=lambda self: self.env.company.currency_id)
-    default_capacity = fields.Integer(string="Capacité (personnes)", default=2)
-    rental_mode = fields.Selection([
-        ('room', 'Chambre entière'),
-        ('bed', 'Au lit (dortoir)'),
-    ], string="Mode de location", default='room', required=True,
-        help="Mode appliqué par défaut aux chambres de ce type.")
     amenity_ids = fields.Many2many('hotel.amenity', string="Équipements")
     description = fields.Text(string="Description")
     image = fields.Image(string="Photo")
     active = fields.Boolean(default=True)
-    room_ids = fields.One2many('hotel.room', 'room_type_id', string="Chambres")
-    room_count = fields.Integer(string="Nb chambres", compute='_compute_room_count')
+    reservation_count = fields.Integer(
+        string="Nb réservations", compute='_compute_reservation_count')
 
-    _default_capacity_positive = models.Constraint(
-        'CHECK(default_capacity > 0)',
-        "La capacit\u00e9 par d\u00e9faut d'un type de chambre doit \u00eatre d'au moins 1 personne.",
-    )
-    @api.constrains('default_capacity')
-    def _check_default_capacity_max(self):
-        for rtype in self:
-            if rtype.default_capacity > MAX_ROOM_CAPACITY:
-                raise ValidationError(_(
-                    "Le type %(type)s ne peut pas dépasser %(max)s places par chambre.",
-                    type=rtype.name, max=MAX_ROOM_CAPACITY))
-
-    _list_price_non_negative = models.Constraint(
-        'CHECK(list_price >= 0)',
-        "Le prix d'un type de chambre ne peut pas \u00eatre n\u00e9gatif.",
+    _prices_non_negative = models.Constraint(
+        'CHECK(room_price >= 0 AND bed_price >= 0)',
+        "Les prix d'un type de chambre ne peuvent pas \u00eatre n\u00e9gatifs.",
     )
 
-    def write(self, vals):
-        res = super().write(vals)
-        if 'default_capacity' in vals:
-            # La capacité d'une chambre est celle de son type (non modifiable
-            # sur la chambre) : les chambres du type suivent (lits ajoutés ou
-            # retirés ; refus si un lit à retirer est réservé).
-            for rtype in self:
-                rooms = rtype.room_ids.filtered(
-                    lambda r, c=rtype.default_capacity: r.capacity != c)
-                if rooms:
-                    rooms.write({'capacity': rtype.default_capacity})
-        return res
+    @api.model
+    def _hotel_cheapest(self, booking_type):
+        """Type actif le moins cher ayant un prix pour ce mode de location
+        ('room' : prix chambre, 'bed' : prix lit)."""
+        fname = 'bed_price' if booking_type == 'bed' else 'room_price'
+        types = self.search([(fname, '>', 0)])
+        return types.sorted(lambda t: (t[fname], t.sequence, t.id))[:1]
 
-    def _compute_room_count(self):
-        groups = self.env['hotel.room']._read_group(
+    @api.model
+    def _hotel_min_price(self, booking_type):
+        return self._hotel_cheapest(booking_type)[
+            'bed_price' if booking_type == 'bed' else 'room_price'] or 0.0
+
+    def _compute_reservation_count(self):
+        groups = self.env['hotel.reservation']._read_group(
             [('room_type_id', 'in', self.ids)], ['room_type_id'], ['__count'])
         mapping = {room_type.id: count for room_type, count in groups}
         for rec in self:
-            rec.room_count = mapping.get(rec.id, 0)
+            rec.reservation_count = mapping.get(rec.id, 0)
 
-    def action_view_rooms(self):
+    def action_view_reservations(self):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
             'name': self.name,
-            'res_model': 'hotel.room',
-            'view_mode': 'kanban,list,form',
+            'res_model': 'hotel.reservation',
+            'view_mode': 'list,form',
             'domain': [('room_type_id', '=', self.id)],
             'context': {'default_room_type_id': self.id},
         }
 
     def _website_cards(self, rooms):
-        """Données des cartes « types de chambre » de la page d'accueil.
-
-        Seuls les types ayant au moins une chambre de `rooms` (chambres publiées)
-        sont retournés ; prix, capacité et équipements sont calculés sur ces chambres.
-        """
-        # Mêmes équipements que la section Confort (« Afficher sur l'accueil »)
+        """Données des cartes « types de chambre » de la page d'accueil : les
+        types ayant un prix ; capacité = plus grande chambre publiée."""
         amenities = self.env['hotel.amenity'].search([('website_home', '=', True)])
+        room_with_image = rooms.filtered('image')[:1]
+        capacity = max(rooms.mapped('capacity') or [0])
         cards = []
-        for rtype in self:
-            type_rooms = rooms.filtered(lambda room: room.room_type_id == rtype)
-            if not type_rooms:
-                continue
-            prices = [room.bed_price_min if room.rental_mode == 'bed' else room.whole_room_price
-                      for room in type_rooms]
-            prices = [price for price in prices if price]
-            room_with_image = type_rooms.filtered('image')[:1]
+        for rtype in self.filtered(lambda t: t.room_price or t.bed_price):
             if rtype.with_context(bin_size=True).image:
                 image_url = '/web/image/hotel.room.type/%s/image' % rtype.id
             elif room_with_image:
@@ -106,8 +78,9 @@ class HotelRoomType(models.Model):
             cards.append({
                 'type': rtype,
                 'image_url': image_url,
-                'price': min(prices) if prices else 0.0,
-                'capacity': max(type_rooms.mapped('capacity') or [rtype.default_capacity]),
-                'amenities': amenities._website_common_to(type_rooms)[:5],
+                'price': rtype.room_price or rtype.bed_price,
+                'per_bed': not rtype.room_price,
+                'capacity': capacity,
+                'amenities': (rtype.amenity_ids & amenities or amenities._website_common_to(rooms))[:5],
             })
         return cards

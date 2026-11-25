@@ -6,25 +6,27 @@ from odoo.tests import Form, HttpCase, TransactionCase, tagged
 
 
 class BookingTypeCommon:
-    """Deux dortoirs (A : 4 lits, B : 2 lits), deux chambres entières C et D."""
+    """Chambres A (3 lits), B, C et D (2 lits) : toutes se louent entières ou
+    au lit ; le prix vient du type de chambre de la réservation."""
 
     @classmethod
     def _setup_rooms(cls):
         cls.ci = fields.Date.today() + timedelta(days=900)
         cls.co = cls.ci + timedelta(days=2)
-        rtype = cls.env['hotel.room.type'].create({'name': 'Type lits', 'list_price': 4000})
+        # prix lit 1000 : type le moins cher (choisi par le site)
+        cls.rtype = cls.env['hotel.room.type'].create({
+            'name': 'Type lits', 'room_price': 400, 'bed_price': 1000})
 
-        def room(name, beds, mode='bed'):
+        def room(name, beds):
             r = cls.env['hotel.room'].create({
-                'name': name, 'room_type_id': rtype.id, 'capacity': beds,
-                'room_price': 4000, 'bed_price': 1000, 'rental_mode': mode,
+                'name': name, 'capacity': beds,
                 'website_published': True})
             return r
 
         cls.room_a = room('BT-A', 3)
         cls.room_b = room('BT-B', 2)
-        cls.room_c = room('BT-C', 2, mode='room')
-        cls.room_d = room('BT-D', 2, mode='room')
+        cls.room_c = room('BT-C', 2)
+        cls.room_d = room('BT-D', 2)
         cls.partner = cls.env['res.partner'].create({
             'hotel_last_name': 'Lits', 'hotel_first_name': 'Test', 'phone': '0550000001', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID0001', 'email': 'lits@example.com', 'hotel_birthdate': '1990-01-01'})
 
@@ -72,11 +74,11 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
     def test_proposals(self):
         Resa = self.env['hotel.reservation']
         vals = {'checkin': self.ci, 'checkout': self.co, 'booking_type': 'bed'}
-        # 2 personnes : chambres de 2 lits libres (B), pas A (3 lits) ni C (par chambre)
+        # 2 personnes : chambres de 2 lits libres (B, C, D), pas A (3 lits)
         new = Resa.new(dict(vals, guest_count=2))
         self.assertTrue(self.room_b.bed_ids <= new.proposed_bed_ids._origin)
         self.assertFalse(self.room_a.bed_ids & new.proposed_bed_ids._origin)
-        self.assertFalse(self.room_c.bed_ids & new.proposed_bed_ids._origin)
+        self.assertTrue(self.room_c.bed_ids <= new.proposed_bed_ids._origin)
         # 3 personnes : A
         new = Resa.new(dict(vals, guest_count=3))
         self.assertTrue(self.room_a.bed_ids <= new.proposed_bed_ids._origin)
@@ -95,7 +97,7 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
         self.assertFalse(self.room_b.bed_ids & proposed)
 
         # Par chambre : seulement les chambres libres en entier (C ; pas D
-        # déjà réservée, ni les dortoirs)
+        # déjà réservée, ni A dont un lit est pris)
         self._book_room(self.room_d)
         new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'room',
                         'guest_count': 2})
@@ -174,13 +176,13 @@ class TestBookingTypeWebsite(BookingTypeCommon, HttpCase):
         by_room = self._available_part(self._rooms_page('room'))
         self.assertIn('Chambre BT-C', by_room)
         self.assertNotIn('Chambre BT-D', by_room)   # déjà réservée
-        self.assertNotIn('Chambre BT-A', by_room)   # dortoir
+        self.assertNotIn('Chambre BT-A', by_room)   # un lit déjà loué
         by_bed = self._available_part(self._rooms_page('bed'))
         # la chambre partagée d'abord, puis les chambres entièrement libres
         self.assertIn('Chambre BT-A', by_bed)
         self.assertIn('Chambre BT-B', by_bed)
         self.assertLess(by_bed.index('Chambre BT-A'), by_bed.index('Chambre BT-B'))
-        self.assertNotIn('Chambre BT-C', by_bed)
+        self.assertIn('Chambre BT-C', by_bed)       # toute chambre se loue au lit
         self.assertIn('chambres partagées', by_bed)
         # trop de voyageurs pour les lits libres de A -> A n'est plus proposée
         self.assertNotIn('Chambre BT-A', self._available_part(self._rooms_page('bed', 4)))
@@ -260,6 +262,8 @@ class TestBookingTypeWebsite(BookingTypeCommon, HttpCase):
         self.assertEqual(resa.booking_type, 'bed')
         self.assertEqual(len(resa.line_ids), 2)
         self.assertEqual(resa.line_ids.bed_id, beds)
+        # type le moins cher au lit (prix lit 1000) choisi automatiquement
+        self.assertEqual(resa.room_type_id, self.rtype)
         self.assertEqual(resa.amount_total, 2 * 1000 * 2)
 
     def test_reservation_form_beds_tab(self):

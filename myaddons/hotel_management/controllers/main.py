@@ -45,9 +45,7 @@ class HotelWebsite(http.Controller):
         rooms = Room.search(published)
         # Le type de location choisi filtre les chambres proposées
         if booking_type == 'bed':
-            rooms = rooms.filtered(lambda r: r.rental_mode != 'room' and r.bed_count)
-        elif booking_type == 'room':
-            rooms = rooms.filtered(lambda r: r.rental_mode != 'bed')
+            rooms = rooms.filtered(lambda r: r.bed_count)
         offers = {}
 
         if checkin or checkout:
@@ -64,7 +62,7 @@ class HotelWebsite(http.Controller):
                     # le groupe, de la capacité la plus proche à la plus grande.
                     fits = rooms.filtered(lambda r: offers[r.id]['whole'])
                     available_rooms = fits.sorted(
-                        lambda r: (r.capacity, r.room_price, r.name or ''))
+                        lambda r: (r.capacity, r.name or ''))
                     occupied_rooms = rooms - available_rooms
                 else:
                     # Par lit : d'abord les chambres déjà partagées, du nombre de
@@ -73,8 +71,7 @@ class HotelWebsite(http.Controller):
                     offer = Room._hotel_bed_offer(ci, co, domain=published)
                     fits = [(room, free, partial) for room, free, partial in offer
                             if room in rooms and len(free) >= guests]
-                    fits.sort(key=lambda f: (not f[2], len(f[1]), f[0].bed_price,
-                                             f[0].name or ''))
+                    fits.sort(key=lambda f: (not f[2], len(f[1]), f[0].name or ''))
                     available_rooms = Room.browse([room.id for room, _f, _p in fits])
                     for room, free, partial in fits:
                         offers[room.id]['partial'] = partial
@@ -134,7 +131,7 @@ class HotelWebsite(http.Controller):
             'whole_price': room._get_whole_room_price(ci) if room else 0.0,
             'free_bed_count': len(free_beds),
             'beds_info': beds_info,
-            'beds_need_dates': bool(room and room.rental_mode != 'room' and not dates_ok),
+            'beds_need_dates': bool(room and not dates_ok),
             'period_start': ci.strftime('%d/%m/%Y') if dates_ok else '',
             'period_end': co.strftime('%d/%m/%Y') if dates_ok else '',
             'errors': [],
@@ -234,16 +231,6 @@ class HotelWebsite(http.Controller):
             hotel_include_draft=True).browse(bed_ids).exists()
         if room:
             beds = beds.filtered(lambda b: b.room_id == room)
-        # Le mode de location de la chambre prime sur le choix du formulaire
-        if room.rental_mode == 'bed':
-            booking_type = 'bed'
-        elif room.rental_mode == 'room':
-            booking_type = 'room'
-        # Tous les lits de la chambre = chambre entière (sauf dortoir)
-        if booking_type == 'bed' and room and room.rental_mode == 'both' \
-                and room.bed_ids and set(beds.ids) >= set(room.bed_ids.ids):
-            booking_type = 'room'
-            beds = request.env['hotel.bed'].sudo().browse()
 
         errors = []
         if not room:
@@ -311,8 +298,11 @@ class HotelWebsite(http.Controller):
             last_name, first_name, email, phone,
             birthdate=birthdate, street=street, city=city)
 
+        # Type de chambre (fixe le prix) : le moins cher ayant un prix pour ce
+        # mode de location ; l'hôtel peut le changer avant de confirmer.
+        room_type = request.env['hotel.room.type'].sudo()._hotel_cheapest(booking_type)
         # Prix : tarif spécial client, sinon tarifs saisonniers nuit par nuit
-        unit = room._get_stay_unit_price(ci, co, booking_type, partner)
+        unit = room._get_stay_unit_price(ci, co, booking_type, partner, room_type)
         if booking_type == 'bed' and beds:
             # Par lit : une ligne par lit (la chambre est déduite du lit)
             lines = [(0, 0, {'room_id': room.id, 'bed_id': bed.id, 'price_unit': unit})
@@ -327,6 +317,7 @@ class HotelWebsite(http.Controller):
             'guest_count': guests,
             'source': 'website',
             'booking_type': booking_type,
+            'room_type_id': room_type.id,
             'note': note,
             'line_ids': lines,
         })

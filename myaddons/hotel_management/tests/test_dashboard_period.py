@@ -11,10 +11,9 @@ class TestDashboardPeriod(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        rtype = cls.env['hotel.room.type'].create({'name': 'Type période', 'list_price': 1000})
+        rtype = cls.env['hotel.room.type'].create({'name': 'Type période', 'room_price': 1000})
         cls.room = cls.env['hotel.room'].create({
-            'name': 'DP-1', 'room_type_id': rtype.id, 'capacity': 3,
-            'rental_mode': 'bed', 'bed_price': 1000, 'room_price': 3000})
+            'name': 'DP-1', 'capacity': 3})
         partner = cls.env['res.partner'].create({'hotel_last_name': 'Test', 'hotel_first_name': 'Client', 'phone': '0550000009', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID-T', 'name': 'Client période', 'hotel_birthdate': '1990-01-01'})
         # 2 lits du 10 au 13/01/2091 : 3 nuits x 2 places = 6 nuitées
         cls.resa = cls.env['hotel.reservation'].create({

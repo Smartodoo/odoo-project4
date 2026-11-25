@@ -12,9 +12,10 @@ class HotelBed(models.Model):
     name = fields.Char(string="Référence", required=True)
     room_id = fields.Many2one(
         'hotel.room', string="Chambre", required=True, ondelete='cascade')
-    room_type_id = fields.Many2one(
-        related='room_id.room_type_id', string="Type", store=True)
-    price = fields.Monetary(string="Prix / nuit", currency_field='currency_id')
+    # Prix fixé par le type de chambre de la réservation : « à partir de »
+    price = fields.Monetary(
+        string="Prix / nuit (à partir de)", currency_field='currency_id',
+        related='room_id.bed_price')
     currency_id = fields.Many2one(
         'res.currency', related='room_id.currency_id', store=True)
     active = fields.Boolean(default=True)
@@ -87,10 +88,6 @@ class HotelBed(models.Model):
         'unique(name, room_id)',
         "Cette r\u00e9f\u00e9rence de lit existe d\u00e9j\u00e0 dans cette chambre.",
     )
-    _price_non_negative = models.Constraint(
-        'CHECK(price >= 0)',
-        "Le prix d'un lit ne peut pas \u00eatre n\u00e9gatif.",
-    )
 
     @api.model
     def default_get(self, fields_list):
@@ -101,8 +98,6 @@ class HotelBed(models.Model):
             if 'name' in fields_list and not res.get('name'):
                 taken = set(room.with_context(active_test=False).bed_ids.mapped('name'))
                 res['name'] = room._next_bed_reference(taken)
-            if 'price' in fields_list and not res.get('price'):
-                res['price'] = room._default_bed_price()
         return res
 
     @api.ondelete(at_uninstall=False)

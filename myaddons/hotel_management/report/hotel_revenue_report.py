@@ -66,7 +66,7 @@ class HotelRevenueReport(models.Model):
                    l.reservation_id,
                    r.partner_id,
                    l.room_id,
-                   room.room_type_id,
+                   r.room_type_id,
                    b.bed_id,
                    r.booking_type,
                    r.source,

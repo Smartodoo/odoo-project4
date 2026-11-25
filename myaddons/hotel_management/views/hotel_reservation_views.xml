@@ -101,7 +101,7 @@
                         </group>
                         <group name="stay_rooms">
                             <field name="booking_type" widget="radio" options="{'horizontal': true}"/>
-                            <field name="room_type_id" placeholder="Tous les types"
+                            <field name="room_type_id" placeholder="Type le moins cher"
                                    options="{'no_create': True, 'no_open': True}"/>
                             <field name="adults"/>
                             <field name="children"/>

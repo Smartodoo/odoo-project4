@@ -12,8 +12,6 @@
                 </header>
                 <field name="name"/>
                 <field name="room_id"/>
-                <field name="room_type_id" readonly="1"/>
-                <field name="price" widget="monetary"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="status" widget="badge" readonly="1"
                        decoration-success="status == 'free'"
@@ -56,7 +54,6 @@
                     <group>
                         <group>
                             <field name="room_id"/>
-                            <field name="room_type_id" readonly="1"/>
                             <field name="current_guest_id" invisible="not current_guest_id"/>
                             <field name="housekeeping_status" widget="badge" readonly="1"
                                    decoration-warning="housekeeping_status == 'dirty'"
@@ -65,8 +62,6 @@
                                    decoration-danger="housekeeping_status == 'to_repair'"/>
                         </group>
                         <group>
-                            <field name="price" widget="monetary"/>
-                            <field name="currency_id" invisible="1"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group>
@@ -99,7 +94,7 @@
                             </div>
                             <div class="text-muted small">
                                 <i class="oi me-1" data-icon="key" title="Chambre"/>
-                                <field name="room_id"/> · <field name="room_type_id"/>
+                                <field name="room_id"/>
                             </div>
                             <div t-if="record.current_guest_id.raw_value" class="small">
                                 <i class="oi oi-filled me-1" data-icon="person" title="Client"/>
@@ -110,12 +105,6 @@
                                 <i class="oi me-1" data-icon="wand_stars" title="Housekeeping"/>
                                 <field name="housekeeping_status"/>
                             </div>
-                            <footer class="mt-1">
-                                <div class="ms-auto text-end">
-                                    <field name="price" widget="monetary" class="fw-bold"/>
-                                    <small class="text-muted"> / nuit</small>
-                                </div>
-                            </footer>
                         </div>
                     </t>
                 </templates>
@@ -136,7 +125,6 @@
                 <filter name="archived" string="Archivés" domain="[('active', '=', False)]"/>
                 <group>
                     <filter name="group_room" string="Chambre" context="{'group_by': 'room_id'}"/>
-                    <filter name="group_type" string="Type" context="{'group_by': 'room_type_id'}"/>
                 </group>
             </search>
         </field>
@@ -162,9 +150,7 @@
         <field name="arch" type="xml">
             <list string="Nombre de lits" create="0" delete="0">
                 <field name="name" string="Chambre"/>
-                <field name="room_type_id"/>
                 <field name="floor_id"/>
-                <field name="rental_mode"/>
                 <field name="bed_summary" string="Lits créés"/>
                 <field name="bed_availability" string="Disponibilité"/>
                 <field name="status" widget="badge"
@@ -191,12 +177,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="room_type_id" readonly="1"/>
                             <field name="floor_id" readonly="1"/>
-                            <field name="rental_mode" readonly="1"/>
-                            <field name="whole_room_price" widget="monetary"
-                                   invisible="rental_mode == 'bed'"/>
-                            <field name="currency_id" invisible="1"/>
                         </group>
                         <group>
                             <field name="bed_summary" string="Lits créés"/>
@@ -209,7 +190,6 @@
                     <field name="bed_ids" context="{'default_room_id': id}">
                         <list editable="bottom">
                             <field name="name" string="Référence"/>
-                            <field name="price" widget="monetary"/>
                             <field name="currency_id" column_invisible="1"/>
                             <field name="status" widget="badge" readonly="1"
                                    decoration-success="status == 'free'"
