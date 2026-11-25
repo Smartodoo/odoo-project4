@@ -318,6 +318,7 @@ class HotelWebsite(http.Controller):
             'source': 'website',
             'booking_type': booking_type,
             'room_type_id': room_type.id,
+            'floor_id': room.floor_id.id,
             'note': note,
             'line_ids': lines,
         })

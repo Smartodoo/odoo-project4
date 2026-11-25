@@ -115,13 +115,12 @@ class HotelReservation(models.Model):
         domain=[('guest_type', '=', 'child')], copy=False)
     room_type_id = fields.Many2one(
         'hotel.room.type', string="Type de chambre", tracking=True,
-        # par lit : types avec un prix lit ; par chambre : types avec un prix chambre
-        domain="[('bed_price', '>', 0 if booking_type == 'bed' else -1), "
-               "('room_price', '>', 0 if booking_type != 'bed' else -1)]",
         help="Fixe le prix de la réservation : « Prix chambre » du type pour une "
-             "location par chambre, « Prix lit » pour une location par lit. "
-             "Seuls les types ayant un prix pour le type de location choisi "
-             "sont proposés.")
+             "location par chambre, « Prix lit » pour une location par lit.")
+    floor_id = fields.Many2one(
+        'hotel.floor', string="Étage", tracking=True, index=True,
+        help="Seules les chambres / lits de cet étage sont proposés ; toutes les "
+             "chambres de la réservation doivent être à cet étage.")
     guest_count = fields.Integer(
         string="Personnes", compute='_compute_guest_count',
         inverse='_inverse_guest_count', store=True, readonly=False,
@@ -508,6 +507,33 @@ class HotelReservation(models.Model):
                 raise ValidationError(_(
                     "Le nombre d'enfants ne peut pas être négatif."))
 
+    @api.onchange('floor_id')
+    def _onchange_floor_id(self):
+        """Changement d'étage : les chambres / lits d'un autre étage sont retirés."""
+        if not self.floor_id:
+            return
+        other = self.line_ids.filtered(
+            lambda l: l.room_id and l.room_id.floor_id != self.floor_id)
+        if other:
+            rooms = ', '.join(sorted(set(other.room_id.mapped('name'))))
+            self.line_ids -= other
+            return {'warning': {
+                'type': 'notification',
+                'title': _("Étage modifié"),
+                'message': _("Chambre(s) retirée(s), autre étage : %s", rooms),
+            }}
+
+    @api.constrains('floor_id', 'line_ids')
+    def _check_floor(self):
+        for rec in self.filtered('floor_id'):
+            other = rec.line_ids.room_id.filtered(lambda r: r.floor_id != rec.floor_id)
+            if other:
+                raise ValidationError(_(
+                    "Réservation %(resa)s : la chambre %(rooms)s n'est pas à l'étage "
+                    "« %(floor)s ». Choisissez des chambres de cet étage ou changez d'étage.",
+                    resa=rec.name or '', rooms=', '.join(other.mapped('name')),
+                    floor=rec.floor_id.name))
+
     @api.onchange('room_type_id')
     def _onchange_room_type_reprice(self):
         """Nouveau type de chambre : prix des lignes recalculés."""
@@ -553,18 +579,18 @@ class HotelReservation(models.Model):
                 rec._check_guest_places()
                 rec._check_availability()
 
-    @api.depends('checkin', 'checkout', 'booking_type',
+    @api.depends('checkin', 'checkout', 'booking_type', 'floor_id',
                  'guest_count', 'children', 'line_ids.room_id', 'line_ids.bed_ids')
     def _compute_proposed(self):
         """Chambres / lits proposés dans les lignes : seulement les chambres
         dont le nombre de lits (libres) = nombre de personnes restant à loger,
         à défaut + 1, puis + 2… (voir hotel.room._hotel_ordered_free_rooms /
-        _hotel_ordered_free_beds)."""
+        _hotel_ordered_free_beds). Seulement les chambres de l'étage choisi."""
         Room = self.env['hotel.room']
         for rec in self:
             origin = rec._origin if rec._origin else False
             checkin, checkout = rec._proposal_period()
-            domain = None
+            domain = [('floor_id', '=', rec.floor_id.id)] if rec.floor_id else None
             guests = max(rec.guest_count or 1, 1)
             if rec.booking_type == 'room':
                 rooms = Room._hotel_ordered_free_rooms(
@@ -645,12 +671,8 @@ class HotelReservation(models.Model):
         """Changement de type de location : les lignes sont converties.
         Par chambre -> par lit : une ligne par lit de chaque chambre ;
         par lit -> par chambre : une ligne par chambre (tous ses lits).
-        Le type de chambre choisi est vidé s'il n'a pas de prix pour le
-        nouveau type de location."""
-        if self.room_type_id and not (
-                self.room_type_id.bed_price if self.booking_type == 'bed'
-                else self.room_type_id.room_price):
-            self.room_type_id = False
+        Le type de chambre choisi est conservé (aucun lien entre type de
+        location et type de chambre)."""
         if not self.line_ids:
             return
         rooms = self.line_ids.room_id

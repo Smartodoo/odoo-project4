@@ -19,8 +19,9 @@ class TestCustomerProfile(TransactionCase):
             'hotel_customer_type_id': cls.vip.id,
             'hotel_preferences': 'Chambre calme, étage élevé'})
         rtype = cls.env['hotel.room.type'].create({'name': 'Type profil', 'room_price': 3000})
+        cls.floor = cls.env['hotel.floor'].create({'name': 'CP étage'})
         cls.room = cls.env['hotel.room'].create({
-            'name': 'CP-1', 'capacity': 2})
+            'name': 'CP-1', 'capacity': 2, 'floor_id': cls.floor.id})
         cls.ci = fields.Date.today() + timedelta(days=950)
 
     def test_default_types(self):
@@ -38,6 +39,7 @@ class TestCustomerProfile(TransactionCase):
         resa = self.env['hotel.reservation'].create({
             'partner_id': self.partner.id, 'checkin': self.ci,
             'checkout': self.ci + timedelta(days=1), 'booking_type': 'room',
+            'floor_id': self.floor.id,
             'line_ids': [(0, 0, {'room_id': self.room.id})]})
         with Form(resa) as f:
             f.partner_customer_type_id = self.blacklist

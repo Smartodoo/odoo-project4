@@ -19,8 +19,9 @@ class TestHotelFlow(TransactionCase):
         cls.co = cls.ci + timedelta(days=3)
         cls.rtype = cls.env['hotel.room.type'].create({
             'name': 'Type test', 'room_price': 5000, 'bed_price': 2000})
+        cls.floor = cls.env['hotel.floor'].create({'name': 'T étage'})
         cls.room = cls.env['hotel.room'].create({
-            'name': 'T-01', 'capacity': 2})
+            'name': 'T-01', 'capacity': 2, 'floor_id': cls.floor.id})
         cls.partner = cls.env['res.partner'].create({
             'hotel_last_name': 'Flow', 'hotel_first_name': 'Test', 'phone': '0550000001', 'street': '1 rue Test', 'hotel_id_type': 'cni', 'hotel_id_number': 'ID0001', 'hotel_birthdate': '1990-01-01'})
 
@@ -65,7 +66,8 @@ class TestHotelFlow(TransactionCase):
         ci = self.co + timedelta(days=30)
         resa = self.env['hotel.reservation'].create({
             'partner_id': self.partner.id, 'checkin': ci, 'checkout': ci + timedelta(days=2),
-            'room_type_id': self.rtype.id, 'line_ids': [(0, 0, {'room_id': self.room.id})]})
+            'room_type_id': self.rtype.id, 'floor_id': self.floor.id,
+            'line_ids': [(0, 0, {'room_id': self.room.id})]})
         resa.line_ids._apply_price()
         self.assertEqual(resa.line_ids.price_unit, 5000)
         with Form(resa) as form:
@@ -212,6 +214,7 @@ class TestHotelFlow(TransactionCase):
         """La remise se saisit sur la réservation, plus sur la fiche client."""
         self.assertNotIn('hotel_discount', self.env['res.partner']._fields)
         with Form(self.env['hotel.reservation']) as form:
+            form.floor_id = self.floor
             form.partner_id = self.partner
             form.checkout = self.today + timedelta(days=1)
             self.assertEqual(form.discount_value, 0)

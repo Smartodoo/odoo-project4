@@ -17,9 +17,11 @@ class BookingTypeCommon:
         cls.rtype = cls.env['hotel.room.type'].create({
             'name': 'Type lits', 'room_price': 400, 'bed_price': 1000})
 
+        cls.floor = cls.env['hotel.floor'].create({'name': 'BT étage'})
+
         def room(name, beds):
             r = cls.env['hotel.room'].create({
-                'name': name, 'capacity': beds,
+                'name': name, 'capacity': beds, 'floor_id': cls.floor.id,
                 'website_published': True})
             return r
 
@@ -110,6 +112,7 @@ class TestBookingType(BookingTypeCommon, TransactionCase):
         commencé à prendre des lits devient la chambre proposée."""
         self._book_bed(self.room_a.bed_ids[0])
         form = Form(self.env['hotel.reservation'])
+        form.floor_id = self.floor
         form.partner_id = self.partner
         form.checkin = self.ci
         form.checkout = self.co

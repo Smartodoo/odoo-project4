@@ -23,8 +23,10 @@ class TestReservationForm(TransactionCase):
         # chambres de la base hors service : seules celles du test sont proposées
         Room.search([]).write({'technical_state': 'out_of_service'})
 
+        cls.floor = cls.env['hotel.floor'].create({'name': 'RF étage'})
+
         def room(name, cap):
-            return Room.create({'name': name, 'capacity': cap})
+            return Room.create({'name': name, 'capacity': cap, 'floor_id': cls.floor.id})
         cls.r3 = room('RF-3', 3)
         cls.r2 = room('RF-2', 2)
         cls.partner = cls.env['res.partner'].create({
@@ -117,6 +119,7 @@ class TestReservationForm(TransactionCase):
 
     def test_guest_blocks_follow_counts(self):
         f = Form(self.env['hotel.reservation'])
+        f.floor_id = self.floor
         f.partner_id = self.partner
         f.checkin = self.ci
         f.checkout = self.co
@@ -180,6 +183,7 @@ class TestReservationForm(TransactionCase):
     def test_main_client_typed_without_contact(self):
         """Client principal saisi directement : la fiche client est créée."""
         f = Form(self.env['hotel.reservation'])
+        f.floor_id = self.floor
         f.checkin = self.ci
         f.checkout = self.co
         f.booking_type = 'bed'
@@ -208,6 +212,7 @@ class TestReservationForm(TransactionCase):
                          ('5 rue des Oliviers', 'passport', 'P445566'))
         # Champs obligatoires du client principal dans le formulaire
         f = Form(self.env['hotel.reservation'])
+        f.floor_id = self.floor
         f.partner_last_name = 'Mansouri'
         with self.assertRaises(AssertionError):
             f.save()
@@ -353,6 +358,7 @@ class TestReservationForm(TransactionCase):
 
     def test_persons_include_children(self):
         f = Form(self.env['hotel.reservation'])
+        f.floor_id = self.floor
         f.partner_id = self.partner
         f.adults = 2
         f.children = 1
@@ -369,28 +375,51 @@ class TestReservationForm(TransactionCase):
             'line_ids': [(0, 0, {'bed_id': b.id}) for b in self.r3.bed_ids]})
         self.assertEqual((resa.adults, resa.guest_count), (2, 3))
 
-    def test_room_type_follows_booking_type(self):
-        """Par lit : seuls les types ayant un prix lit ; par chambre : ceux
-        ayant un prix chambre. Changer de mode vide un type sans prix."""
-        Type = self.env['hotel.room.type']
-        type_private = Type.create({'name': 'RF Privée', 'room_price': 5000})
+    def test_room_type_independent_of_booking_type(self):
+        """Aucun lien entre type de location et type de chambre : tous les
+        types sont proposés, et changer de mode garde le type choisi."""
         domain = self.env['hotel.reservation']._fields['room_type_id'].domain
-        self.assertIn('booking_type', domain)
-        bed_types = Type.search([('bed_price', '>', 0), ('room_price', '>', -1)])
-        room_types = Type.search([('bed_price', '>', -1), ('room_price', '>', 0)])
-        self.assertIn(self.type_dorm, bed_types)
-        self.assertNotIn(type_private, bed_types)
-        self.assertIn(type_private, room_types)
-        self.assertNotIn(self.type_dorm, room_types)
-        self.assertIn(self.type_other, bed_types & room_types)
+        self.assertFalse(domain)
         f = Form(self.env['hotel.reservation'])
+        f.floor_id = self.floor
         f.booking_type = 'bed'
-        f.room_type_id = self.type_dorm
+        f.room_type_id = self.type_dorm   # pas de prix chambre
         f.booking_type = 'room'
-        self.assertFalse(f.room_type_id)
-        f.room_type_id = self.type_other
+        self.assertEqual(f.room_type_id, self.type_dorm)
         f.booking_type = 'bed'
-        self.assertEqual(f.room_type_id, self.type_other)
+        self.assertEqual(f.room_type_id, self.type_dorm)
+
+    def test_floor_filters_and_is_checked(self):
+        """Étage : obligatoire dans le formulaire, filtre les propositions,
+        chambres d'un autre étage refusées."""
+        from odoo.exceptions import ValidationError
+        Floor = self.env['hotel.floor']
+        f1 = Floor.create({'name': 'RF Étage 1'})
+        f2 = Floor.create({'name': 'RF Étage 2'})
+        self.r2.floor_id = f1
+        other = self.env['hotel.room'].create({'name': 'RF-E2', 'capacity': 2, 'floor_id': f2.id})
+        proposed = self._new(guest_count=2, floor_id=f1.id).proposed_bed_ids._origin
+        self.assertEqual(proposed, self.r2.bed_ids)
+        proposed = self._new(guest_count=2, floor_id=f2.id).proposed_bed_ids._origin
+        self.assertEqual(proposed, other.bed_ids)
+        arch = self.env['hotel.reservation'].get_view(view_type='form')['arch']
+        self.assertRegex(arch, r'name="floor_id"[^>]*required=')
+        with self.assertRaises(ValidationError):
+            self.env['hotel.reservation'].create({
+                'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+                'booking_type': 'room', 'floor_id': f1.id,
+                'line_ids': [(0, 0, {'room_id': other.id})]})
+        resa = self.env['hotel.reservation'].create({
+            'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+            'booking_type': 'room', 'floor_id': f2.id,
+            'line_ids': [(0, 0, {'room_id': other.id})]})
+        # changer d'étage dans le formulaire retire les chambres de l'autre étage
+        new = self.env['hotel.reservation'].new({'floor_id': f1.id, 'line_ids': [
+            (0, 0, {'room_id': other.id})]})
+        warning = new._onchange_floor_id()
+        self.assertFalse(new.line_ids)
+        self.assertIn('RF-E2', warning['warning']['message'])
+        self.assertEqual(resa.floor_id, f2)
 
 @tagged('post_install', '-at_install')
 class TestRoomCreation(TransactionCase):

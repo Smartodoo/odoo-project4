@@ -103,6 +103,8 @@
                             <field name="booking_type" widget="radio" options="{'horizontal': true}"/>
                             <field name="room_type_id" placeholder="Type le moins cher"
                                    options="{'no_create': True, 'no_open': True}"/>
+                            <field name="floor_id" required="state not in ('cancel', 'checkout')"
+                                   options="{'no_create': True, 'no_open': True}"/>
                             <field name="adults"/>
                             <field name="children"/>
                             <field name="guest_count" readonly="1" force_save="1"/>
@@ -395,6 +397,7 @@
                 <field name="checkin"/>
                 <field name="checkout"/>
                 <field name="nights"/>
+                <field name="floor_id" optional="show"/>
                 <field name="room_count"/>
                 <field name="guest_count"/>
                 <field name="source" optional="hide"/>
@@ -440,6 +443,7 @@
                 <field name="partner_id"/>
                 <field name="partner_phone"/>
                 <field name="partner_id_number"/>
+                <field name="floor_id"/>
                 <filter name="draft" string="Brouillon" domain="[('state', '=', 'draft')]"/>
                 <filter name="confirmed" string="Confirmées" domain="[('state', '=', 'confirmed')]"/>
                 <filter name="checkin" string="En séjour" domain="[('state', '=', 'checkin')]"/>
@@ -458,6 +462,7 @@
                     <filter name="group_source" string="Source" context="{'group_by': 'source'}"/>
                     <filter name="group_month" string="Mois d'arrivée" context="{'group_by': 'checkin:month'}"/>
                     <filter name="group_state" string="État" context="{'group_by': 'state'}"/>
+                    <filter name="group_floor" string="Étage" context="{'group_by': 'floor_id'}"/>
                     <filter name="group_partner" string="Client" context="{'group_by': 'partner_id'}"/>
                     <filter name="group_checkin" string="Arrivée" context="{'group_by': 'checkin'}"/>
                 </group>
