@@ -18,6 +18,11 @@ class HotelRoomType(models.Model):
         help="Prix d'une nuit pour UN lit réservé avec ce type (location au lit).")
     currency_id = fields.Many2one(
         'res.currency', default=lambda self: self.env.company.currency_id)
+    capacity = fields.Integer(
+        string="Capacité (personnes)",
+        help="Facultatif. Réservation par chambre avec ce type : seules les "
+             "chambres de cette capacité sont proposées. Vide : chambres de "
+             "capacité = nombre de personnes, sinon + 1, + 2…")
     amenity_ids = fields.Many2many('hotel.amenity', string="Équipements")
     description = fields.Text(string="Description")
     image = fields.Image(string="Photo")
@@ -25,6 +30,10 @@ class HotelRoomType(models.Model):
     reservation_count = fields.Integer(
         string="Nb réservations", compute='_compute_reservation_count')
 
+    _capacity_non_negative = models.Constraint(
+        'CHECK(capacity IS NULL OR capacity >= 0)',
+        "La capacit\u00e9 d'un type de chambre ne peut pas \u00eatre n\u00e9gative.",
+    )
     _prices_non_negative = models.Constraint(
         'CHECK(room_price >= 0 AND bed_price >= 0)',
         "Les prix d'un type de chambre ne peuvent pas \u00eatre n\u00e9gatifs.",

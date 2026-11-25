@@ -116,6 +116,31 @@ class TestReservationForm(TransactionCase):
         other.action_confirm()
         self.assertEqual(list(proposed(3)), [self.r2, two])
 
+    def test_room_proposals_type_capacity(self):
+        """Type de chambre avec capacité : seules les chambres vides de l'étage
+        de cette capacité ; type sans capacité : règle personnes + i."""
+        Room = self.env['hotel.room']
+        small = Room.create({'name': 'RF-T1', 'capacity': 1, 'floor_id': self.floor.id})
+        Type = self.env['hotel.room.type']
+        t_double = Type.create({'name': 'RF Double', 'room_price': 5000, 'capacity': 2})
+        t_free = Type.create({'name': 'RF Libre', 'room_price': 5000})
+
+        def proposed(guests, rtype):
+            return self._new(booking_type='room', guest_count=guests, floor_id=self.floor.id,
+                             room_type_id=rtype.id).proposed_room_ids._origin
+        self.assertEqual(proposed(1, t_double), self.r2)
+        self.assertEqual(proposed(3, t_double), self.r2)
+        self.assertEqual(proposed(1, t_free), small)
+        self.assertEqual(proposed(3, t_free), self.r3)
+        t_double.capacity = 3
+        self.assertEqual(proposed(1, t_double), self.r3)
+        t_double.capacity = 4  # aucune chambre de 4
+        self.assertFalse(proposed(1, t_double))
+        # par lit : la capacité du type ne joue pas
+        beds = self._new(guest_count=2, floor_id=self.floor.id,
+                         room_type_id=t_double.id).proposed_bed_ids._origin
+        self.assertEqual(beds, self.r2.bed_ids)
+
     def test_bed_partial_rooms_before_free_rooms(self):
         """Par lit : une chambre partiellement occupée passe avant une chambre
         libre, même si elle a plus de lits libres que de personnes."""

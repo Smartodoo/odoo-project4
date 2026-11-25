@@ -579,11 +579,12 @@ class HotelReservation(models.Model):
                 rec._check_guest_places()
                 rec._check_availability()
 
-    @api.depends('checkin', 'checkout', 'booking_type', 'floor_id',
+    @api.depends('checkin', 'checkout', 'booking_type', 'floor_id', 'room_type_id.capacity',
                  'guest_count', 'children', 'line_ids.room_id', 'line_ids.bed_ids')
     def _compute_proposed(self):
         """Chambres / lits proposés dans les lignes, seulement à l'étage choisi :
-        par chambre, les chambres totalement vides de capacité = personnes + i ;
+        par chambre, les chambres totalement vides de capacité = celle du type
+        de chambre choisi si elle est renseignée, sinon personnes + i ;
         par lit, d'abord
         les chambres partiellement occupées (lits libres = personnes + i),
         sinon les chambres libres (lits = personnes + i). Voir
@@ -596,7 +597,8 @@ class HotelReservation(models.Model):
             guests = max(rec.guest_count or 1, 1)
             if rec.booking_type == 'room':
                 rooms = Room._hotel_ordered_free_rooms(
-                    checkin, checkout, origin, guests, rec.line_ids.room_id._origin, domain)
+                    checkin, checkout, origin, guests, rec.line_ids.room_id._origin, domain,
+                    capacity=rec.room_type_id.capacity)
                 rec.proposed_room_ids = rooms
                 rec.proposed_room_order = ','.join(str(i) for i in rooms.ids)
                 rec.proposed_bed_ids = False
