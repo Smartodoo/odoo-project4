@@ -316,3 +316,52 @@ class TestBookingTypeWebsite(BookingTypeCommon, HttpCase):
             '/odoo/action-hotel_management.action_hotel_reservation/%s' % resa.id,
             code, ready="!!document.querySelector('.o_form_view .o_notebook')",
             login='admin', timeout=90)
+
+
+@tagged('post_install', '-at_install')
+class TestRoomPublish(BookingTypeCommon, HttpCase):
+    """Bouton Publier / Dépublier : seules les chambres publiées apparaissent
+    sur le site et peuvent y être réservées."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._setup_rooms()
+
+    def test_new_room_unpublished_and_buttons(self):
+        room = self.env['hotel.room'].create({'name': 'BT-NEW', 'capacity': 2})
+        self.assertFalse(room.website_published)
+        room.action_website_publish()
+        self.assertTrue(room.website_published)
+        room.action_website_unpublish()
+        self.assertFalse(room.website_published)
+        for xid in ('hotel_management.view_hotel_room_form',
+                    'hotel_management.view_hotel_room_config_form'):
+            arch = self.env.ref(xid).arch
+            self.assertIn('action_website_publish', arch)
+            self.assertIn('action_website_unpublish', arch)
+
+    def test_unpublished_room_hidden_and_not_bookable(self):
+        self.room_b.action_website_unpublish()
+        url = '/hotel/rooms?checkin=%s&checkout=%s&guests=1&booking_type=%s'
+        for btype in ('room', 'bed'):
+            page = self.url_open(url % (self.ci, self.co, btype)).text
+            self.assertNotIn('Chambre BT-B<', page)
+            self.assertIn('Chambre BT-A', page)
+        self.assertNotIn('Chambre BT-B<', self.url_open('/hotel/rooms').text)
+        self.assertNotIn('Chambre BT-B<', self.url_open('/').text)
+        detail = self.url_open('/hotel/room/%s' % self.room_b.id, allow_redirects=False)
+        self.assertIn(detail.status_code, (301, 302, 303))
+        # envoi forcé sur la chambre dépubliée : refusé
+        page = self.url_open('/hotel/room/%s' % self.room_a.id).text
+        token = re.search(r'name="csrf_token" value="([^"]+)"', page).group(1)
+        res = self.url_open('/hotel/booking/submit', data={
+            'csrf_token': token, 'room_id': self.room_b.id, 'checkin': str(self.ci),
+            'checkout': str(self.co), 'guests': 1, 'booking_type': 'room',
+            'last_name': 'Client', 'first_name': 'Web', 'birthdate': '1990-01-01',
+            'street': '1 rue Test', 'phone': '0550000000', 'email': 'web.depub@example.com'},
+            allow_redirects=False)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Chambre introuvable', res.text)
+        self.assertFalse(self.env['hotel.reservation'].search(
+            [('partner_id.email', '=', 'web.depub@example.com')]))

@@ -209,7 +209,9 @@ class HotelWebsite(http.Controller):
         # Brouillons compris : un lit / une chambre déjà retenu n'est pas revendu
         Room = request.env['hotel.room'].sudo().with_context(hotel_include_draft=True)
         try:
-            room = Room.browse(int(post.get('room_id') or 0)).exists()
+            # seules les chambres publiées se réservent sur le site
+            room = Room.browse(int(post.get('room_id') or 0)).exists().filtered(
+                'website_published')
         except ValueError:
             room = Room.browse()
         ci = self._parse_date(post.get('checkin'))

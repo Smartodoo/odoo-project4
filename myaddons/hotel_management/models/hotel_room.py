@@ -51,7 +51,10 @@ class HotelRoom(models.Model):
     image = fields.Image(string="Photo")
     description = fields.Text(string="Description")
     active = fields.Boolean(default=True)
-    website_published = fields.Boolean(string="Publié sur le site", default=True)
+    website_published = fields.Boolean(
+        string="Publié sur le site", default=False, tracking=True,
+        help="Seules les chambres publiées apparaissent sur le site web et "
+             "peuvent y être réservées (bouton « Publier » de la chambre).")
     company_id = fields.Many2one(
         'res.company', default=lambda self: self.env.company)
 
@@ -280,6 +283,14 @@ class HotelRoom(models.Model):
                 bed_vals.append({'room_id': room.id, 'name': name})
         if bed_vals:
             self.env['hotel.bed'].create(bed_vals)
+
+    def action_website_publish(self):
+        """Bouton « Publier » : la chambre apparaît sur le site web."""
+        self.write({'website_published': True})
+
+    def action_website_unpublish(self):
+        """Bouton « Dépublier » : la chambre est retirée du site web."""
+        self.write({'website_published': False})
 
     def action_set_out_of_service(self):
         """Fermer durablement la chambre (statut « Hors service »)."""

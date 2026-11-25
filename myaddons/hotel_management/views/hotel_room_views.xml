@@ -8,6 +8,7 @@
                 <field name="name"/>
                 <field name="floor_id"/>
                 <field name="capacity"/>
+                <field name="website_published" string="Publiée" widget="boolean_toggle" optional="show"/>
                 <field name="current_booking_type" string="Mode (résa en cours)" optional="show"/>
                 <field name="bed_count" optional="hide"/>
                 <field name="bed_availability" optional="show"/>
@@ -83,6 +84,12 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_website_publish" type="object" string="Publier"
+                            icon="public" class="btn-primary" invisible="website_published"
+                            help="Afficher cette chambre sur le site web"/>
+                    <button name="action_website_unpublish" type="object" string="Dépublier"
+                            icon="public_off" invisible="not website_published"
+                            help="Retirer cette chambre du site web"/>
                     <button name="action_set_in_service" type="object"
                             string="Remettre en service" class="btn-primary"
                             invisible="status != 'out_of_service'"/>
@@ -90,6 +97,8 @@
                            statusbar_visible="available,reserved,partial,occupied,cleaning,maintenance,out_of_service"/>
                 </header>
                 <sheet>
+                    <widget name="web_ribbon" title="Non publié" bg_color="text-bg-warning"
+                            invisible="website_published"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_reservations" type="object"
                                 class="oe_stat_button" icon="event_available">
@@ -269,6 +278,9 @@
             <search>
                 <field name="name"/>
                 <field name="floor_id"/>
+                <filter name="published" string="Publiées sur le site" domain="[('website_published', '=', True)]"/>
+                <filter name="unpublished" string="Non publiées" domain="[('website_published', '=', False)]"/>
+                <separator/>
                 <filter name="clean" string="Propres" domain="[('housekeeping_status', '=', 'clean')]"/>
                 <filter name="dirty" string="À nettoyer" domain="[('housekeeping_status', '=', 'dirty')]"/>
                 <filter name="maintenance" string="En maintenance" domain="[('technical_state', '=', 'maintenance')]"/>
@@ -304,6 +316,7 @@
                 <field name="floor_id"/>
                 <field name="capacity"/>
                 <field name="bed_summary" string="Lits créés"/>
+                <field name="website_published" string="Publiée" widget="boolean_toggle"/>
             </list>
         </field>
     </record>
@@ -314,7 +327,18 @@
         <field name="priority">95</field>
         <field name="arch" type="xml">
             <form string="Chambre">
+                <header>
+                    <button name="action_website_publish" type="object" string="Publier"
+                            icon="public" class="btn-primary" invisible="website_published"
+                            help="Afficher cette chambre sur le site web"/>
+                    <button name="action_website_unpublish" type="object" string="Dépublier"
+                            icon="public_off" invisible="not website_published"
+                            help="Retirer cette chambre du site web"/>
+                </header>
                 <sheet>
+                    <widget name="web_ribbon" title="Non publié" bg_color="text-bg-warning"
+                            invisible="website_published"/>
+                    <field name="website_published" invisible="1"/>
                     <field name="image" widget="image" class="oe_avatar"/>
                     <div class="oe_title">
                         <label for="name"/>
