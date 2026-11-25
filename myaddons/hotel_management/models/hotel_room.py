@@ -623,38 +623,28 @@ class HotelRoom(models.Model):
     @api.model
     def _hotel_ordered_free_rooms(self, checkin, checkout, ignore_reservation=False,
                                   guests=1, chosen=None, domain=None):
-        """Location « par chambre » : seules les chambres libres en entier dont
-        le nombre de lits est le plus proche du nombre de personnes restant à
-        loger sont proposées (= personnes ; à défaut personnes + 1, puis + 2…).
-        Si aucune chambre ne peut loger tout le monde, toutes sont proposées,
-        de la plus grande à la plus petite (groupe à répartir)."""
+        """Location « par chambre » : toutes les chambres totalement vides
+        (aucun lit loué, pas en maintenance) sur la période (et l'étage :
+        `domain`), hors chambres déjà choisies, par numéro."""
         chosen = chosen or self.env['hotel.room']
-        placed = sum(r.capacity or len(r.bed_ids.filtered('active')) for r in chosen)
-        remaining = max(guests - placed, 1)
         rooms = self._hotel_whole_free_rooms(
             checkin, checkout, ignore_reservation, domain=domain) - chosen
-
-        def size(room):
-            return room.capacity or len(room.bed_ids.filtered('active'))
-        fitting = [size(r) for r in rooms if size(r) >= remaining]
-        if fitting:
-            target = min(fitting)
-            return rooms.filtered(lambda r: size(r) == target).sorted(
-                lambda r: r.name or '')
-        return rooms.sorted(lambda r: (-size(r), r.name or ''))
+        return rooms.sorted(lambda r: r.name or '')
 
     @api.model
     def _hotel_ordered_free_beds(self, checkin, checkout, ignore_reservation=False,
                                  guests=1, taken_beds=None, domain=None):
-        """Location « par lit », sur la période [checkin, checkout[, avec
-        N = nombre de personnes restant à loger. Pour i = 0, 1, 2… :
-          a. chambres partiellement occupées (lits déjà loués par d'autres
-             réservations, ou chambre entamée par la réservation en cours)
-             dont le nombre de lits libres = N + i ;
-          b. sinon chambres non occupées dont le nombre de lits libres = N + i.
-        Le premier groupe trouvé est seul proposé. Si aucune chambre n'a assez
+        """Location « par lit », sur la période [checkin, checkout[ et l'étage
+        (`domain`), avec N = nombre de personnes restant à loger :
+          1. d'abord les chambres partiellement occupées (lits déjà loués par
+             d'autres réservations, ou chambre entamée par la réservation en
+             cours) : celles dont le nombre de lits libres = N + i, pour
+             i = 0, 1, 2… (la plus petite valeur trouvée) ;
+          2. s'il n'y en a aucune pouvant loger le groupe : les chambres
+             totalement libres dont le nombre de lits = N + i (i = 0, 1, 2…).
+        Seul le premier groupe trouvé est proposé. Si aucune chambre n'a assez
         de lits libres pour tout le groupe : tous les lits libres, des
-        chambres les plus libres aux moins libres (groupe à répartir).
+        chambres partielles puis des plus libres (groupe à répartir).
         `taken_beds` = lits déjà choisis dans la réservation en cours : ils
         comptent comme placés."""
         taken_beds = taken_beds or self.env['hotel.bed']
@@ -677,15 +667,14 @@ class HotelRoom(models.Model):
                 beds += entry[1].sorted(lambda b: b.name or '')
             return beds
 
-        sizes = sorted({len(o[1]) for o in offer if len(o[1]) >= remaining})
-        for size in sizes:  # N + i, i croissant (seules les tailles existantes)
-            for partial in (True, False):
-                group = [o for o in offer if o[2] == partial and len(o[1]) == size]
-                if group:
-                    return beds_of(group)
-        # Aucune chambre assez grande : tous les lits libres, la plus libre d'abord
+        for partial in (True, False):
+            group = [o for o in offer if o[2] == partial and len(o[1]) >= remaining]
+            if group:
+                size = min(len(o[1]) for o in group)  # N + i, i le plus petit
+                return beds_of([o for o in group if len(o[1]) == size])
+        # Aucune chambre assez grande : tous les lits libres, partielles d'abord
         beds = self.env['hotel.bed']
-        for o in sorted(offer, key=lambda o: (-len(o[1]), not o[2]) + key(o)):
+        for o in sorted(offer, key=lambda o: (not o[2], -len(o[1])) + key(o)):
             beds += o[1].sorted(lambda b: b.name or '')
         return beds
 

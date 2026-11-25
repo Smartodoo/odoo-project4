@@ -582,10 +582,11 @@ class HotelReservation(models.Model):
     @api.depends('checkin', 'checkout', 'booking_type', 'floor_id',
                  'guest_count', 'children', 'line_ids.room_id', 'line_ids.bed_ids')
     def _compute_proposed(self):
-        """Chambres / lits proposés dans les lignes : seulement les chambres
-        dont le nombre de lits (libres) = nombre de personnes restant à loger,
-        à défaut + 1, puis + 2… (voir hotel.room._hotel_ordered_free_rooms /
-        _hotel_ordered_free_beds). Seulement les chambres de l'étage choisi."""
+        """Chambres / lits proposés dans les lignes, seulement à l'étage choisi :
+        par chambre, toutes les chambres totalement vides ; par lit, d'abord
+        les chambres partiellement occupées (lits libres = personnes + i),
+        sinon les chambres libres (lits = personnes + i). Voir
+        hotel.room._hotel_ordered_free_rooms / _hotel_ordered_free_beds."""
         Room = self.env['hotel.room']
         for rec in self:
             origin = rec._origin if rec._origin else False
