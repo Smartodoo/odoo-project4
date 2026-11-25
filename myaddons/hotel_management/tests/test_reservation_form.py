@@ -87,28 +87,34 @@ class TestReservationForm(TransactionCase):
         resa = self._new(guest_count=2, line_ids=[(0, 0, {'bed_id': bed.id, 'bed_ids': [(6, 0, bed.ids)]})])
         self.assertEqual(resa.proposed_bed_ids._origin, self.r2.bed_ids[1:])
 
-    def test_room_proposals_all_empty_rooms_of_floor(self):
-        """Par chambre : toutes les chambres totalement vides de l'étage,
-        quelle que soit leur capacité ; une chambre dont un lit est loué
-        n'est pas proposée."""
+    def test_room_proposals_capacity_of_floor(self):
+        """Par chambre : chambres totalement vides de l'étage dont la capacité
+        = personnes, sinon personnes + 1, + 2… ; aucune assez grande : toutes,
+        la plus grande d'abord. Une chambre dont un lit est loué est exclue."""
         Room = self.env['hotel.room']
         floor2 = self.env['hotel.floor'].create({'name': 'RF Étage 2'})
         small = Room.create({'name': 'RF-R1', 'capacity': 1, 'floor_id': self.floor.id})
+        two = Room.create({'name': 'RF-R2B', 'capacity': 2, 'floor_id': self.floor.id})
         away = Room.create({'name': 'RF-R9', 'capacity': 2, 'floor_id': floor2.id})
 
         def proposed(guests, floor=self.floor):
             return self._new(booking_type='room', guest_count=guests,
                              floor_id=floor.id).proposed_room_ids._origin
-        self.assertEqual(proposed(2), small | self.r2 | self.r3)
-        self.assertEqual(proposed(1), small | self.r2 | self.r3)
+        self.assertEqual(proposed(1), small)
+        self.assertEqual(proposed(2), self.r2 | two)
+        self.assertEqual(proposed(3), self.r3)
         self.assertEqual(proposed(2, floor2), away)
+        # 4 personnes : aucune assez grande -> toutes, la plus grande d'abord
+        self.assertEqual(list(proposed(4)), [self.r3, self.r2, two, small])
+        # plus de chambre de 1 libre -> 1 + 1 = chambres de 2
+        small.technical_state = 'maintenance'
+        self.assertEqual(proposed(1), self.r2 | two)
+        # r3 entamée par une location au lit : plus « totalement vide »
         other = self.env['hotel.reservation'].create({
             'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
             'booking_type': 'bed', 'line_ids': [(0, 0, {'bed_id': self.r3.bed_ids[0].id})]})
         other.action_confirm()
-        self.assertEqual(proposed(2), small | self.r2)
-        small.technical_state = 'maintenance'
-        self.assertEqual(proposed(2), self.r2)
+        self.assertEqual(list(proposed(3)), [self.r2, two])
 
     def test_bed_partial_rooms_before_free_rooms(self):
         """Par lit : une chambre partiellement occupée passe avant une chambre

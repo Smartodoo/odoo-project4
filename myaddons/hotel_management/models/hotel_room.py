@@ -623,13 +623,25 @@ class HotelRoom(models.Model):
     @api.model
     def _hotel_ordered_free_rooms(self, checkin, checkout, ignore_reservation=False,
                                   guests=1, chosen=None, domain=None):
-        """Location « par chambre » : toutes les chambres totalement vides
-        (aucun lit loué, pas en maintenance) sur la période (et l'étage :
-        `domain`), hors chambres déjà choisies, par numéro."""
+        """Location « par chambre » : chambres totalement vides (aucun lit
+        loué, pas en maintenance) sur la période et l'étage (`domain`), avec
+        N = personnes restant à loger (hors chambres déjà choisies) : celles
+        dont la capacité = N, sinon N + 1, N + 2… (seul ce groupe est
+        proposé). Si aucune ne peut loger tout le groupe : toutes, de la plus
+        grande à la plus petite (groupe à répartir)."""
         chosen = chosen or self.env['hotel.room']
+
+        def size(room):
+            return room.capacity or len(room.bed_ids.filtered('active'))
+        remaining = max(guests - sum(size(r) for r in chosen), 1)
         rooms = self._hotel_whole_free_rooms(
             checkin, checkout, ignore_reservation, domain=domain) - chosen
-        return rooms.sorted(lambda r: r.name or '')
+        fitting = [size(r) for r in rooms if size(r) >= remaining]
+        if fitting:
+            target = min(fitting)  # N + i, i le plus petit
+            return rooms.filtered(lambda r: size(r) == target).sorted(
+                lambda r: r.name or '')
+        return rooms.sorted(lambda r: (-size(r), r.name or ''))
 
     @api.model
     def _hotel_ordered_free_beds(self, checkin, checkout, ignore_reservation=False,

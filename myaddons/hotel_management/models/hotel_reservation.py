@@ -583,7 +583,8 @@ class HotelReservation(models.Model):
                  'guest_count', 'children', 'line_ids.room_id', 'line_ids.bed_ids')
     def _compute_proposed(self):
         """Chambres / lits proposés dans les lignes, seulement à l'étage choisi :
-        par chambre, toutes les chambres totalement vides ; par lit, d'abord
+        par chambre, les chambres totalement vides de capacité = personnes + i ;
+        par lit, d'abord
         les chambres partiellement occupées (lits libres = personnes + i),
         sinon les chambres libres (lits = personnes + i). Voir
         hotel.room._hotel_ordered_free_rooms / _hotel_ordered_free_beds."""
