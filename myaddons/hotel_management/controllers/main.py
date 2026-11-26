@@ -35,10 +35,12 @@ class HotelWebsite(http.Controller):
         separate = bool(kw.get('separate')) and booking_type == 'bed' and guests > 1
         return checkin, checkout, guests, booking_type, separate
 
-    def _site_types(self, booking_type):
-        """Formules proposées : types actifs ayant un prix pour le mode."""
+    def _site_types(self, booking_type, guests=1):
+        """Formules proposées : types actifs ayant un prix pour le mode et
+        assez grands pour le groupe (capacité vide = pas de limite)."""
         fname = 'bed_price' if booking_type == 'bed' else 'room_price'
-        return request.env['hotel.room.type'].sudo().search([(fname, '>', 0)])
+        return request.env['hotel.room.type'].sudo().search([(fname, '>', 0)]).filtered(
+            lambda t: not t.capacity or t.capacity >= guests)
 
     def _type_price(self, room_type, ci, co, guests, booking_type):
         """(prix / nuit, total du séjour) pour une formule : tarif saisonnier
@@ -72,7 +74,7 @@ class HotelWebsite(http.Controller):
             else:
                 dates_selected = True
                 bed_proposal = None
-                for rtype in self._site_types(booking_type):
+                for rtype in self._site_types(booking_type, guests):
                     if booking_type == 'bed':
                         # par lit : la proposition ne dépend pas du type
                         if bed_proposal is None:
@@ -124,7 +126,8 @@ class HotelWebsite(http.Controller):
             type_id = int(kw.get('type_id') or 0)
         except ValueError:
             type_id = 0
-        room_type = self._site_types(booking_type or 'room').filtered(lambda t: t.id == type_id)
+        room_type = self._site_types(booking_type or 'room', guests).filtered(
+            lambda t: t.id == type_id)
         proposal = {'rooms': request.env['hotel.room'].sudo().browse(),
                     'beds': request.env['hotel.bed'].sudo().browse(), 'floor': False}
         unit = total = 0.0

@@ -141,6 +141,35 @@ class TestReservationForm(TransactionCase):
                          room_type_id=t_double.id).proposed_bed_ids._origin
         self.assertEqual(beds, self.r2.bed_ids)
 
+    def test_guests_above_type_capacity_refused(self):
+        """Réservation : personnes > capacité du type choisi -> refusée (message
+        clair) ; avertissement immédiat dans le formulaire ; type sans capacité
+        ou réservation annulée : pas de contrôle."""
+        from odoo.exceptions import ValidationError
+        Type = self.env['hotel.room.type']
+        t_single = Type.create({'name': 'RF Single', 'room_price': 3000, 'capacity': 1})
+        t_free = Type.create({'name': 'RF Sans capacité', 'room_price': 3000})
+        vals = {'partner_id': self.partner.id, 'checkin': self.ci, 'checkout': self.co,
+                'booking_type': 'room', 'room_type_id': t_single.id, 'adults': 1,
+                'children': 2, 'line_ids': [(0, 0, {'room_id': self.r3.id})]}
+        with self.assertRaises(ValidationError) as err:
+            self.env['hotel.reservation'].create(vals)
+        self.assertIn('RF Single', str(err.exception))
+        self.assertIn('1 personne', str(err.exception))
+        resa = self.env['hotel.reservation'].create(dict(vals, room_type_id=t_free.id))
+        with self.assertRaises(ValidationError):
+            resa.room_type_id = t_single
+        with self.assertRaises(ValidationError):
+            self.env['hotel.reservation'].create(dict(vals, booking_type='bed', line_ids=[
+                (0, 0, {'bed_id': b.id}) for b in self.r3.bed_ids]))
+        resa.state = 'cancel'
+        resa.room_type_id = t_single   # annulée : pas de contrôle
+        new = self._new(guest_count=3, room_type_id=t_single.id)
+        warning = new._onchange_room_type_capacity()
+        self.assertIn('RF Single', warning['warning']['message'])
+        self.assertFalse(self._new(guest_count=1, room_type_id=t_single.id)
+                         ._onchange_room_type_capacity())
+
     def test_bed_partial_rooms_before_free_rooms(self):
         """Par lit : une chambre partiellement occupée passe avant une chambre
         libre, même si elle a plus de lits libres que de personnes ; tant
@@ -299,9 +328,9 @@ class TestReservationForm(TransactionCase):
         f.checkout = self.co
         f.booking_type = 'bed'
         f.partner_phone = '0550000000'
-        f.partner_last_name = 'Haddad'
+        f.partner_last_name = 'Zzhaddad'
         self.assertFalse(f.partner_id)
-        f.partner_first_name = 'Sara'
+        f.partner_first_name = 'Zzsara'
         # Nom + prénom saisis : contact créé et sélectionné tout de suite
         self.assertTrue(f.partner_id)
         self.assertEqual(f.partner_id.phone, '0550000000')
@@ -314,10 +343,10 @@ class TestReservationForm(TransactionCase):
             line.bed_id = self.r2.bed_ids[0]
         resa = f.save()
         self.assertTrue(resa.partner_id)
-        self.assertEqual(resa.partner_id.hotel_last_name, 'Haddad')
+        self.assertEqual(resa.partner_id.hotel_last_name, 'Zzhaddad')
         self.assertEqual(resa.partner_id.phone, '0550000000')
         self.assertEqual(str(resa.partner_id.hotel_birthdate), '1992-05-04')
-        self.assertIn('Haddad', resa.partner_id.name)
+        self.assertIn('Zzhaddad', resa.partner_id.name)
         self.assertEqual((resa.partner_id.street, resa.partner_id.hotel_id_type,
                           resa.partner_id.hotel_id_number),
                          ('5 rue des Oliviers', 'passport', 'P445566'))

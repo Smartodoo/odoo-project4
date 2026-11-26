@@ -145,6 +145,8 @@ class TestReceptionRules(TransactionCase):
     # --- Déjà pris (même en brouillon) = non proposé -------------------------
     def test_draft_blocks_proposals(self):
         Resa = self.env['hotel.reservation']
+        (self.env['hotel.room'].search([]) - self.room - self.dorm).write(
+            {'technical_state': 'out_of_service'})
         new = Resa.new({'checkin': self.ci, 'checkout': self.co, 'booking_type': 'room'})
         self.assertIn(self.room, new.proposed_room_ids._origin)
         self._resa()  # brouillon sur RR-1

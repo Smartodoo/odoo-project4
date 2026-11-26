@@ -215,6 +215,35 @@ class TestBookingTypeWebsite(WebsiteCommon, HttpCase):
         self.assertIn('Chambre BT-B', catalogue)
         self.assertNotIn('Chambre 101<', catalogue)
 
+    def test_types_too_small_hidden(self):
+        """Site : un type dont la capacité est inférieure au nombre de personnes
+        n'est pas proposé (ni en chambre entière ni au lit) ; type sans
+        capacité toujours proposé."""
+        small = self.env['hotel.room.type'].create(
+            {'name': 'Single web', 'room_price': 300, 'bed_price': 900, 'capacity': 1})
+        for btype in ('room', 'bed'):
+            page = self.url_open('/hotel/rooms?' + self._qs(btype, 2)).text
+            self.assertNotIn('Single web', page)
+            self.assertIn('Type lits', page)            # sans capacité
+            page1 = self.url_open('/hotel/rooms?' + self._qs(btype, 1)).text
+            self.assertIn('Single web', page1)
+        # accès direct à la formule trop petite : renvoyé aux formules
+        res = self.url_open('/hotel/book?type_id=%s&%s' % (small.id, self._qs('room', 2)),
+                            allow_redirects=False)
+        self.assertIn(res.status_code, (301, 302, 303))
+        page = self.url_open('/hotel/book?type_id=%s&%s' % (small.id, self._qs('room', 1))).text
+        token = re.search(r'name="csrf_token" value="([^"]+)"', page).group(1)
+        res = self.url_open('/hotel/booking/submit', data={
+            'csrf_token': token, 'type_id': small.id, 'checkin': str(self.ci),
+            'checkout': str(self.co), 'guests': 2, 'booking_type': 'room',
+            'room_id': self.room_b.id, 'last_name': 'Client', 'first_name': 'Web',
+            'birthdate': '1990-01-01', 'street': '1 rue', 'phone': '0550000000',
+            'email': 'small.web@example.com'}, allow_redirects=False)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Formule introuvable', res.text)
+        self.assertFalse(self.env['hotel.reservation'].search(
+            [('partner_id.email', '=', 'small.web@example.com')]))
+
     def test_room_proposals(self):
         self._book_bed(self.room_a.bed_ids[0])
         self._book_room(self.room_d)

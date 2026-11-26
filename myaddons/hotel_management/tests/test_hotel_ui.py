@@ -114,6 +114,7 @@ class TestHotelUi(HttpCase):
         from datetime import timedelta
         import re
         from odoo import fields
+        self.env['hotel.room'].search([]).write({'website_published': False})
         rtype = self.env['hotel.room.type'].create({'name': 'Web', 'room_price': 3000})
         room = self.env['hotel.room'].create({
             'name': 'WEB-1', 'capacity': 2, 'website_published': True})
@@ -168,6 +169,7 @@ class TestHotelUi(HttpCase):
         from odoo import fields
         admin = self.env.ref('base.user_admin')
         admin.partner_id.email = 'partage.web@example.com'
+        self.env['hotel.room'].search([]).write({'website_published': False})
         rtype = self._rtype = self.env['hotel.room.type'].create({'name': 'WebN', 'room_price': 1000})
         room = self.env['hotel.room'].create({
             'name': 'WEB-N', 'capacity': 2, 'website_published': True})
@@ -237,6 +239,16 @@ class TestHotelUi(HttpCase):
         self.env['hotel.housekeeping'].create({'room_id': room.id})
         self.env['hotel.maintenance.request'].create({'name': 'Test kanban', 'room_id': room.id})
         self.env['hotel.staff'].create({'name': 'Agent kanban'})
+        from datetime import timedelta
+        from odoo import fields
+        partner = self.env['res.partner'].create({
+            'hotel_last_name': 'Kanban', 'hotel_first_name': 'Test', 'phone': '0550000077',
+            'street': '1 rue', 'hotel_id_type': 'cni', 'hotel_id_number': 'KB-1',
+            'hotel_birthdate': '1990-01-01'})
+        d = fields.Date.today() + timedelta(days=1500)
+        self.env['hotel.reservation'].create({
+            'partner_id': partner.id, 'checkin': d, 'checkout': d + timedelta(days=1),
+            'booking_type': 'room', 'line_ids': [(0, 0, {'room_id': room.id})]})
         for url in ('/odoo/action-hotel_management.action_hotel_housekeeping',
                     '/odoo/action-hotel_management.action_hotel_maintenance',
                     '/odoo/action-hotel_management.action_hotel_staff',

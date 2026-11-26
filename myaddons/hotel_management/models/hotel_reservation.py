@@ -516,6 +516,34 @@ class HotelReservation(models.Model):
                 raise ValidationError(_(
                     "Le nombre d'enfants ne peut pas être négatif."))
 
+    def _room_type_capacity_message(self):
+        """Message si le nombre de personnes dépasse la capacité du type de
+        chambre choisi (si elle est renseignée), sinon False."""
+        self.ensure_one()
+        rtype = self.room_type_id
+        if (rtype and rtype.capacity and self.state != 'cancel'
+                and (self.guest_count or 0) > rtype.capacity):
+            return _(
+                "Le nombre de personnes (%(guests)s) dépasse la capacité du type de "
+                "chambre « %(type)s » (%(capacity)s personne(s) maximum).\n"
+                "Choisissez un type plus grand, ou réduisez le nombre de personnes.",
+                guests=self.guest_count, type=rtype.name, capacity=rtype.capacity)
+        return False
+
+    @api.constrains('guest_count', 'adults', 'children', 'room_type_id', 'state')
+    def _check_room_type_capacity(self):
+        for rec in self:
+            message = rec._room_type_capacity_message()
+            if message:
+                raise ValidationError(message)
+
+    @api.onchange('adults', 'children', 'guest_count', 'room_type_id')
+    def _onchange_room_type_capacity(self):
+        message = self._room_type_capacity_message()
+        if message:
+            return {'warning': {'title': _("Capacité du type de chambre dépassée"),
+                                'message': message}}
+
     @api.onchange('floor_id')
     def _onchange_floor_id(self):
         """Changement d'étage : les chambres / lits d'un autre étage sont retirés."""
