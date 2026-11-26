@@ -5,7 +5,6 @@ from . import test_reception_rules
 from . import test_proposal_ui
 from . import test_auto_beds
 from . import test_dashboard_period
-from . import test_website_search_order
 from . import test_customer_profile
 from . import test_reservation_form
 from . import test_online_channel

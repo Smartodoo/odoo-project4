@@ -119,11 +119,12 @@ class TestHotelUi(HttpCase):
             'name': 'WEB-1', 'capacity': 2, 'website_published': True})
         ci = fields.Date.today() + timedelta(days=700)
         co = ci + timedelta(days=2)
-        page = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=1' % (room.id, ci, co))
+        page = self.url_open('/hotel/book?type_id=%s&checkin=%s&checkout=%s&guests=1&booking_type=room'
+                             % (rtype.id, ci, co))
         self.assertEqual(page.status_code, 200)
         token = re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
         res = self.url_open('/hotel/booking/submit', data={
-            'csrf_token': token, 'room_id': room.id, 'checkin': str(ci), 'checkout': str(co),
+            'csrf_token': token, 'room_id': room.id, 'type_id': rtype.id, 'checkin': str(ci), 'checkout': str(co),
             'guests': 1, 'booking_type': 'room', 'last_name': 'Client', 'first_name': 'Web', 'birthdate': '1990-01-01', 'street': '1 rue Test',
             'email': 'client.web@example.com', 'phone': '0550000000'}, allow_redirects=False)
         self.assertIn(res.status_code, (302, 303))
@@ -145,11 +146,13 @@ class TestHotelUi(HttpCase):
         import re
         if login:
             self.authenticate(login, login)
-        page = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=1' % (room.id, ci, co))
+        page = self.url_open('/hotel/book?type_id=%s&checkin=%s&checkout=%s&guests=1&booking_type=room'
+                             % (self._rtype.id, ci, co))
         self.assertEqual(page.status_code, 200)
         token = re.search(r'csrf_token["\']?\s*(?:value=|:)\s*["\']([^"\']+)', page.text).group(1)
         res = self.url_open('/hotel/booking/submit', data={
-            'csrf_token': token, 'room_id': room.id, 'checkin': str(ci), 'checkout': str(co),
+            'csrf_token': token, 'room_id': room.id, 'type_id': self._rtype.id,
+            'checkin': str(ci), 'checkout': str(co),
             'guests': 1, 'booking_type': 'room', 'last_name': last, 'first_name': first,
             'birthdate': birthdate, 'street': street, 'city': 'Oran', 'phone': '0551000000',
             'email': email}, allow_redirects=False)
@@ -165,7 +168,7 @@ class TestHotelUi(HttpCase):
         from odoo import fields
         admin = self.env.ref('base.user_admin')
         admin.partner_id.email = 'partage.web@example.com'
-        rtype = self.env['hotel.room.type'].create({'name': 'WebN', 'room_price': 1000})
+        rtype = self._rtype = self.env['hotel.room.type'].create({'name': 'WebN', 'room_price': 1000})
         room = self.env['hotel.room'].create({
             'name': 'WEB-N', 'capacity': 2, 'website_published': True})
         d = fields.Date.today() + timedelta(days=800)
@@ -206,9 +209,10 @@ class TestHotelUi(HttpCase):
         minor = str(fields.Date.today() - timedelta(days=365 * 10))
         for kw in ({'birthdate': minor}, {'birthdate': ''}, {'street': ''}, {'phone': ''}):
             import re
-            page = self.url_open('/hotel/room/%s?checkin=%s&checkout=%s&guests=1' % (room.id, d, d + timedelta(days=1)))
+            page = self.url_open('/hotel/book?type_id=%s&checkin=%s&checkout=%s&guests=1&booking_type=room'
+                                 % (rtype.id, d, d + timedelta(days=1)))
             token = re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
-            data = {'csrf_token': token, 'room_id': room.id, 'checkin': str(d),
+            data = {'csrf_token': token, 'room_id': room.id, 'type_id': rtype.id, 'checkin': str(d),
                     'checkout': str(d + timedelta(days=1)), 'guests': 1, 'booking_type': 'room',
                     'last_name': 'Mineur', 'first_name': 'Test', 'email': 'mineur@example.com',
                     'birthdate': '1990-01-01', 'street': '1 rue', 'phone': '0552000000'}

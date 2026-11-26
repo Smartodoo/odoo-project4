@@ -23,10 +23,7 @@ class HotelWebsite(http.Controller):
         except Exception:
             return None
 
-    @http.route(['/hotel', '/hotel/rooms'], type='http', auth='public',
-                website=True, sitemap=True)
-    def hotel_rooms(self, **kw):
-        Room = request.env['hotel.room'].sudo().with_context(hotel_include_draft=True)
+    def _search_params(self, kw):
         checkin = kw.get('checkin') or ''
         checkout = kw.get('checkout') or ''
         try:
@@ -34,68 +31,79 @@ class HotelWebsite(http.Controller):
         except ValueError:
             guests = 1
         booking_type = self._booking_type(kw)
+        # « accepter d'être séparés » : location au lit, plus d'une personne
+        separate = bool(kw.get('separate')) and booking_type == 'bed' and guests > 1
+        return checkin, checkout, guests, booking_type, separate
 
+    def _site_types(self, booking_type):
+        """Formules proposées : types actifs ayant un prix pour le mode."""
+        fname = 'bed_price' if booking_type == 'bed' else 'room_price'
+        return request.env['hotel.room.type'].sudo().search([(fname, '>', 0)])
+
+    def _type_price(self, room_type, ci, co, guests, booking_type):
+        """(prix / nuit, total du séjour) pour une formule : tarif saisonnier
+        nuit par nuit, sinon prix du type ; au lit : x nombre de personnes."""
+        room = request.env['hotel.room'].sudo().new({})
+        unit = room._get_stay_unit_price(ci, co, booking_type, False, room_type)
+        if booking_type == 'bed':
+            unit *= guests
+        nights = (co - ci).days if ci and co and co > ci else 0
+        return unit, unit * nights
+
+    @http.route(['/hotel', '/hotel/rooms'], type='http', auth='public',
+                website=True, sitemap=True)
+    def hotel_rooms(self, **kw):
+        """Recherche : dates, personnes, chambre entière ou lit ; résultat =
+        formules (types de chambre) disponibles avec leur prix total. Le
+        client choisit ensuite sa chambre / ses lits parmi les propositions."""
+        Room = request.env['hotel.room'].sudo()
+        checkin, checkout, guests, booking_type, separate = self._search_params(kw)
         ci = self._parse_date(checkin)
         co = self._parse_date(checkout)
         error = None
         dates_selected = False
-        available_rooms = Room.browse()
-        occupied_rooms = Room.browse()
-        published = [('website_published', '=', True)]
-        rooms = Room.search(published)
-        # Le type de location choisi filtre les chambres proposées
-        if booking_type == 'bed':
-            rooms = rooms.filtered(lambda r: r.bed_count)
-        offers = {}
-
+        cards = []
         if checkin or checkout:
-            if ci and co and co > ci:
-                dates_selected = True
-                for r in rooms:
-                    offers[r.id] = r.get_offer(ci, co, guests)
-                if not booking_type:
-                    error = ("Choisissez le type de location (chambre entière ou lit "
-                             "en dortoir) pour voir les disponibilités.")
-                    dates_selected = False
-                elif booking_type == 'room':
-                    # Par chambre : chambres libres en entier pouvant accueillir
-                    # le groupe, de la capacité la plus proche à la plus grande.
-                    fits = rooms.filtered(lambda r: offers[r.id]['whole'])
-                    available_rooms = fits.sorted(
-                        lambda r: (r.capacity, r.name or ''))
-                    occupied_rooms = rooms - available_rooms
-                else:
-                    # Par lit (placement « ensemble ») : les chambres déjà
-                    # partagées pouvant loger tout le groupe, du nombre de lits
-                    # libres le plus proche au plus grand ; les chambres
-                    # entièrement vides seulement si aucune chambre partagée ne
-                    # peut loger le groupe.
-                    offer = Room._hotel_bed_offer(ci, co, domain=published)
-                    fits = [(room, free, partial) for room, free, partial in offer
-                            if room in rooms and len(free) >= guests]
-                    if any(partial for _r, _f, partial in fits):
-                        fits = [f for f in fits if f[2]]
-                    fits.sort(key=lambda f: (not f[2], len(f[1]), f[0].name or ''))
-                    available_rooms = Room.browse([room.id for room, _f, _p in fits])
-                    for room, free, partial in fits:
-                        offers[room.id]['partial'] = partial
-                        offers[room.id]['free_count'] = len(free)
-                    occupied_rooms = rooms - available_rooms
-            else:
+            if not (ci and co and co > ci):
                 error = "Veuillez saisir des dates valides (le départ doit suivre l'arrivée)."
-
+            elif not booking_type:
+                error = ("Choisissez le type de location (chambre entière ou lit "
+                         "en dortoir) pour voir les disponibilités.")
+            else:
+                dates_selected = True
+                bed_proposal = None
+                for rtype in self._site_types(booking_type):
+                    if booking_type == 'bed':
+                        # par lit : la proposition ne dépend pas du type
+                        if bed_proposal is None:
+                            bed_proposal = Room._hotel_website_proposal(
+                                ci, co, guests, 'bed', rtype, separate)
+                        proposal = bed_proposal
+                    else:
+                        proposal = Room._hotel_website_proposal(ci, co, guests, 'room', rtype)
+                    unit, total = self._type_price(rtype, ci, co, guests, booking_type)
+                    cards.append({
+                        'type': rtype,
+                        'available': bool(proposal['rooms']),
+                        'count': len(proposal['beds'] if booking_type == 'bed'
+                                     else proposal['rooms']),
+                        'unit': unit,
+                        'total': total,
+                    })
+                cards.sort(key=lambda c: (not c['available'], c['total']))
         values = {
-            'rooms': rooms,
-            'available_rooms': available_rooms,
-            'occupied_rooms': occupied_rooms,
-            'offers': offers,
+            'rooms': Room.search([('website_published', '=', True)]),
+            'cards': cards,
             'dates_selected': dates_selected,
             'checkin': checkin,
             'checkout': checkout,
+            'nights': (co - ci).days if dates_selected else 0,
             'guests': guests,
             'booking_type': booking_type,
+            'separate': separate,
             'error': error,
             'today': self._today_str(),
+            'currency': request.env.company.currency_id,
         }
         return request.render('hotel_management.rooms_page', values)
 
@@ -106,69 +114,73 @@ class HotelWebsite(http.Controller):
         value = kw.get('booking_type')
         return value if value in ('room', 'bed') else ''
 
-    def _room_detail_values(self, room, checkin, checkout, guests, **extra):
-        """Valeurs du template détail : dispo chambre entière + par lit."""
+    def _book_values(self, kw, **extra):
+        """Valeurs de la page de réservation d'une formule : chambres / lits
+        proposés par le système, prix, formulaire client."""
+        checkin, checkout, guests, booking_type, separate = self._search_params(kw)
         ci = self._parse_date(checkin)
         co = self._parse_date(checkout)
-        Bed = request.env['hotel.bed']
-        # Comme au back-office : une réservation en brouillon bloque aussi
-        room = room.with_context(hotel_include_draft=True) if room else room
-        available = None
-        whole_available = None
-        free_beds = Bed
-        dates_ok = bool(room and ci and co and co > ci)
-        if dates_ok:
-            whole_available = room.can_book_whole_room(ci, co)
-            free_beds = room.bookable_beds(ci, co)
-            available = bool(whole_available or free_beds)
-        # Seuls les lits libres sur TOUTE la période sont proposés ; sans
-        # dates, aucun lit n'est proposé (on demande d'abord les dates).
-        beds_info = [{'bed': b, 'available': True} for b in free_beds]
+        try:
+            type_id = int(kw.get('type_id') or 0)
+        except ValueError:
+            type_id = 0
+        room_type = self._site_types(booking_type or 'room').filtered(lambda t: t.id == type_id)
+        proposal = {'rooms': request.env['hotel.room'].sudo().browse(),
+                    'beds': request.env['hotel.bed'].sudo().browse(), 'floor': False}
+        unit = total = 0.0
+        valid = bool(room_type and booking_type and ci and co and co > ci)
+        if valid:
+            proposal = request.env['hotel.room'].sudo()._hotel_website_proposal(
+                ci, co, guests, booking_type, room_type, separate)
+            unit, total = self._type_price(room_type, ci, co, guests, booking_type)
+        beds_by_room = [(room, proposal['beds'].filtered(lambda b, r=room: b.room_id == r))
+                        for room in proposal['rooms']] if booking_type == 'bed' else []
         values = {
-            'room': room,
+            'room_type': room_type,
+            'valid': valid,
+            'proposal': proposal,
+            'beds_by_room': beds_by_room,
             'checkin': checkin,
             'checkout': checkout,
+            'nights': (co - ci).days if valid else 0,
             'guests': guests,
-            'booking_type': '',
-            'available': available,
-            'whole_available': whole_available,
-            'whole_price': room._get_whole_room_price(ci) if room else 0.0,
-            'free_bed_count': len(free_beds),
-            'beds_info': beds_info,
-            'beds_need_dates': bool(room and not dates_ok),
-            'period_start': ci.strftime('%d/%m/%Y') if dates_ok else '',
-            'period_end': co.strftime('%d/%m/%Y') if dates_ok else '',
+            'booking_type': booking_type,
+            'separate': separate,
+            'unit': unit,
+            'total': total,
+            'currency': request.env.company.currency_id,
             'errors': [],
-            'last_name': '',
-            'first_name': '',
-            'birthdate': '',
-            'street': '',
-            'city': '',
+            'selected_room_id': 0,
+            'selected_bed_ids': [],
+            'last_name': '', 'first_name': '', 'birthdate': '', 'street': '',
+            'city': '', 'email': '', 'phone': '', 'note': '',
             'birthdate_max': fields.Date.to_string(
                 fields.Date.context_today(request.env.user) - relativedelta(years=18)),
-            'email': '',
-            'phone': '',
             'today': self._today_str(),
         }
         values.update(extra)
         return values
 
+    @http.route(['/hotel/book'], type='http', auth='public', website=True, sitemap=False)
+    def hotel_book(self, **kw):
+        values = self._book_values(kw)
+        if not values['room_type']:
+            return request.redirect('/hotel/rooms')
+        return request.render('hotel_management.book_page', values)
+
     @http.route(['/hotel/room/<model("hotel.room"):room>'], type='http',
                 auth='public', website=True, sitemap=False)
     def hotel_room_detail(self, room, **kw):
-        room = room.sudo().with_context(hotel_include_draft=True)
+        """Fiche d'une chambre (présentation) ; la réservation se fait par la
+        recherche (formules), le système proposant les chambres."""
+        room = room.sudo()
         if not room.website_published:
             return request.redirect('/hotel/rooms')
-        checkin = kw.get('checkin') or ''
-        checkout = kw.get('checkout') or ''
-        try:
-            guests = max(int(kw.get('guests') or 1), 1)
-        except ValueError:
-            guests = 1
-        values = self._room_detail_values(
-            room, checkin, checkout, guests,
-            booking_type=kw.get('booking_type') if kw.get('booking_type') in ('room', 'bed') else '')
-        return request.render('hotel_management.room_detail_page', values)
+        checkin, checkout, guests, booking_type, separate = self._search_params(kw)
+        return request.render('hotel_management.room_detail_page', {
+            'room': room, 'checkin': checkin, 'checkout': checkout, 'guests': guests,
+            'booking_type': booking_type, 'today': self._today_str(),
+        })
 
     def _website_booking_partner(self, last_name, first_name, email, phone,
                                  birthdate=None, street='', city=''):
@@ -206,16 +218,21 @@ class HotelWebsite(http.Controller):
     @http.route(['/hotel/booking/submit'], type='http', auth='public',
                 website=True, methods=['POST'])
     def hotel_booking_submit(self, **post):
-        # Brouillons compris : un lit / une chambre déjà retenu n'est pas revendu
-        Room = request.env['hotel.room'].sudo().with_context(hotel_include_draft=True)
-        try:
-            # seules les chambres publiées se réservent sur le site
-            room = Room.browse(int(post.get('room_id') or 0)).exists().filtered(
-                'website_published')
-        except ValueError:
-            room = Room.browse()
-        ci = self._parse_date(post.get('checkin'))
-        co = self._parse_date(post.get('checkout'))
+        """Envoi de la demande : la chambre / les lits choisis doivent faire
+        partie des propositions du système pour la formule (recalculées ici :
+        brouillons compris, chambres publiées seulement)."""
+        if not post.get('type_id'):
+            # ancien formulaire (sans formule) : type le moins cher du mode
+            rtype = request.env['hotel.room.type'].sudo()._hotel_cheapest(
+                self._booking_type(post) or 'room')
+            post = dict(post, type_id=rtype.id, booking_type=self._booking_type(post) or 'room')
+        values = self._book_values(post)
+        room_type = values['room_type']
+        booking_type = values['booking_type'] or 'room'
+        guests = values['guests']
+        proposal = values['proposal']
+        ci = self._parse_date(values['checkin'])
+        co = self._parse_date(values['checkout'])
         last_name = (post.get('last_name') or '').strip()
         first_name = (post.get('first_name') or '').strip()
         birthdate = self._parse_date(post.get('birthdate'))
@@ -225,22 +242,18 @@ class HotelWebsite(http.Controller):
         phone = (post.get('phone') or '').strip()
         note = (post.get('note') or '').strip()
         try:
-            guests = max(int(post.get('guests') or 1), 1)
+            room_id = int(post.get('room_id') or 0)
         except ValueError:
-            guests = 1
-
-        # Type de réservation : chambre entière ou lit(s)
-        booking_type = post.get('booking_type') or 'room'
-        bed_ids_raw = request.httprequest.form.getlist('bed_ids')
-        bed_ids = [int(x) for x in bed_ids_raw if x.isdigit()]
-        beds = request.env['hotel.bed'].sudo().with_context(
-            hotel_include_draft=True).browse(bed_ids).exists()
-        if room:
-            beds = beds.filtered(lambda b: b.room_id == room)
+            room_id = 0
+        bed_ids = [int(x) for x in request.httprequest.form.getlist('bed_ids') if x.isdigit()]
+        Room = request.env['hotel.room'].sudo()
+        Bed = request.env['hotel.bed'].sudo()
+        room = Room.browse(room_id).exists().filtered('website_published')
+        beds = Bed.browse(bed_ids).exists()
 
         errors = []
-        if not room:
-            errors.append("Chambre introuvable.")
+        if not room_type:
+            errors.append("Formule introuvable.")
         if not (ci and co and co > ci):
             errors.append("Les dates de séjour sont invalides.")
         if not last_name:
@@ -261,61 +274,47 @@ class HotelWebsite(http.Controller):
             errors.append("L'adresse est obligatoire.")
         if not email:
             errors.append("L'adresse e-mail est obligatoire.")
-        if room and ci and co and co > ci:
+        if room_type and ci and co and co > ci:
             if booking_type == 'bed':
                 if not beds:
-                    errors.append("Veuillez sélectionner au moins un lit.")
-                else:
-                    unavailable = beds.filtered(lambda b: not b.is_available(ci, co))
-                    if unavailable:
-                        errors.append(
-                            "Lit(s) indisponible(s) sur la période : %s."
-                            % ', '.join(unavailable.mapped('name')))
-                    if guests != len(beds):
-                        errors.append(
-                            "Vous êtes %s personne(s) : sélectionnez exactement %s lit(s)."
-                            % (guests, guests))
-            else:
-                room_places = room.capacity or len(room.bed_ids.filtered('active'))
-                if guests > room_places:
+                    errors.append("Veuillez sélectionner vos lits.")
+                elif beds - proposal['beds']:
                     errors.append(
-                        "Cette chambre accueille au maximum %s personne(s)." % room_places)
-                if not room.can_book_whole_room(ci, co):
-                    free = room.bookable_beds(ci, co)
-                    if free:
-                        errors.append(
-                            "La chambre entière n'est plus disponible (des lits sont déjà "
-                            "loués), mais %s lit(s) restent libres : réservez-les au lit."
-                            % len(free))
-                    else:
-                        errors.append(
-                            "Cette chambre n'est plus disponible sur la période choisie.")
+                        "Lit(s) indisponible(s) ou non proposé(s) : %s. Choisissez parmi "
+                        "les lits proposés." % ', '.join((beds - proposal['beds']).mapped('name')))
+                elif len(beds) != guests:
+                    errors.append(
+                        "Vous êtes %s personne(s) : sélectionnez exactement %s lit(s)."
+                        % (guests, guests))
+                elif len(beds.room_id) > 1 and not values['separate']:
+                    errors.append(
+                        "Choisissez des lits dans une même chambre, ou cochez « J'accepte "
+                        "d'être réparti dans des chambres différentes ».")
+            else:
+                if not room:
+                    errors.append("Chambre introuvable.")
+                elif room not in proposal['rooms']:
+                    errors.append(
+                        "La chambre %s n'est plus disponible pour cette formule : "
+                        "choisissez parmi les chambres proposées." % room.name)
 
         if errors:
-            values = self._room_detail_values(
-                room, post.get('checkin') or '', post.get('checkout') or '',
-                guests, errors=errors, last_name=last_name,
-                first_name=first_name, birthdate=post.get('birthdate') or '',
-                street=street, city=city, email=email, phone=phone,
-                booking_type=post.get('booking_type') or '')
-            return request.render('hotel_management.room_detail_page', values)
+            values.update(
+                errors=errors, last_name=last_name, first_name=first_name,
+                birthdate=post.get('birthdate') or '', street=street, city=city,
+                email=email, phone=phone, note=note, selected_room_id=room_id,
+                selected_bed_ids=bed_ids)
+            return request.render('hotel_management.book_page', values)
 
         partner = self._website_booking_partner(
             last_name, first_name, email, phone,
             birthdate=birthdate, street=street, city=city)
-
-        # Type de chambre (fixe le prix) : le moins cher ayant un prix pour ce
-        # mode de location ; l'hôtel peut le changer avant de confirmer.
-        room_type = request.env['hotel.room.type'].sudo()._hotel_cheapest(booking_type)
-        # Prix : tarif spécial client, sinon tarifs saisonniers nuit par nuit
-        unit = room._get_stay_unit_price(ci, co, booking_type, partner, room_type)
-        if booking_type == 'bed' and beds:
-            # Par lit : une ligne par lit (la chambre est déduite du lit)
-            lines = [(0, 0, {'room_id': room.id, 'bed_id': bed.id, 'price_unit': unit})
-                     for bed in beds]
+        if booking_type == 'bed':
+            lines = [(0, 0, {'room_id': bed.room_id.id, 'bed_id': bed.id}) for bed in beds]
+            floor = beds.room_id.floor_id[:1]
         else:
-            lines = [(0, 0, {'room_id': room.id, 'price_unit': unit})]
-
+            lines = [(0, 0, {'room_id': room.id})]
+            floor = room.floor_id
         reservation = request.env['hotel.reservation'].sudo().create({
             'partner_id': partner.id,
             'checkin': ci,
@@ -324,11 +323,14 @@ class HotelWebsite(http.Controller):
             'source': 'website',
             'booking_type': booking_type,
             'room_type_id': room_type.id,
-            'floor_id': room.floor_id.id,
-            'bed_placement': 'together',
+            'floor_id': floor.id,
+            'bed_placement': 'fill' if values['separate'] else 'together',
             'note': note,
             'line_ids': lines,
         })
+        # Prix : tarif spécial client, sinon saison, sinon prix de la formule
+        for line in reservation.line_ids:
+            line._apply_price()
         # Réservation en ligne laissée en BROUILLON : l'hôtel la vérifie,
         # complète l'identité du client puis la confirme lui-même (bouton
         # Confirmer, puis « Envoyer confirmation » pour l'e-mail au client).

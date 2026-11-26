@@ -662,6 +662,12 @@ class HotelRoom(models.Model):
     @api.model
     def _hotel_ordered_free_beds(self, checkin, checkout, ignore_reservation=False,
                                  guests=1, taken_beds=None, domain=None, placement='together'):
+        return self._hotel_bed_proposal(
+            checkin, checkout, ignore_reservation, guests, taken_beds, domain, placement)[0]
+
+    @api.model
+    def _hotel_bed_proposal(self, checkin, checkout, ignore_reservation=False,
+                            guests=1, taken_beds=None, domain=None, placement='together'):
         """Location « par lit », sur la période [checkin, checkout[ et l'étage
         (`domain`), avec N = nombre de personnes restant à loger. Chambres
         partielles = lits déjà loués par d'autres réservations, ou chambre
@@ -677,7 +683,10 @@ class HotelRoom(models.Model):
         trouvé est proposé. En dernier recours (rien ne loge le groupe) :
         tous les lits libres, chambres partielles d'abord.
         `taken_beds` = lits déjà choisis dans la réservation en cours : ils
-        comptent comme placés."""
+        comptent comme placés.
+        Renvoie (lits, nature) ; nature : 'fill' (trous des chambres
+        partielles), 'partial' (une chambre partielle), 'free' (chambre libre),
+        'fallback' (dernier recours)."""
         taken_beds = taken_beds or self.env['hotel.bed']
         remaining = max(guests - len(taken_beds), 1)
         # Occupation réelle (autres réservations) : sans les lits en cours de choix
@@ -709,18 +718,63 @@ class HotelRoom(models.Model):
                 chosen.append(o)
                 count += len(o[1])
             if count >= remaining:
-                return beds_of(chosen, ordered=True)
-        groups = [partials] if partials else [[o for o in offer if not o[2]]]
-        for group in groups:
-            fits = [o for o in group if len(o[1]) >= remaining]
-            if fits:
-                size = min(len(o[1]) for o in fits)  # N + i, i le plus petit
-                return beds_of([o for o in fits if len(o[1]) == size])
+                return beds_of(chosen, ordered=True), 'fill'
+        group = partials or [o for o in offer if not o[2]]
+        fits = [o for o in group if len(o[1]) >= remaining]
+        if fits:
+            size = min(len(o[1]) for o in fits)  # N + i, i le plus petit
+            return (beds_of([o for o in fits if len(o[1]) == size]),
+                    'partial' if partials else 'free')
         # Rien ne loge le groupe : tous les lits libres, partielles d'abord
         beds = self.env['hotel.bed']
         for o in sorted(offer, key=lambda o: (not o[2], -len(o[1])) + key(o)):
             beds += o[1].sorted(lambda b: b.name or '')
-        return beds
+        return beds, 'fallback'
+
+    @api.model
+    def _hotel_website_proposal(self, checkin, checkout, guests, booking_type,
+                                room_type=False, separate=False):
+        """Ce que le site propose pour une formule (type de chambre) : mêmes
+        règles que la réception, chambres publiées seulement, étage choisi
+        automatiquement.
+          - par chambre : chambres totalement vides de capacité = celle du type
+            (si renseignée) sinon personnes + i, pouvant loger le groupe ;
+          - par lit : pour chaque étage, la proposition de la réception
+            (placement « compléter » si le client accepte d'être séparé, sinon
+            « ensemble ») ; l'étage retenu est le meilleur (trous des chambres
+            partielles, puis chambre partielle, puis chambre libre).
+        Renvoie {'rooms', 'beds', 'floor'} (vides si complet)."""
+        Room = self.sudo().with_context(hotel_include_draft=True)
+        published = [('website_published', '=', True)]
+        result = {'rooms': Room.browse(), 'beds': self.env['hotel.bed'].sudo().browse(),
+                  'floor': self.env['hotel.floor'].sudo().browse()}
+        if not (checkin and checkout and checkout > checkin):
+            return result
+        guests = max(guests or 1, 1)
+        if booking_type == 'room':
+            rooms = Room._hotel_ordered_free_rooms(
+                checkin, checkout, False, guests, domain=published,
+                capacity=room_type.capacity if room_type else 0)
+            result['rooms'] = rooms.filtered(
+                lambda r: (r.capacity or len(r.bed_ids.filtered('active'))) >= guests)
+            return result
+        placement = 'fill' if separate and guests > 1 else 'together'
+        rank = {'fill': 0, 'partial': 1, 'free': 2, 'fallback': 3}
+        best = None
+        floors = Room.search(published).mapped('floor_id')
+        for floor in floors.sorted(lambda f: (f.sequence, f.name or '', f.id)):
+            beds, kind = Room._hotel_bed_proposal(
+                checkin, checkout, False, guests,
+                domain=published + [('floor_id', '=', floor.id)], placement=placement)
+            if len(beds) < guests:
+                continue
+            if kind == 'fallback' and placement != 'fill':
+                continue  # le groupe ne tient pas dans une seule chambre
+            if best is None or rank[kind] < rank[best[1]]:
+                best = (beds, kind, floor)
+        if best:
+            result.update(beds=best[0], rooms=best[0].room_id, floor=best[2])
+        return result
 
     @api.model
     @api.readonly

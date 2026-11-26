@@ -31,6 +31,14 @@
                                     <option value="bed" t-att-selected="booking_type == 'bed'">Lit en dortoir</option>
                                 </select>
                             </div>
+                            <div t-if="booking_type == 'bed' and guests &gt; 1"
+                                 class="o_hotel_search_field o_hotel_separate">
+                                <label class="d-flex align-items-center gap-2 mb-0">
+                                    <input type="checkbox" name="separate" value="1"
+                                           t-att-checked="'checked' if separate else None"/>
+                                    J'accepte d'être réparti dans des chambres différentes
+                                </label>
+                            </div>
                             <div class="o_hotel_search_field o_hotel_search_btn">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="oi me-1" data-icon="search"/>Rechercher
@@ -58,41 +66,78 @@
                     </t>
 
                     <t t-if="dates_selected">
-                        <h2 class="mb-3">Chambres disponibles
-                            <small class="text-muted">du <t t-out="checkin"/> au <t t-out="checkout"/></small>
+                        <h2 class="mb-3">Nos formules disponibles
+                            <small class="text-muted">du <t t-out="checkin"/> au <t t-out="checkout"/>
+                                · <t t-out="guests"/> pers. · <t t-out="nights"/> nuit(s)</small>
                         </h2>
-                        <div t-if="available_rooms" class="alert alert-info o_hotel_partial_hint">
-                            <t t-if="booking_type == 'bed'">
-                                <i class="oi me-1" data-icon="bed"/>
-                                Pour <t t-out="guests"/> voyageur(s) : d'abord les chambres partagées ayant juste
-                                le nombre de lits libres qu'il vous faut, puis celles qui en ont davantage,
-                                puis les chambres entièrement libres.
-                            </t>
-                            <t t-else="">
-                                <i class="oi me-1" data-icon="home"/>
-                                Pour <t t-out="guests"/> voyageur(s) : d'abord les chambres de votre taille,
-                                puis les chambres plus grandes.
+                        <div t-if="booking_type == 'bed' and guests &gt; 1 and not separate"
+                             class="alert alert-info py-2">
+                            <i class="oi me-1" data-icon="group"/>
+                            Vous serez logés ensemble dans une même chambre. Plus de choix ?
+                            <a class="alert-link"
+                               t-attf-href="/hotel/rooms?#{type_qs}&amp;booking_type=bed&amp;separate=1">
+                                Acceptez d'être répartis dans des chambres différentes</a>.
+                        </div>
+                        <div class="row" t-if="cards">
+                            <t t-foreach="cards" t-as="card">
+                                <t t-set="rtype" t-value="card['type']"/>
+                                <div class="col-lg-4 col-md-6 mb-4">
+                                    <div t-attf-class="o_hotel_room_web_card #{'' if card['available'] else 'opacity-50'}">
+                                        <div class="o_hotel_room_img">
+                                            <t t-if="rtype.image">
+                                                <img t-attf-src="/web/image/hotel.room.type/#{rtype.id}/image"
+                                                     t-att-alt="rtype.name"/>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="o_hotel_room_noimg"><i class="oi" t-att-data-icon="'bed' if booking_type == 'bed' else 'home'"/></div>
+                                            </t>
+                                        </div>
+                                        <div class="o_hotel_room_web_body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <h4 class="mb-0" t-out="rtype.name"/>
+                                                <span class="o_hotel_price text-end">
+                                                    <span t-out="card['total']"
+                                                          t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                                    <small class="d-block">au total</small>
+                                                </span>
+                                            </div>
+                                            <div class="text-muted mb-2">
+                                                <span t-out="card['unit']"
+                                                      t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                                / nuit<t t-if="booking_type == 'bed'"> (<t t-out="guests"/> lit(s))</t>
+                                                <t t-if="rtype.capacity"> ·
+                                                    <i class="oi oi-filled me-1" data-icon="person"/><t t-out="rtype.capacity"/> pers.
+                                                </t>
+                                            </div>
+                                            <p t-if="rtype.description" class="small" t-out="rtype.description"/>
+                                            <div class="o_hotel_amenities mb-2">
+                                                <t t-foreach="rtype.amenity_ids" t-as="am">
+                                                    <span class="o_hotel_amenity" t-att-title="am.name">
+                                                        <i t-attf-class="oi #{am.icon or ''} me-1" t-attf-data-icon="#{am.icon or 'check'}"/><t t-out="am.name"/>
+                                                    </span>
+                                                </t>
+                                            </div>
+                                            <t t-if="card['available']">
+                                                <a t-attf-href="/hotel/book?type_id=#{rtype.id}&amp;#{type_qs}&amp;booking_type=#{booking_type}#{'&amp;separate=1' if separate else ''}"
+                                                   class="btn btn-primary btn-sm w-100">
+                                                    Choisir
+                                                </a>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="o_hotel_offer_tag o_hotel_offer_full">
+                                                    <i class="oi me-1" data-icon="close"/>Complet pour ces dates
+                                                </span>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
                             </t>
                         </div>
-                        <t t-if="available_rooms">
-                            <div class="row">
-                                <t t-foreach="available_rooms" t-as="room">
-                                    <t t-call="hotel_management.room_card"/>
-                                </t>
-                            </div>
-                        </t>
-                        <t t-else="">
-                            <div class="alert alert-info">
-                                Aucune chambre disponible pour ces dates. Essayez d'autres dates.
-                            </div>
-                        </t>
-
-                        <!-- Seules les chambres libres sur toute la période sont
-                             proposées : celles déjà réservées ne sont pas affichées. -->
-                        <p t-if="occupied_rooms and available_rooms" class="text-muted small mt-2">
-                            <i class="oi me-1" data-icon="info"/>
-                            Seules les chambres libres sur toute la période sont affichées.
-                        </p>
+                        <div t-if="not any(c['available'] for c in cards)" class="alert alert-info">
+                            Aucune disponibilité pour ces dates. Essayez d'autres dates
+                            <t t-if="booking_type == 'bed' and guests &gt; 1 and not separate">
+                                ou acceptez d'être répartis dans des chambres différentes</t>.
+                        </div>
                     </t>
                     <t t-else="">
                         <h2 class="mb-3">Nos chambres</h2>
@@ -148,36 +193,6 @@
                             <i class="oi me-1" data-icon="bed"/><t t-out="room.bed_count"/> lit(s)
                         </t>
                     </div>
-                    <t t-set="offer" t-value="offers and offers.get(room.id)"/>
-                    <div class="o_hotel_offer mb-2">
-                        <t t-if="offer">
-                            <span t-if="offer['whole'] and booking_type != 'bed'" class="o_hotel_offer_tag o_hotel_offer_ok">
-                                <i class="oi me-1" data-icon="check"/>Chambre entière
-                            </span>
-                            <span t-if="booking_type == 'bed' and offer.get('free_count') == guests or booking_type == 'room' and offer['whole'] and room.capacity == guests"
-                                  class="o_hotel_offer_tag o_hotel_offer_ok">
-                                <i class="oi me-1" data-icon="verified"/>Idéal pour <t t-out="guests"/> voyageur(s)
-                            </span>
-                            <span t-if="offer.get('partial')" class="o_hotel_offer_tag o_hotel_offer_beds">
-                                <i class="oi me-1" data-icon="group"/>Chambre partagée
-                            </span>
-                            <span t-if="offer['beds'] and booking_type != 'room'" class="o_hotel_offer_tag o_hotel_offer_beds">
-                                <i class="oi me-1" data-icon="bed"/><t t-out="len(offer['beds'])"/> lit(s) libre(s)
-                                dès <span t-out="offer['bed_price_min']"
-                                          t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                            </span>
-                            <span t-if="not offer['bookable']" class="o_hotel_offer_tag o_hotel_offer_full">
-                                <i class="oi me-1" data-icon="close"/>Complet
-                            </span>
-                        </t>
-                        <t t-else="">
-                            <span t-if="room.whole_room_price" class="o_hotel_offer_tag o_hotel_offer_ok">Chambre entière</span>
-                            <span t-if="room.bed_price_min and room.bed_count" class="o_hotel_offer_tag o_hotel_offer_beds">
-                                Au lit dès <span t-field="room.bed_price_min"
-                                                 t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                            </span>
-                        </t>
-                    </div>
                     <div class="o_hotel_amenities mb-2">
                         <t t-foreach="room.amenity_ids" t-as="am">
                             <span class="o_hotel_amenity" t-att-title="am.name">
@@ -187,7 +202,7 @@
                     </div>
                     <a t-attf-href="/hotel/room/#{room.id}?checkin=#{checkin}&amp;checkout=#{checkout}&amp;guests=#{guests}&amp;booking_type=#{booking_type or ''}"
                        class="btn btn-primary btn-sm w-100">
-                        Voir &amp; réserver
+                        Voir la chambre
                     </a>
                 </div>
             </div>
@@ -215,8 +230,7 @@
                             </div>
                             <h1>Chambre <t t-out="room.name"/></h1>
                             <p class="text-muted">
-                                <i class="oi oi-filled me-1" data-icon="person"/><t t-out="room.capacity"/> personnes ·
-                                Étage <t t-out="room.floor or '—'"/>
+                                <i class="oi oi-filled me-1" data-icon="person"/><t t-out="room.capacity"/> personnes
                             </p>
                             <p t-if="room.description" t-out="room.description"/>
                             <h4 class="mt-3">Équipements</h4>
@@ -230,52 +244,12 @@
                         </div>
                         <div class="col-lg-5">
                             <div class="o_hotel_booking_box" id="o_hotel_booking">
-                                <div class="o_hotel_booking_price mb-2">
-                                    <t t-if="booking_type == 'bed' or not whole_price">
-                                        <small class="text-muted">dès</small>
-                                        <span t-field="room.bed_price_min"
-                                              t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                                        <small class="text-muted">/ lit / nuit</small>
-                                    </t>
-                                    <t t-else="">
-                                        <small class="text-muted">dès</small>
-                                        <span t-out="whole_price"
-                                              t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                                        <small class="text-muted">/ nuit (chambre entière)</small>
-                                    </t>
-                                </div>
-                                <!-- Réservable sur la période ? Sinon : pas de réservation
-                                     possible ici, on renvoie vers les chambres libres. -->
-                                <t t-set="book_blocked" t-value="available == False or (booking_type == 'room' and whole_available == False)"/>
-                                <t t-if="book_blocked">
-                                    <div class="alert alert-warning py-2">
-                                        <i class="oi oi-filled me-1" data-icon="cancel"/>
-                                        <t t-if="booking_type == 'room' and available">Cette chambre n'est pas libre en entier</t>
-                                        <t t-else="">Cette chambre n'est pas libre</t>
-                                        pour les dates sélectionnées.
-                                        <a class="alert-link d-block mt-1"
-                                           t-attf-href="/hotel/rooms?checkin=#{checkin}&amp;checkout=#{checkout}&amp;guests=#{guests}&amp;booking_type=#{booking_type or 'room'}">
-                                            Voir les chambres libres sur ces dates
-                                        </a>
-                                    </div>
-                                </t>
-                                <t t-elif="available and whole_available == False and booking_type != 'room'">
-                                    <div class="alert alert-info py-2">
-                                        <i class="oi oi-filled me-1" data-icon="info"/>
-                                        Des lits sont déjà loués : la chambre entière n'est plus disponible,
-                                        mais il reste <b><t t-out="free_bed_count"/> lit(s)</b> à réserver.
-                                    </div>
-                                </t>
-                                <t t-if="errors">
-                                    <div class="alert alert-danger">
-                                        <ul class="mb-0">
-                                            <li t-foreach="errors" t-as="err" t-out="err"/>
-                                        </ul>
-                                    </div>
-                                </t>
-                                <form method="post" action="/hotel/booking/submit" class="o_hotel_booking_form">
-                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                    <input type="hidden" name="room_id" t-att-value="room.id"/>
+                                <h4>Réserver</h4>
+                                <p class="text-muted small">
+                                    Indiquez vos dates : nous vous proposons nos formules
+                                    et les chambres disponibles.
+                                </p>
+                                <form method="get" action="/hotel/rooms" class="o_hotel_booking_form">
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <label class="form-label">Arrivée</label>
@@ -291,77 +265,137 @@
                                     <div class="mt-2">
                                         <label class="form-label">Personnes</label>
                                         <input type="number" class="form-control" name="guests"
-                                               min="1" t-att-max="room.capacity" t-att-value="guests"/>
+                                               min="1" t-att-value="guests"/>
                                     </div>
-                                    <!-- Le type choisi dans la recherche (par chambre / par lit)
-                                         limite le formulaire à cette seule option. -->
-                                    <t t-set="show_room" t-value="room.whole_room_price and booking_type != 'bed'"/>
-                                    <t t-set="show_beds" t-value="room.bed_price_min and beds_info and booking_type != 'room'"/>
-                                    <t t-set="room_ok" t-value="show_room and whole_available != False"/>
-                                    <t t-if="show_room and show_beds">
-                                        <hr/>
-                                        <label class="form-label fw-bold">Que souhaitez-vous réserver ?</label>
-                                        <div class="o_hotel_choice">
-                                            <input class="btn-check" type="radio" name="booking_type"
-                                                   value="room" id="bt_room"
-                                                   t-att-checked="'checked' if room_ok else None"
-                                                   t-att-disabled="None if room_ok else 'disabled'"/>
-                                            <label class="o_hotel_choice_card" for="bt_room">
-                                                <i class="oi" data-icon="home"/>
-                                                <span class="o_hotel_choice_title">Toute la chambre</span>
-                                                <span class="o_hotel_choice_price">
-                                                    <span t-out="whole_price"
-                                                          t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                                                    / nuit
-                                                </span>
-                                                <small t-if="not room_ok" class="text-danger">Indisponible</small>
-                                            </label>
-                                            <input class="btn-check" type="radio" name="booking_type"
-                                                   value="bed" id="bt_bed"
-                                                   t-att-checked="None if room_ok else 'checked'"/>
-                                            <label class="o_hotel_choice_card" for="bt_bed">
-                                                <i class="oi" data-icon="bed"/>
-                                                <span class="o_hotel_choice_title">Un ou plusieurs lits</span>
-                                                <span class="o_hotel_choice_price">
-                                                    dès <span t-field="room.bed_price_min"
-                                                              t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                                                    / lit
-                                                </span>
-                                            </label>
+                                    <div class="mt-2">
+                                        <label class="form-label">Type de location</label>
+                                        <select name="booking_type" class="form-select" required="required">
+                                            <option value="room" t-att-selected="booking_type != 'bed'">Chambre entière</option>
+                                            <option value="bed" t-att-selected="booking_type == 'bed'">Lit en dortoir</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                                        <i class="oi me-1" data-icon="search"/>Voir les disponibilités
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ================= RÉSERVATION D'UNE FORMULE ================= -->
+    <template id="book_page" name="Hôtel - Réservation">
+        <t t-call="website.layout">
+            <div class="o_hotel_web">
+                <div class="container my-4">
+                    <t t-set="type_qs" t-value="'checkin=%s&amp;checkout=%s&amp;guests=%s&amp;booking_type=%s' % (checkin or '', checkout or '', guests, booking_type or '')"/>
+                    <a t-attf-href="/hotel/rooms?#{type_qs}#{'&amp;separate=1' if separate else ''}"
+                       class="btn btn-link px-0 mb-2">
+                        <i class="oi me-1" data-icon="chevron_left"/>Retour aux formules
+                    </a>
+                    <h1 t-out="room_type.name"/>
+                    <p class="text-muted">
+                        Du <t t-out="checkin"/> au <t t-out="checkout"/> · <t t-out="nights"/> nuit(s) ·
+                        <t t-out="guests"/> personne(s) ·
+                        <t t-if="booking_type == 'bed'">location au lit</t><t t-else="">chambre entière</t>
+                    </p>
+                    <div t-if="errors" class="alert alert-danger">
+                        <ul class="mb-0">
+                            <li t-foreach="errors" t-as="err" t-out="err"/>
+                        </ul>
+                    </div>
+                    <form method="post" action="/hotel/booking/submit" class="o_hotel_booking_form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="type_id" t-att-value="room_type.id"/>
+                        <input type="hidden" name="checkin" t-att-value="checkin"/>
+                        <input type="hidden" name="checkout" t-att-value="checkout"/>
+                        <input type="hidden" name="guests" t-att-value="guests"/>
+                        <input type="hidden" name="booking_type" t-att-value="booking_type"/>
+                        <input t-if="separate" type="hidden" name="separate" value="1"/>
+                        <div class="row">
+                            <div class="col-lg-7">
+                                <t t-if="not proposal['rooms']">
+                                    <div class="alert alert-warning">
+                                        Plus de disponibilité pour cette formule sur ces dates.
+                                        <a class="alert-link" t-attf-href="/hotel/rooms?#{type_qs}">Voir les autres formules</a>
+                                    </div>
+                                </t>
+                                <t t-elif="booking_type == 'bed'">
+                                    <h4>Choisissez <t t-out="guests"/> lit(s)</h4>
+                                    <p class="text-muted small">
+                                        Lits proposés pour votre séjour<t t-if="separate">, éventuellement
+                                        dans des chambres différentes</t><t t-else="">, dans une même chambre</t>.
+                                    </p>
+                                    <div t-if="booking_type == 'bed' and guests &gt; 1" class="mb-3">
+                                        <a t-if="not separate" class="small"
+                                           t-attf-href="/hotel/book?type_id=#{room_type.id}&amp;#{type_qs}&amp;separate=1">
+                                            J'accepte d'être réparti dans des chambres différentes</a>
+                                        <a t-else="" class="small"
+                                           t-attf-href="/hotel/book?type_id=#{room_type.id}&amp;#{type_qs}">
+                                            Je préfère être dans une même chambre</a>
+                                    </div>
+                                    <t t-foreach="beds_by_room" t-as="rb">
+                                        <t t-set="room" t-value="rb[0]"/>
+                                        <div class="border rounded mb-3 p-3">
+                                            <div class="d-flex gap-3 align-items-center">
+                                                <img t-if="room.image" t-attf-src="/web/image/hotel.room/#{room.id}/image?width=240"
+                                                     t-att-alt="room.name" style="width: 96px; height: 64px; object-fit: cover; flex: none;" class="rounded"/>
+                                                <div>
+                                                    <strong>Chambre <t t-out="room.name"/></strong>
+                                                    <div class="text-muted small"><t t-out="room.capacity"/> lits</div>
+                                                </div>
+                                            </div>
+                                            <div class="o_hotel_bed_pick mt-2">
+                                                <t t-foreach="rb[1]" t-as="bed">
+                                                    <input class="btn-check" type="checkbox" name="bed_ids"
+                                                           t-att-value="bed.id" t-att-id="'bed_%s' % bed.id"
+                                                           t-att-checked="'checked' if bed.id in selected_bed_ids else None"/>
+                                                    <label class="o_hotel_bed_option" t-att-for="'bed_%s' % bed.id">
+                                                        <i class="oi" data-icon="bed"/>
+                                                        <span class="fw-bold" t-out="bed.name"/>
+                                                    </label>
+                                                </t>
+                                            </div>
                                         </div>
                                     </t>
-                                    <t t-elif="show_room">
-                                        <input type="hidden" name="booking_type" value="room"/>
+                                </t>
+                                <t t-else="">
+                                    <h4>Choisissez votre chambre</h4>
+                                    <t t-foreach="proposal['rooms']" t-as="room">
+                                        <input class="btn-check" type="radio" name="room_id"
+                                               t-att-value="room.id" t-att-id="'room_%s' % room.id" required="required"
+                                               t-att-checked="'checked' if room.id == selected_room_id or (len(proposal['rooms']) == 1) else None"/>
+                                        <label class="btn btn-outline-secondary text-start mb-2 p-2 d-flex gap-3 align-items-center w-100"
+                                               t-att-for="'room_%s' % room.id">
+                                            <img t-if="room.image" t-attf-src="/web/image/hotel.room/#{room.id}/image?width=240"
+                                                 t-att-alt="room.name" style="width: 120px; height: 80px; object-fit: cover; flex: none;" class="rounded"/>
+                                            <div>
+                                                <strong>Chambre <t t-out="room.name"/></strong>
+                                                <div class="text-muted small">
+                                                    <i class="oi oi-filled me-1" data-icon="person"/><t t-out="room.capacity"/> pers.
+                                                </div>
+                                                <div class="o_hotel_amenities">
+                                                    <t t-foreach="room.amenity_ids" t-as="am">
+                                                        <span class="o_hotel_amenity" t-att-title="am.name">
+                                                            <i t-attf-class="oi #{am.icon or ''} me-1" t-attf-data-icon="#{am.icon or 'check'}"/><t t-out="am.name"/>
+                                                        </span>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                        </label>
                                     </t>
-                                    <t t-elif="show_beds">
-                                        <input type="hidden" name="booking_type" value="bed"/>
-                                        <hr/>
-                                        <label class="form-label fw-bold">Choisissez vos lits</label>
-                                    </t>
-                                    <div t-if="beds_need_dates" class="alert alert-info py-2 mt-3 mb-0">
-                                        <i class="oi oi-filled me-1" data-icon="info"/>
-                                        Choisissez vos dates d'arrivée et de départ : les lits libres
-                                        sur toute la période s'afficheront.
+                                </t>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="o_hotel_booking_box" id="o_hotel_booking">
+                                    <div class="o_hotel_booking_price mb-2">
+                                        <span t-out="total" t-options='{"widget": "monetary", "display_currency": currency}'/>
+                                        <small class="text-muted">au total
+                                            (<span t-out="unit" t-options='{"widget": "monetary", "display_currency": currency}'/> / nuit)</small>
                                     </div>
-                                    <div t-if="show_beds" class="small text-muted mt-2">
-                                        Seuls les lits libres du <t t-out="period_start"/>
-                                        au <t t-out="period_end"/> sont proposés.
-                                    </div>
-                                    <div t-if="show_beds" class="o_hotel_bed_pick mt-2">
-                                        <t t-foreach="beds_info" t-as="bi">
-                                            <input class="btn-check" type="checkbox" name="bed_ids"
-                                                   t-att-value="bi['bed'].id"
-                                                   t-att-id="'bed_%s' % bi['bed'].id"/>
-                                            <label class="o_hotel_bed_option"
-                                                   t-att-for="'bed_%s' % bi['bed'].id">
-                                                <i class="oi" data-icon="bed"/>
-                                                <span class="fw-bold" t-out="bi['bed'].name"/>
-                                                <span t-field="bi['bed'].price"
-                                                      t-options='{"widget": "monetary", "display_currency": room.currency_id}'/>
-                                            </label>
-                                        </t>
-                                    </div>
-                                    <hr/>
                                     <div class="row g-2 mt-0">
                                         <div class="col-6">
                                             <label class="form-label">Nom</label>
@@ -402,16 +436,16 @@
                                     </div>
                                     <div class="mt-2">
                                         <label class="form-label">Demandes particulières</label>
-                                        <textarea class="form-control" name="note" rows="2"/>
+                                        <textarea class="form-control" name="note" rows="2" t-out="note"/>
                                     </div>
                                     <button type="submit" class="btn btn-primary w-100 mt-3"
-                                            t-att-disabled="'disabled' if book_blocked else None">
-                                        <i class="oi me-1" data-icon="check"/>Confirmer la réservation
+                                            t-att-disabled="None if proposal['rooms'] else 'disabled'">
+                                        <i class="oi me-1" data-icon="check"/>Envoyer ma demande de réservation
                                     </button>
-                                </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </t>
@@ -433,6 +467,8 @@
                         <div class="o_hotel_confirm_card mx-auto">
                             <table class="table mb-0">
                                 <tr><th>Référence</th><td t-out="reservation.name"/></tr>
+                                <tr t-if="reservation.room_type_id"><th>Formule</th>
+                                    <td t-out="reservation.room_type_id.name"/></tr>
                                 <tr><th>Chambre(s)</th>
                                     <td t-out="', '.join(reservation.line_ids.mapped('room_id.name')) or '—'"/></tr>
                                 <tr t-if="reservation.line_ids.mapped('bed_ids')"><th>Lit(s)</th>
